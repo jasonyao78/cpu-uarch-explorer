@@ -10,5 +10,5 @@
 
 | 目录 | 内容 | 许可证状态 | 处置 |
 |---|---|---|---|
-| `cpu-cache-demo-code/`（本地） | 历史内存延迟 demo（lmbench 衍生，GPLv2） | 不随本仓分发，gitignore | 存档参考（ADR-0002） |
-| `cpu微架构材料/`（本地） | 第三方 CPUSUIT 探针工程 + 个人 gem5 DDR 分析 + 未知作者材料 | 无 LICENSE / 部分本人作品 | 评审中（OI-7） |
+| `../cpu-uarch-ref/cpu-cache-demo-code/`（仓库外） | 历史内存延迟 demo（lmbench 衍生，GPLv2） | 不随本仓分发 | 存档参考（ADR-0002） |
+| `../cpu-uarch-ref/cpu微架构材料/`（仓库外） | 第三方 CPUSUIT 探针工程 + 个人 gem5 DDR 分析 + 未知作者材料 | 无 LICENSE / 部分本人作品 | 评审中（OI-7）；CPUSUIT 仅方法学借鉴、禁搬代码 |

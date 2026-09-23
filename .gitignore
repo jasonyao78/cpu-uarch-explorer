@@ -12,11 +12,8 @@ __pycache__/
 data/private/
 data/restricted/
 
-# Legacy demo (lmbench-derived, see ADR-0002): kept locally, untracked
-cpu-cache-demo-code/
-
-# External reference materials under review, provenance/license unresolved
-cpu微架构材料/
+# Personal reference materials live OUTSIDE the repo tree (see
+# docs/reference-materials.md): ../cpu-uarch-ref/ — nothing to ignore here.
 
 # OS noise
 .DS_Store

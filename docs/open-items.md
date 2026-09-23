@@ -7,7 +7,7 @@
 - **阻塞**：§2.4 全部细节、gem5 校准闭环、ADR-0004 的 submodule 落地。
 - **来源**：用户手头已有带 git 仓的代码，稍后提供。
 - **接入时 checklist**：fork → `third_party/gem5` 钉 commit → 梳理基线 commit / Python 配置 / C++ 修改 / O3 参数 / 已有校准数据及误差 → ADR-0004 追加记录。
-- **关联**：本地 `cpu微架构材料/gem5-DDR访问通路时延细节全流程分析.md`（Michael 自己的分析，基于 gem5 commit `3dc9dcc`）——接入时确认该 commit 与 D9300 模型的关系。
+- **关联**：仓库外参考目录中的 `cpu微架构材料/gem5-DDR访问通路时延细节全流程分析.md`（Michael 自己的分析，基于 gem5 commit `3dc9dcc`）——接入时确认该 commit 与 D9300 模型的关系。
 
 ## OI-2 红米设备信息回填（`android-arm64`）
 
@@ -55,8 +55,9 @@
 - **回填**：机型（vivo X100 / iQOO Neo9 Pro / OPPO Find X7 / 其他）、root 状态、adb 可达性、kernel 版本。
 - **方法学提醒**：全大核无小核兜底，thermal 压力大于大小核机型，校准实验需预留温控与间歇。
 
-## OI-7 外部参考材料 `cpu微架构材料/` 处置（新增，2026-09-23）
+## OI-7 外部参考材料处置（新增，2026-09-23；2026-09-23 二次更新：已迁至仓库外）
 
+- **位置**：`../cpu-uarch-ref/`（workspace 级，仓库外，已加只读约束）。含两个子目录：`cpu-cache-demo-code/`（历史 demo）与 `cpu微架构材料/`。
 - **内容**：第三方 CPUSUIT Benchmark 探针工程（无 LICENSE，含 xbyak_aarch64 第三方库）+ Michael 自己的 gem5 DDR 时延分析 + DDR 时序分析 + 未知作者 PPTX。
 - **初步评估**（详见 req-v0.3 置信度注记）：CPUSUIT 覆盖度（ROB 探测、port 分析等）对 probes/ 规划有 HIGH 参考价值，但**无 LICENSE 不可搬代码**，仅限方法学借鉴；gem5 DDR 分析为本人作品，可评估后移入 `docs/`（注意其绑定 gem5 commit 3dc9dcc）。
 - **处置待决策**：逐文件确认作者与许可证 → 决定 移入 docs / 登记为方法学参考 / 忽略。

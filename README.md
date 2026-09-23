@@ -33,4 +33,4 @@
 
 - 主仓许可证：Apache-2.0（见 `LICENSE`；决策背景见 `docs/adr/ADR-0002-license-apache2.md`，含历史 demo 代码来源审计）。
 - 仓库未来转公开时 git 历史全量可见：从第一个 commit 起即执行设备匿名化与 secret 扫描，请勿提交设备序列号、NDA 资料。
-- 本地存在未入库的参考目录（`cpu-cache-demo-code/`、`cpu微架构材料/`），已在 `.gitignore` 排除，详见 `docs/open-items.md`。
+- 个人参考材料已移至**仓库外** `../cpu-uarch-ref/`（只读约束），受跟踪索引见 `docs/reference-materials.md`；开源发布前删除该目录即可，与 git 历史无任何关联。
