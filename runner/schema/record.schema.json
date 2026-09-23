@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "runner/schema/record.schema.json",
+  "title": "probe-run-record",
+  "description": "统一实验协议的物理载体：一次 probe 运行产生一条 JSONL 记录（每行一条）。schema 扁平化设计，未来 SQLite 汇总层可无损映射（ADR-0003）。",
+  "type": "object",
+  "required": [
+    "run_id",
+    "timestamp",
+    "backend",
+    "device_code",
+    "os",
+    "probe_name",
+    "probe_git_commit",
+    "metrics",
+    "evidence_level"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "本次运行的唯一 ID"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "运行开始时间，ISO 8601，带时区"
+    },
+    "backend": {
+      "type": "string",
+      "enum": [
+        "macos-arm64",
+        "linux-x86_64",
+        "android-arm64",
+        "android-arm64-d9300-phys",
+        "gem5-arm64-d9300",
+        "linux-riscv64"
+      ]
+    },
+    "device_code": {
+      "type": "string",
+      "description": "匿名设备代号，如 macbook-m4pro-01；真身映射存 data/private/（永不入库）"
+    },
+    "os": { "type": "string", "description": "如 macOS / Linux / Android" },
+    "os_version": { "type": "string" },
+    "kernel": { "type": "string", "description": "uname -r 或等效信息" },
+    "compiler": { "type": "string", "description": "如 AppleClang 17.0.0" },
+    "compiler_flags": { "type": "string", "description": "完整编译 flags" },
+    "probe_name": { "type": "string", "description": "如 cache-mem/ptr_chase" },
+    "probe_git_commit": { "type": "string", "description": "probe 源码的 git commit（短 hash 可）" },
+    "params": {
+      "type": "object",
+      "description": "probe 运行参数（扁平键值）",
+      "additionalProperties": true
+    },
+    "affinity": {
+      "type": "string",
+      "description": "绑核 / QoS / 调度设置，自由文本，如 'qos=USER_INTERACTIVE' 或 'taskset 80'"
+    },
+    "metrics": {
+      "type": "array",
+      "description": "测量结果列表",
+      "items": {
+        "type": "object",
+        "required": ["name", "value", "unit"],
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "number" },
+          "unit": { "type": "string", "description": "如 ns / cycles / bytes_per_s" }
+        }
+      },
+      "minItems": 1
+    },
+    "evidence_level": {
+      "type": "string",
+      "enum": [
+        "MEASURED",
+        "DERIVED",
+        "SIMULATED",
+        "PUBLIC_SOURCE",
+        "ASSUMED",
+        "UNKNOWN",
+        "NDA_RESTRICTED"
+      ]
+    },
+    "raw_command": { "type": "string", "description": "实际执行的完整命令行" },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": false
+}

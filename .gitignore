@@ -1,0 +1,25 @@
+# Build artifacts
+build/
+*.o
+*.out
+
+# Python
+__pycache__/
+.venv/
+*.pyc
+
+# Data layers: private/restricted never enter git history (ADR-0003)
+data/private/
+data/restricted/
+
+# Legacy demo (lmbench-derived, see ADR-0002): kept locally, untracked
+cpu-cache-demo-code/
+
+# External reference materials under review, provenance/license unresolved
+cpu微架构材料/
+
+# OS noise
+.DS_Store
+
+# gem5 build outputs (future submodule under third_party/)
+third_party/gem5/build/
