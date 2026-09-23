@@ -1,0 +1,18 @@
+# taskset 01 ./test-mem-lat.sh                                         
+Buffer size: 1 KB, stride 128, time 0.001181 s, latency 1.13 ns
+Buffer size: 2 KB, stride 128, time 0.001225 s, latency 1.17 ns
+Buffer size: 4 KB, stride 128, time 0.002273 s, latency 2.17 ns
+Buffer size: 8 KB, stride 128, time 0.002469 s, latency 2.35 ns
+Buffer size: 16 KB, stride 128, time 0.002640 s, latency 2.52 ns
+Buffer size: 32 KB, stride 128, time 0.002808 s, latency 2.68 ns
+Buffer size: 64 KB, stride 128, time 0.002513 s, latency 2.40 ns
+Buffer size: 128 KB, stride 128, time 0.006823 s, latency 6.51 ns
+Buffer size: 256 KB, stride 128, time 0.008138 s, latency 7.76 ns
+Buffer size: 512 KB, stride 128, time 0.018159 s, latency 17.32 ns
+Buffer size: 1024 KB, stride 128, time 0.020317 s, latency 19.38 ns
+Buffer size: 2048 KB, stride 128, time 0.025665 s, latency 24.48 ns
+Buffer size: 4096 KB, stride 128, time 0.025655 s, latency 24.47 ns
+Buffer size: 8192 KB, stride 128, time 0.051462 s, latency 49.08 ns
+Buffer size: 16384 KB, stride 128, time 0.250260 s, latency 238.68 ns
+Buffer size: 32768 KB, stride 128, time 0.364557 s, latency 347.69 ns
+Buffer size: 65536 KB, stride 128, time 0.429415 s, latency 409.55 ns
