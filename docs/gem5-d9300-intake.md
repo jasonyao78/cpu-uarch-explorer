@@ -123,3 +123,10 @@ src/dev/npu/coral_verilated_backend.cc:8:10: fatal error: 'elf.h' file not found
 - **修复（port 路线，非回退）**：overlay 的 `src/python/SConscript` 重写为 **v25.1 原版 + 仅有的 3 行有意改动**（`ndp_compatible_cache_hierarchy.py` 的 PySource 登记）。有意改动与上游版本变化的分离方法：diff 三方（overlay vs v25.0.0.1 基线 = 有意改动；v25.0.0.1 vs v25.1 = 上游变化）。
 - **全量扫描**：对保留的全部 SConscript 做引用完整性检查（PySource/SConscript()/Source() 路径必须存在于 HEAD∪overlay），除两个单参数 `PySource('gem5.components.boards')` 误报外无其他问题。
 - **遗留风险**：C++ 侧的 v25.0→v25.1 API 不兼容（27 个 O3/内存文件）只能编译暴露；configs Python 的运行时 import 同理。重建循环 = 报错 → 三方 diff 分离有意改动 → port 到 v25.1 → 重建。
+
+### 失败 #2 与路线裁定：改钉 v25.0.0.1（2026-09-25）
+
+- **报错**：`ModuleNotFoundError: No module named 'm5.objects.IQUnit'`（SimObject 参数结构生成阶段）。v25.1 的 O3 重构把 IQ 拆出 `IQUnit`（`src/cpu/o3/IQUnit.py`），v25.1 的 `BaseO3CPU.py` 硬依赖它；而 overlay 的 v25.0 基线 `inst_queue.hh`/`o3/SConscript` 里没有 IQUnit——**v25.0 增量与 v25.1 核心的结构性冲突，不是单点引用问题**。
+- **裁定**：v25.0→v25.1 的移植（746 行有意改动 + O3 重构适配）是独立里程碑的工作；为让校准闭环尽快可用，**submodule 改钉增量树的原生基线 v25.0.0.1**——修剪后的 135 文件同步上去恰好还原原项目的已验证状态，零移植工作量（ADR-0004 已修订；v25.1 移植入 backlog）。
+- **加固**：`apply_patchset.sh` 增加基线断言（HEAD 必须等于 v25.0.0.1 的 commit，否则拒绝同步）与预存脏树检测（OI-8 的 overlay 加固两项落地）。
+- **待办**：v25.1 移植 milestone（三方 diff 逐文件 port 27 个有意文件；Neoverse V2 模板等 v25.1 资产届时可用）。

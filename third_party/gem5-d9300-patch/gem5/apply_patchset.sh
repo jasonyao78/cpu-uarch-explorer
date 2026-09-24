@@ -12,6 +12,31 @@ if ! git -C "${GEM5_REPO}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     exit 1
 fi
 
+# 基线断言（2026-09-25，OI-1 教训）：增量树基于 v25.0.0.1 开发，
+# 同步到错误的基线会产生"静默版本混合"（曾致 m5.internal / IQUnit 类
+# 引用失效）。钉错基线时拒绝同步；确需跳过用 GEM5_SKIP_BASELINE_CHECK=1。
+EXPECTED_BASELINE="v25.0.0.1"
+if [ "${GEM5_SKIP_BASELINE_CHECK:-0}" != "1" ]; then
+    # 比较 commit 哈希而非 tag 名：annotated tag 的 describe 输出格式不稳定
+    expected_commit="$(git -C "${GEM5_REPO}" rev-parse "${EXPECTED_BASELINE}^{commit}" 2>/dev/null || true)"
+    actual_commit="$(git -C "${GEM5_REPO}" rev-parse HEAD)"
+    if [ -z "${expected_commit}" ] || [ "${actual_commit}" != "${expected_commit}" ]; then
+        echo "error: gem5 baseline mismatch: expect ${EXPECTED_BASELINE} (${expected_commit:-tag-missing})," \
+             "got $(git -C "${GEM5_REPO}" rev-parse --short HEAD)" >&2
+        echo "hint: git -C ${GEM5_REPO} checkout ${EXPECTED_BASELINE}，" \
+             "或确认移植完成后用 GEM5_SKIP_BASELINE_CHECK=1 跳过" >&2
+        exit 1
+    fi
+fi
+
+# 预存脏树检测：同步前工作树必须纯净，否则旧增量残留会与新增量混合
+# （apply_patchset 只拷不删；build/ 等 gitignore 内容不受影响）。
+if [ -n "$(git -C "${GEM5_REPO}" status --porcelain --untracked-files=normal)" ]; then
+    echo "error: gem5 worktree is dirty; reset first:" >&2
+    echo "  git -C ${GEM5_REPO} checkout -- . && git -C ${GEM5_REPO} clean -fd" >&2
+    exit 1
+fi
+
 has_delta=0
 for path in configs src ext include system util tests scripts; do
     if [ -e "${SCRIPT_DIR}/${path}" ]; then
