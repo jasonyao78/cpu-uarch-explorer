@@ -6,7 +6,7 @@
 
 - **✅ 模型工作定位**：用户提供的 gem5-d9300-patch 增量树——`configs/example/arm/arm_multicore_d9300.py`（D9300 全系统配置）+ CoralNPU/NDP/Gemmini 资产 + `run_multicore.sh` 全流程（checkpoint/NPU 后端切换）。原始 drop 只读归档于 `../cpu-uarch-ref/gem5-d9300-patch/`（MANIFEST.sha256）。
 - **✅ 集成落地（ADR-0004 修订：overlay 方案）**：`third_party/gem5` = 官方上游 submodule（钉 `f5c5a6e390`，v25.1.0.1，ignore=dirty）；`third_party/gem5-d9300-patch/gem5` = 增量树（唯一事实源）；`apply_patchset.sh` 同步后构建；脚本与文档路径已适配本仓布局。
-- **⏳ 基线兼容性验证（构建中）**：delta 覆盖 867 个修改文件（+22841/−54427；删除量提示增量基于不同版本的上游开发）+ 50 个新文件；scons `build/ARM/gem5.opt` 后台构建中（日志 `third_party/gem5/build-macos-arm64.log`）。首次失败原因：conda Python 3.13 未过 gem5 链接检查，已改用 Homebrew Python 3.12。
+- **基线兼容性（macOS 预检通过，正式构建转 Xeon）**：delta 覆盖 867 改/50 新；macOS 上 configure 通过、**922 个对象编译成功**（含 delta 的 coral_backend / coral_stagea_backend / npu_device），唯一硬阻塞为 verilated NPU 后端引用 glibc 专属 `<elf.h>`。gem5 正式构建按 v0.3 原定计划放在 Xeon 服务器，操作手册：`docs/runbooks/build-gem5-xeon.md`（含依赖安装、overlay 同步、rsync/GitHub 两条取码路径）。
 - **⏳ intake 梳理**：O3 参数表、DDR/内存配置、checkpoint 流程、NPU 后端、已有校准数据 → `docs/gem5-d9300-intake.md`。
 - **⏳ 合规检查点（开源前）**：增量树逐文件 SPDX/权属复核（用户已确认无权属问题入库私有仓；delta 文件普遍缺许可证头）。
 - **⏳ SE 模式精简配置**：现有配置为 full-system（需磁盘镜像 + 内核）；校准闭环需补 SE 模式配置让 ptr_chase 等微基准跑进 gem5（写配置时遵循 `third_party/gem5/configs/AGENTS.md`：优先 stdlib、窄配置、py_compile + 最小测试验证）。

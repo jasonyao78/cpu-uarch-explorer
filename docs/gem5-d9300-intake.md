@@ -60,3 +60,13 @@
 - **基线版本差异**：−54427 行删除表明增量基于与 v25.1.0.1 不同的上游版本开发；scons `build/ARM/gem5.opt` 构建验证中，失败则按报错回退基线 commit 或修增量。
 - **构建环境备忘**：gem5 v25.1 + conda Python 3.13 链接检查失败（"Can't find a working Python installation"）；改用 Homebrew Python 3.12（`/opt/homebrew/opt/python@3.12/libexec/bin` 前置 PATH）+ brew protobuf 29.3 + scons 4.10.1（`~/.local/bin`）。
 - `3dc9dcc`（DDR 报告引用的 commit）不在上游 v25.1 历史中；增量覆盖的 867 个修改文件的 diff 形态可用于溯源真实开发基线（构建通过后做）。
+
+### 构建验证结果（macOS，2026-09-24）
+
+configure 通过（Homebrew Python 3.12 + brew protobuf 29.3 + scons 4.10.1）；**922 个对象编译成功**，含 delta 自带文件（`coral_backend.o`、`coral_stagea_backend.o`、`npu_device.o`、`NPUDevice.py.o`）。唯一硬错误：
+
+```
+src/dev/npu/coral_verilated_backend.cc:8:10: fatal error: 'elf.h' file not found
+```
+
+`<elf.h>` 为 glibc 专属头文件，macOS 不提供；且 verilated NPU 后端依赖 Verilator + NPU RTL，属 Linux 流程。**结论：overlay 与 v25.1 基线兼容性良好；正式构建平台定为 Xeon 服务器**（runbook：`docs/runbooks/build-gem5-xeon.md`）。macOS 本地构建非 verilated 变体的备选方案：delta 中对 verilated 后端加 `__APPLE__` 守卫（backlog）。首次失败记录：conda Python 3.13 未过 gem5 链接检查（"Can't find a working Python installation"）。
