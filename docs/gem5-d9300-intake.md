@@ -115,3 +115,11 @@ src/dev/npu/coral_verilated_backend.cc:8:10: fatal error: 'elf.h' file not found
 修剪改变 sync 结果，本地 macOS 无法构建 gem5（elf.h 阻塞），**验证门 = Xeon 重建 + SE 冒烟**，操作命令见 runbook `docs/runbooks/build-gem5-xeon.md` §修剪后回归验证。回滚路径：`git checkout <修剪前 commit> -- third_party/gem5-d9300-patch` + submodule 重置 + 重同步 + 重建。原始 drop 档案（`../cpu-uarch-ref/`，MANIFEST.sha256）为最终兜底。
 
 **若重建失败的最可能根因**：27 个有意改动文件按 v25.0 API 编写，与 v25.1 核心头文件不兼容（如 `inst_queue.hh` 周边 API 在 v25.1 有变更）——届时两条路：从 git 历史恢复携带文件回到全量 overlay（保底），或把 27 个文件 port 到 v25.1 API（正确但工作量大的根治，迟早要做，因为上游更新路线依赖它）。
+
+### 修剪后首次重建：失败 #1 与修复（2026-09-25）
+
+- **报错**：`scons: *** [build/ARM/python/m5/internal/__init__.py.cc] Source 'src/python/m5/internal/__init__.py' not found`。
+- **根因**：正是预告的"旧布局引用"类失败——保留的 `src/python/SConscript`（v25.0 基线 + 有意改动）用 `PySource` 引用了 `m5/internal/{__init__,params}.py`，而 **v25.1 已整个删除 `m5/internal/` 目录**；此前全量 overlay 把这两个 v25.0 文件拷进工作树所以能编过，修剪后暴露。
+- **修复（port 路线，非回退）**：overlay 的 `src/python/SConscript` 重写为 **v25.1 原版 + 仅有的 3 行有意改动**（`ndp_compatible_cache_hierarchy.py` 的 PySource 登记）。有意改动与上游版本变化的分离方法：diff 三方（overlay vs v25.0.0.1 基线 = 有意改动；v25.0.0.1 vs v25.1 = 上游变化）。
+- **全量扫描**：对保留的全部 SConscript 做引用完整性检查（PySource/SConscript()/Source() 路径必须存在于 HEAD∪overlay），除两个单参数 `PySource('gem5.components.boards')` 误报外无其他问题。
+- **遗留风险**：C++ 侧的 v25.0→v25.1 API 不兼容（27 个 O3/内存文件）只能编译暴露；configs Python 的运行时 import 同理。重建循环 = 报错 → 三方 diff 分离有意改动 → port 到 v25.1 → 重建。
