@@ -23,6 +23,8 @@ ctest --preset macos-arm64-release
 .venv/bin/python -m analysis.cli report --run data/public/runs/<run目录>
 ```
 
+ssh 平台的 `target.ssh_host` 用 **ssh config 别名**（如 `xeon-8481c-01`）：真实地址只存在于 `data/private/hosts.md` 与本机 `~/.ssh/config`，禁止入库；`ssh_remote_root` 为远端仓库根。
+
 ## 铁律（违反即返工）
 
 1. **数据纪律**：测量遵守 `docs/methodology/measurement-discipline.md`；违反纪律的数据进 `data/quarantine/`（保留审计），禁止晋升 baseline。绝不编造数值——失败记录用空 metrics + 结构化 `failure`（schema v2 强制）。

@@ -51,7 +51,7 @@
 
 - **已回填（MEASURED，2026-09-24）**：Ubuntu 24.04.4 LTS；kernel 7.0.0-30-generic；perf 7.0.12；`perf_event_paranoid=4`（非特权 perf 封锁，sudo 可用）；dmesg 确认 SPR 完整 PMU：Sapphire Rapids events、full-width counters、PEBS fmt4+-baseline、32-deep LBR、AnyThread deprecated；NMI watchdog 常驻占 1 个 hw-PMU 计数器；RAPL PMU（package/dram 功耗）。
 - **方法学提示**：perf 采集一律走 sudo；全核计数时注意 NMI watchdog 占用的计数器缺口；PEBS/LBR 可用意味着 frontend/分支分析可做 precise 采样。
-- **脚本评审（仍待）**：用户已有一份 x86 探测脚本（待提供）。评审维度：① 覆盖度（core latency/throughput、branch、TLB、带宽 vs 仅 mem）；② 方法学（绑核、sibling 隔离、预热、稳态判定、统计口径；8481C 为 Sapphire Rapids，警惕硬编码事件名）；③ 可移植性与许可证。
+- **脚本评审（状态更新 2026-09-25）**：用户外部 x86 探测脚本始终未提供；linux-x86_64 平台已改经本仓 runner（ssh transport + taskset 控制）接入并产出首份 sweep（`data/public/runs/20260924T174644Z-ptr-chase-cache-sweep`）。外部脚本若日后提供仍可按三维度评审；平台接入项视为完成。
 
 ## OI-4 SM8550 历史数据溯源
 

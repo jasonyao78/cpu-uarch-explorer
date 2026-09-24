@@ -238,15 +238,17 @@ ctest --preset macos-arm64-release
 
 **已知限制**：
 
-- 只有 local 执行器；SSH/ADB/gem5 通道未实现（`transport` 字段已预留）；
+- ~~只有 local 执行器~~ ✅ 2026-09-25：SSH 通道已实现（SshExecutor + transport 工厂按 ADR-0006 选择，主流程零特判），Xeon（linux-x86_64）平台接入并产出首份跨平台数据；ADB/gem5 通道未实现；
 - 只有 ptr_chase 一个测量探针；core/branch/tlb/sync 四域只有 README；
 - 报告层仅支持单 run 报告；跨 run 汇总与校准差异单未做；
 - 环境事务（改 governor/hugepage 需"改完恢复"）只有设计结论（借 GB10 模型重新实现），无代码；
 - gem5 基建已验证（v25.0.0.1 + 134 文件最小集，Xeon 重建与 SE 冒烟通过）；D9300 SE 精简配置与建模后置（启动条件：探针套件齐备 + D9300 实机入册）。
 
+**Xeon 首测解读（2026-09-25，MEDIUM 置信度）**：台阶位置与硬件画像一致（L1d 48KB 边界出现在 64K 档、L2 2MB 边界出现在 2M 档）；但 LLC（105MB 共享）平台期未观测到——4M 档起直接 DRAM 量级，且 128M 档非单调（74.9ns < 64M 档的 117.8ns）。原因未锁定，候选：powersave DVFS 逐 case 浮动、4K 页 TLB 遍历、THP（madvise 默认）。**锁频复测前，本次 sweep 的 ns 绝对值不可用于跨档/跨平台结论**（measurement-discipline §5/§6；复测需 root 改 governor，列入待用户授权项）。
+
 ## 12. 下一步（规划，未实现）
 
 1. ~~analysis/ 报告层~~（✅ 2026-09-25 落地：单 run Markdown + SVG）→ 后续：跨 run 汇总对比、校准差异单（MEASURED vs SIMULATED）；
-2. fake transport/target 契约测试（不依赖真机的 Runner 回归）；
+2. fake transport/target 契约测试（SSH fake 单测已落地 2026-09-25；target 契约随 ADB/gem5 通道补充）；
 3. 环境事务模型落地（Linux governor/hugepage 控制的前置）；
 4. gem5 SE 模式精简配置（ptr_chase 进模拟器，校准闭环起点）。
