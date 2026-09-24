@@ -5,6 +5,7 @@
 ## 0. 获取代码（二选一）
 
 **方式 A：GitHub 克隆（推荐，私有仓需认证）**
+
 ```bash
 # 服务器上先完成 gh 认证（jasonyao78 账号）：
 #   gh auth login
@@ -15,12 +16,24 @@ cd cpu-uarch-explorer
 ```
 
 **方式 B：rsync 本机直传（服务器无法访问 GitHub 时用）**
+
 ```bash
-# 在 M4 Pro 本机执行：
-rsync -a --info=progress2 \
+# 在 M4 Pro 本机执行。注意：
+# 1. macOS 自带 openrsync（2.6.9 兼容）不支持 --info=progress2，用 --progress；
+#    想要总进度条可 brew install rsync 后用 rsync3 的 --info=progress2。
+# 2. 必须排除构建产物（third_party/gem5/build/ 有 ~1.5GB macOS Mach-O 对象，
+#    在 Linux 上完全无用；rsync 的 'build/' 模式按目录名匹配任意层级）。
+# 3. 目标路径放 NVMe（先 lsblk / findmnt 确认挂载点；home 目录可能在 HDD 上）。
+rsync -a --progress \
+  --exclude '.DS_Store' \
+  --exclude 'build/' \
+  --exclude 'build-x86/' \
+  --exclude 'build-ubsan/' \
+  --exclude 'third_party/gem5/build-macos-arm64.log' \
   /Users/michaelyao/workspace/cpu-uarch-explorer/ \
   <server>:/path/on/nvme/cpu-uarch-explorer/
-# 注意 third_party/gem5 是 submodule：确认 .git 目录/文件一并同步（rsync -a 会带）
+# submodule 说明：absorbgitdirs 后 third_party/gem5/.git 是指向
+# ../../.git/modules/third_party/gem5 的相对指针，rsync -a 带上 .git 即在服务器侧可用。
 ```
 
 ## 1. 系统依赖（Ubuntu 24.04）
