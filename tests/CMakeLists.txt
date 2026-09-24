@@ -22,3 +22,15 @@ set_tests_properties(ptr_chase_rejects_stride_gt_buffer PROPERTIES WILL_FAIL TRU
 
 add_test(NAME ptr_chase_rejects_zero_buffer COMMAND ${PT} -b 0 -s 64 -n 8000)
 set_tests_properties(ptr_chase_rejects_zero_buffer PROPERTIES WILL_FAIL TRUE)
+
+# hugepage 能力分级（Probe ABI 退出码 2 = unsupported；fallback 标注）：
+# macOS 无 MAP_HUGETLB → 期望非零退出；Linux 无页池 → 期望成功且输出显式标注
+if(APPLE)
+  add_test(NAME ptr_chase_hugepage_unsupported COMMAND ${PT} -b 4096 -s 64 -n 8000 -h)
+  set_tests_properties(ptr_chase_hugepage_unsupported PROPERTIES WILL_FAIL TRUE)
+else()
+  add_test(NAME ptr_chase_hugepage_fallback_or_ok
+           COMMAND ${PT} -b 4096 -s 64 -n 8000 -h)
+  set_tests_properties(ptr_chase_hugepage_fallback_or_ok PROPERTIES
+      PASS_REGULAR_EXPRESSION "page_policy=")
+endif()

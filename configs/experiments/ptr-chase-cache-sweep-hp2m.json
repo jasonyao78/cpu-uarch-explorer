@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-cache-sweep-hp2m",
+  "title": "cache/内存层次 sweep（2MB hugepage 对照组；正式测量口径，measurement-discipline §2）",
+  "protocol_version": "1.0",
+  "harness": "portable",
+  "parameters": [
+    { "name": "buffer", "type": "size", "range": "32KiB..256MiB，覆盖 L1→DRAM" },
+    { "name": "stride", "type": "size", "default": "64B" },
+    { "name": "warmup", "type": "int", "default": 200000 },
+    { "name": "loads_per_slot", "type": "int", "default": 8 },
+    { "name": "min_loads", "type": "int", "default": 4194304,
+      "notes": "计时分辨率反推的安全量级；hugepage 下 TLB 开销大降，min_loads 约束仍保守有效" },
+    { "name": "repetitions", "type": "int", "default": 5 },
+    { "name": "hugepage", "type": "int", "default": "1",
+      "notes": "1 = 2MB hugepage（-h，缺页池时回退 4K 并显式标注）；0 = 默认 4K" }
+  ],
+  "preconditions": [
+    "probe 已构建；Linux 目标须先分配 hugepage 池（sudo，见 runbook）",
+    "若记录中 page_policy=fallback-4k 占比高，说明页池不足，数据按 4K 口径解读",
+    "测量期间机器空闲；温度口径 warm（measurement-discipline §1）"
+  ],
+  "metrics": [
+    { "name": "latency_ns", "unit": "ns", "statistic": "median" }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "sweep": {
+      "buffer": ["32KiB", "64KiB", "128KiB", "256KiB", "512KiB", "1MiB", "2MiB", "4MiB",
+                 "8MiB", "16MiB", "32MiB", "64MiB", "128MiB", "256MiB"]
+    },
+    "fixed_params": ["stride", "warmup", "loads_per_slot", "min_loads", "hugepage"]
+  },
+  "notes": "与 ptr-chase-cache-sweep（4K 口径）成 A/B 对照：消除 TLB 项 + 降低物理布局敏感度（2026-09-25 Xeon 双峰实证，设计文档 §11）"
+}

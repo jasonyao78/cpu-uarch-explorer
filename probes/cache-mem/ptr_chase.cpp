@@ -42,8 +42,17 @@
 //    2=能力不支持（保留）。校验项：stride 为指针宽度的整数倍、
 //    loads ≥ 展开因子、槽位数 ≥ 2。
 //
-// 输出：key=value 行（buffer_kb / stride / loads / elapsed_ns / latency_ns），
-// 由 runner 层包装为 record.schema.json 记录。
+// 附加：hugepage 支持（-h / -H；measurement-discipline §2 落地）
+//    Linux 正式测量须用 2MB hugepage：① 4K 页在工作集超出 TLB 覆盖后
+//    每档叠加页遍历开销，把 LLC 平台期拉成斜坡；② buddy 分配器给出的
+//    4K 物理页布局可能不均，随机链在 L3 set 上冲突（2026-09-25 Xeon
+//    实测：96MiB 档 5 次重复内双峰 60ns vs 108-141ns，铁证）。2MB 大页
+//    同时缓解两者。`-h` 缺页池时回退 4K 并在输出标注 fallback（显式
+//    标注纪律）；`-H` 严格模式缺页池直接退出码 2（能力不支持）。
+//    macOS 无 MAP_HUGETLB：请求 -h/-H 一律退出码 2，不假装支持。
+//
+// 输出：key=value 行（buffer_kb / stride / loads / elapsed_ns / latency_ns /
+// page_policy / page_kb），由 runner 层包装为 record.schema.json 记录。
 
 #include <cstdint>
 #include <cstdio>
@@ -53,6 +62,14 @@
 #include <random>
 #include <unistd.h>
 #include <sys/mman.h>
+
+// MAP_HUGETLB 为 Linux 专有（2MB 默认大页）；macOS 等平台无此能力，
+// 请求 hugepage 时以退出码 2（能力不支持）回应（Probe ABI，原理"附加"节）。
+#ifndef MAP_HUGETLB
+#define CPU_UARCH_NO_HUGEPAGE 1
+#else
+#define CPU_UARCH_NO_HUGEPAGE 0
+#endif
 
 namespace {
 
@@ -66,11 +83,13 @@ double now_ns() {
 
 void usage(const char* prog) {
     std::fprintf(stderr,
-        "usage: %s -b KB -s stride_bytes [-n loads] [-w warmup_loads]\n"
+        "usage: %s -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-h|-H]\n"
         "  -b  buffer size in KB            (default 8192)\n"
         "  -s  stride between chain slots, must be a multiple of %zu (default 64)\n"
         "  -n  total dependent loads, >= %d (default 268435456)\n"
-        "  -w  warmup loads                (default 200000)\n",
+        "  -w  warmup loads                (default 200000)\n"
+        "  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)\n"
+        "  -H  2MB hugepage strict (exit 2 if pool unavailable)\n",
         prog, sizeof(char*), kUnroll);
 }
 
@@ -80,6 +99,42 @@ void usage(const char* prog) {
     std::exit(1);
 }
 
+// hugepage 分配：尺寸向上取整到 2MB 对齐 + MAP_HUGETLB；缺页池时 strict 退出 2、
+// 非 strict 回退 4K（page_policy 显式标注，requested/actual 纪律）。
+char* map_buffer(size_t bytes, bool want_hp, bool strict_hp,
+                 const char* prog, const char** policy, unsigned* page_kb) {
+#if CPU_UARCH_NO_HUGEPAGE
+    (void)bytes; (void)strict_hp;
+    if (want_hp) {
+        std::fprintf(stderr, "unsupported: MAP_HUGETLB not available on this platform\n");
+        std::exit(2);
+    }
+    *policy = "default-4k"; *page_kb = 4;
+    return nullptr;  // 未触发，下行统一走默认 mmap
+#else
+    if (!want_hp) {
+        *policy = "default-4k"; *page_kb = 4;
+        return nullptr;
+    }
+    constexpr size_t kHp = 2 * 1024 * 1024;
+    const size_t hp_bytes = (bytes + kHp - 1) / kHp * kHp;
+    char* buf = static_cast<char*>(mmap(nullptr, hp_bytes, PROT_READ | PROT_WRITE,
+                                        MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0));
+    if (buf != MAP_FAILED) {
+        *policy = "hugepage-2m"; *page_kb = 2048;
+        return buf;
+    }
+    if (strict_hp) {
+        std::fprintf(stderr, "unsupported: hugepage pool unavailable (strict mode)\n");
+        std::exit(2);
+    }
+    std::fprintf(stderr, "warning: hugepage pool unavailable, falling back to 4K pages "
+                         "(results keep [fallback-4k] tag; see measurement-discipline §2)\n");
+    *policy = "fallback-4k"; *page_kb = 4;
+    return nullptr;
+#endif
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -87,14 +142,17 @@ int main(int argc, char** argv) {
     size_t stride = 64;
     long long loads = 268435456; // 2^28；按计时器分辨率反推的最小安全量级（原理 §4）
     long long warmup = 200000;
+    bool want_hp = false, strict_hp = false;
 
     int opt;
-    while ((opt = getopt(argc, argv, "b:s:n:w:")) != -1) {
+    while ((opt = getopt(argc, argv, "b:s:n:w:hH")) != -1) {
         switch (opt) {
         case 'b': buffer_kb = std::strtoull(optarg, nullptr, 10); break;
         case 's': stride = std::strtoull(optarg, nullptr, 10); break;
         case 'n': loads = std::strtoll(optarg, nullptr, 10); break;
         case 'w': warmup = std::strtoll(optarg, nullptr, 10); break;
+        case 'h': want_hp = true; break;
+        case 'H': want_hp = true; strict_hp = true; break;
         default: usage(argv[0]); return 1;
         }
     }
@@ -115,7 +173,19 @@ int main(int argc, char** argv) {
         die(argv[0], "buffer too small for this stride (need at least 2 slots)");
     loads -= loads % kUnroll;
 
-    char* buf = static_cast<char*>(mmap(nullptr, bytes, PROT_READ | PROT_WRITE,
+    // hugepage 分配（-h/-H）；nullptr 表示走默认 4K 路径
+    const char* page_policy = "default-4k";
+    unsigned page_kb = 4;
+    char* hp_buf = map_buffer(bytes, want_hp, strict_hp, argv[0], &page_policy, &page_kb);
+    size_t map_bytes = bytes;
+#if !CPU_UARCH_NO_HUGEPAGE
+    if (hp_buf != nullptr) {
+        constexpr size_t kHp = 2 * 1024 * 1024;
+        map_bytes = (bytes + kHp - 1) / kHp * kHp;
+    }
+#endif
+    char* buf = hp_buf != nullptr ? hp_buf
+              : static_cast<char*>(mmap(nullptr, bytes, PROT_READ | PROT_WRITE,
                                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
     if (buf == MAP_FAILED) {
         std::perror("mmap");
@@ -167,10 +237,11 @@ int main(int argc, char** argv) {
     const double elapsed = t1 - t0;
     const double latency = elapsed / static_cast<double>(loads);
 
-    std::printf("buffer_kb=%zu stride=%zu loads=%lld elapsed_ns=%.0f latency_ns=%.4f\n",
-                buffer_kb, stride, loads, elapsed, latency);
+    std::printf("buffer_kb=%zu stride=%zu loads=%lld elapsed_ns=%.0f latency_ns=%.4f "
+                "page_policy=%s page_kb=%u\n",
+                buffer_kb, stride, loads, elapsed, latency, page_policy, page_kb);
 
     free(perm);
-    munmap(buf, bytes);
+    munmap(buf, map_bytes);
     return 0;
 }

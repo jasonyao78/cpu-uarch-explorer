@@ -112,16 +112,27 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
             loads = max(min_loads, loads_per_slot * slots)
             loads -= loads % 8  # 对齐展开因子（Probe ABI：loads >= 8 且为 8 的倍数）
 
-            case_params = tuple(sorted({
+            # hugepage：实验声明时才进入 case（测量语义参数，measurement-discipline
+            # §2）；未声明的实验完全不出现该键——旧配置零影响。
+            hp_rv = params.get("hugepage")
+            hugepage = int(hp_rv.value) if hp_rv is not None else 0
+            if hugepage not in (0, 1):
+                raise RunnerError("plan-error", f"hugepage must be 0 or 1, got {hugepage}")
+
+            case_params = {
                 "buffer_kb": ResolvedValue(buffer_kb, params["buffer"].source),
                 "stride": ResolvedValue(stride_b, params["stride"].source),
                 "loads": ResolvedValue(loads, "derived"),
                 "warmup": ResolvedValue(int(params.get("warmup", ResolvedValue(200000, "spec-default")).value),
                                         params.get("warmup", ResolvedValue(None, "spec-default")).source),
-            }.items()))
-            case_id = f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"
+            }
+            if hp_rv is not None:
+                case_params["hugepage"] = ResolvedValue(hugepage, hp_rv.source)
+            case_id = (f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"
+                       + ("-hp2m" if hugepage else ""))
             cases.append(Case(id=case_id, probe=probe, control=control,
-                              params=case_params, repetitions=repetitions))
+                              params=tuple(sorted(case_params.items())),
+                              repetitions=repetitions))
 
     return Plan(experiment_id=spec["id"], protocol_version=spec["protocol_version"],
                 cases=tuple(cases), target=platform["target"])

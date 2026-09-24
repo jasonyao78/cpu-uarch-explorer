@@ -2,9 +2,13 @@
 """ptr_chase adapter：指针追逐内存延迟探针（probes/cache-mem/ptr_chase.cpp）。
 
 Probe ABI（与源码头部注释一致）：
-  argv:  -b buffer_kb -s stride_bytes -n loads -w warmup
-  stdout: buffer_kb=.. stride=.. loads=.. elapsed_ns=.. latency_ns=..
-  退出码: 0 成功 / 1 输入或环境错误 / 2 能力不支持（保留）
+  argv:  -b buffer_kb -s stride_bytes -n loads -w warmup [-h|-H]
+  stdout: buffer_kb=.. .. latency_ns=.. page_policy=.. page_kb=..
+  退出码: 0 成功 / 1 输入或环境错误 / 2 能力不支持（hugepage 无平台能力或
+          strict 模式缺页池；fallback 非 strict 模式下成功但标注 fallback-4k）
+
+measurement-discipline §2：hugepage 是 Linux 正式测量前提；fallback 必须
+显式可见——page_policy 随 metric 入档（requested/actual 双记录原则）。
 """
 
 from __future__ import annotations
@@ -23,22 +27,30 @@ class PtrChaseAdapter:
 
     def build_argv(self, params: dict[str, Any]) -> list[str]:
         """参数 dict → probe argv。缺参数/类型错误抛 ParseError（plan 期已校验，
-        此处是最后一道防线）。"""
+        此处是最后一道防线）。hugepage 非 0 时加 -h（fallback 允许）。"""
         try:
             buffer_kb = int(params["buffer_kb"])
             stride = int(params["stride"])
             loads = int(params["loads"])
             warmup = int(params["warmup"])
+            hugepage = int(params.get("hugepage", 0))
         except (KeyError, TypeError, ValueError) as e:
             raise ParseError(f"ptr_chase argv build failed: {e}")
-        return ["-b", str(buffer_kb), "-s", str(stride),
+        argv = ["-b", str(buffer_kb), "-s", str(stride),
                 "-n", str(loads), "-w", str(warmup)]
+        if hugepage:
+            argv.append("-h")
+        return argv
 
     def parse_output(self, stdout: str, stderr: str) -> list[dict[str, Any]]:
         """stdout key=value → metrics 列表。缺 latency_ns、非数值、nan/inf
-        一律抛 ParseError（绝不编造数值，空 metrics + failure 是合法出路）。"""
+        一律抛 ParseError（绝不编造数值，空 metrics + failure 是合法出路）。
+        page_policy 存在时随 metric 入档（§2 显式标注纪律）。"""
         fields = parse_key_value_lines(stdout)
         if not fields:
             raise ParseError(f"no key=value lines in probe output; stderr={stderr.strip()!r}")
         latency = require_finite_number(fields, "latency_ns")
-        return [{"name": "latency_ns", "value": latency, "unit": "ns"}]
+        metric: dict[str, Any] = {"name": "latency_ns", "value": latency, "unit": "ns"}
+        if "page_policy" in fields:
+            metric["page_policy"] = fields["page_policy"]
+        return [metric]

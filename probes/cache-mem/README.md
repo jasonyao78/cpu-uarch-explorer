@@ -15,7 +15,8 @@
 
 ## 后续迭代方向（backlog，方法学迁移 OI-9）
 
+- ~~hugepage 开关~~ ✅ 2026-09-25 已实现：`-h`（缺页池回退 4K 并显式标注）/`-H`（严格，退出 2）；输出含 `page_policy`/`page_kb`，随 metric 入档。
 - `CLOCK_MONOTONIC_RAW` 替代 `CLOCK_MONOTONIC`（减小时钟调整抖动）。
-- hugepage 开关（fallback/strict 两级）+ cold 模式参数化（驱逐后冷测 + 输出温度标签）——遵守 `docs/methodology/measurement-discipline.md`。
+- cold 模式参数化（驱逐后冷测 + 输出温度标签）——遵守 `docs/methodology/measurement-discipline.md`。
 - `evict_slc` 类驱逐工具的移植评估（独立小进程，BSD-3 同源，引用需登记来源）。
 - 跨核迁移延迟探针（chase_migrate 范式：绑核建链 → warm → 迁核确认 → 测同链，penalty = dst − src）。
