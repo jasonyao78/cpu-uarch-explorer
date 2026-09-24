@@ -6,7 +6,7 @@
 
 - **✅ 模型工作定位**：用户提供的 gem5-d9300-patch 增量树——`configs/example/arm/arm_multicore_d9300.py`（D9300 全系统配置）+ CoralNPU/NDP/Gemmini 资产 + `run_multicore.sh` 全流程（checkpoint/NPU 后端切换）。原始 drop 只读归档于 `../cpu-uarch-ref/gem5-d9300-patch/`（MANIFEST.sha256）。
 - **✅ 集成落地（ADR-0004 修订：overlay 方案）**：`third_party/gem5` = 官方上游 submodule（钉 `f5c5a6e390`，v25.1.0.1，ignore=dirty）；`third_party/gem5-d9300-patch/gem5` = 增量树（唯一事实源）；`apply_patchset.sh` 同步后构建；脚本与文档路径已适配本仓布局。
-- **基线兼容性 ✅（2026-09-24 验证）**：Xeon 系统 scons 构建成功（`build/ARM/gem5.opt` 954MB，`scons: done building targets`）——overlay 与 v25.1 基线兼容性正式确认。曾用 uv python 驱动构建导致 gem5py 崩溃（Error 134），改系统 scons 后通过；教训已记入 runbook 附2 与 ADR-0007 修订。剩余：intake 梳理、SE 模式精简配置、开源前 SPDX 检查点。
+- **基线兼容性 ✅（2026-09-24 验证）**：Xeon 系统 scons 构建成功（`build/ARM/gem5.opt` 954MB）；ARM64 SE 冒烟仿真通过（交叉编译静态 hello → `Exiting @ tick`，退出码 0）。overlay 与 v25.1 基线兼容性正式确认。曾用 uv python 驱动构建导致 gem5py 崩溃（Error 134），改系统 scons 后通过；教训已记入 runbook 附2/附3 与 ADR-0007 修订。剩余：intake 梳理（O3/DDR 参数表、已有校准数据）、SE 模式精简配置（校准闭环用）、开源前 SPDX 检查点。
 - **⏳ intake 梳理**：O3 参数表、DDR/内存配置、checkpoint 流程、NPU 后端、已有校准数据 → `docs/gem5-d9300-intake.md`。
 - **⏳ 合规检查点（开源前）**：增量树逐文件 SPDX/权属复核（用户已确认无权属问题入库私有仓；delta 文件普遍缺许可证头）。
 - **⏳ SE 模式精简配置**：现有配置为 full-system（需磁盘镜像 + 内核）；校准闭环需补 SE 模式配置让 ptr_chase 等微基准跑进 gem5（写配置时遵循 `third_party/gem5/configs/AGENTS.md`：优先 stdlib、窄配置、py_compile + 最小测试验证）。

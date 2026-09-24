@@ -105,3 +105,15 @@ scons: *** [build/ARM/params/PartitionManager.hh] Error 134
 **根因**：uv 托管 Python（python-build-standalone）的 `lib-dynload/` 只有 3 个 `.so`（其余扩展模块静态链入 libpython）。gem5 的 gem5py（内嵌 Python 的代码生成器）按 uv 的 `python3-config` 链接/解析后，其内嵌解释器的模块解析在该非标准布局下断裂。与 delta 无关（同 overlay 用系统 scons 即通过）。
 
 **解决**：系统 scons 构建（gem5py 按系统 python3-config 链接，全链路一致）。**验证：2026-09-24 系统 scons 构建成功（`build/ARM/gem5.opt` 954MB）。** 另注意：在 `third_party/gem5` 内执行 `uv run` 会因 gem5 自带 `pyproject.toml` 另建 venv，同样会污染构建环境，一并禁止。
+
+## 附3：冒烟验证（2026-09-24 通过）
+
+```bash
+# 编译 ARM64 静态测试程序（服务器已有交叉编译器 /usr/bin/aarch64-linux-gnu-gcc）
+printf "int main(void){return 42;}\n" > /tmp/h.c
+aarch64-linux-gnu-gcc -static -O1 -o /tmp/hello-arm64 /tmp/h.c
+# 运行 SE 仿真（ARM-only 构建跑 x86 二进制会报 "No SE workload is compatible"，属预期）
+cd third_party/gem5
+./build/ARM/gem5.opt configs/deprecated/example/se.py --cmd /tmp/hello-arm64
+# 预期：Exiting @ tick <N> because exiting with last active thread context，退出码 0
+```

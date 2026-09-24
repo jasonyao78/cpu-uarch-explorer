@@ -71,6 +71,12 @@ src/dev/npu/coral_verilated_backend.cc:8:10: fatal error: 'elf.h' file not found
 
 `<elf.h>` 为 glibc 专属头文件，macOS 不提供；且 verilated NPU 后端依赖 Verilator + NPU RTL，属 Linux 流程。**结论：overlay 与 v25.1 基线兼容性良好；正式构建平台定为 Xeon 服务器**（runbook：`docs/runbooks/build-gem5-xeon.md`）。macOS 本地构建非 verilated 变体的备选方案：delta 中对 verilated 后端加 `__APPLE__` 守卫（backlog）。首次失败记录：conda Python 3.13 未过 gem5 链接检查（"Can't find a working Python installation"）。
 
+### SE 冒烟仿真（2026-09-24 通过）
+
+- 交叉编译 ARM64 静态 hello（服务器已有 `/usr/bin/aarch64-linux-gnu-gcc`）→ `configs/deprecated/example/se.py --cmd /tmp/hello-arm64` → **`Exiting @ tick 46213000 because exiting with last active thread context`，退出码 0**。
+- 注意：ARM-only 构建（`build/ARM/`）跑 x86 二进制会报 `ValueError: No SE workload is compatible`（v25 Workload 兼容性检查），属预期，非故障。
+- 结论：**构建 → 二进制可运行 → ARM SE 仿真执行** 全链路验证完毕；gem5 D9300 模型基础设施功能就绪。
+
 ### delta 树清理（2026-09-24）
 
 - **已删 `util/`（6 文件）**：`orchestrator-request.py`（纯新增，原项目的分布式编排管道）+ `transmitter.py`、`gem5-resources-manager/requirements.txt`、`dockerfiles/gpu-fs/{Dockerfile,README.md}`、`docker-bake.hcl`（5 个上游文件的改写，均不在 scons 构建路径上，删除后恢复上游原版）。submodule 工作树已同步恢复（`git checkout -- util/`）。
