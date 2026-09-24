@@ -252,7 +252,15 @@ ctest --preset macos-arm64-release
   2. **4K 页 TLB 压力把平台期拉成斜坡**——4M→64M 的缓慢单调爬升（82→94 cycles@0.8GHz）与页数增长（1K→16K 页，L2 STLB 2048 项溢出）吻合；
   3. **物理页分配布局决定 L3 观测形态**——96MiB 档 5 次重复内双峰（3 次 ~60ns / 2 次 108~141ns，同二进制同尺寸仅 mmap 布局不同）：坏布局下 L3 set 冲突使命中看起来像 DRAM。真实 L3 命中延迟的证据存在于 2M 档（33cy）与 96M 好运气样本（48cy），与 SPR 文献值 ~40-50cy 吻合。
 - **判定**：sysfs 容量真值（48K/2M/105M）与台阶位置**全部一致**；"缺失的 L3 平台期"不是硬件矛盾，而是 **4K 页 + 内存碎片布局 + 未锁频** 的合成伪影——正是 measurement-discipline"hugepage 为 Linux 正式测量前提"条款的又一实证。
-- **复测前置（按优先级）**：① ptr_chase hugepage 支持（backlog 项，消除 TLB 项 + 大幅降低 set 冲突敏感度）；② 锁频（sudo governor=performance，需用户授权；走未来环境事务）；③ evict 工具 warm/cold 对照。
+- **v3 锁频复测（2026-09-25 晚，三重对照定案；参考 run：`20260924T184842Z`-hp2m 与 `20260924T185031Z`-4K，均 performance governor）**：
+
+  | 干预 | 效果（median ns 代表档） |
+  |---|---|
+  | 仅锁频（4K：powersave→performance） | L1 2.52→1.32（≈2GHz→3.8GHz）；L3 区 105~118 → **37~45，平台期现身** |
+  | 仅 hugepage（锁频下 4K→2M） | L2 尾段 4.7~5.4→4.2 纯平；2M 档 13.98→4.75；L3 区斜坡 37.6→44.8 → **35.6~36.8 纯平**；DRAM 102→91.5 |
+
+  hp2m+perf 全曲线为教科书形态：L1 1.32ns（5.0cy@3.8G）/ L2 4.22ns（16.0cy）/ L3 35.6ns 纯平（uncore 域）/ DRAM 91.5ns；台阶与 sysfs 容量逐一对应。**该 run 升级为 Xeon 延迟参考基线（HIGH 置信度）**——v1/v2 的 MEDIUM 结论就此关闭；v1 run（`20260924T174644Z`）保留作方法学反例档案。
+- **复测前置（按优先级）**：① ~~ptr_chase hugepage 支持~~ ✅ 已落地；② ~~锁频~~ ✅ 本轮完成（手动 sudo 路径；工具自动路径待 NOPASSWD 授权）；③ evict 工具 warm/cold 对照（待办）。
 
 ## 12. 下一步（规划，未实现）
 
