@@ -11,6 +11,7 @@
 | gem5 DDR 时延分析 | `../cpu-uarch-ref/cpu微架构材料/gem5-DDR访问通路时延细节全流程分析.md/.html` | Michael 自己的报告：gem5 DDR 读通路时延分解（trace + 源码 commit `3dc9dcc`） | 本人作品 | 可评估后移入 `docs/`（接入 gem5 时，OI-1） | 待 gem5 源码接入时处置 |
 | DDR 时序参数分析 | `../cpu-uarch-ref/cpu微架构材料/DDR关键时序参数分析.md` | DDR 关键时序参数讲解 | 作者待确认 | 确认作者前仅个人阅读 | 待确认 |
 | CPU MicroArchitecture Analysis.pptx | `../cpu-uarch-ref/cpu微架构材料/` | 微架构分析幻灯片 | **作者未知** | 确认作者与来源前不引用、不传播 | 待确认 |
+| gem5-d9300-patch 原始 drop | `../cpu-uarch-ref/gem5-d9300-patch/` | gem5 增量树原始档案 + MANIFEST.sha256（1015 项） | 同左（工作副本已入 `third_party/gem5-d9300-patch/`） | 只读存档；一切变更以 third_party/ 增量树为准 | 已归档（2026-09-24） |
 
 ## 借鉴工作流（防"被参考实现带偏"）
 

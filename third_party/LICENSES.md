@@ -4,7 +4,8 @@
 
 | 包 | 引入路径 | 来源 | 版本/commit | 许可证 | 补丁 |
 |---|---|---|---|---|---|
-| gem5 | `third_party/gem5`（暂为本地克隆，gitignore；待转 submodule） | https://github.com/gem5/gem5.git | stable @ `f5c5a6e390`（v25.1.0.1 线） | BSD-3-Clause（见 third_party/gem5/LICENSE） | 暂无（上游未修改；D9300 工作未随附，见 docs/gem5-d9300-intake.md） |
+| gem5 | `third_party/gem5`（正式 submodule） | https://github.com/gem5/gem5.git | stable @ `f5c5a6e390`（v25.1.0.1 线） | BSD-3-Clause（见 third_party/gem5/LICENSE） | 无（上游纯净；本地增量走 overlay，见下一行） |
+| gem5-d9300-patch（本地增量树） | `third_party/gem5-d9300-patch/gem5` | 用户提供内部 delta；原始 drop 只读归档于 `../cpu-uarch-ref/gem5-d9300-patch/`（含 SHA256 清单） | 2026-09-24 入库快照 | **逐文件 SPDX 待补**（用户已确认无权属问题；开源前检查点，OI-1） | 覆盖上游 867 文件 + 新增 50 文件 |
 
 ## 本地未入库的参考材料（明确**不是**本仓依赖）
 

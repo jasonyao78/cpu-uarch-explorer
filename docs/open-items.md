@@ -2,16 +2,14 @@
 
 > 本地快照（2026-09-23，tag `req-v0.3`）。仓库接入 GitHub 后同步为 Issues（标签 `open-item`）。每项注明：阻塞什么、如何回填、当前证据等级。
 
-## OI-1 gem5 D9300 模型源码接入（2026-09-24 更新：基线就位，D9300 工作未随附）
+## OI-1 gem5 D9300 模型源码接入（2026-09-24：主体完成，剩余验证与梳理）
 
-- **已就位**：`third_party/gem5` = 上游 gem5/gem5 `stable` @ `f5c5a6e390`（v25.1.0.1 线，2026-09-24 核实），远程为上游 GitHub，工作树干净，BSD-3-Clause。
-- **关键发现**：该克隆中**未发现任何 D9300/Dimensity/MediaTek 相关修改**（全分支检索 + 全树文件名与内容检索）。它是基线，不是模型。
-- **下一步（二选一或并行）**：
-  - (a) **定位真实 D9300 模型工作**：是否在其他机器/内部仓/压缩包中？v0.3 §2.4 预期的"Python 配置修改、C++ 修改、O3 参数、已有校准数据"均不在此克隆内；
-  - (b) **决策在基线上自建**：v25.1 自带 **Neoverse V2 核心模型配置**（分布式 IQ、真实 FU 延迟、FDIP），是 D9300（X4+A720）O3 参数化的最佳起点；自建路线需另行计划。
-- **接入 checklist 状态**：基线 commit ✅ 已知；D9300 配置/C++ 修改/校准数据 ❌ 未随附；fork→submodule 待用户将此克隆推送到本人 GitHub 后钉版（当前 .gitignore 排除，ADR-0004）。
-- **调查记录**：`docs/gem5-d9300-intake.md`。
-- **关联**：`../cpu-uarch-ref/cpu微架构材料/gem5-DDR访问通路时延细节全流程分析.md`（Michael 自己的分析，基于 gem5 commit `3dc9dcc`）——`3dc9dcc` 不在当前克隆历史中，进一步佐证 D9300 模型工作在其他仓库/历史里，接入时需一并定位。
+- **✅ 模型工作定位**：用户提供的 gem5-d9300-patch 增量树——`configs/example/arm/arm_multicore_d9300.py`（D9300 全系统配置）+ CoralNPU/NDP/Gemmini 资产 + `run_multicore.sh` 全流程（checkpoint/NPU 后端切换）。原始 drop 只读归档于 `../cpu-uarch-ref/gem5-d9300-patch/`（MANIFEST.sha256）。
+- **✅ 集成落地（ADR-0004 修订：overlay 方案）**：`third_party/gem5` = 官方上游 submodule（钉 `f5c5a6e390`，v25.1.0.1，ignore=dirty）；`third_party/gem5-d9300-patch/gem5` = 增量树（唯一事实源）；`apply_patchset.sh` 同步后构建；脚本与文档路径已适配本仓布局。
+- **⏳ 基线兼容性验证（构建中）**：delta 覆盖 867 个修改文件（+22841/−54427；删除量提示增量基于不同版本的上游开发）+ 50 个新文件；scons `build/ARM/gem5.opt` 后台构建中（日志 `third_party/gem5/build-macos-arm64.log`）。首次失败原因：conda Python 3.13 未过 gem5 链接检查，已改用 Homebrew Python 3.12。
+- **⏳ intake 梳理**：O3 参数表、DDR/内存配置、checkpoint 流程、NPU 后端、已有校准数据 → `docs/gem5-d9300-intake.md`。
+- **⏳ 合规检查点（开源前）**：增量树逐文件 SPDX/权属复核（用户已确认无权属问题入库私有仓；delta 文件普遍缺许可证头）。
+- **⏳ SE 模式精简配置**：现有配置为 full-system（需磁盘镜像 + 内核）；校准闭环需补 SE 模式配置让 ptr_chase 等微基准跑进 gem5（写配置时遵循 `third_party/gem5/configs/AGENTS.md`：优先 stdlib、窄配置、py_compile + 最小测试验证）。
 
 ## OI-2 红米设备信息回填（`android-arm64`）
 

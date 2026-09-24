@@ -20,3 +20,4 @@
 - **OI-5 关闭（2026-09-24 当日补充）**：计时器（41.67ns 分辨率、4.06ns 开销）与 QoS 分流（双峰 3.8×，BACKGROUND=E-core 手段）实测完毕；PMC 转为"装 Xcode 后验证"的环境决策。能力探针落 `probes/platform/`。
 - **gem5 基线源码就位**（§2.4）：上游 stable v25.1.0.1 @ f5c5a6e390；**未发现 D9300 修改**——D9300 模型工作需定位或决策自建（OI-1 更新，见 docs/gem5-d9300-intake.md）。
 - 个人参考材料移至仓库外 `../cpu-uarch-ref/`（只读），新增受跟踪索引 `docs/reference-materials.md`。
+- **gem5 D9300 模型集成（当日追加）**：模型工作定位（overlay 增量树，`arm_multicore_d9300.py` + CoralNPU/NDP/Gemmini）；上游转正式 submodule 钉 `f5c5a6e390`；集成哲学修订为 overlay（ADR-0004 修订）；基线兼容性 scons 构建验证进行中（详见 OI-1 与 `docs/gem5-d9300-intake.md`）。
