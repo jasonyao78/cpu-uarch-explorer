@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="500" font-family="Menlo, monospace" font-size="12">
+<rect width="860" height="500" fill="#fafafa"/>
+<text x="430.0" y="22" text-anchor="middle" font-size="14" font-weight="bold">ptr-chase-l3-boundary-hp2m @ xeon-8481c-01</text>
+<line x1="80.0" y1="40" x2="80.0" y2="430" stroke="#e5e7eb"/>
+<text x="80.0" y="446" text-anchor="middle">64M</text>
+<line x1="145.6" y1="40" x2="145.6" y2="430" stroke="#e5e7eb"/>
+<text x="145.6" y="446" text-anchor="middle">68M</text>
+<line x1="207.4" y1="40" x2="207.4" y2="430" stroke="#e5e7eb"/>
+<text x="207.4" y="446" text-anchor="middle">72M</text>
+<line x1="265.9" y1="40" x2="265.9" y2="430" stroke="#e5e7eb"/>
+<text x="265.9" y="446" text-anchor="middle">76M</text>
+<line x1="321.4" y1="40" x2="321.4" y2="430" stroke="#e5e7eb"/>
+<text x="321.4" y="446" text-anchor="middle">80M</text>
+<line x1="374.2" y1="40" x2="374.2" y2="430" stroke="#e5e7eb"/>
+<text x="374.2" y="446" text-anchor="middle">84M</text>
+<line x1="424.6" y1="40" x2="424.6" y2="430" stroke="#e5e7eb"/>
+<text x="424.6" y="446" text-anchor="middle">88M</text>
+<line x1="472.7" y1="40" x2="472.7" y2="430" stroke="#e5e7eb"/>
+<text x="472.7" y="446" text-anchor="middle">92M</text>
+<line x1="518.7" y1="40" x2="518.7" y2="430" stroke="#e5e7eb"/>
+<text x="518.7" y="446" text-anchor="middle">96M</text>
+<line x1="562.9" y1="40" x2="562.9" y2="430" stroke="#e5e7eb"/>
+<text x="562.9" y="446" text-anchor="middle">100M</text>
+<line x1="605.3" y1="40" x2="605.3" y2="430" stroke="#e5e7eb"/>
+<text x="605.3" y="446" text-anchor="middle">104M</text>
+<line x1="646.2" y1="40" x2="646.2" y2="430" stroke="#e5e7eb"/>
+<text x="646.2" y="446" text-anchor="middle">108M</text>
+<line x1="685.5" y1="40" x2="685.5" y2="430" stroke="#e5e7eb"/>
+<text x="685.5" y="446" text-anchor="middle">112M</text>
+<line x1="723.5" y1="40" x2="723.5" y2="430" stroke="#e5e7eb"/>
+<text x="723.5" y="446" text-anchor="middle">116M</text>
+<line x1="760.2" y1="40" x2="760.2" y2="430" stroke="#e5e7eb"/>
+<text x="760.2" y="446" text-anchor="middle">120M</text>
+<line x1="795.6" y1="40" x2="795.6" y2="430" stroke="#e5e7eb"/>
+<text x="795.6" y="446" text-anchor="middle">124M</text>
+<line x1="830.0" y1="40" x2="830.0" y2="430" stroke="#e5e7eb"/>
+<text x="830.0" y="446" text-anchor="middle">128M</text>
+<line x1="80" y1="367.0" x2="830" y2="367.0" stroke="#e5e7eb"/>
+<text x="72" y="371.0" text-anchor="end">32</text>
+<line x1="80" y1="153.4" x2="830" y2="153.4" stroke="#e5e7eb"/>
+<text x="72" y="157.4" text-anchor="end">64</text>
+<line x1="80" y1="-60.3" x2="830" y2="-60.3" stroke="#e5e7eb"/>
+<text x="72" y="-56.3" text-anchor="end">128</text>
+<text x="430.0" y="492" text-anchor="middle">buffer size（log2，每格一倍）</text>
+<text x="16" y="250.0" text-anchor="middle" transform="rotate(-90 16 250.0)">latency_ns（log2）</text>
+<polyline points="80.0,323.2 145.6,321.2 207.4,313.3 265.9,298.0 321.4,297.6 374.2,289.3 424.6,258.6 472.7,241.8 518.7,236.1 562.9,215.6 605.3,206.1 646.2,195.5 685.5,176.5 723.5,172.6 760.2,164.1 795.6,154.8 830.0,146.8" fill="none" stroke="#2563eb" stroke-width="2"/>
+<circle cx="80.0" cy="323.2" r="3" fill="#2563eb"/>
+<circle cx="145.6" cy="321.2" r="3" fill="#2563eb"/>
+<circle cx="207.4" cy="313.3" r="3" fill="#2563eb"/>
+<circle cx="265.9" cy="298.0" r="3" fill="#2563eb"/>
+<circle cx="321.4" cy="297.6" r="3" fill="#2563eb"/>
+<circle cx="374.2" cy="289.3" r="3" fill="#2563eb"/>
+<circle cx="424.6" cy="258.6" r="3" fill="#2563eb"/>
+<circle cx="472.7" cy="241.8" r="3" fill="#2563eb"/>
+<circle cx="518.7" cy="236.1" r="3" fill="#2563eb"/>
+<circle cx="562.9" cy="215.6" r="3" fill="#2563eb"/>
+<circle cx="605.3" cy="206.1" r="3" fill="#2563eb"/>
+<circle cx="646.2" cy="195.5" r="3" fill="#2563eb"/>
+<circle cx="685.5" cy="176.5" r="3" fill="#2563eb"/>
+<circle cx="723.5" cy="172.6" r="3" fill="#2563eb"/>
+<circle cx="760.2" cy="164.1" r="3" fill="#2563eb"/>
+<circle cx="795.6" cy="154.8" r="3" fill="#2563eb"/>
+<circle cx="830.0" cy="146.8" r="3" fill="#2563eb"/>
+<rect x="680" y="46" width="12" height="12" fill="#2563eb"/>
+<text x="698" y="57">taskset=0</text>
+</svg>
