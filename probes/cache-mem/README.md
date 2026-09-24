@@ -12,3 +12,10 @@
 
 - 循环控制开销残余 <1 cycle/load，L1 级测量略偏悲观方向，解读 L1 数值时留意（v0.3 §9 校准需交叉方法验证）。
 - 未做页着色/大页控制；TLB 效应与 cache 效应在小步长区间耦合，解读时注意。
+
+## 后续迭代方向（backlog，方法学迁移 OI-9）
+
+- `CLOCK_MONOTONIC_RAW` 替代 `CLOCK_MONOTONIC`（减小时钟调整抖动）。
+- hugepage 开关（fallback/strict 两级）+ cold 模式参数化（驱逐后冷测 + 输出温度标签）——遵守 `docs/methodology/measurement-discipline.md`。
+- `evict_slc` 类驱逐工具的移植评估（独立小进程，BSD-3 同源，引用需登记来源）。
+- 跨核迁移延迟探针（chase_migrate 范式：绑核建链 → warm → 迁核确认 → 测同链，penalty = dst − src）。

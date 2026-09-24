@@ -12,6 +12,7 @@
 | DDR 时序参数分析 | `../cpu-uarch-ref/cpu微架构材料/DDR关键时序参数分析.md` | DDR 关键时序参数讲解 | 作者待确认 | 确认作者前仅个人阅读 | 待确认 |
 | CPU MicroArchitecture Analysis.pptx | `../cpu-uarch-ref/cpu微架构材料/` | 微架构分析幻灯片 | **作者未知** | 确认作者与来源前不引用、不传播 | 待确认 |
 | gem5-d9300-patch 原始 drop | `../cpu-uarch-ref/gem5-d9300-patch/` | gem5 增量树原始档案 + MANIFEST.sha256（1015 项） | 同左（工作副本已入 `third_party/gem5-d9300-patch/`） | 只读存档；一切变更以 third_party/ 增量树为准 | 已归档（2026-09-24） |
+| arm64-uarch-probe（GB10 项目） | `~/gb10-cpu-arch-probe`（原地保留，活跃项目） | 本人前作：GB10（ARM64 Linux，X925+A725 双 cluster）微架构探测框架，Phase 1-4 完成；声明式配置/runner/契约测试/测量方法学 | BSD-3-Clause（Copyright Michael Yao 2026） | **借鉴模式**（用户决策 2026-09-24）：模式与方法学迁移、runner 蓝图参考；代码引用须登记来源；GB10 基线数据不入我方校准链 | 已登记，迁移跟踪见 OI-9 |
 
 ## 借鉴工作流（防"被参考实现带偏"）
 

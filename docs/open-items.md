@@ -17,6 +17,16 @@
 - **验收标准（ADR-0006）**：新增 RISC-V 仅需 toolchain preset + ISA kernels + capability provider + target 配置；runner 主流程零修改、通用 schema 零修改、现有 contract tests 全绿。
 - **前置**：ADR-0006 与 schema v2（2026-09-24 已落盘）。
 
+## OI-9 arm64-uarch-probe 借鉴迁移（2026-09-24 登记）
+
+- **背景**：用户前作 `~/gb10-cpu-arch-probe`（GB10 = ARM64 Linux，X925+A725 双 cluster，在手且活跃；Phase 1-4 完成）。深度分析结论：其声明式配置、runner、契约测试、测量方法学领先本仓 1-2 个阶段，但绑定 ARM64/Linux 且有未完工子系统（环境事务）。
+- **决策**：借鉴模式（用户拍板）——两仓独立；方法学迁移 + runner 蓝图参考；GB10 基线数据不入我方校准链。
+- **方法学迁移**：`docs/methodology/measurement-discipline.md`（温度语义三档/页策略/统计/置信度/修正留痕/报告模板）。
+- **ptr_chase 改进 backlog**：见 `probes/cache-mem/README.md`（MONOTONIC_RAW、hugepage+cold 参数化、evict 工具移植评估、chase_migrate 范式）。
+- **runner 蓝图吸收清单**（Phase C / OI-8 的前置设计输入）：声明式 configs + 启动期引用完整性校验、Plan/Run 分离 + environment phase 分组、ProbeAdapter 4 方法 + 错误值返回、ResultStore 原子写 + case_definitions_signature、ResolvedValue{value,source} 参数溯源、exit code 阶梯、adapter↔二进制契约测试、fixture 真实捕获。
+- **不吸收**：环境事务子系统（其自身未完工，coordinator=None）；其 ARM64 硬编码假设。
+- **GB10 平台**：未来接入按声明式平台 JSON 模式（v0.4 候选）；它是 hugepage/PMU/跨核方法学的最佳宿主，也是可扩展性的天然验收平台。
+
 ## OI-2 红米设备信息回填（`android-arm64`）
 
 - **阻塞**：§2.3 画像补全、Android target 适配、capability discovery 基线。
