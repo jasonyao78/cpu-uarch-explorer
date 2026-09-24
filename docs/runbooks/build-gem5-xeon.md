@@ -114,3 +114,44 @@ cd third_party/gem5
 ./build/ARM/gem5.opt configs/deprecated/example/se.py --cmd /tmp/hello-arm64
 # 预期：Exiting @ tick <N> because exiting with last active thread context，退出码 0
 ```
+
+## 附4：增量树最小集修剪后的回归验证（2026-09-24 修剪，873 携带文件已删）
+
+修剪把 sync 结果从"全量旧版覆盖"改为"v25.1 纯净基线 + 135 个有意 delta 文件"。**首次 sync 前必须先把服务器侧 submodule 工作树重置纯净**——apply_patchset 只拷不删，旧的 873 个携带文件不会自己消失：
+
+```bash
+cd /path/on/nvme/cpu-uarch-explorer
+git pull                                  # 拉到含修剪的 commit
+git submodule update --init               # 确认 gem5 在 f5c5a6e390
+
+# 1. submodule 重置纯净（关键！build/ 在 gem5 自身 gitignore 内，clean 不动它）
+git -C third_party/gem5 checkout -- .
+git -C third_party/gem5 clean -fd
+git -C third_party/gem5 status --short | wc -l    # 预期 0
+
+# 2. 同步修剪后的 overlay
+sh third_party/gem5-d9300-patch/gem5/apply_patchset.sh
+git -C third_party/gem5 status --short | wc -l    # 预期 ≈135（原 912）
+
+# 3. 重建（对象缓存仍在，增量编译；27 个有意 delta 碰 v25.1 API 不兼容会在这里报错）
+cd third_party/gem5
+scons build/ARM/gem5.opt -j56 2>&1 | tee build-xeon-arm64.log
+
+# 4. 冒烟（附3 同款）
+./build/ARM/gem5.opt --version
+./build/ARM/gem5.opt configs/deprecated/example/se.py --cmd /tmp/hello-arm64
+```
+
+**回报内容**：scons 退出码、`build-xeon-arm64.log` 尾部 30 行、第 2 步的文件数，贴回 OI-1。
+
+**失败回滚**（保底路径）：
+
+```bash
+cd /path/on/nvme/cpu-uarch-explorer
+git checkout <修剪前 commit> -- third_party/gem5-d9300-patch
+git -C third_party/gem5 checkout -- . && git -C third_party/gem5 clean -fd
+sh third_party/gem5-d9300-patch/gem5/apply_patchset.sh
+cd third_party/gem5 && scons build/ARM/gem5.opt -j56
+```
+
+**失败的第一嫌疑**：保留的 7 个 pybind11 新增文件与 v25.1 的 pybind11 树冲突，或 27 个 O3/内存改动文件与 v25.1 API 不兼容——前者直接删这 7 个文件重试；后者走 port 路线（见 intake 文档末节）。

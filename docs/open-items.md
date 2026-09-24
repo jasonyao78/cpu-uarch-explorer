@@ -6,6 +6,7 @@
 
 - **✅ 模型工作定位**：用户提供的 gem5-d9300-patch 增量树——`configs/example/arm/arm_multicore_d9300.py`（D9300 全系统配置）+ CoralNPU/NDP/Gemmini 资产 + `run_multicore.sh` 全流程（checkpoint/NPU 后端切换）。原始 drop 只读归档于 `../cpu-uarch-ref/gem5-d9300-patch/`（MANIFEST.sha256）。
 - **✅ 集成落地（ADR-0004 修订：overlay 方案）**：`third_party/gem5` = 官方上游 submodule（钉 `f5c5a6e390`，v25.1.0.1，ignore=dirty）；`third_party/gem5-d9300-patch/gem5` = 增量树（唯一事实源）；`apply_patchset.sh` 同步后构建；脚本与文档路径已适配本仓布局。
+- **✅ 最小集修剪（2026-09-24，blob 哈希普查）**：增量树真实基线定位为 **v25.0.0.1**（873/1008 逐字节吻合）；删除 873 个纯旧版携带文件（它们此前会把 v25.1 静默回退，属隐性风险），保留 **135 个有意 delta**（27 改 = O3/内存模型本体；108 新 = D9300 配置 + NPU 资产 + 流程脚本），1008 → 135 文件。普查方法与清单见 `docs/gem5-d9300-intake.md` 三次更新节。**⏳ 验证门：Xeon 重建 + SE 冒烟未过（命令见 runbook 附4），通过前不算完成；第一嫌疑是保留的 7 个 pybind11 新文件与 27 个 O3 改动对 v25.1 API 的兼容性**。
 - **基线兼容性 ✅（2026-09-24 验证）**：Xeon 系统 scons 构建成功（`build/ARM/gem5.opt` 954MB）；ARM64 SE 冒烟仿真通过（交叉编译静态 hello → `Exiting @ tick`，退出码 0）。overlay 与 v25.1 基线兼容性正式确认。曾用 uv python 驱动构建导致 gem5py 崩溃（Error 134），改系统 scons 后通过；教训已记入 runbook 附2/附3 与 ADR-0007 修订。剩余：intake 梳理（O3/DDR 参数表、已有校准数据）、SE 模式精简配置（校准闭环用）、开源前 SPDX 检查点。
 - **⏳ intake 梳理**：O3 参数表、DDR/内存配置、checkpoint 流程、NPU 后端、已有校准数据 → `docs/gem5-d9300-intake.md`。
 - **⏳ 合规检查点（开源前）**：增量树逐文件 SPDX/权属复核（用户已确认无权属问题入库私有仓；delta 文件普遍缺许可证头）。
