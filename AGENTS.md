@@ -32,6 +32,7 @@ ssh 平台的 `target.ssh_host` 用 **ssh config 别名**（如 `xeon-8481c-01`�
 3. **注释纪律**：`docs/methodology/comment-discipline.md`——模块锚点、契约 docstring、决策留出处；改代码不改注释视为缺陷。
 4. **schema 演进**：`runner/schema/` 扩展字段必须登记到 `runner/schema/README.md`；`additionalProperties=true`，不许破坏旧读者。
 5. **git**：monorepo + trunk-based（ADR-0001），小步提交；commit message 格式 `type(scope): summary`；本仓未来转公开，**历史全量可见**——secret/序列号/NDA 内容从第一个 commit 起就不许进来。
+6. **提交卫生（2026-09-25 起）**：只提交本任务自己修改/产出的文件；他人或并行会话产出的文件（代码/文档/任务书）一律不代提交、不混入本任务提交——发现混入时撤出单独提交。
 
 ## gem5 overlay（third_party/）
 
