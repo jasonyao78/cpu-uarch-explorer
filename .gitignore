@@ -12,6 +12,10 @@ __pycache__/
 data/private/
 data/restricted/
 
+# Run raw samples: regenerable intermediates, kept local only (ADR-0008
+# 数据策略：git 只收 records/manifests，raw/ 由 SHA256 manifest 锚定完整性)
+data/public/runs/*/raw/
+
 # Personal reference materials live OUTSIDE the repo tree (see
 # docs/reference-materials.md): ../cpu-uarch-ref/ — nothing to ignore here.
 
