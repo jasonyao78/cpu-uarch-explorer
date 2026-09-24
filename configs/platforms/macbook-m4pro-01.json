@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "target": {
+    "os": "darwin",
+    "isa": "aarch64",
+    "abi": "darwin-aapcs64",
+    "target_id": "macbook-m4pro-01",
+    "cpu_profile": "apple-m4-pro",
+    "execution_kind": "native",
+    "executor": "native",
+    "transport": "local"
+  },
+  "probes": {
+    "ptr_chase": "build/probes/cache-mem/ptr_chase"
+  },
+  "defaults": {
+    "repetitions": 5
+  },
+  "controls": [
+    {
+      "id": "qos-default",
+      "control": { "mechanism": "qos", "value": "default" },
+      "command_prefix": [],
+      "notes": "不施加 taskpolicy，进程以默认 QoS 运行；OI-5 实测其延迟档与 USER_INTERACTIVE 相同（P-core）"
+    },
+    {
+      "id": "qos-background",
+      "control": { "mechanism": "qos", "value": "background" },
+      "command_prefix": ["/usr/sbin/taskpolicy", "-b"],
+      "notes": "taskpolicy -b = BACKGROUND QoS → E-core（macOS 无精确绑核的替代调度手段，OI-5 实测双峰）"
+    }
+  ],
+  "capabilities_note": "计时器分辨率 41.67ns / 调用开销 4.06ns / QoS 双峰 2.6~3.9×（OI-5，MEASURED，probes/platform/）"
+}
