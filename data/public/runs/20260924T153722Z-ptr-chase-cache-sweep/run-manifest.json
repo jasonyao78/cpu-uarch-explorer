@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "experiment_id": "ptr-chase-cache-sweep",
+  "protocol_version": "1.0",
+  "target": {
+    "os": "darwin",
+    "isa": "aarch64",
+    "abi": "darwin-aapcs64",
+    "target_id": "macbook-m4pro-01",
+    "cpu_profile": "apple-m4-pro",
+    "execution_kind": "native",
+    "executor": "native",
+    "transport": "local"
+  },
+  "records": "/Users/michaelyao/workspace/cpu-uarch-explorer/data/public/runs/20260924T153722Z-ptr-chase-cache-sweep/records.jsonl",
+  "summary": {
+    "total": 28,
+    "ok": 28,
+    "failed": 0,
+    "skipped": 0,
+    "unsupported": 0
+  }
+}
