@@ -147,7 +147,11 @@ def execute_environment_tx(platform: dict, specs: list[str], work, *,
     lock.acquire()
     try:
         store.save(journal)
-        _apply_all(executor, journal, specs)
+        try:
+            _apply_all(executor, journal, specs)
+        except BaseException:
+            store.save(journal)  # apply-failed 终态必须落盘，否则 unfinished 永久阻塞
+            raise
         store.save(journal)
         try:
             result = work()
