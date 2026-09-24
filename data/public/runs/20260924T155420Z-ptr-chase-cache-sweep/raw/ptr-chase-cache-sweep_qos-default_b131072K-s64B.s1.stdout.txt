@@ -1,0 +1,1 @@
+buffer_kb=131072 stride=64 loads=16777216 elapsed_ns=1991990000 latency_ns=118.7319
