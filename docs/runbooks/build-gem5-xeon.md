@@ -120,7 +120,7 @@ cd third_party/gem5
 修剪 + 改钉后的最终状态为 **v25.0.0.1 + 134 文件有意 delta**。验证当日踩过三个坑，均为增量树缺陷而非流程问题（m5.internal 引用、IQUnit 结构冲突、CheckerCPU 注销链，详见 intake 文档）。最终生效的流程：
 
 ```bash
-cd ~/cpu-uarch-explorer                     # Xeon 服务器（michael@10.126.126.128）
+cd ~/cpu-uarch-explorer                     # Xeon 服务器（真实地址见 data/private/hosts.md）
 git pull && git submodule update --init     # 确认 gem5 在 ddd4ae35ad（v25.0.0.1）
 
 # 1. submodule 重置纯净（apply_patchset 只拷不删，旧残留不会自己消失）
