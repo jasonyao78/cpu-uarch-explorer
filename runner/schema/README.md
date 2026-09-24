@@ -1,12 +1,18 @@
 # runner/schema — 统一数据模型
 
-`record.schema.json` 是统一实验协议（需求 v0.3 §4）的物理载体：一次 probe 运行产生**一条 JSONL 记录**（每行一个 JSON 对象），追加写入 `data/<layer>/runs/<backend>/<date>.jsonl`。
+## v2（当前，ADR-0006）
 
-设计原则（ADR-0003）：
+| 文件 | 用途 |
+|---|---|
+| `experiment.schema.json` | ExperimentSpec：实验语义定义（测什么/参数/前置条件/指标定义） |
+| `capability-manifest.schema.json` | 目标能力快照（capability discovery 产物，按 target 引用） |
+| `run-record.v2.schema.json` | 运行记录 v2：目标正交分解（os/isa/abi/target_id/cpu_profile/execution_kind/executor/transport，`backend` 仅派生展示名）、运行状态（ok/failed/skipped/unsupported）、统计量（repetitions/median/分位数/raw_samples_ref）、证据来源（evidence.provenance）与访问分类（access_class）分离 |
+| `artifact-manifest.schema.json` | 产物清单：二进制/镜像/checkpoint/原始样本的 SHA256 与构建谱系 |
 
-- **信封强制**：run_id、timestamp、backend、device_code、probe_git_commit、evidence_level 等元数据字段必填——任何记录必须能回答"何时、在哪台设备、哪版代码、什么参数下测得"。
-- **扁平字段**：不嵌套大对象；`params` 与 `metrics` 为小型受控对象，未来 SQLite 汇总层（推迟引入）可无损映射为 child 表。
-- **schema 演进**：新增字段不得破坏旧读者；废弃字段保留至少一个基线周期。
-- **证据等级**：`MEASURED / DERIVED / SIMULATED / PUBLIC_SOURCE / ASSUMED / UNKNOWN / NDA_RESTRICTED`，与需求 v0.3 §7 一致。
+原则：信封强制（v2 的 required 列表）；`schema_version` 必填；`additionalProperties=true`（新增字段不破坏旧读者，**扩展字段必须登记到本 README**）；证据来源与访问分类是两个正交轴。
 
-Runner 层实现（targets 适配、采集、落盘）属下一迭代（M4 Pro 最小骨架）范围。
+## v1（归档）
+
+`record.schema.json`（v1，2026-09-23 基线）：已被 v2 取代，保留作历史参考，新记录一律用 v2。
+
+Runner 层实现（targets 适配、采集、落盘）按 ADR-0006 的组合式结构落地（BuildProfile/Transport/Executor/PlatformControl/Collector/Parser，见 OI-8）。

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "runner/schema/artifact-manifest.schema.json",
+  "title": "artifact-manifest",
+  "description": "实验产物清单（ADR-0006）：probe 二进制、磁盘镜像、checkpoint、原始样本的 SHA256 与构建谱系。run-record.metrics.raw_samples_ref 与 probe.artifact 引用本清单条目 id。",
+  "type": "object",
+  "required": ["schema_version", "id", "kind", "sha256", "created_at"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "id": { "type": "string" },
+    "kind": { "enum": ["probe-binary", "disk-image", "checkpoint", "dataset", "raw-samples"] },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "size_bytes": { "type": "integer" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "source": {
+      "type": "object",
+      "properties": { "commit": { "type": "string" }, "dirty": { "type": "boolean" } },
+      "additionalProperties": true
+    },
+    "build_profile": {
+      "type": "object",
+      "properties": { "triple": { "type": "string" }, "compiler": { "type": "string" }, "flags": { "type": "string" } },
+      "additionalProperties": true
+    },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": true
+}

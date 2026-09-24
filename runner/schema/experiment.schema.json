@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "runner/schema/experiment.schema.json",
+  "title": "experiment-spec",
+  "description": "实验语义定义（ExperimentSpec，ADR-0006）：测什么、参数、前置条件、指标定义。实现层：portable harness + 可选 ISA kernels；运行记录须带 protocol_version 与 implementation_id。",
+  "type": "object",
+  "required": ["schema_version", "id", "protocol_version", "harness", "metrics"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "protocol_version": { "type": "string" },
+    "harness": { "enum": ["portable", "isa-kernel"] },
+    "parameters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "range": { "type": "string" },
+          "default": {}
+        },
+        "additionalProperties": true
+      }
+    },
+    "preconditions": { "type": "array", "items": { "type": "string" } },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "unit"],
+        "properties": {
+          "name": { "type": "string" },
+          "unit": { "type": "string" },
+          "statistic": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "runner/schema/run-record.v2.schema.json",
+  "title": "run-record",
+  "description": "实验运行记录 v2（ADR-0006）：目标正交分解、运行状态、统计量、证据来源与访问分类分离。可演进：新增字段不破坏旧读者（additionalProperties=true，扩展字段须在 runner/schema/README 登记）。",
+  "type": "object",
+  "required": ["schema_version", "run_id", "timestamp", "status", "target", "probe", "metrics", "evidence"],
+  "properties": {
+    "schema_version": { "const": "2.0" },
+    "run_id": { "type": "string", "format": "uuid" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "status": { "enum": ["ok", "failed", "skipped", "unsupported"] },
+    "target": {
+      "type": "object",
+      "description": "目标正交分解（ADR-0006）；backend 展示名仅派生",
+      "required": ["os", "isa", "execution_kind", "executor", "target_id"],
+      "properties": {
+        "os": { "enum": ["darwin", "linux", "android"] },
+        "isa": { "enum": ["aarch64", "x86_64", "riscv64"] },
+        "abi": { "type": "string" },
+        "target_id": { "type": "string", "description": "库存编号，如 macbook-m4pro-01" },
+        "cpu_profile": { "type": "string", "description": "SoC/微架构画像，如 apple-m4-pro" },
+        "execution_kind": { "enum": ["native", "simulator"] },
+        "executor": { "type": "string", "description": "native / gem5-arm64-d9300 / ..." },
+        "transport": { "enum": ["local", "ssh", "adb"] },
+        "backend": { "type": "string", "description": "派生展示名（如 macos-arm64），不作权威键" }
+      },
+      "additionalProperties": true
+    },
+    "probe": {
+      "type": "object",
+      "required": ["name", "protocol_version", "implementation_id"],
+      "properties": {
+        "name": { "type": "string" },
+        "protocol_version": { "type": "string" },
+        "implementation_id": { "type": "string", "description": "portable 或 kernel:<isa>" },
+        "git": {
+          "type": "object",
+          "properties": { "commit": { "type": "string" }, "dirty": { "type": "boolean" } },
+          "additionalProperties": true
+        },
+        "artifact": {
+          "type": "object",
+          "properties": { "sha256": { "type": "string" }, "manifest_ref": { "type": "string" } },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "os_version": { "type": "string" },
+        "kernel": { "type": "string" },
+        "compiler": { "type": "string" },
+        "compiler_flags": { "type": "string" },
+        "control": {
+          "type": "object",
+          "description": "调度控制的结构化记录",
+          "properties": {
+            "mechanism": { "enum": ["qos", "taskset", "affinity-api", "none"] },
+            "value": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "thermal_note": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "params": { "type": "object" },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "value", "unit"],
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "number" },
+          "unit": { "type": "string" },
+          "repetitions": { "type": "integer", "minimum": 1 },
+          "statistics": {
+            "type": "object",
+            "properties": {
+              "min": { "type": "number" },
+              "median": { "type": "number" },
+              "p25": { "type": "number" },
+              "p75": { "type": "number" },
+              "max": { "type": "number" }
+            },
+            "additionalProperties": true
+          },
+          "raw_samples_ref": { "type": "string", "description": "artifact-manifest id（原始样本）" }
+        },
+        "additionalProperties": true
+      },
+      "minItems": 1
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["provenance"],
+      "properties": {
+        "provenance": { "enum": ["MEASURED", "DERIVED", "SIMULATED", "PUBLIC_SOURCE", "ASSUMED", "UNKNOWN"] },
+        "note": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "access_class": {
+      "enum": ["PUBLIC", "PRIVATE", "RESTRICTED"],
+      "description": "访问分类（数据分层），与证据来源正交"
+    },
+    "raw_command": { "type": "string" },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": true
+}

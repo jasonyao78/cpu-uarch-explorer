@@ -11,6 +11,12 @@
 - **⏳ 合规检查点（开源前）**：增量树逐文件 SPDX/权属复核（用户已确认无权属问题入库私有仓；delta 文件普遍缺许可证头）。
 - **⏳ SE 模式精简配置**：现有配置为 full-system（需磁盘镜像 + 内核）；校准闭环需补 SE 模式配置让 ptr_chase 等微基准跑进 gem5（写配置时遵循 `third_party/gem5/configs/AGENTS.md`：优先 stdlib、窄配置、py_compile + 最小测试验证）。
 
+## OI-8 runner 组合式重构与扩展性验收（Phase C，2026-09-24 评审衍生）
+
+- **内容**：runner 按 BuildProfile / Transport / Executor / PlatformControl / Collector / Parser 组合式重构（ADR-0006）；fake target / transport 契约测试；RISC-V compile-only preset 作为扩展性架构测试；gem5 overlay 同步加固（基线断言、同步后 diff 摘要、预存脏树检测）。
+- **验收标准（ADR-0006）**：新增 RISC-V 仅需 toolchain preset + ISA kernels + capability provider + target 配置；runner 主流程零修改、通用 schema 零修改、现有 contract tests 全绿。
+- **前置**：ADR-0006 与 schema v2（2026-09-24 已落盘）。
+
 ## OI-2 红米设备信息回填（`android-arm64`）
 
 - **阻塞**：§2.3 画像补全、Android target 适配、capability discovery 基线。

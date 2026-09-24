@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "runner/schema/capability-manifest.schema.json",
+  "title": "capability-manifest",
+  "description": "目标能力快照（capability discovery 产物，ADR-0006）：每个 backend 首次接入或能力变化时采集一次，run-record 通过 target 引用同一份快照。",
+  "type": "object",
+  "required": ["schema_version", "target", "captured_at", "capabilities"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "target": { "type": "object" },
+    "captured_at": { "type": "string", "format": "date-time" },
+    "capabilities": {
+      "type": "object",
+      "description": "特性名 → 能力判定与证据",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["supported"],
+        "properties": {
+          "supported": { "type": "boolean" },
+          "detail": { "type": "string" },
+          "evidence": { "enum": ["MEASURED", "DERIVED", "SIMULATED", "PUBLIC_SOURCE", "ASSUMED", "UNKNOWN"] }
+        },
+        "additionalProperties": true
+      }
+    },
+    "probe": { "type": "object", "description": "采集本快照所用探针与参数" }
+  },
+  "additionalProperties": true
+}
