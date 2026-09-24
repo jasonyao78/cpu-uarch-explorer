@@ -178,23 +178,22 @@ CMake + `CMakePresets.json` 单一入口，产物按 `<目标平台>/<profile>` 
 
 `docs/methodology/comment-discipline.md`（2026-09-24 起强制）：模块头部写职责 + 设计锚点；公开函数写契约；非显然决策留"为什么"及出处；反模式防线旁标注教训来源；中文注释英文标识符；`ptr_chase.cpp` 头部为密度基准；改代码不改注释视为缺陷。
 
-## 8. 校准层：gem5 集成（进行中）
+## 8. 校准层：gem5 集成（基建已验证，建模后置）
 
 ### 8.1 overlay 集成方案（ADR-0004 修订）
 
-- `third_party/gem5`：官方上游 submodule，钉 `f5c5a6e390`（v25.1 线），**保持纯净**，不直接提交修改；
+- `third_party/gem5`：官方上游 submodule，钉 `ddd4ae35ad`（**v25.0.0.1**，增量树原生基线），**保持纯净**，不直接提交修改；
 - `third_party/gem5-d9300-patch/gem5`：D9300 增量树，**唯一事实源**；
-- `apply_patchset.sh`：构建前把增量同步进 submodule 工作树；上游更新 = submodule 快进 + 重同步 + 重建。
+- `apply_patchset.sh`：构建前把增量同步进 submodule 工作树，带基线断言与脏树检测；上游更新 = submodule 快进 + 重同步 + 重建。
 
-### 8.2 最小集修剪（2026-09-24，blob 哈希普查）
+### 8.2 最小集修剪（2026-09-24/25，blob 哈希普查）
 
-增量树真实基线经 blob 哈希普查定位为 **v25.0.0.1**（873/1008 文件逐字节吻合）。原树中 873 个文件是旧基线的纯携带——它们在 sync 时会**静默回退** v25.1 的对应文件（隐性风险，已消除）。修剪后保留 **135 个有意 delta**：27 个改动（O3 流水线 commit/fetch/iew/inst_queue/lsq/rename 等 + DRAMInterface/lpddr5 内存模型）+ 108 个新增（D9300/D9200 配置、CoralNPU/NDP/Gemmini 资产、`run_multicore.sh`）。普查与清单详见 `docs/gem5-d9300-intake.md`。
+增量树真实基线经 blob 哈希普查定位为 **v25.0.0.1**（873/1008 文件逐字节吻合）。原树中 873 个文件是旧基线的纯携带——它们在 sync 时会**静默回退**上游新版的对应文件（隐性风险，已消除）。修剪后保留 **134 个有意 delta**：26 个改动（O3 流水线 commit/fetch/iew/inst_queue/lsq/rename 等 + DRAMInterface/lpddr5 内存模型）+ 108 个新增（D9300/D9200 配置、CoralNPU/NDP/Gemmini 资产、`run_multicore.sh`）。普查与清单详见 `docs/gem5-d9300-intake.md`。
 
 ### 8.3 当前状态与验证门
 
-- 已通过（全量 overlay 时代）：Xeon scons 构建成功（954MB gem5.opt）、ARM64 SE 冒烟仿真通过；
-- **进行中**：修剪后的 Xeon 重建 + SE 冒烟（验证门，命令见 `docs/runbooks/build-gem5-xeon.md` 附4）；第一嫌疑是保留的 7 个 pybind11 新文件与 27 个 O3 改动对 v25.1 API 的兼容性；
-- 未做：D9300 的 SE 模式精简配置（现有配置是全系统级，需磁盘镜像+内核）——这是校准闭环让 ptr_chase 跑进模拟器的前提（OI-1）。
+- **已通过（2026-09-25，最终状态）**：v25.0.0.1 + 134 文件最小集，Xeon 干净重建成功（gem5.opt 910M，0 error），SE 冒烟通过。过程中修掉三个增量树缺陷（m5.internal 引用、IQUnit 结构性冲突、CheckerCPU 注销链断裂），全部留痕于 intake 文档；
+- 未做：D9300 的 SE 模式精简配置（现有配置是全系统级，需磁盘镜像+内核）；**建模/校准整体后置**——启动条件为探针套件齐备（core+cache+branch）且 D9300 实机入册（OI-6），此前 gem5 侧只做 intake 参数谱系梳理。
 
 ## 9. 常用操作手册
 
@@ -243,7 +242,7 @@ ctest --preset macos-arm64-release
 - 只有 ptr_chase 一个测量探针；core/branch/tlb/sync 四域只有 README；
 - 报告层仅支持单 run 报告；跨 run 汇总与校准差异单未做；
 - 环境事务（改 governor/hugepage 需"改完恢复"）只有设计结论（借 GB10 模型重新实现），无代码；
-- gem5 改钉后干净重建验证进行中（OI-1）；D9300 SE 精简配置未做。
+- gem5 基建已验证（v25.0.0.1 + 134 文件最小集，Xeon 重建与 SE 冒烟通过）；D9300 SE 精简配置与建模后置（启动条件：探针套件齐备 + D9300 实机入册）。
 
 ## 12. 下一步（规划，未实现）
 

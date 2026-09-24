@@ -115,32 +115,35 @@ cd third_party/gem5
 # 预期：Exiting @ tick <N> because exiting with last active thread context，退出码 0
 ```
 
-## 附4：增量树最小集修剪后的回归验证（2026-09-24 修剪，873 携带文件已删）
+## 附4：增量树最小集回归验证（2026-09-25 已完成，留存作流程参考）
 
-修剪把 sync 结果从"全量旧版覆盖"改为"v25.1 纯净基线 + 135 个有意 delta 文件"。**首次 sync 前必须先把服务器侧 submodule 工作树重置纯净**——apply_patchset 只拷不删，旧的 873 个携带文件不会自己消失：
+修剪 + 改钉后的最终状态为 **v25.0.0.1 + 134 文件有意 delta**。验证当日踩过三个坑，均为增量树缺陷而非流程问题（m5.internal 引用、IQUnit 结构冲突、CheckerCPU 注销链，详见 intake 文档）。最终生效的流程：
 
 ```bash
-cd /path/on/nvme/cpu-uarch-explorer
-git pull                                  # 拉到含修剪的 commit
-git submodule update --init               # 确认 gem5 在 f5c5a6e390
+cd ~/cpu-uarch-explorer                     # Xeon 服务器（michael@10.126.126.128）
+git pull && git submodule update --init     # 确认 gem5 在 ddd4ae35ad（v25.0.0.1）
 
-# 1. submodule 重置纯净（关键！build/ 在 gem5 自身 gitignore 内，clean 不动它）
+# 1. submodule 重置纯净（apply_patchset 只拷不删，旧残留不会自己消失）
 git -C third_party/gem5 checkout -- .
 git -C third_party/gem5 clean -fd
 git -C third_party/gem5 status --short | wc -l    # 预期 0
 
-# 2. 同步修剪后的 overlay
+# 2. 同步 overlay（基线断言 + 脏树检测会自动把关）
 sh third_party/gem5-d9300-patch/gem5/apply_patchset.sh
-git -C third_party/gem5 status --short | wc -l    # 预期 ≈135（原 912）
+git -C third_party/gem5 status --short | wc -l    # 预期 ≈53（26 改 + 目录折叠的新增）
 
-# 3. 重建（对象缓存仍在，增量编译；27 个有意 delta 碰 v25.1 API 不兼容会在这里报错）
+# 3. 干净重建（基线切换后 build/ARM 必须删掉重来，陈旧 codegen 会报 phantom 错误）
 cd third_party/gem5
+rm -rf build/ARM
 scons build/ARM/gem5.opt -j56 2>&1 | tee build-xeon-arm64.log
 
-# 4. 冒烟（附3 同款）
-./build/ARM/gem5.opt --version
+# 4. 冒烟（注意：gem5 没有 --version 选项，勿加）
 ./build/ARM/gem5.opt configs/deprecated/example/se.py --cmd /tmp/hello-arm64
 ```
+
+**2026-09-25 验证结果**：gem5.opt 910M、0 error；冒烟 `Exiting @ tick 46213000`，退出码 0。
+
+**rsync 教训**：从本机同步仓库到服务器时**必须带 `--delete`**（至少对 `third_party/gem5-d9300-patch/`），否则本机删除的文件在服务器上残留，overlay 会同步出陈旧内容（当日因此复现了一次已修复的 CheckerCPU 错误）。`--delete` 配合 `--exclude 'build/'` 使用是安全的（build 被排除在删除集合外）。
 
 **回报内容**：scons 退出码、`build-xeon-arm64.log` 尾部 30 行、第 2 步的文件数，贴回 OI-1。
 

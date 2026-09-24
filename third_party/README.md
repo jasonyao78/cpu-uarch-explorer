@@ -6,7 +6,7 @@
 
 | 依赖 | 路径 | 许可证 | 状态 |
 |---|---|---|---|
-| gem5 | `third_party/gem5`（submodule） | BSD-3-Clause（上游） | 官方上游 submodule，钉 `f5c5a6e390`（v25.1.0.1）；工作树经 apply_patchset.sh 同步增量后构建 |
+| gem5 | `third_party/gem5`（submodule） | BSD-3-Clause（上游） | 官方上游 submodule，钉 `ddd4ae35ad`（v25.0.0.1，增量树原生基线，ADR-0004 修订）；工作树经 apply_patchset.sh 同步增量后构建（带基线断言） |
 | gem5-d9300-patch | `third_party/gem5-d9300-patch/gem5` | 待逐文件 SPDX（开源前检查点，OI-1） | D9300/CoralNPU/NDP/Gemmini 增量树（本地 gem5 修改的唯一事实源，见其 README 与 AGENTS.md） |
 
 ## 登记要求

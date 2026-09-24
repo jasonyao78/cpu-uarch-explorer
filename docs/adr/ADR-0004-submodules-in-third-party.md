@@ -21,7 +21,7 @@
 
 收到 D9300 模型增量后发现其自带 overlay 设计（其 README/AGENTS 明确声明：submodule 保持纯上游，增量树为唯一事实源）。经用户确认采用 overlay：
 
-- `third_party/gem5`：官方上游 submodule，钉 `f5c5a6e390`（v25.1.0.1），不直接提交修改；
+- `third_party/gem5`：官方上游 submodule，钉 `f5c5a6e390`（v25.1.0.1），不直接提交修改；（**钉住的基线已被 2026-09-25 修订取代为 v25.0.0.1**，见下节）
 - `third_party/gem5-d9300-patch/gem5`：增量树（本地 gem5 修改的唯一事实源），`apply_patchset.sh` 编译前同步进 submodule 工作树；
 - 上游更新 = submodule 快进 + 重同步 + 重建；fork 方案保留为"未来必须修改 submodule 本体"时的备选。
 
