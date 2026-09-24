@@ -1,6 +1,6 @@
 # probes/platform — 平台能力探针（capability discovery）
 
-与 `probes/` 下其他目录不同：这里探测的不是微架构参数，而是**平台本身的能力边界**——计时器、调度控制、计数器接口。结果直接支撑 runner/targets 的 capability discovery 实现（骨架迭代时本目录代码升级为 `runner/targets/` 的正式模块，非一次性实验）。
+与 `probes/` 下其他目录不同：这里探测的不是微架构参数，而是**平台本身的能力边界**——计时器、调度控制、计数器接口。结果直接支撑 runner/targets 的 capability discovery 实现（探针代码留在 Probe 层，runner 只负责调用与解释其结果，非一次性实验）。
 
 ## 组织规则（重要）
 

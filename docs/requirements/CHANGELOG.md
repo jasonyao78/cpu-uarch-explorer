@@ -21,3 +21,4 @@
 - **gem5 基线源码就位**（§2.4）：上游 stable v25.1.0.1 @ f5c5a6e390；**未发现 D9300 修改**——D9300 模型工作需定位或决策自建（OI-1 更新，见 docs/gem5-d9300-intake.md）。
 - 个人参考材料移至仓库外 `../cpu-uarch-ref/`（只读），新增受跟踪索引 `docs/reference-materials.md`。
 - **gem5 D9300 模型集成（当日追加）**：模型工作定位（overlay 增量树，`arm_multicore_d9300.py` + CoralNPU/NDP/Gemmini）；上游转正式 submodule 钉 `f5c5a6e390`；集成哲学修订为 overlay（ADR-0004 修订）；基线兼容性 scons 构建验证进行中（详见 OI-1 与 `docs/gem5-d9300-intake.md`）。
+- **评审修订（2026-09-24，第二轮）**：ptr_chase 输入校验/无偏洗牌/退出码修复 + 首批 CTest（含 UBSan 目标）；§4「同一份源码」措辞修订为 ExperimentSpec 语义一致性；新增 ADR-0006（目标正交分解 / ExperimentSpec / Probe ABI）与 schema v2 四类记录（run / capability / artifact / experiment，证据来源与访问分类分离）。
