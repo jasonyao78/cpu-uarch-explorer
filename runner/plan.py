@@ -49,6 +49,8 @@ class Plan:
 
 
 def _parse_controls(platform: dict) -> list[Control]:
+    """平台配置的 controls 列表 → Control 对象；未配置任何控制手段时返回
+    显式的 none 控制——"没有控制"本身也是必须入档的测量条件。"""
     controls = []
     for c in platform.get("controls", []) or []:
         controls.append(Control(
@@ -63,6 +65,9 @@ def _parse_controls(platform: dict) -> list[Control]:
 
 
 def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) -> Plan:
+    """展开确定性 case 集合：controls × sweep 笛卡尔积，每 case 携带
+    repetitions 与参数溯源。所有单位解析/派生计算在此完成——plan 期报错，
+    run 期不做参数解释（GB10 静默降级教训的对冲结构）。"""
     cli_overrides = cli_overrides or {}
     exe = spec["execution"]
     probe = exe["probe"]

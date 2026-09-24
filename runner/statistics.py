@@ -23,6 +23,8 @@ def percentile(sorted_values: list[float], q: float) -> float:
 
 
 def summarize(values: list[float]) -> dict:
+    """样本序列 → run-record v2 statistics 块（min/median/p25/p75/max）。
+    空列表抛 ValueError——没有样本就没有数字，不许产出空统计。"""
     if not values:
         raise ValueError("summarize() requires at least one sample")
     s = sorted(values)

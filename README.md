@@ -20,6 +20,7 @@
 - `docs/requirements/v0.3.md` — 需求基线（平台画像、架构、校准误差目标）
 - `docs/requirements/CHANGELOG.md` — 基线修订记录
 - `docs/adr/` — 架构决策记录（许可证、数据模型、分支策略等）
+- `docs/methodology/` — 测量纪律与[注释纪律](docs/methodology/comment-discipline.md)（新代码强制遵守）
 - `docs/open-items.md` — 遗留问题跟踪（设备信息回填、gem5 源码接入等）
 - `docs/learning/` — 个人学习笔记（费曼工作流，开源时可整目录移除）
 - `probes/` — P0 微基准源码（C++17 + CMake；构建走 `CMakePresets.json`，`build/<target-triple>/<profile>` 分层，ADR-0008）

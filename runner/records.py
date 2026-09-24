@@ -22,6 +22,8 @@ def now_iso() -> str:
 
 
 def git_provenance(repo_root: Path) -> dict:
+    """采集仓库谱系：HEAD commit 与 dirty 状态（不含未跟踪文件——构建产物
+    不算脏；内容被修改才算，对应"这数字是哪版代码测的"）。"""
     def _git(*args: str) -> str:
         return subprocess.run(["git", "-C", str(repo_root), *args],
                               capture_output=True, text=True).stdout.strip()

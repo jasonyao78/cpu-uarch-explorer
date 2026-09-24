@@ -31,6 +31,8 @@ _EXIT_STATUS = {0: "ok", 1: "failed", 2: "unsupported"}
 
 
 def _failure_reason(result) -> tuple[str, dict]:
+    """把执行结果映射为 (status, failure)：超时空返回码、exit 2=unsupported、
+    其余非零=failed，reason 为机器可读码（run-record v2 failure.reason）。"""
     if result.timed_out:
         return "failed", {"reason": "probe-timeout"}
     if result.returncode == 2:
@@ -91,6 +93,10 @@ def run_plan(plan: Plan, platform: dict, run_dir: Path, repo_root: Path) -> dict
 
 def _run_case(case: Case, platform: dict, probe_meta: dict,
               executor: LocalExecutor, store: ArtifactStore, git: dict) -> dict:
+    """执行单个 case：按 case.repetitions 重复执行（sample_index 递增），
+    每趟原始输出落盘；全部成功才产 ok 记录（median 统计），任何失败产出
+    status=failed/unsupported + 结构化 failure + 空 metrics（schema v2
+    条件化约束），成功样本数写入 detail 供审计。"""
     adapter = _ADAPTERS[case.probe]
     probe_bin = str(Path(platform["probes"][case.probe]).resolve())
     params = {k: rv.value for k, rv in case.params}

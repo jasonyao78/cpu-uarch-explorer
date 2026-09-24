@@ -28,6 +28,8 @@ def _load_json(path: Path, what: str) -> dict:
 
 
 def load_experiment(path: str | Path) -> dict[str, Any]:
+    """加载 ExperimentSpec JSON 并校验运行必需的结构性前提（完整 schema
+    校验属开发期动作；运行时保持 stdlib 零依赖）。"""
     spec = _load_json(Path(path), "experiment spec")
     for key in ("schema_version", "id", "protocol_version", "harness", "metrics"):
         if key not in spec:
@@ -40,6 +42,7 @@ def load_experiment(path: str | Path) -> dict[str, Any]:
 
 
 def load_platform(path: str | Path) -> dict[str, Any]:
+    """加载平台配置并校验 target 正交分解五要素（ADR-0006）与 probes 映射。"""
     cfg = _load_json(Path(path), "platform config")
     if "target" not in cfg:
         raise RunnerError("config-invalid", f"platform config missing 'target': {path}")

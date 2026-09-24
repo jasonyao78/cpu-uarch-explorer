@@ -28,6 +28,7 @@ class ArtifactStore:
         self.entries: list[dict] = []
 
     def register_file(self, path: Path, kind: str, notes: str = "") -> dict:
+        """登记任意文件为 artifact：读字节算 SHA256，追加 manifest 条目并返回。"""
         data = Path(path).read_bytes()
         entry = {
             "schema_version": "1.0",
@@ -44,6 +45,8 @@ class ArtifactStore:
         return entry
 
     def register_probe_binary(self, path: Path, git_commit: str, git_dirty: bool) -> dict:
+        """登记 probe 二进制：SHA256 + 构建谱系（git commit/dirty），
+        供 run-record.probe.artifact 引用——回答"这数字是哪版二进制测的"。"""
         entry = self.register_file(path, "probe-binary", notes="probe 可执行文件谱系")
         entry["source"] = {"commit": git_commit, "dirty": git_dirty}
         return entry

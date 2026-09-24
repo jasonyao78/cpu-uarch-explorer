@@ -22,6 +22,8 @@ class PtrChaseAdapter:
     implementation_id = "portable"
 
     def build_argv(self, params: dict[str, Any]) -> list[str]:
+        """参数 dict → probe argv。缺参数/类型错误抛 ParseError（plan 期已校验，
+        此处是最后一道防线）。"""
         try:
             buffer_kb = int(params["buffer_kb"])
             stride = int(params["stride"])
@@ -33,6 +35,8 @@ class PtrChaseAdapter:
                 "-n", str(loads), "-w", str(warmup)]
 
     def parse_output(self, stdout: str, stderr: str) -> list[dict[str, Any]]:
+        """stdout key=value → metrics 列表。缺 latency_ns、非数值、nan/inf
+        一律抛 ParseError（绝不编造数值，空 metrics + failure 是合法出路）。"""
         fields = parse_key_value_lines(stdout)
         if not fields:
             raise ParseError(f"no key=value lines in probe output; stderr={stderr.strip()!r}")

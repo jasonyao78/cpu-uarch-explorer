@@ -21,6 +21,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def _cmd_plan(args) -> int:
+    """plan 子命令：打印确定性 case 预览（含参数来源与重复次数），无副作用。"""
     spec = load_experiment(args.experiment)
     platform = load_platform(args.platform)
     plan = build_plan(spec, platform)
@@ -45,6 +46,8 @@ def _cmd_run(args) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """CLI 入口。退出码阶梯：0 全成功 / 1 配置或输入错误 / 2 有 case 失败
+    （数据已落盘，OI-9 蓝图 exit code 阶梯）。"""
     parser = argparse.ArgumentParser(prog="runner", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     for name, fn in (("plan", _cmd_plan), ("run", _cmd_run)):

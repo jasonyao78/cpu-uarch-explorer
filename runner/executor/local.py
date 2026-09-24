@@ -26,6 +26,9 @@ class LocalExecutor:
         self._timeout_s = timeout_s
 
     def execute(self, argv: list[str], command_prefix: tuple[str, ...] = ()) -> ExecutionResult:
+        """同步执行一条命令（可选控制前缀，如 taskpolicy -b），捕获 stdout/stderr。
+        永不抛异常：超时/无法启动也收敛为 ExecutionResult（returncode=None），
+        由上层映射为结构化 failure——执行层不决定语义。"""
         cmd = list(command_prefix) + [str(a) for a in argv]
         raw_command = " ".join(cmd)
         try:
