@@ -1,0 +1,4 @@
+[submodule "third_party/gem5"]
+	path = third_party/gem5
+	url = https://github.com/gem5/gem5.git
+	ignore = dirty

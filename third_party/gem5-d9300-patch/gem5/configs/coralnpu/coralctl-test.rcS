@@ -1,0 +1,48 @@
+#!/bin/sh
+
+mkdir -p /proc /sys /tmp /dev
+[ -r /proc/mounts ] || mount -t proc proc /proc 2>/dev/null || true
+is_mounted() {
+    while read -r _source target _rest; do
+        [ "$target" = "$1" ] && return 0
+    done < /proc/mounts
+    return 1
+}
+is_mounted /sys || mount -t sysfs sysfs /sys 2>/dev/null || true
+is_mounted /tmp || mount -t tmpfs tmpfs /tmp 2>/dev/null || true
+is_mounted /dev || mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+[ -c /dev/mem ] || mknod /dev/mem c 1 1 2>/dev/null || true
+
+NPU_BASE=0x1D000000
+CORALCTL=
+for candidate in \
+    /tmp/coralctl \
+    /usr/local/bin/coralctl \
+    /data/usr/local/bin/coralctl \
+    /bin/coralctl \
+    /data/bin/coralctl
+do
+    if [ -x "$candidate" ]; then
+        CORALCTL="$candidate"
+        break
+    fi
+done
+
+echo "[coralctl-test] started"
+echo "[coralctl-test] tool=${CORALCTL:-none}"
+
+result=1
+if [ -z "$CORALCTL" ]; then
+    echo "[coralctl-test] FAIL: coralctl is not installed in the guest image"
+elif "$CORALCTL" info "${NPU_BASE}" &&
+     "$CORALCTL" run "${NPU_BASE}"; then
+    echo "[coralctl-test] PASS"
+    result=0
+else
+    echo "[coralctl-test] FAIL: coralctl returned an error"
+fi
+
+if command -v m5 >/dev/null 2>&1; then
+    m5 --inst exit
+fi
+exit "$result"

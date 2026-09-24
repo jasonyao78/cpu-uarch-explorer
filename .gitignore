@@ -18,9 +18,5 @@ data/restricted/
 # OS noise
 .DS_Store
 
-# gem5 local clone (third_party/gem5): upstream stable baseline, not yet a
-# submodule — gitignore until forked to GitHub and pinned (ADR-0004, OI-1)
-third_party/gem5/
-
-# gem5 build outputs (future submodule)
-third_party/gem5-build/
+# gem5 in-tree build outputs (submodule's own .gitignore also covers build/)
+third_party/gem5/build/

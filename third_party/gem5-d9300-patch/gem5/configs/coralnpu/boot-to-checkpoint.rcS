@@ -1,0 +1,137 @@
+#!/bin/sh
+
+mkdir -p /proc /sys /tmp /dev
+mount -t proc proc /proc 2>/dev/null || true
+mount -t sysfs sysfs /sys 2>/dev/null || true
+mount -t tmpfs tmpfs /tmp 2>/dev/null || true
+mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+
+echo "[coralnpu] boot checkpoint script started"
+
+preloaded_coralctl=0
+preloaded_module=0
+preloaded_busybox=0
+preloaded_model=0
+dt_memory_region=0
+preloaded_qwen=0
+
+for dt_property in \
+    /proc/device-tree/coralnpu@1d000000/memory-region \
+    /sys/firmware/devicetree/base/coralnpu@1d000000/memory-region
+do
+    if [ -e "$dt_property" ]; then
+        dt_memory_region=1
+        echo "[coralnpu] device tree memory-region ready: $dt_property"
+        break
+    fi
+done
+if [ "$dt_memory_region" -ne 1 ]; then
+    echo "[coralnpu] ERROR: coralnpu memory-region missing from device tree"
+fi
+
+for candidate in \
+    /usr/local/bin/coralctl \
+    /data/usr/local/bin/coralctl \
+    /bin/coralctl \
+    /data/bin/coralctl
+do
+    if [ -x "$candidate" ]; then
+        cp "$candidate" /tmp/coralctl
+        chmod 0700 /tmp/coralctl
+        echo "[coralnpu] preloaded coralctl into checkpoint tmpfs"
+        preloaded_coralctl=1
+        break
+    fi
+done
+
+for candidate in \
+    "/lib/modules/$(uname -r)/extra/opennpux_coral.ko" \
+    /root/opennpux_coral.ko
+do
+    if [ -r "$candidate" ]; then
+        cp "$candidate" /tmp/opennpux_coral.ko
+        chmod 0600 /tmp/opennpux_coral.ko
+        echo "[coralnpu] preloaded opennpux_coral.ko into checkpoint tmpfs"
+        preloaded_module=1
+        break
+    fi
+done
+
+if [ -x /bin/busybox ]; then
+    cp /bin/busybox /tmp/busybox
+    chmod 0700 /tmp/busybox
+    echo "[coralnpu] preloaded busybox into checkpoint tmpfs"
+    preloaded_busybox=1
+fi
+
+for candidate in \
+    /usr/local/share/opennpux/heterogeneous-smoke.npxm \
+    /root/heterogeneous-smoke.npxm
+do
+    if [ -r "$candidate" ]; then
+        cp "$candidate" /tmp/opennpux-model.npxm
+        chmod 0600 /tmp/opennpux-model.npxm
+        preloaded_model=1
+        echo "[coralnpu] preloaded model into checkpoint tmpfs"
+        break
+    fi
+done
+[ "$preloaded_model" -ne 1 ] || : > /tmp/opennpux-model.ready
+
+for candidate in \
+    /usr/local/share/opennpux/qwen-tiny.npxm \
+    /data/usr/local/share/opennpux/qwen-tiny.npxm \
+    /root/qwen-tiny.npxm
+do
+    if [ -r "$candidate" ]; then
+        cp "$candidate" /tmp/qwen-tiny.npxm
+        chmod 0600 /tmp/qwen-tiny.npxm
+        preloaded_qwen=1
+        echo "[coralnpu] preloaded qwen-tiny into checkpoint tmpfs"
+        break
+    fi
+done
+[ "$preloaded_qwen" -ne 1 ] || : > /tmp/qwen-tiny.ready
+
+if [ "$preloaded_coralctl" -eq 1 ] && \
+   [ "$preloaded_module" -eq 1 ] && \
+   [ "$preloaded_busybox" -eq 1 ] && \
+   [ "$dt_memory_region" -eq 1 ]; then
+    : > /tmp/coralnpu-baseline-preload.ready
+    echo "[coralnpu] baseline checkpoint preload ready"
+else
+    echo "[coralnpu] WARNING: baseline checkpoint preload incomplete"
+fi
+
+sync
+if [ -r /sys/block/vda/inflight ]; then
+    i=0
+    while [ "$i" -lt 1000 ]; do
+        set -- $(cat /sys/block/vda/inflight)
+        if [ "${1:-1}" = "0" ] && [ "${2:-1}" = "0" ]; then
+            break
+        fi
+        usleep 1000 2>/dev/null || true
+        i=$((i + 1))
+    done
+    echo "[coralnpu] virtio block inflight before checkpoint: $(cat /sys/block/vda/inflight)"
+fi
+
+echo "[coralnpu] requesting checkpoint after Linux boot"
+/sbin/m5 --inst checkpoint
+
+# Execution resumes here after restoring the checkpoint. Fetch the readfile
+# configured for this gem5 invocation instead of continuing a stale test
+# embedded in the checkpoint.
+RESUME_SCRIPT=/tmp/coralnpu-resume.rcS
+rm -f "${RESUME_SCRIPT}"
+echo "[coralnpu] resumed from boot checkpoint; loading current resume script"
+/sbin/m5 --inst readfile > "${RESUME_SCRIPT}"
+
+if [ ! -s "${RESUME_SCRIPT}" ]; then
+    echo "[coralnpu] FAIL: current resume script is empty"
+    /sbin/m5 --inst exit
+fi
+
+chmod 0700 "${RESUME_SCRIPT}"
+exec /bin/sh "${RESUME_SCRIPT}"

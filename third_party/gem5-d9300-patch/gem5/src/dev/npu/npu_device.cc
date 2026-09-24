@@ -1,0 +1,652 @@
+/*
+ * Coral-compatible NPU device shell for gem5.
+ */
+
+#include "dev/npu/npu_device.hh"
+
+#include <algorithm>
+#include <cstring>
+#include <limits>
+
+#include "base/addr_range.hh"
+#include "base/logging.hh"
+#include "base/trace.hh"
+#include "debug/NPUDevice.hh"
+#include "dev/npu/coral_stagea_backend.hh"
+#include "dev/npu/coral_verilated_backend.hh"
+#include "mem/packet_access.hh"
+#include "sim/serialize.hh"
+
+namespace gem5
+{
+
+namespace
+{
+
+constexpr Addr kBackendIdOffset = 0x30ffc;
+constexpr Addr kFirmwareEntryOffset = 0x30ff8;
+constexpr Addr kSharedSizeOffset = 0x30ff4;
+constexpr Addr kSharedBaseOffset = 0x30ff0;
+constexpr Addr kDmaStateOffset = 0x30fec;
+constexpr Addr kDmaCompletionsOffset = 0x30fe8;
+constexpr Addr kDmaRequestsOffset = 0x30fe4;
+constexpr Addr kDmaErrorsOffset = 0x30fe0;
+constexpr Addr kRuntimeSyncOffsetOffset = 0x30fd0;
+constexpr Addr kRuntimeSyncSizeOffset = 0x30fd4;
+constexpr Addr kRuntimeSyncControlOffset = 0x30fd8;
+constexpr Addr kRuntimeSyncStatusOffset = 0x30fdc;
+constexpr Addr kResetControlOffset = 0x30000;
+constexpr uint32_t kStageABackendId = 0x4e505501;
+constexpr uint32_t kVerilatedCoralBackendId = 0x4e505502;
+constexpr Addr kFastDmaPageSize = 4096;
+
+} // namespace
+
+NPUDevice::NPUDevice(const Params &p)
+  : DmaVirtDevice(p),
+    pioAddr(p.pioAddr),
+    pioSize(p.pioSize),
+    pioDelay(p.pioDelay),
+    dmaExtmemBase(p.dmaExtmemBase),
+    dmaSharedBase(p.dmaSharedBase),
+    dmaSharedSize(p.dmaSharedSize),
+    fastDma(p.fastDma),
+    fastDmaEventBatch(p.fastDmaEventBatch),
+    fastDmaSyncOffset(p.fastDmaSyncOffset),
+    fastDmaSyncSize(p.fastDmaSyncSize),
+    runtimeSyncOffset(0),
+    runtimeSyncSize(0),
+    runtimeSyncStatus(0),
+    backendId(0),
+    firmwareEntry(0),
+    dmaActive(false),
+    hostToExtmemSyncActive(false),
+    dmaRequests(0),
+    dmaCompletions(0),
+    dmaErrors(0),
+    fastDmaCache(fastDma ? dmaSharedSize : 0, 0),
+    fastDmaPageValid(fastDma ?
+        (dmaSharedSize + kFastDmaPageSize - 1) / kFastDmaPageSize : 0,
+        false),
+    fastDmaPageDirty(fastDmaPageValid.size(), false),
+    hostToExtmemSyncData(fastDmaSyncSize, 0),
+    backendEvent(*this),
+    hostToExtmemSyncEvent(
+        [this] { completeHostToLocalExtmemSync(); }, name())
+{
+    fatal_if(dmaSharedSize == 0, "Coral NPU DMA shared size is zero");
+    fatal_if(fastDma && fastDmaEventBatch == 0,
+             "Coral fast DMA event batch must be non-zero");
+    fatal_if(p.backendType == "verilated-coral" && fastDma &&
+                 (fastDmaSyncOffset > dmaSharedSize ||
+                  fastDmaSyncSize > dmaSharedSize - fastDmaSyncOffset),
+             "Coral fast DMA synchronization range is outside shared memory: "
+             "offset=%#x size=%#x shared_size=%#x",
+             fastDmaSyncOffset, fastDmaSyncSize, dmaSharedSize);
+    fatal_if(dmaSharedBase > std::numeric_limits<uint32_t>::max(),
+             "Coral NPU DMA shared base must fit the 32-bit shell CSR");
+    if (p.backendType == "stage-a") {
+        backendId = kStageABackendId;
+        backend = std::make_unique<CoralStageABackend>(
+            pioAddr, pioSize, p.itcmSize, p.dtcmSize, p.executionLatency,
+            p.autoHalt);
+    } else if (p.backendType == "verilated-coral") {
+        backendId = kVerilatedCoralBackendId;
+        auto rtlBackend = std::make_unique<CoralVerilatedBackend>(
+            p.coralRepo, p.verilatedWrapper, p.rtlFirmware, p.rtlTickPeriod,
+            p.rtlCyclesPerEvent, p.fastDma, p.operatorMode);
+        firmwareEntry = rtlBackend->entryPoint();
+        backend = std::move(rtlBackend);
+    } else {
+        fatal("Unknown NPU backend type '%s'", p.backendType);
+    }
+
+    DPRINTFR(NPUDevice,
+             "Created NPUDevice backend=%s pio=%#x size=%#x "
+             "fast_dma=%d fast_dma_event_batch=%u\n",
+             backend->name(), pioAddr, pioSize, fastDma,
+             fastDmaEventBatch);
+    syncBackendEvent();
+}
+
+bool
+NPUDevice::dmaQuiesced() const
+{
+    return !dmaActive && !hostToExtmemSyncActive &&
+           !backend->hasDmaRequest() &&
+           !backend->hasPendingEvent();
+}
+
+void
+NPUDevice::checkDrainDone()
+{
+    if (drainState() == DrainState::Draining && dmaQuiesced()) {
+        DPRINTFR(NPUDevice, "Coral NPU drain completed\n");
+        signalDrainDone();
+    }
+}
+
+DrainState
+NPUDevice::drain()
+{
+    if (dmaQuiesced()) {
+        return DrainState::Drained;
+    }
+
+    DPRINTFR(NPUDevice,
+             "Coral NPU draining active=%u backend_dma=%u pending_event=%u\n",
+             dmaActive, backend->hasDmaRequest(),
+             backend->hasPendingEvent());
+    return DrainState::Draining;
+}
+
+void
+NPUDevice::serialize(CheckpointOut &cp) const
+{
+    fatal_if(!dmaQuiesced(),
+             "Cannot serialize Coral NPU while RTL/DMA is in flight");
+    DmaVirtDevice::serialize(cp);
+    SERIALIZE_SCALAR(dmaRequests);
+    SERIALIZE_SCALAR(dmaCompletions);
+    SERIALIZE_SCALAR(dmaErrors);
+}
+
+void
+NPUDevice::unserialize(CheckpointIn &cp)
+{
+    DmaVirtDevice::unserialize(cp);
+    UNSERIALIZE_OPT_SCALAR(dmaRequests);
+    UNSERIALIZE_OPT_SCALAR(dmaCompletions);
+    UNSERIALIZE_OPT_SCALAR(dmaErrors);
+}
+
+void
+NPUDevice::processBackendEvent()
+{
+    // Functional inference does not assign timing meaning to each DMA or RTL
+    // batch. Keep crossing the Verilator/gem5 boundary locally until the
+    // batch budget is exhausted or execution stops. Timing mode processes one
+    // batch and preserves the original event/DMA scheduling behavior.
+    const unsigned batchBudget = fastDma ? fastDmaEventBatch : 1;
+    for (unsigned batch = 0; batch < batchBudget; ++batch) {
+        backend->processEvent();
+        startBackendDma();
+        if (!fastDma || dmaActive || !backend->hasPendingEvent() ||
+            backend->externallyBlocked()) {
+            break;
+        }
+        if (backendEvent.scheduled()) {
+            deschedule(backendEvent);
+        }
+    }
+    if (fastDma && backend->hasLocalExtmem() &&
+        !backend->hasPendingEvent() && !backend->hasDmaRequest()) {
+        syncLocalExtmemToHost();
+    } else if (fastDma && !backend->hasPendingEvent() &&
+        !backend->hasDmaRequest()) {
+        flushFastDmaCache();
+    }
+    syncBackendEvent();
+    checkDrainDone();
+}
+
+void
+NPUDevice::startBackendDma()
+{
+    if (dmaActive || !backend->hasDmaRequest()) {
+        return;
+    }
+
+    const CoralDmaRequest &request = backend->dmaRequest();
+    if (request.addr < dmaExtmemBase ||
+        request.addr - dmaExtmemBase >= dmaSharedSize ||
+        request.size > dmaSharedSize - (request.addr - dmaExtmemBase)) {
+        DPRINTFR(NPUDevice,
+                 "Coral DMA rejected type=%s coral=%#x size=%u outside "
+                 "EXTMEM window [%#x:%#x]\n",
+                 request.type == CoralDmaType::Read ? "read" : "write",
+                 request.addr, request.size, dmaExtmemBase,
+                 dmaExtmemBase + dmaSharedSize - 1);
+        completeBackendDmaError();
+        return;
+    }
+    const Addr hostAddr =
+        dmaSharedBase + (request.addr - dmaExtmemBase);
+    auto *callback =
+        new DmaVirtCallback<std::array<uint8_t, CORAL_GEM5_DMA_DATA_BYTES>>(
+            [this](const auto &data) { completeBackendDma(data); },
+            request.data);
+    dmaActive = true;
+    ++dmaRequests;
+    if (!fastDma || dmaRequests <= 10 || dmaRequests % 1000 == 0) {
+        DPRINTFR(NPUDevice,
+                 "Coral DMA start count=%u type=%s coral=%#x host=%#x "
+                 "size=%u mode=%s\n",
+                 dmaRequests,
+                 request.type == CoralDmaType::Read ? "read" : "write",
+                 request.addr, hostAddr, request.size,
+                 fastDma ? "functional" : "timing");
+    }
+
+    if (fastDma) {
+        std::array<uint8_t, CORAL_GEM5_DMA_DATA_BYTES> data = request.data;
+        fastDmaAccess(request, hostAddr, data);
+        completeBackendDma(data);
+        return;
+    }
+
+    if (request.type == CoralDmaType::Read) {
+        dmaReadVirt(hostAddr, request.size, callback,
+                    callback->dmaBuffer.data());
+    } else {
+        dmaWriteVirt(hostAddr, request.size, callback,
+                     callback->dmaBuffer.data());
+    }
+}
+
+void
+NPUDevice::functionalMemoryAccess(MemCmd command, Addr addr, size_t size,
+                                  uint8_t *data)
+{
+    RequestPtr request = std::make_shared<Request>(
+        addr, size, 0, dmaPort.requestorId);
+    request->taskId(context_switch_task_id::DMA);
+    Packet packet(request, command);
+    packet.dataStatic(data);
+    dmaPort.sendFunctional(&packet);
+    fatal_if(packet.isError(),
+             "Coral fast DMA functional access failed at %#x size=%llu",
+             addr, static_cast<unsigned long long>(size));
+}
+
+void
+NPUDevice::functionalMemoryRange(MemCmd command, Addr addr, size_t size,
+                                 uint8_t *data)
+{
+    const size_t blockSize = cacheBlockSize();
+    fatal_if(blockSize == 0, "Coral fast DMA cache block size is zero");
+    size_t completed = 0;
+    while (completed < size) {
+        const Addr current = addr + completed;
+        const size_t boundary = blockSize - current % blockSize;
+        const size_t chunk = std::min(boundary, size - completed);
+        functionalMemoryAccess(command, current, chunk, data + completed);
+        completed += chunk;
+    }
+}
+
+void
+NPUDevice::fastDmaAccess(
+    const CoralDmaRequest &request, Addr hostAddr,
+    std::array<uint8_t, CORAL_GEM5_DMA_DATA_BYTES> &data)
+{
+    const Addr offset = hostAddr - dmaSharedBase;
+    const size_t page = offset / kFastDmaPageSize;
+    const size_t inPage = offset % kFastDmaPageSize;
+    fatal_if(page >= fastDmaPageValid.size() ||
+                 request.size > kFastDmaPageSize - inPage,
+             "Coral fast DMA request crosses cache page addr=%#x size=%u",
+             request.addr, request.size);
+
+    const size_t pageOffset = page * kFastDmaPageSize;
+    const size_t pageSize = std::min<size_t>(
+        kFastDmaPageSize, fastDmaCache.size() - pageOffset);
+    if (!fastDmaPageValid[page]) {
+        functionalMemoryRange(MemCmd::ReadReq,
+                              dmaSharedBase + pageOffset, pageSize,
+                              fastDmaCache.data() + pageOffset);
+        fastDmaPageValid[page] = true;
+    }
+
+    auto *cacheData = fastDmaCache.data() + offset;
+    if (request.type == CoralDmaType::Read) {
+        std::copy_n(cacheData, request.size, data.data());
+    } else {
+        std::copy_n(data.data(), request.size, cacheData);
+        fastDmaPageDirty[page] = true;
+    }
+}
+
+void
+NPUDevice::flushFastDmaCache()
+{
+    for (size_t page = 0; page < fastDmaPageDirty.size(); ++page) {
+        if (!fastDmaPageDirty[page]) {
+            continue;
+        }
+        const size_t offset = page * kFastDmaPageSize;
+        const size_t size = std::min<size_t>(
+            kFastDmaPageSize, fastDmaCache.size() - offset);
+        functionalMemoryRange(MemCmd::WriteReq, dmaSharedBase + offset,
+                              size, fastDmaCache.data() + offset);
+        fastDmaPageDirty[page] = false;
+    }
+}
+
+void
+NPUDevice::invalidateFastDmaCache()
+{
+    std::fill(fastDmaPageValid.begin(), fastDmaPageValid.end(), false);
+    std::fill(fastDmaPageDirty.begin(), fastDmaPageDirty.end(), false);
+}
+
+void
+NPUDevice::startHostToLocalExtmemSync()
+{
+    if (!backend->hasLocalExtmem() || fastDmaSyncSize == 0) {
+        releaseBackendReset();
+        return;
+    }
+    fatal_if(hostToExtmemSyncActive,
+             "Coral host-to-EXTMEM synchronization already active");
+    fatal_if(fastDmaSyncSize > std::numeric_limits<int>::max(),
+             "Coral host-to-EXTMEM synchronization is too large: %#x",
+             fastDmaSyncSize);
+
+    hostToExtmemSyncActive = true;
+    ++dmaRequests;
+    dmaRead(dmaSharedBase + fastDmaSyncOffset,
+            static_cast<int>(fastDmaSyncSize), &hostToExtmemSyncEvent,
+            hostToExtmemSyncData.data());
+    DPRINTFR(NPUDevice,
+             "Coral coherent host-to-EXTMEM sync start count=%u "
+             "host=%#x size=%#x\n",
+             dmaRequests, dmaSharedBase + fastDmaSyncOffset,
+             fastDmaSyncSize);
+}
+
+void
+NPUDevice::completeHostToLocalExtmemSync()
+{
+    fatal_if(!hostToExtmemSyncActive,
+             "Coral host-to-EXTMEM sync completion without active request");
+    hostToExtmemSyncActive = false;
+    backend->writeLocalExtmem(dmaExtmemBase + fastDmaSyncOffset,
+                              hostToExtmemSyncData.data(),
+                              hostToExtmemSyncData.size());
+    ++dmaCompletions;
+
+    uint32_t firstWord = 0;
+    if (hostToExtmemSyncData.size() >= sizeof(firstWord)) {
+        std::memcpy(&firstWord, hostToExtmemSyncData.data(),
+                    sizeof(firstWord));
+    }
+    DPRINTFR(NPUDevice,
+             "Coral coherent host-to-EXTMEM sync complete count=%u "
+             "size=%#x first_word=%#010x\n",
+             dmaCompletions, fastDmaSyncSize, firstWord);
+    inform("Coral coherent host-to-EXTMEM sync complete: size=%#x "
+           "first_word=%#010x", fastDmaSyncSize, firstWord);
+    releaseBackendReset();
+    checkDrainDone();
+}
+
+void
+NPUDevice::releaseBackendReset()
+{
+    RequestPtr request = std::make_shared<Request>(
+        pioAddr + kResetControlOffset, sizeof(uint32_t), 0,
+        dmaPort.requestorId);
+    Packet packet(request, MemCmd::WriteReq);
+    uint32_t resetControl = 0;
+    packet.dataStatic(reinterpret_cast<uint8_t *>(&resetControl));
+    fatal_if(!backend->write(&packet, pioAddr),
+             "Coral backend rejected deferred reset release");
+    DPRINTFR(NPUDevice,
+             "Coral RTL reset released after coherent EXTMEM sync\n");
+    syncBackendEvent();
+}
+
+void
+NPUDevice::syncLocalExtmemToHost()
+{
+    std::vector<uint8_t> data(fastDmaSyncSize);
+    backend->readLocalExtmem(dmaExtmemBase + fastDmaSyncOffset,
+                             data.data(), data.size());
+    functionalMemoryRange(MemCmd::WriteReq,
+                          dmaSharedBase + fastDmaSyncOffset, data.size(),
+                          data.data());
+    ++dmaRequests;
+    ++dmaCompletions;
+    DPRINTFR(NPUDevice,
+             "Coral local EXTMEM NPU-to-host sync count=%u size=%llu\n",
+             dmaCompletions,
+             static_cast<unsigned long long>(fastDmaSyncSize));
+}
+
+bool
+NPUDevice::syncHostRangeToLocalExtmem(Addr offset, Addr size)
+{
+    if (!fastDma || !backend->hasLocalExtmem() || size == 0 ||
+        offset > dmaSharedSize || size > dmaSharedSize - offset) {
+        return false;
+    }
+
+    std::vector<uint8_t> data(size);
+    functionalMemoryRange(MemCmd::ReadReq, dmaSharedBase + offset,
+                          data.size(), data.data());
+    backend->writeLocalExtmem(dmaExtmemBase + offset, data.data(), data.size());
+    invalidateFastDmaCache();
+    ++dmaRequests;
+    ++dmaCompletions;
+    DPRINTFR(NPUDevice,
+             "Coral runtime host-to-EXTMEM sync offset=%#x size=%#x "
+             "count=%u\n",
+             offset, size, dmaCompletions);
+    return true;
+}
+
+bool
+NPUDevice::syncLocalExtmemRangeToHost(Addr offset, Addr size)
+{
+    if (!fastDma || !backend->hasLocalExtmem() || size == 0 ||
+        offset > dmaSharedSize || size > dmaSharedSize - offset) {
+        return false;
+    }
+
+    std::vector<uint8_t> data(size);
+    backend->readLocalExtmem(dmaExtmemBase + offset, data.data(), data.size());
+    functionalMemoryRange(MemCmd::WriteReq, dmaSharedBase + offset,
+                          data.size(), data.data());
+    ++dmaRequests;
+    ++dmaCompletions;
+    DPRINTFR(NPUDevice,
+             "Coral runtime EXTMEM-to-host sync offset=%#x size=%#x "
+             "count=%u\n",
+             offset, size, dmaCompletions);
+    return true;
+}
+
+void
+NPUDevice::completeBackendDma(
+    const std::array<uint8_t, CORAL_GEM5_DMA_DATA_BYTES> &data)
+{
+    fatal_if(!dmaActive, "Coral NPU DMA completion without active request");
+    const CoralDmaRequest &request = backend->dmaRequest();
+    dmaActive = false;
+    backend->completeDma(data.data(), request.size, false);
+    ++dmaCompletions;
+    if (!fastDma || dmaCompletions <= 10 || dmaCompletions % 1000 == 0) {
+        DPRINTFR(NPUDevice, "Coral DMA complete count=%u mode=%s\n",
+                 dmaCompletions, fastDma ? "functional" : "timing");
+    }
+    fatal_if(backend->hasDmaRequest(),
+             "Coral backend retained DMA request after completion");
+    syncBackendEvent();
+    checkDrainDone();
+}
+
+void
+NPUDevice::completeBackendDmaError()
+{
+    fatal_if(dmaActive, "Coral NPU DMA error while DMA is active");
+    fatal_if(!backend->hasDmaRequest(),
+             "Coral NPU DMA error without pending backend request");
+    backend->completeDma(nullptr, 0, true);
+    ++dmaErrors;
+    DPRINTFR(NPUDevice, "Coral DMA error count=%u\n", dmaErrors);
+    fatal_if(backend->hasDmaRequest(),
+             "Coral backend retained DMA request after error completion");
+    syncBackendEvent();
+    checkDrainDone();
+}
+
+void
+NPUDevice::syncBackendEvent()
+{
+    if (backend->hasPendingEvent()) {
+        const Tick when = backend->nextEventTick();
+        if (!backendEvent.scheduled() || backendEvent.when() != when) {
+            if (backendEvent.scheduled()) {
+                deschedule(backendEvent);
+            }
+            schedule(backendEvent, when);
+        }
+    } else if (backendEvent.scheduled()) {
+        deschedule(backendEvent);
+    }
+}
+
+Tick
+NPUDevice::read(PacketPtr pkt)
+{
+    DPRINTFR(NPUDevice, "backend=%s read addr=%#x size=%u\n",
+             backend->name(), pkt->getAddr(), pkt->getSize());
+
+    const Addr offset = pkt->getAddr() - pioAddr;
+    if (offset == kDmaRequestsOffset &&
+        pkt->getSize() == sizeof(uint32_t)) {
+        pkt->setLE<uint32_t>(dmaRequests);
+        pkt->makeAtomicResponse();
+    } else if (offset == kDmaCompletionsOffset &&
+        pkt->getSize() == sizeof(uint32_t)) {
+        pkt->setLE<uint32_t>(dmaCompletions);
+        pkt->makeAtomicResponse();
+    } else if (offset == kDmaStateOffset &&
+        pkt->getSize() == sizeof(uint32_t)) {
+        const uint32_t state =
+            (backend->hasDmaRequest() ? 0x1 : 0x0) |
+            (dmaActive ? 0x2 : 0x0);
+        pkt->setLE<uint32_t>(state);
+        pkt->makeAtomicResponse();
+    } else if (offset == kDmaErrorsOffset &&
+        pkt->getSize() == sizeof(uint32_t)) {
+        pkt->setLE<uint32_t>(dmaErrors);
+        pkt->makeAtomicResponse();
+    } else if (offset == kRuntimeSyncOffsetOffset &&
+        pkt->getSize() == sizeof(uint32_t)) {
+        pkt->setLE<uint32_t>(runtimeSyncOffset);
+        pkt->makeAtomicResponse();
+    } else if (offset == kRuntimeSyncSizeOffset &&
+        pkt->getSize() == sizeof(uint32_t)) {
+        pkt->setLE<uint32_t>(runtimeSyncSize);
+        pkt->makeAtomicResponse();
+    } else if (offset == kRuntimeSyncStatusOffset &&
+        pkt->getSize() == sizeof(uint32_t)) {
+        pkt->setLE<uint32_t>(runtimeSyncStatus);
+        pkt->makeAtomicResponse();
+    } else if (offset == kSharedBaseOffset &&
+        pkt->getSize() == sizeof(uint32_t)) {
+        pkt->setLE<uint32_t>(dmaSharedBase);
+        pkt->makeAtomicResponse();
+    } else if (offset == kSharedSizeOffset &&
+        pkt->getSize() == sizeof(uint32_t)) {
+        pkt->setLE<uint32_t>(dmaSharedSize);
+        pkt->makeAtomicResponse();
+    } else if (offset == kFirmwareEntryOffset &&
+        pkt->getSize() == sizeof(firmwareEntry)) {
+        pkt->setLE<uint32_t>(firmwareEntry);
+        pkt->makeAtomicResponse();
+    } else if (offset == kBackendIdOffset &&
+        pkt->getSize() == sizeof(backendId)) {
+        pkt->setLE<uint32_t>(backendId);
+        pkt->makeAtomicResponse();
+    } else if (!backend->read(pkt, pioAddr)) {
+        DPRINTFR(NPUDevice, "backend=%s bad read addr=%#x size=%u\n",
+                 backend->name(), pkt->getAddr(), pkt->getSize());
+        pkt->makeAtomicResponse();
+        pkt->setBadAddress();
+    }
+
+    syncBackendEvent();
+    return pioDelay;
+}
+
+Tick
+NPUDevice::write(PacketPtr pkt)
+{
+    DPRINTFR(NPUDevice, "backend=%s write addr=%#x size=%u\n",
+             backend->name(), pkt->getAddr(), pkt->getSize());
+
+    const Addr offset = pkt->getAddr() - pioAddr;
+    if (pkt->getSize() == sizeof(uint32_t) &&
+        offset == kRuntimeSyncOffsetOffset) {
+        runtimeSyncOffset = pkt->getLE<uint32_t>();
+        pkt->makeAtomicResponse();
+        return pioDelay;
+    }
+    if (pkt->getSize() == sizeof(uint32_t) &&
+        offset == kRuntimeSyncSizeOffset) {
+        runtimeSyncSize = pkt->getLE<uint32_t>();
+        pkt->makeAtomicResponse();
+        return pioDelay;
+    }
+    if (pkt->getSize() == sizeof(uint32_t) &&
+        offset == kRuntimeSyncControlOffset) {
+        runtimeSyncStatus = 0;
+        const uint32_t control = pkt->getLE<uint32_t>();
+        if (control == 0x1) {
+            runtimeSyncStatus = syncHostRangeToLocalExtmem(
+                runtimeSyncOffset, runtimeSyncSize) ? 1 : 2;
+        } else if (control == 0x2) {
+            runtimeSyncStatus = syncLocalExtmemRangeToHost(
+                runtimeSyncOffset, runtimeSyncSize) ? 1 : 2;
+        } else {
+            runtimeSyncStatus = 2;
+        }
+        pkt->makeAtomicResponse();
+        syncBackendEvent();
+        return pioDelay;
+    }
+    if (fastDma && backend->hasLocalExtmem() &&
+        offset == kResetControlOffset &&
+        pkt->getSize() == sizeof(uint32_t) &&
+        (pkt->getLE<uint32_t>() & 0x3) == 0) {
+        pkt->makeAtomicResponse();
+        startHostToLocalExtmemSync();
+        syncBackendEvent();
+        return pioDelay;
+    }
+
+    if (!backend->write(pkt, pioAddr)) {
+        DPRINTFR(NPUDevice, "backend=%s bad write addr=%#x size=%u\n",
+                 backend->name(), pkt->getAddr(), pkt->getSize());
+        pkt->makeAtomicResponse();
+        pkt->setBadAddress();
+    }
+
+    if (fastDma && offset == kResetControlOffset &&
+        pkt->getSize() == sizeof(uint32_t) &&
+        (pkt->getLE<uint32_t>() & 0x1) != 0) {
+        invalidateFastDmaCache();
+    }
+
+    syncBackendEvent();
+    return pioDelay;
+}
+
+AddrRangeList
+NPUDevice::getAddrRanges() const
+{
+    AddrRangeList ranges;
+    ranges.push_back(RangeSize(pioAddr, pioSize));
+    return ranges;
+}
+
+TranslationGenPtr
+NPUDevice::translate(Addr vaddr, Addr size)
+{
+    return backend->translate(vaddr, size);
+}
+
+} // namespace gem5
