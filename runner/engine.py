@@ -142,6 +142,7 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
     latencies: list[float] = []
     raw_refs: list[str] = []
     first_failure: dict | None = None
+    first_ok_extra: dict | None = None  # adapter 附加字段（如 page_policy）随 metric 入档
     raw_command = ""
     for sample_index in range(case.repetitions):
         result = executor.execute(argv, case.control.command_prefix)
@@ -156,6 +157,9 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
         try:
             metrics = adapter.parse_output(result.stdout, result.stderr)
             latencies.append(metrics[0]["value"])
+            if first_ok_extra is None:
+                first_ok_extra = {k: v for k, v in metrics[0].items()
+                                  if k not in ("name", "value", "unit")}
         except ParseError as e:
             if first_failure is None:
                 first_failure = {"reason": "parse-error", "detail": str(e)}
@@ -172,6 +176,7 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
             "name": "latency_ns", "value": stats["median"], "unit": "ns",
             "repetitions": len(latencies), "statistics": stats,
             "raw_samples_ref": raw_refs[0],
+            **(first_ok_extra or {}),
         }]
         return build_run_record(status="ok", target=platform["target"], probe=probe_meta,
                                 environment=env, params=params, params_provenance=provenance,
