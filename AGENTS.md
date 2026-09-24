@@ -35,10 +35,10 @@ ctest --preset macos-arm64-release
 
 - `third_party/gem5` submodule 保持纯净上游，钉 **v25.0.0.1**；一切本地修改只进 `third_party/gem5-d9300-patch/gem5`（唯一事实源，134 文件最小集）。
 - 同步：`sh third_party/gem5-d9300-patch/gem5/apply_patchset.sh`（自带基线断言与脏树检测；拒绝时按提示处理，不要 `--force` 类绕过）。
-- 构建只在 Xeon 服务器（`michael@10.126.126.128`，`~/cpu-uarch-explorer`）：`scons build/ARM/gem5.opt -j56`，**用系统 scons**；uv python 驱动会导致 gem5py 崩溃（runbook 附2）。macOS 不做 gem5 构建平台（elf.h 阻塞）。
+- 构建只在 Xeon 服务器（真实地址见 `data/private/hosts.md`）：`scons build/ARM/gem5.opt -j56`，**用系统 scons**；uv python 驱动会导致 gem5py 崩溃（runbook 附2）。macOS 不做 gem5 构建平台（elf.h 阻塞）。
 - 本机 → 服务器同步用 `rsync -a --delete --exclude 'build/' --exclude '.DS_Store'`（`--delete` 必须带，否则本机删除的文件在服务器残留）。
 - 增量树加文件前先想"它相对基线 v25.0.0.1 的 delta 是什么"；纯旧版携带文件不许进来（普查方法见 `docs/gem5-d9300-intake.md`）。
 
-## 当前阶段（2026-09-25）
+## 当前阶段
 
-M4 Pro 最小骨架已闭环（probe → JSON → 报告）。主线：探针域扩展（core/branch/TLB）与 Xeon 平台接入。gem5 建模后置——校准闭环的启动条件是探针套件齐备 + D9300 实机入册（OI-6）。
+以 README 开头的"当前状态"为唯一口径（此处不复制，防漂移）。
