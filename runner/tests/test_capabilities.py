@@ -25,7 +25,8 @@ class FakeExecutor:
         for key, res in self._responses:
             if key in cmd:
                 return res
-        return ExecutionResult(returncode=1, stdout="", stderr="no scripted response")
+        return ExecutionResult(returncode=1, stdout="", stderr="no scripted response",
+                               raw_command="fake")
 
 
 _XEON_TOPOLOGY = """1,Data,48K,12,0,56
@@ -42,7 +43,7 @@ performance powersave
 
 class TestCacheTopology(unittest.TestCase):
     def test_parse_xeon_topology(self):
-        ex = FakeExecutor([("cache/index", ExecutionResult(0, _XEON_TOPOLOGY, ""))])
+        ex = FakeExecutor([("cache/index", ExecutionResult(0, _XEON_TOPOLOGY, "", "fake"))])
         cap = collect_cache_topology(ex)
         self.assertTrue(cap["supported"])
         levels = cap["values"]["levels"]
@@ -52,7 +53,7 @@ class TestCacheTopology(unittest.TestCase):
         self.assertEqual(levels[3]["shared_cpu_list"], "0-111")
 
     def test_unreadable_sysfs_degrades_honestly(self):
-        ex = FakeExecutor([("cache/index", ExecutionResult(2, "", "Permission denied"))])
+        ex = FakeExecutor([("cache/index", ExecutionResult(2, "", "Permission denied", "fake"))])
         cap = collect_cache_topology(ex)
         self.assertFalse(cap["supported"])
         self.assertIn("Permission denied", cap["detail"])
@@ -60,7 +61,7 @@ class TestCacheTopology(unittest.TestCase):
 
 class TestCpufreq(unittest.TestCase):
     def test_parse_xeon_cpufreq(self):
-        ex = FakeExecutor([("scaling_driver", ExecutionResult(0, _XEON_CPUFREQ, ""))])
+        ex = FakeExecutor([("scaling_driver", ExecutionResult(0, _XEON_CPUFREQ, "", "fake"))])
         cap = collect_cpufreq(ex)
         self.assertTrue(cap["supported"])
         v = cap["values"]
@@ -73,8 +74,8 @@ class TestCpufreq(unittest.TestCase):
 class TestManifestShape(unittest.TestCase):
     def test_collect_all_matches_schema_required_keys(self):
         ex = FakeExecutor([
-            ("cache/index", ExecutionResult(0, _XEON_TOPOLOGY, "")),
-            ("scaling_driver", ExecutionResult(0, _XEON_CPUFREQ, "")),
+            ("cache/index", ExecutionResult(0, _XEON_TOPOLOGY, "", "fake")),
+            ("scaling_driver", ExecutionResult(0, _XEON_CPUFREQ, "", "fake")),
         ])
         manifest = collect_all(ex, {"target_id": "xeon-8481c-01"})
         for key in ("schema_version", "target", "capabilities"):
