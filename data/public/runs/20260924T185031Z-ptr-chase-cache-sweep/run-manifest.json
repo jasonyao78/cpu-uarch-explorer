@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "experiment_id": "ptr-chase-cache-sweep",
+  "protocol_version": "1.0",
+  "target": {
+    "os": "linux",
+    "isa": "x86_64",
+    "abi": "linux-sysv-x86_64",
+    "target_id": "xeon-8481c-01",
+    "cpu_profile": "sapphire-rapids-8481c",
+    "execution_kind": "native",
+    "executor": "native",
+    "transport": "ssh",
+    "ssh_host": "xeon-8481c-01",
+    "ssh_remote_root": "~/cpu-uarch-explorer"
+  },
+  "records": "/Users/michaelyao/workspace/cpu-uarch-explorer/data/public/runs/20260924T185031Z-ptr-chase-cache-sweep/records.jsonl",
+  "summary": {
+    "total": 14,
+    "ok": 14,
+    "failed": 0,
+    "skipped": 0,
+    "unsupported": 0
+  }
+}
