@@ -70,6 +70,7 @@
     "params": { "type": "object" },
     "metrics": {
       "type": "array",
+      "description": "status=ok 时至少一项数值 metric（由 allOf 条件强制）；failed/skipped/unsupported 允许空数组，原因记录于 failure",
       "items": {
         "type": "object",
         "required": ["name", "value", "unit"],
@@ -92,8 +93,17 @@
           "raw_samples_ref": { "type": "string", "description": "artifact-manifest id（原始样本）" }
         },
         "additionalProperties": true
+      }
+    },
+    "failure": {
+      "type": "object",
+      "description": "status != ok 时必填的结构化原因（metrics 此时允许为空数组）",
+      "required": ["reason"],
+      "properties": {
+        "reason": { "type": "string", "description": "机器可读原因码，如 probe-exit-nonzero / capability-unsupported / skipped-by-plan" },
+        "detail": { "type": "string" }
       },
-      "minItems": 1
+      "additionalProperties": true
     },
     "evidence": {
       "type": "object",
@@ -111,5 +121,15 @@
     "raw_command": { "type": "string" },
     "notes": { "type": "string" }
   },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "ok" } }, "required": ["status"] },
+      "then": { "properties": { "metrics": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "status": { "enum": ["failed", "skipped", "unsupported"] } }, "required": ["status"] },
+      "then": { "required": ["failure"] }
+    }
+  ],
   "additionalProperties": true
 }

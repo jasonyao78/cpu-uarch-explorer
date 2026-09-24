@@ -6,7 +6,7 @@
 |---|---|
 | `experiment.schema.json` | ExperimentSpec：实验语义定义（测什么/参数/前置条件/指标定义） |
 | `capability-manifest.schema.json` | 目标能力快照（capability discovery 产物，按 target 引用） |
-| `run-record.v2.schema.json` | 运行记录 v2：目标正交分解（os/isa/abi/target_id/cpu_profile/execution_kind/executor/transport，`backend` 仅派生展示名）、运行状态（ok/failed/skipped/unsupported）、统计量（repetitions/median/分位数/raw_samples_ref）、证据来源（evidence.provenance）与访问分类（access_class）分离 |
+| `run-record.v2.schema.json` | 运行记录 v2：目标正交分解（os/isa/abi/target_id/cpu_profile/execution_kind/executor/transport，`backend` 仅派生展示名）、运行状态（ok/failed/skipped/unsupported）、统计量（repetitions/median/分位数/raw_samples_ref）、证据来源（evidence.provenance）与访问分类（access_class）分离。metrics 强制随 status 条件化（2026-09-24 评审修订）：`status=ok` 时 ≥1 项数值 metric；`failed/skipped/unsupported` 允许空 metrics 且必填结构化 `failure{reason, detail}`；repetitions/statistics 的强制条件由 ExperimentSpec 决定，不在本 schema 强制 |
 | `artifact-manifest.schema.json` | 产物清单：二进制/镜像/checkpoint/原始样本的 SHA256 与构建谱系 |
 
 原则：信封强制（v2 的 required 列表）；`schema_version` 必填；`additionalProperties=true`（新增字段不破坏旧读者，**扩展字段必须登记到本 README**）；证据来源与访问分类是两个正交轴。
