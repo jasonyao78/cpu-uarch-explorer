@@ -244,7 +244,15 @@ ctest --preset macos-arm64-release
 - 环境事务（改 governor/hugepage 需"改完恢复"）只有设计结论（借 GB10 模型重新实现），无代码；
 - gem5 基建已验证（v25.0.0.1 + 134 文件最小集，Xeon 重建与 SE 冒烟通过）；D9300 SE 精简配置与建模后置（启动条件：探针套件齐备 + D9300 实机入册）。
 
-**Xeon 首测解读（2026-09-25，MEDIUM 置信度）**：台阶位置与硬件画像一致（L1d 48KB 边界出现在 64K 档、L2 2MB 边界出现在 2M 档）；但 LLC（105MB 共享）平台期未观测到——4M 档起直接 DRAM 量级，且 128M 档非单调（74.9ns < 64M 档的 117.8ns）。原因未锁定，候选：powersave DVFS 逐 case 浮动、4K 页 TLB 遍历、THP（madvise 默认）。**锁频复测前，本次 sweep 的 ns 绝对值不可用于跨档/跨平台结论**（measurement-discipline §5/§6；复测需 root 改 governor，列入待用户授权项）。
+**Xeon 首测解读（2026-09-25，修订版 v2 —— 修正留痕，measurement-discipline §6）**：
+
+- **v1 结论（同日早些时候）**：台阶位置与硬件画像一致（L1d 48KB 边界在 64K 档、L2 2MB 边界在 2M 档）；LLC 平台期未观测到，原因未锁定，候选 DVFS/TLB/THP。
+- **v2 根因（freq_snapshot + L3 细扫 + 重复内分布三重证据锁定）**：
+  1. **内存敏感负载下 HWP 不升频**——指针追逐全程实测 800MHz（`freq_snapshot` 入档），而 ALU 密集负载可达 2.0GHz：ns 绝对值被放大 2~4 倍，但同 case 内比值/台阶位置不受影响（频率在同一 case 内约去）；
+  2. **4K 页 TLB 压力把平台期拉成斜坡**——4M→64M 的缓慢单调爬升（82→94 cycles@0.8GHz）与页数增长（1K→16K 页，L2 STLB 2048 项溢出）吻合；
+  3. **物理页分配布局决定 L3 观测形态**——96MiB 档 5 次重复内双峰（3 次 ~60ns / 2 次 108~141ns，同二进制同尺寸仅 mmap 布局不同）：坏布局下 L3 set 冲突使命中看起来像 DRAM。真实 L3 命中延迟的证据存在于 2M 档（33cy）与 96M 好运气样本（48cy），与 SPR 文献值 ~40-50cy 吻合。
+- **判定**：sysfs 容量真值（48K/2M/105M）与台阶位置**全部一致**；"缺失的 L3 平台期"不是硬件矛盾，而是 **4K 页 + 内存碎片布局 + 未锁频** 的合成伪影——正是 measurement-discipline"hugepage 为 Linux 正式测量前提"条款的又一实证。
+- **复测前置（按优先级）**：① ptr_chase hugepage 支持（backlog 项，消除 TLB 项 + 大幅降低 set 冲突敏感度）；② 锁频（sudo governor=performance，需用户授权；走未来环境事务）；③ evict 工具 warm/cold 对照。
 
 ## 12. 下一步（规划，未实现）
 

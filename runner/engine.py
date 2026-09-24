@@ -132,6 +132,13 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
     argv = [probe_path] + adapter.build_argv(params)
     env = environment_block(case.control.mechanism, case.control.value, system_info)
 
+    # 频率快照（measurement-discipline §5；2026-09-25 讨论裁定"快照先行"）：
+    # 锁频落地前，每条记录至少能回答"测量时核频多少"。瞬时值非区间精确
+    # 频率；采集失败则省略字段，不编造。environment.freq_snapshot 为登记的
+    # schema 扩展字段（runner/schema/README.md）。
+    cpu_hint = case.control.value if case.control.mechanism == "taskset" else "0"
+    snap_before = executor.freq_snapshot(cpu_hint)
+
     latencies: list[float] = []
     raw_refs: list[str] = []
     first_failure: dict | None = None
@@ -152,6 +159,12 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
         except ParseError as e:
             if first_failure is None:
                 first_failure = {"reason": "parse-error", "detail": str(e)}
+
+    # 频率快照必须在 ok/failed 两条 return 路径之前入 env——放晚了 ok 路径
+    # 直接 return 会漏（2026-09-25 复测自证：首跑 12 条记录全无快照）。
+    snap_after = executor.freq_snapshot(cpu_hint)
+    if snap_before is not None or snap_after is not None:
+        env["freq_snapshot"] = {"before_hz": snap_before, "after_hz": snap_after}
 
     if latencies and first_failure is None:
         stats = summarize(latencies)

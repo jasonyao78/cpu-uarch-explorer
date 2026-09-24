@@ -72,3 +72,16 @@ class SshExecutor:
             "kernel": lines[1].strip() if len(lines) > 1 else "unknown",
             "compiler": lines[2].strip() if len(lines) > 2 else "unknown",
         }
+
+    def freq_snapshot(self, cpu_hint: str) -> dict | None:
+        """目标机频率快照（scaling_cur_freq，x86 该值含 turbo 实况）。
+        频率感知纪律（measurement-discipline §5）的落地：不锁频的平台
+        至少让每条记录能回答"测量时核频多少"。读失败返回 None。"""
+        res = self.execute(["cat",
+                            f"/sys/devices/system/cpu/cpu{cpu_hint or '0'}/cpufreq/scaling_cur_freq"])
+        if res.returncode != 0:
+            return None
+        try:
+            return {"khz": int(res.stdout.strip()), "source": "scaling_cur_freq"}
+        except ValueError:
+            return None

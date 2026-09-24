@@ -109,5 +109,24 @@ class TestXeonPlatformPlanExpansion(unittest.TestCase):
         self.assertEqual(plan.target["target_id"], "xeon-8481c-01")
 
 
+class TestFreqSnapshot(unittest.TestCase):
+    """频率快照契约（measurement-discipline §5）：scaling_cur_freq 解析、
+    读失败返回 None（字段省略而非编造）。守 macOS 无频率接口的现实。"""
+
+    def test_ssh_freq_snapshot_parses(self):
+        ex = SshExecutor("h", "~")
+        with mock.patch("runner.executor.ssh.subprocess.run") as m:
+            m.return_value = _completed(0, "2000000\n", "")
+            self.assertEqual(ex.freq_snapshot("0"), {"khz": 2000000, "source": "scaling_cur_freq"})
+
+    def test_ssh_freq_snapshot_failure_is_none(self):
+        ex = SshExecutor("h", "~")
+        with mock.patch("runner.executor.ssh.subprocess.run") as m:
+            m.return_value = _completed(1, "", "No such file")
+            self.assertIsNone(ex.freq_snapshot("0"))
+            m.return_value = _completed(0, "not-a-number\n", "")
+            self.assertIsNone(ex.freq_snapshot("0"))
+
+
 if __name__ == "__main__":
     unittest.main()

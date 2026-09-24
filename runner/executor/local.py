@@ -50,3 +50,13 @@ class LocalExecutor:
         同一口径，engine 不关心数据来自哪一侧。"""
         from ..records import local_system_info
         return local_system_info()
+
+    def freq_snapshot(self, cpu_hint: str) -> dict | None:
+        """本机频率快照：Linux 读 cpufreq sysfs；macOS 无用户态频率接口
+        （v0.3 §2.1 已知约束）返回 None——engine 据此省略字段，不编造。"""
+        path = f"/sys/devices/system/cpu/cpu{cpu_hint or '0'}/cpufreq/scaling_cur_freq"
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return {"khz": int(f.read().strip()), "source": "scaling_cur_freq"}
+        except OSError:
+            return None

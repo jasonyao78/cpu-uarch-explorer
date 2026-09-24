@@ -26,5 +26,5 @@
       "notes": "绑物理核 CPU0；SMT sibling 为 CPU56（v0.3 §2.2 SMT 纪律）——本期不主动隔离 sibling，控制口径为运行前确认系统低负载并如实记录"
     }
   ],
-  "capabilities_note": "PMU 完整（SPR events / PEBS / LBR，OI-3 已回填 MEASURED）；perf_event_paranoid=4（perf 需 sudo，本期纯计时法不碰）；**governor=powersave、实测 800MHz~3.8GHz 浮动（2026-09-25 接入 run 时采集）——计时法测量须先锁频或改 cycles 口径，否则 ns 绝对值不可跨档比较**；ssh_host 为 ssh config 别名，真实地址见 data/private/hosts.md"
+  "capabilities_note": "PMU 完整（SPR events / PEBS / LBR，OI-3 已回填 MEASURED）；perf_event_paranoid=4（perf 需 sudo，本期纯计时法不碰）；**governor=powersave、实测 800MHz~3.8GHz 浮动（2026-09-25 接入 run 时采集）；同日细扫证实：内存敏感负载（指针追逐）全程 800MHz 不升频，ALU 密集负载可达 2.0GHz——锁频或 hugepage 改造前，ns 绝对值不可跨档比较，仅台阶位置可用**；ssh_host 为 ssh config 别名，真实地址见 data/private/hosts.md"
 }
