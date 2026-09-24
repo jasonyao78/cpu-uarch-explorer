@@ -14,8 +14,11 @@ from pathlib import Path
 
 from .engine import run_plan
 from .errors import EXIT_OK, EXIT_RUN_FAILURES, EXIT_USAGE, RunnerError
+from .executor import make_executor
 from .plan import build_plan
+from .records import now_iso, write_json_atomic
 from .spec import load_experiment, load_platform
+from .targets.capabilities import collect_all
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -45,17 +48,47 @@ def _cmd_run(args) -> int:
     return EXIT_OK if summary["failed"] == 0 else EXIT_RUN_FAILURES
 
 
+def _cmd_capabilities(args) -> int:
+    """capabilities 子命令：经执行器通道采集平台能力事实（cache 拓扑 /
+    cpufreq），写 capability-manifest JSON 入库——测量校验准绳
+    （探测不到如实 unsupported，零损失；2026-09-25 讨论落定）。"""
+    platform = load_platform(args.platform)
+    executor = make_executor(platform)
+    manifest = collect_all(executor, platform["target"])
+    manifest["captured_at"] = now_iso()
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    tid = platform["target"].get("target_id", "unknown-target")
+    path = out / f"{tid}-{stamp}.json"
+    write_json_atomic(path, manifest)
+    for name, cap in manifest["capabilities"].items():
+        if not cap["supported"]:
+            print(f"[--] {name}: unsupported ({cap['detail']})")
+        elif name == "cache-topology":
+            levels = ", ".join(f"L{e['level']}{e['type'][0]}={e['size']}"
+                               for e in cap["values"]["levels"])
+            print(f"[ok] {name}: {levels}")
+        else:
+            print(f"[ok] {name}: {cap['values']}")
+    print(f"capability-manifest: {path}")
+    return EXIT_OK
+
+
 def main(argv: list[str] | None = None) -> int:
     """CLI 入口。退出码阶梯：0 全成功 / 1 配置或输入错误 / 2 有 case 失败
     （数据已落盘，OI-9 蓝图 exit code 阶梯）。"""
     parser = argparse.ArgumentParser(prog="runner", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    for name, fn in (("plan", _cmd_plan), ("run", _cmd_run)):
+    for name, fn in (("plan", _cmd_plan), ("run", _cmd_run), ("capabilities", _cmd_capabilities)):
         p = sub.add_parser(name)
-        p.add_argument("--experiment", required=True)
         p.add_argument("--platform", required=True)
+        if name in ("plan", "run"):
+            p.add_argument("--experiment", required=True)
         if name == "run":
             p.add_argument("--out", default="data/public/runs")
+        if name == "capabilities":
+            p.add_argument("--out", default="data/public/capabilities")
         p.set_defaults(fn=fn)
     args = parser.parse_args(argv)
     try:
