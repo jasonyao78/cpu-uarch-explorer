@@ -39,12 +39,16 @@ rsync -a --progress \
 ## 1. Python 环境（uv，ADR-0007）
 
 ```bash
-# 服务器已装 uv（~/.local/bin/uv；如需重装：curl -LsSf https://astral.sh/uv/install.sh | sh）
+# uv 管本仓 runner/analysis 依赖；gem5 构建用系统工具链（§3，勿混用！）
 cd /path/on/nvme/cpu-uarch-explorer
 uv sync        # 按 uv.lock 建 .venv（uv 托管 CPython 3.12 + scons + protobuf）
-# gem5 构建前：让 SConstruct 找到与 venv 同源的 python3-config（已实测通过 gem5 embed 检查）
-export PATH="$(uv run python -c 'import sys; print(sys.base_prefix)')/bin:$PATH"
 ```
+
+> ⚠️ **教训（2026-09-24）**：不要把 uv 托管 Python 的 bin 前置到 PATH 去驱动 gem5 构建，
+> 也不要在 `third_party/gem5` 目录内执行 `uv run`（gem5 自带 pyproject.toml 会让 uv 另建 venv）。
+> 两者都会让 gem5py（内嵌 Python 的代码生成器）落到 python-build-standalone 的非标准布局上，
+> 导致 codegen 崩溃（Error 134 / `No module named '_contextvars'`）。
+> gem5 构建用系统 scons（§3）；gem5 运行时如需 protobuf：`sudo apt install python3-protobuf`。
 
 ## 1b. 系统依赖（Ubuntu 24.04，已具备）
 
@@ -64,8 +68,10 @@ sh third_party/gem5-d9300-patch/gem5/apply_patchset.sh
 
 ```bash
 cd third_party/gem5
-uv run scons build/ARM/gem5.opt -j56 2>&1 | tee build-xeon-arm64.log
+scons build/ARM/gem5.opt -j56 2>&1 | tee build-xeon-arm64.log
 ```
+
+用系统 scons（`/usr/bin/scons`，apt 自带）+ 系统 python3.12——gem5 CI 参考环境；不要在此目录用 `uv run`（原因见 §1 ⚠️）。
 
 ## 4. 验证与回传
 
@@ -85,3 +91,17 @@ src/dev/npu/coral_verilated_backend.cc: fatal error: 'elf.h' file not found
 ```
 
 `<elf.h>` 是 glibc 专属头文件，macOS（Mach-O）不提供。verilated NPU 后端本身就是 Linux + Verilator + NPU RTL 流程，**macOS 不做 gem5 构建平台**。若将来需要 macOS 本地构建非 verilated 变体，可在 delta 中对 verilated 后端加 `__APPLE__` 守卫（backlog，需 NPU 流程负责人确认）。
+
+## 附2：Linux 构建失败记录 #2（2026-09-24，已解决）
+
+**现象**：`uv run scons`（或 PATH 前置 uv 托管 Python）驱动构建时，codegen 阶段批量崩溃：
+
+```
+terminate called after throwing an instance of 'pybind11::error_already_set'
+  what():  ModuleNotFoundError: No module named '_contextvars'
+scons: *** [build/ARM/params/PartitionManager.hh] Error 134
+```
+
+**根因**：uv 托管 Python（python-build-standalone）的 `lib-dynload/` 只有 3 个 `.so`（其余扩展模块静态链入 libpython）。gem5 的 gem5py（内嵌 Python 的代码生成器）按 uv 的 `python3-config` 链接/解析后，其内嵌解释器的模块解析在该非标准布局下断裂。与 delta 无关（同 overlay 用系统 scons 即通过）。
+
+**解决**：系统 scons 构建（gem5py 按系统 python3-config 链接，全链路一致）。**验证：2026-09-24 系统 scons 构建成功（`build/ARM/gem5.opt` 954MB）。** 另注意：在 `third_party/gem5` 内执行 `uv run` 会因 gem5 自带 `pyproject.toml` 另建 venv，同样会污染构建环境，一并禁止。

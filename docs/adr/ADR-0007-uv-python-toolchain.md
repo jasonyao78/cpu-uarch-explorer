@@ -14,9 +14,9 @@ macOS 实测补充：uv 托管的 python-build-standalone 在 macOS 上**未过*
 
 ## 决策
 
-- Python 工具链统一为 **uv**：`pyproject.toml` 声明依赖（当前：scons、protobuf~=5.29），`.python-version` 钉 3.12，`uv.lock` **入库**保证跨主机一致。
--  gem5 构建（Linux）：`uv sync` 后用 uv 托管 Python；构建前 `export PATH="$(uv run python -c 'import sys; print(sys.base_prefix)')/bin:$PATH"` 让 SConstruct 找到与 venv 同源的 `python3-config`。
-- macOS 特例：uv 正常管理 runner/analysis 依赖；gem5 的 embed 检查若需在 macOS 验证，临时用 Homebrew Python 3.12（构建本身仍归 Linux）。
+- Python 工具链统一为 **uv**：`pyproject.toml` 声明依赖，`.python-version` 钉 3.12，`uv.lock` **入库**保证跨主机一致。uv 的职责 = 本仓 runner/analysis 依赖管理。
+- **gem5 构建 = 系统工具链**（Ubuntu：apt scons + system python3.12，即 gem5 CI 参考环境）。⚠️ 修订（2026-09-24）：原决策"uv 托管 Python 驱动 gem5 构建"经实测失败——python-build-standalone 布局（lib-dynload 仅 3 个 .so，其余静态链入 libpython）使 gem5py 内嵌解释器模块解析断裂（Error 134 / `_contextvars`）。**严禁**将 uv python bin 前置 PATH 驱动 scons；**严禁**在 `third_party/gem5` 内 `uv run`（gem5 自带 pyproject 会另建 venv）。
+- macOS：uv 管理 runner/analysis；gem5 构建归 Linux（embed 检查如需在 macOS 验证，临时用 Homebrew Python）。
 - 项目 Python 工作**不再混用** conda base、系统 pip `--user`、`--break-system-packages`。
 
 ## 后果
