@@ -19,4 +19,22 @@
 
 ## 页面索引
 
-（随实验进展添加，一页一个微架构概念：load-to-use、cache 一致性、分支预测、TLB 层次、SMT 干扰……）
+**框架与工程**（架构设计 × 代码细节）：
+
+- `00-why-this-framework.md` — 问题本质：没有纪律的测量产生数字不是知识
+- `04-layered-architecture.md` — 四层架构：probe/runner/数据/报告为什么分开
+- `05-data-model.md` — 四类记录、证据等级、"不许编数"的 schema 强制
+- `06-plan-run-and-provenance.md` — Plan/Run 分离与参数溯源（GB10 血泪）
+- `07-probe-abi-contract-tests.md` — Probe ABI 三条规矩与真实二进制契约测试
+- `08-persistence-reliability.md` — fsync/原子替换/JSONL 追加/raw 不入库
+- `09-gem5-overlay-minimal-delta.md` — blob 哈希普查破案：1008→134 与三次构建失败
+- `10-frequency-and-env-transactions.md` — 频率能力分级与环境事务模型
+- `11-cross-platform-abstraction.md` — target 正交分解、controls 收敛、三机管线
+
+**微架构概念**（三段式：概念/测量/模型）：
+
+- `01-pointer-chase.md` — 指针追逐与 MLP=1：测"单次依赖 load 的真实延迟"
+- `02-timing-and-statistics.md` — 41.67ns 的尺子量 1ns：区间平均 + median-of-5
+- `03-qos-steering.md` — QoS 分流：macOS 无绑核下的 E 核测量手段
+
+（后续随实验进展添加：TLB 层次、分支预测、SMT 干扰、cache 一致性……每页一个概念，测量栏引用 data/public 与报告，模型栏待 gem5 校准启动后补。）
