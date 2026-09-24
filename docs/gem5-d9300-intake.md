@@ -70,3 +70,10 @@ src/dev/npu/coral_verilated_backend.cc:8:10: fatal error: 'elf.h' file not found
 ```
 
 `<elf.h>` 为 glibc 专属头文件，macOS 不提供；且 verilated NPU 后端依赖 Verilator + NPU RTL，属 Linux 流程。**结论：overlay 与 v25.1 基线兼容性良好；正式构建平台定为 Xeon 服务器**（runbook：`docs/runbooks/build-gem5-xeon.md`）。macOS 本地构建非 verilated 变体的备选方案：delta 中对 verilated 后端加 `__APPLE__` 守卫（backlog）。首次失败记录：conda Python 3.13 未过 gem5 链接检查（"Can't find a working Python installation"）。
+
+### delta 树清理（2026-09-24）
+
+- **已删 `util/`（6 文件）**：`orchestrator-request.py`（纯新增，原项目的分布式编排管道）+ `transmitter.py`、`gem5-resources-manager/requirements.txt`、`dockerfiles/gpu-fs/{Dockerfile,README.md}`、`docker-bake.hcl`（5 个上游文件的改写，均不在 scons 构建路径上，删除后恢复上游原版）。submodule 工作树已同步恢复（`git checkout -- util/`）。
+- **保留，待 Xeon 构建通过后定夺**：`ext/pybind11/`（185 文件，旧版 vendored 副本——与 `src/python` 绑定的 API 兼容性未知，删错了编译就挂）、`ext/testlib/terminal.py`（2 行改动）、`configs/example/gem5_library/x86-parsec-benchmarks.py` 与 `riscv-fs.py`、`tests/gem5/example_configs/multisim/`（测试引用关系不确定）。
+- **判定保留（项目相关）**：D9300/X4/A720/A510 等 ARM core 模型、`arm_multicore_*` 配置、coralnpu/ndp/gemmini 资产、`src/dev/npu/`、`src/cpu/o3/tdm.*`、`tlm_chi.py`、riscv 配置（v0.3 方向）、`run_multicore.sh`、`scripts/`、`tests/test-progs/{gemmini-apps,ndp}/`。
+- 原始档案 `../cpu-uarch-ref/gem5-d9300-patch/`（含 MANIFEST.sha256）保留全部原文件，任何删除可恢复。
