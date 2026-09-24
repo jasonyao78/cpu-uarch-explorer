@@ -40,11 +40,24 @@ def compiler_version() -> str:
         return "unknown"
 
 
-def environment_block(control_mechanism: str, control_value: str) -> dict:
+def local_system_info() -> dict:
+    """本机环境采集：os_version/kernel/compiler。LocalExecutor 直接使用；
+    SshExecutor 在目标机采集同名字段——两边口径一致，engine 合并 control
+    入档（run-record.environment 描述的是目标机）。"""
     return {
         "os_version": plat.mac_ver()[0] if plat.system() == "Darwin" else plat.platform(),
         "kernel": plat.release(),
         "compiler": compiler_version(),
+    }
+
+
+def environment_block(control_mechanism: str, control_value: str,
+                      system_info: dict | None = None) -> dict:
+    """组装 environment 段：默认本机采集；engine 传入执行器采集的
+    system_info（ssh 场景为目标机）时以传入为准。"""
+    info = system_info if system_info is not None else local_system_info()
+    return {
+        **info,
         "control": {"mechanism": control_mechanism, "value": control_value},
     }
 

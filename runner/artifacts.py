@@ -51,6 +51,23 @@ class ArtifactStore:
         entry["source"] = {"commit": git_commit, "dirty": git_dirty}
         return entry
 
+    def register_probe_binary_digest(self, display_path: str, sha256_hex: str,
+                                     git_commit: str, git_dirty: bool) -> dict:
+        """登记远端 probe 二进制（transport=ssh）：本机读不到远端字节，
+        SHA256 由执行器通道在目标机采集后传入；其余谱系同本机登记。"""
+        entry = {
+            "schema_version": "1.0",
+            "id": f"probe-binary:{Path(display_path).name}",
+            "kind": "probe-binary",
+            "sha256": sha256_hex,
+            "created_at": _now_iso(),
+            "path": display_path,
+            "notes": "probe 可执行文件谱系（SHA256 经 ssh 在目标机采集）",
+            "source": {"commit": git_commit, "dirty": git_dirty},
+        }
+        self.entries.append(entry)
+        return entry
+
     def write_raw_sample(self, case_id: str, sample_index: int,
                          stdout: str, stderr: str) -> dict:
         """原始样本字节先落盘再算 SHA256，manifest id 即 raw_samples_ref 引用目标。"""

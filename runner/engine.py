@@ -2,10 +2,16 @@
 """Run 引擎：Plan → repeated execution → adapter → raw artifact → parser
 → statistics → atomic record（2026-09-24 评审裁定的最小纵向闭环）。
 
+2026-09-25 扩展（Xeon 接入任务）：执行器按 platform.target.transport
+经 make_executor 选择（ADR-0006 正交分解），主流程对传输层零特判。
+环境信息（os/kernel/compiler）由执行器通道采集——ssh 平台的记录描述
+的是目标机而非本机；远端 probe 二进制的 SHA256 同样经执行器通道在
+目标机采集（artifact 锚定实际执行的那份二进制）。
+
 反模式对照（GB10 实证缺陷，逐条对冲）：
 - samples 配置死参数 → repetitions 在此真实驱动循环，sample_index 递增；
 - 静默参数降级 → 单位解析在 plan 期严格报错（resolve.py）；
-- environment 硬编码 unknown → 每次运行采集真实 os/kernel/compiler + control；
+- environment 硬编码 unknown → 每次运行由执行器采集真实 os/kernel/compiler + control；
 - 宽泛 except 掩盖失败 → 异常映射为结构化 failure.reason，绝不吞掉；
 - 输出打印请求值而非实际值 → raw_command 记录实际执行命令（含控制前缀）。
 """
@@ -17,10 +23,10 @@ from pathlib import Path
 from .adapters.ptr_chase import PtrChaseAdapter
 from .artifacts import ArtifactStore
 from .errors import ParseError
-from .executor.local import LocalExecutor
+from .executor import make_executor
 from .plan import Case, Plan
-from .records import (JsonlWriter, build_run_record, compiler_version,  # noqa: F401
-                      environment_block, git_provenance, write_json_atomic,
+from .records import (JsonlWriter, build_run_record, environment_block,  # noqa: F401
+                      git_provenance, write_json_atomic,
                       write_jsonl_atomic)
 from .statistics import summarize
 
@@ -42,6 +48,29 @@ def _failure_reason(result) -> tuple[str, dict]:
     return "failed", {"reason": f"probe-exit-{result.returncode}", "detail": result.stderr.strip()}
 
 
+def _register_probe(store: ArtifactStore, executor, platform: dict,
+                    probe_name: str, git: dict) -> tuple[str, dict]:
+    """登记 probe 二进制 artifact，返回 (实际 argv 用的路径, manifest 条目)。
+
+    local：读本机字节算 SHA256，argv 用绝对路径；ssh：路径相对远端仓库根
+    （execute 会话内已 cd），SHA256 经执行器通道在目标机采集——本机读不到
+    远端字节，也不允许假装读得到（OI-9 蓝图：artifact 锚定实际执行体）。"""
+    configured = platform["probes"][probe_name]
+    if platform["target"].get("transport", "local") == "local":
+        probe_bin = Path(configured)
+        if not probe_bin.is_file():
+            raise SystemExit(f"probe binary missing: {probe_bin} (run cmake --build build first)")
+        return (str(probe_bin.resolve()),
+                store.register_probe_binary(probe_bin, git["commit"], git["dirty"]))
+    res = executor.execute(["sha256sum", configured])
+    digest = res.stdout.split()[0] if res.returncode == 0 and res.stdout.split() else None
+    if digest is None or len(digest) != 64:
+        raise SystemExit(f"remote probe binary missing or unreadable: {configured} "
+                         f"(via ssh; stderr: {res.stderr.strip()[:200]})")
+    return (configured,
+            store.register_probe_binary_digest(configured, digest, git["commit"], git["dirty"]))
+
+
 def run_plan(plan: Plan, platform: dict, run_dir: Path, repo_root: Path) -> dict:
     """执行整个 plan，逐 case 落 record；返回 run 汇总。任何 case 失败不中断后续 case。"""
     run_dir = Path(run_dir)
@@ -49,13 +78,12 @@ def run_plan(plan: Plan, platform: dict, run_dir: Path, repo_root: Path) -> dict
     store = ArtifactStore(run_dir)
     records_path = run_dir / "records.jsonl"
     writer = JsonlWriter(records_path)
-    executor = LocalExecutor()
+    executor = make_executor(platform)
 
     git = git_provenance(repo_root)
-    probe_bin = Path(platform["probes"][plan.cases[0].probe])
-    if not probe_bin.is_file():
-        raise SystemExit(f"probe binary missing: {probe_bin} (run cmake --build build first)")
-    bin_entry = store.register_probe_binary(probe_bin, git["commit"], git["dirty"])
+    probe_path, bin_entry = _register_probe(store, executor, platform, plan.cases[0].probe, git)
+    # 环境信息由执行器通道一次采集：ssh 平台描述目标机，local 描述本机
+    system_info = executor.system_info()
 
     probe_meta = {
         "name": plan.cases[0].probe,
@@ -68,7 +96,8 @@ def run_plan(plan: Plan, platform: dict, run_dir: Path, repo_root: Path) -> dict
     summary = {"total": 0, "ok": 0, "failed": 0, "skipped": 0, "unsupported": 0}
     try:
         for case in plan.cases:
-            record = _run_case(case, platform, probe_meta, executor, store, git)
+            record = _run_case(case, platform, probe_meta, probe_path, executor,
+                               store, system_info, git)
             writer.append(record)
             summary["total"] += 1
             summary[record["status"]] += 1
@@ -91,18 +120,17 @@ def run_plan(plan: Plan, platform: dict, run_dir: Path, repo_root: Path) -> dict
     return summary
 
 
-def _run_case(case: Case, platform: dict, probe_meta: dict,
-              executor: LocalExecutor, store: ArtifactStore, git: dict) -> dict:
+def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
+              executor, store: ArtifactStore, system_info: dict, git: dict) -> dict:
     """执行单个 case：按 case.repetitions 重复执行（sample_index 递增），
     每趟原始输出落盘；全部成功才产 ok 记录（median 统计），任何失败产出
     status=failed/unsupported + 结构化 failure + 空 metrics（schema v2
     条件化约束），成功样本数写入 detail 供审计。"""
     adapter = _ADAPTERS[case.probe]
-    probe_bin = str(Path(platform["probes"][case.probe]).resolve())
     params = {k: rv.value for k, rv in case.params}
     provenance = {k: rv.source for k, rv in case.params}
-    argv = [probe_bin] + adapter.build_argv(params)
-    env = environment_block(case.control.mechanism, case.control.value)
+    argv = [probe_path] + adapter.build_argv(params)
+    env = environment_block(case.control.mechanism, case.control.value, system_info)
 
     latencies: list[float] = []
     raw_refs: list[str] = []

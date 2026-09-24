@@ -43,3 +43,10 @@ class LocalExecutor:
         except OSError as e:
             return ExecutionResult(returncode=None, stdout="", stderr=str(e),
                                    raw_command=raw_command)
+
+    def system_info(self) -> dict:
+        """本机环境采集：os/kernel/compiler（LocalExecutor 场景），供
+        run-record.environment 使用；与 SshExecutor.system_info 同名字段、
+        同一口径，engine 不关心数据来自哪一侧。"""
+        from ..records import local_system_info
+        return local_system_info()
