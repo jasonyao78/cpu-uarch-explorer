@@ -1,9 +1,15 @@
-# analysis — 报告生成与校准对比
+# analysis —— 报告生成与校准对比
 
-职责（随骨架迭代实现）：
+当前实现（2026-09-25）：消费 run 目录的 `records.jsonl`，生成 Markdown 报告 + SVG 延迟曲线（纯 stdlib，零依赖）。
 
-1. **单 run 报告**：JSONL 记录 → 人类可读报告（含 docs/learning 定义的"费曼段"）。
-2. **跨 run 对比**：多设备/多日期趋势图；SQLite 汇总层引入后（ADR-0003 触发条件）改为 SQL 查询驱动。
-3. **校准对比**：实机 MEASURED vs gem5 SIMULATED，按 ADR-0005 的 T1/T2/T3 目标判定，超差生成"校准差异单"。
+```bash
+.venv/bin/python -m analysis.cli report --run data/public/runs/<run目录>
+# 产出写回 run 目录：report.md（元信息/数据表/台阶推断/置信度）+ latency.svg
+```
 
-状态：待实现。
+- 报告口径遵守 `docs/methodology/measurement-discipline.md` §7（温度/页策略/统计量/置信度/核型/证据等级/日期逐项入档）；
+- 台阶检测阈值：相邻档位 median 比值 >1.5×，标注为推断而非断言；
+- failed 记录隔离展示，不进图表；
+- 测试：`analysis/tests/`（合成 fixture，不依赖真机数据）。
+
+待做：跨 run 汇总对比、校准差异单（MEASURED vs SIMULATED）。

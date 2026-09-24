@@ -130,4 +130,10 @@ src/dev/npu/coral_verilated_backend.cc:8:10: fatal error: 'elf.h' file not found
 - **裁定**：v25.0→v25.1 的移植（746 行有意改动 + O3 重构适配）是独立里程碑的工作；为让校准闭环尽快可用，**submodule 改钉增量树的原生基线 v25.0.0.1**——修剪后的 135 文件同步上去恰好还原原项目的已验证状态，零移植工作量（ADR-0004 已修订；v25.1 移植入 backlog）。
 - **加固**：`apply_patchset.sh` 增加基线断言（HEAD 必须等于 v25.0.0.1 的 commit，否则拒绝同步）与预存脏树检测（OI-8 的 overlay 加固两项落地）。
 - **后续修正**：改钉后 `src/python/SConscript` 回退为"v25.0.0.1 基线 + ndp 3 行"（失败 #1 的 v25.1 移植版在 v25.0 树上引用不存在的 `src/python/pybind11/port.cc`，第三次重建报错确认；改钉后原 overlay 版本才是自洽的）。
+
+### 失败 #3：CheckerCPU 注销链断裂（2026-09-25，改钉后首次重建）
+
+- **报错**：批量 `Error 134`，根因 `ModuleNotFoundError: No module named 'm5.objects.CheckerCPU'`（`DummyChecker.py:36` 导入）。
+- **根因**：overlay 的 `src/cpu/SConscript` 相对基线只删了 3 行（`SimObject('CheckerCPU.py'...)` + `Source('checker/cpu.cc')`），但保留了 `DummyChecker.py` 的注册——而 `DummyChecker` 继承 `CheckerCPU`，模块未注册导致导入失败。即**原增量树自带不自洽的注销**（推测原作者想裁掉 checker CPU 但漏了 DummyChecker 注册行）。
+- **处置**：恢复上游注册的最简形式 = 该文件与基线逐字节相同 → 按最小集原则直接从增量树移除（增量树 135 → 134 文件）。checker CPU 是 SimObject，不实例化则无影响；若将来证实原项目确有裁掉它的必要，需连 DummyChecker 注册一并移除并记录动机。
 - **待办**：v25.1 移植 milestone（三方 diff 逐文件 port 27 个有意文件；Neoverse V2 模板等 v25.1 资产届时可用）。
