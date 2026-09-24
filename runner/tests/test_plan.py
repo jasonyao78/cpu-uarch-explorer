@@ -27,7 +27,7 @@ SPEC = {
 PLATFORM = {
     "target": {"os": "darwin", "isa": "aarch64", "execution_kind": "native",
                "executor": "native", "target_id": "t-01"},
-    "probes": {"ptr_chase": "build/probes/cache-mem/ptr_chase"},
+    "probes": {"ptr_chase": "build/macos-arm64/release/probes/cache-mem/ptr_chase"},
     "controls": [
         {"id": "c0", "control": {"mechanism": "qos", "value": "default"}, "command_prefix": []},
         {"id": "c1", "control": {"mechanism": "qos", "value": "background"},

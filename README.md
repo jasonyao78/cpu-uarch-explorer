@@ -22,8 +22,9 @@
 - `docs/adr/` — 架构决策记录（许可证、数据模型、分支策略等）
 - `docs/open-items.md` — 遗留问题跟踪（设备信息回填、gem5 源码接入等）
 - `docs/learning/` — 个人学习笔记（费曼工作流，开源时可整目录移除）
-- `probes/` — P0 微基准源码（C++17 + CMake）
+- `probes/` — P0 微基准源码（C++17 + CMake；构建走 `CMakePresets.json`，`build/<target-triple>/<profile>` 分层，ADR-0008）
 - `runner/` — Python 编排（`schema/` 为统一数据模型；v2 含 experiment / capability / run-record / artifact 四类记录，ADR-0006）
+- `configs/` — 声明式配置：`experiments/` 实验规格实例、`platforms/` 平台画像与 probe 二进制映射（ADR-0008）
 - `pyproject.toml` / `uv.lock` / `.python-version` — Python 工具链，uv 管理（ADR-0007）
 - `workloads/` — Geekbench / SPEC / CoreMark 适配层（只含 Runner 与解析器，不含商业内容）
 - `analysis/` — 报告生成与校准对比

@@ -21,15 +21,12 @@ cd cpu-uarch-explorer
 # 在 M4 Pro 本机执行。注意：
 # 1. macOS 自带 openrsync（2.6.9 兼容）不支持 --info=progress2，用 --progress；
 #    想要总进度条可 brew install rsync 后用 rsync3 的 --info=progress2。
-# 2. 必须排除构建产物（third_party/gem5/build/ 有 ~1.5GB macOS Mach-O 对象，
-#    在 Linux 上完全无用；rsync 的 'build/' 模式按目录名匹配任意层级）。
+# 2. 必须排除构建产物（构建目录已收敛为单一 build/ 树，ADR-0008；
+#    rsync 的 'build/' 模式按目录名匹配任意层级，一条规则全覆盖）。
 # 3. 目标路径放 NVMe（先 lsblk / findmnt 确认挂载点；home 目录可能在 HDD 上）。
 rsync -a --progress \
   --exclude '.DS_Store' \
   --exclude 'build/' \
-  --exclude 'build-x86/' \
-  --exclude 'build-ubsan/' \
-  --exclude 'third_party/gem5/build-macos-arm64.log' \
   /Users/michaelyao/workspace/cpu-uarch-explorer/ \
   <server>:/path/on/nvme/cpu-uarch-explorer/
 # submodule 说明：absorbgitdirs 后 third_party/gem5/.git 是指向

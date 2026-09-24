@@ -14,7 +14,7 @@ from runner.adapters.ptr_chase import PtrChaseAdapter
 from runner.errors import ParseError
 
 ROOT = Path(__file__).resolve().parents[2]
-BINARY = ROOT / "build" / "probes" / "cache-mem" / "ptr_chase"
+BINARY = ROOT / "build" / "macos-arm64" / "release" / "probes" / "cache-mem" / "ptr_chase"
 
 
 @unittest.skipUnless(BINARY.is_file(), f"ptr_chase not compiled: {BINARY}")

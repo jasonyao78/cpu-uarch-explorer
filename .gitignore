@@ -1,4 +1,4 @@
-# Build artifacts
+# Build artifacts: single entry build/<target-triple>/<profile> (ADR-0008)
 build/
 *.o
 *.out

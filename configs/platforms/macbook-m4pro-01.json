@@ -11,7 +11,7 @@
     "transport": "local"
   },
   "probes": {
-    "ptr_chase": "build/probes/cache-mem/ptr_chase"
+    "ptr_chase": "build/macos-arm64/release/probes/cache-mem/ptr_chase"
   },
   "defaults": {
     "repetitions": 5
