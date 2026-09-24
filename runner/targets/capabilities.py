@@ -52,7 +52,7 @@ def collect_cpufreq(executor) -> dict[str, Any]:
     script = "; ".join(f'echo "$(cat {base}/{f} 2>/dev/null)"' for f in _CPUFREQ_FIELDS)
     res = executor.execute(["sh", "-c", script])
     lines = res.stdout.splitlines()
-    if res.returncode != 0 or len(lines) < len(_CPUFFREQ_FIELDS) or not lines[1].strip():
+    if res.returncode != 0 or len(lines) < len(_CPUFREQ_FIELDS) or not lines[1].strip():
         return {"supported": False, "detail": f"cpufreq sysfs unreadable: {res.stderr.strip()[:120]}"}
     return {"supported": True, "detail": base, "values": {
         "driver": lines[0].strip(),

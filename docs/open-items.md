@@ -17,7 +17,10 @@
 ## OI-8 runner 组合式重构与扩展性验收（Phase C，2026-09-24 评审衍生）
 
 - **✅ 最小纵向闭环（2026-09-24 落地）**：`runner/` 包实现 Plan → repeated execution → adapter → raw artifact → parser → statistics → atomic record 全链：`spec.py`（配置加载与结构校验）、`resolve.py`（ResolvedValue{value,source} 溯源 + 严格单位解析，未知单位硬报错）、`plan.py`（Plan/Run 分离、确定性 case 展开、repetitions 真实消费）、`adapters/ptr_chase.py`、`executor/local.py`（command_prefix 承载 QoS 控制）、`artifacts.py`（原始样本 + SHA256 manifest）、`records.py`（run-record v2 构建、JSONL 逐行 fsync、汇总文件 tmp→fsync→replace→父目录 fsync）、`engine.py`、`cli.py`（plan 预览 / run 执行、退出码阶梯 0/1/2）。22 项测试全绿（含真实二进制契约测试 `test_ptr_chase_contract.py`）。首份实机数据：M4 Pro P/E 双峰 cache sweep，28 case × 5 重复全 ok，28 条 run-record 与 141 条 artifact-manifest 全部通过 schema 校验（`data/public/runs/20260924T153722Z-ptr-chase-cache-sweep/`）。
-- **剩余**：fake target / transport 契约测试；RISC-V compile-only preset 作为扩展性架构测试；gem5 overlay 同步加固（同步后 diff 摘要；基线断言与脏树检测已于 2026-09-25 落地）；SSH/ADB Transport 与 gem5 Executor；跨 run 汇总与校准差异单（analysis/ 已落地单 run 报告，2026-09-25）。
+- **剩余**：fake target / transport 契约测试；RISC-V compile-only preset 作为扩展性架构测试；gem5 overlay 同步加固（同步后 diff 摘要；基线断言与脏树检测已于 2026-09-25 落地）；跨 run 汇总与校准差异单（analysis/ 已落地单 run 报告，2026-09-25）。
+- **⬆ 环境事务模型（2026-09-25 升级为主线任务）**：GB10 模式重新实现——host-wide lock、durable journal、inspect→validate→apply→verify→逆序 restore、中断恢复、未完成事务阻塞下次运行（OI-9 裁定"借模型"）。**第一个受控项 = Xeon 的 cpufreq governor（performance 锁频）**；macOS 无锁频能力（v0.3 §2.1 已知约束），对应路径是 capability-manifest 记 `unsupported` + 测量期 powermetrics 并发采样入档。原则：锁频是 host 级状态突变，必须走事务恢复，禁止用 command_prefix 实现。
+- **先行低成本项（并入 Xeon 接入任务）**：频率只读快照——每 case 前后读 `scaling_cur_freq`（Linux）/ powermetrics 采样（macOS），写入 `environment.freq_snapshot`（schema 扩展字段，登记 runner/schema/README.md）；让每条记录能回答"当时频率多少"，不解决波动但提供不确定度证据。
+- **传输层**：SSH/ADB Transport 与 gem5 Executor（SSH 随 Xeon 接入任务先行，见 `docs/tasks/2026-09-25-xeon-platform-onboarding.md`）。
 - **验收标准（ADR-0006）**：新增 RISC-V 仅需 toolchain preset + ISA kernels + capability provider + target 配置；runner 主流程零修改、通用 schema 零修改、现有 contract tests 全绿。
 - **前置**：ADR-0006 与 schema v2（2026-09-24 已落盘）。
 
@@ -28,7 +31,7 @@
 - **方法学迁移**：`docs/methodology/measurement-discipline.md`（温度语义三档/页策略/统计/置信度/修正留痕/报告模板）。
 - **ptr_chase 改进 backlog**：见 `probes/cache-mem/README.md`（MONOTONIC_RAW、hugepage+cold 参数化、evict 工具移植评估、chase_migrate 范式）。
 - **runner 蓝图吸收清单**（Phase C / OI-8 的前置设计输入）：声明式 configs + 启动期引用完整性校验、Plan/Run 分离 + environment phase 分组、ProbeAdapter 4 方法 + 错误值返回、ResultStore 原子写 + case_definitions_signature、ResolvedValue{value,source} 参数溯源、exit code 阶梯、adapter↔二进制契约测试。**借分层、协议与测试方式，不借其当前 Runner 实现**（2026-09-24 外部评审实证：working-set 的 MiB/KiB 单位不被识别、静默降级为默认 1024KB；profile 声明的 samples 无消费点、sample_index 恒为 0；journal_tx_ids 从不追加；environment 硬编码 platform=unknown；CLI 以 coordinator=None 构造且调用缺 backend 参数）。fixture 的真实来源须由 capture manifest/命令证明（其历史 fixture 曾手写臆造，见该仓复盘文档），不能因文件存在就默认真实。
-- **环境事务子系统：借模型、重新实现接线**（2026-09-24 评审纠偏，原"整体不吸收"裁定过头）：模型本身已实现 host-wide lock / durable journal / inspect→validate→apply→verify / 失败后逆序 restore / signal 中断恢复 / 未完成事务阻止新运行；coordinator=None 是 CLI/Runner 接线缺陷而非模型无价值。未来控制 Linux governor / hugepage / THP / perf 权限时此为核心模式。**不吸收**：其 ARM64 硬编码假设。
+- **环境事务子系统：借模型、重新实现接线**（2026-09-24 评审纠偏，原"整体不吸收"裁定过头）：模型本身已实现 host-wide lock / durable journal / inspect→validate→apply→verify / 失败后逆序 restore / signal 中断恢复 / 未完成事务阻止新运行；coordinator=None 是 CLI/Runner 接线缺陷而非模型无价值。未来控制 Linux governor / hugepage / THP / perf 权限时此为核心模式（**2026-09-25 升级：第一个受控项定为 Xeon cpufreq governor，见 OI-8**）。**不吸收**：其 ARM64 硬编码假设。
 - **GB10 平台**：未来接入按声明式平台 JSON 模式（v0.4 候选）；它是 hugepage/PMU/跨核方法学的最佳宿主，也是可扩展性的天然验收平台。
 
 ## OI-2 红米设备信息回填（`android-arm64`）

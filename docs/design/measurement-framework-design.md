@@ -241,7 +241,7 @@ ctest --preset macos-arm64-release
 - ~~只有 local 执行器~~ ✅ 2026-09-25：SSH 通道已实现（SshExecutor + transport 工厂按 ADR-0006 选择，主流程零特判），Xeon（linux-x86_64）平台接入并产出首份跨平台数据；ADB/gem5 通道未实现；
 - 只有 ptr_chase 一个测量探针；core/branch/tlb/sync 四域只有 README；
 - 报告层仅支持单 run 报告；跨 run 汇总与校准差异单未做；
-- 环境事务（改 governor/hugepage 需"改完恢复"）只有设计结论（借 GB10 模型重新实现），无代码；
+- 环境事务（改 governor/hugepage 需"改完恢复"）只有设计结论（借 GB10 模型重新实现），无代码；频率管理按能力分级：**能锁的平台走事务锁+恢复（Xeon governor=performance 为第一受控项），不能锁的平台（macOS 无锁频能力）走测量期并发采样入档**，频率只读快照作为先行项并入 Xeon 接入（OI-8）；
 - gem5 基建已验证（v25.0.0.1 + 134 文件最小集，Xeon 重建与 SE 冒烟通过）；D9300 SE 精简配置与建模后置（启动条件：探针套件齐备 + D9300 实机入册）。
 
 **Xeon 首测解读（2026-09-25，修订版 v2 —— 修正留痕，measurement-discipline §6）**：

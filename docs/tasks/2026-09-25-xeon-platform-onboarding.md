@@ -20,15 +20,17 @@
 3. `CMakePresets.json` 新增 `linux-x86_64-release` preset，探针在服务器原生构建；
 4. 在 Xeon 上完成 ptr-chase-cache-sweep：14 档 buffer × 5 重复 × ≥1 个控制组，run 目录入库（records.jsonl / artifacts.jsonl / run-manifest.json / report.md / latency.svg，raw/ 按策略不入库）；
 5. 全部 records 通过 `runner/schema/run-record.v2.schema.json` 校验；
-6. 报告数据呈现合理的 x86 层次结构（参考预期：L1d 48KB / L2 2MB / LLC ≈105MB 共享，台阶应在相应档位附近；**不符预期不得强行解释，如实记录并标注置信度**）；
-7. 本机（macOS）全部测试保持绿色：CTest 5 项 + runner 22 项 + analysis 7 项；新增代码带测试（SSH 执行器用 fake/mock，不依赖真机）；
-8. 文档同步：CHANGELOG、设计文档 §11/§12（local-only 限制条目更新）、OI-3 标注接入完成。
+6. **频率快照入档**：每条 run-record 的 `environment` 含 `freq_snapshot`（case 前后各读一次 `/sys/devices/system/cpu/cpuN/cpufreq/scaling_cur_freq`，N=绑定的核；格式 `{before_khz, after_khz, cpu}`）——只读、不改系统状态；该字段是 schema 扩展字段，须登记 `runner/schema/README.md`；
+7. 报告数据呈现合理的 x86 层次结构（参考预期：L1d 48KB / L2 2MB / LLC ≈105MB 共享，台阶应在相应档位附近；**不符预期不得强行解释，如实记录并标注置信度**）；
+8. 本机（macOS）全部测试保持绿色：CTest 5 项 + runner 22 项 + analysis 7 项；新增代码带测试（SSH 执行器用 fake/mock，不依赖真机）；
+9. 文档同步：CHANGELOG、设计文档 §11/§12（local-only 限制条目更新）、OI-3 标注接入完成。
 
 ## 3. 非目标（明确不做）
 
 - gem5 相关的一切（OI-1 剩余项是另一条线）；
 - Android 平台、新探针（core/branch/TLB 是后续任务）；
 - perf/PMU 采集（本期纯计时法；`perf_event_paranoid=4` 意味着 perf 需 sudo，不碰）；
+- **锁频 / governor 修改**（需要环境事务模型 + sudo，是 OI-8 的独立主线任务；本期只做只读频率快照）；
 - 跨 run 汇总对比、报告层功能增强；
 - x86 服务器上的 gem5 重建（已验证状态，勿动）。
 
@@ -59,9 +61,10 @@
 4. **构建 preset**：`CMakePresets.json` 加 `linux-x86_64-release`（binaryDir `build/linux-x86_64/release`，仅设 Release）。
 5. **服务器构建**：rsync（带 --delete）→ 服务器上 `cmake --preset linux-x86_64-release && cmake --build --preset linux-x86_64-release`。
 6. **plan 预览**：本机跑 `runner.cli plan --platform xeon-8481c-01.json ...`，确认 case 展开正确（控制组、参数溯源）。
-7. **实跑 + 报告**：`runner.cli run` → `analysis.cli report`；jsonschema 校验全部 records（命令见设计文档 §9）。
-8. **测试**：SSH 执行器的单测用 fake（subprocess 拦截或假 transport），不依赖真机；plan 对 ssh 平台的展开测试。
-9. **文档与提交**：CHANGELOG、设计文档 §11/§12、OI-3、（如有新约定）AGENTS.md；本机提交，粒度按功能切分（执行器 / 配置+preset / 数据 / 文档）。
+7. **频率快照**：在 engine 的 case 执行前后加只读采样钩子（接口按执行器抽象：local 读本地 sysfs，ssh 读远端 sysfs；Linux 实现本期落地，macOS 侧留 unsupported 占位）。采样值进 `environment.freq_snapshot`。
+8. **实跑 + 报告**：`runner.cli run` → `analysis.cli report`；jsonschema 校验全部 records（命令见设计文档 §9）。
+9. **测试**：SSH 执行器的单测用 fake（subprocess 拦截或假 transport），不依赖真机；plan 对 ssh 平台的展开测试；频率快照解析的单测。
+10. **文档与提交**：CHANGELOG、设计文档 §11/§12、OI-3、（如有新约定）AGENTS.md；本机提交，粒度按功能切分（执行器 / 配置+preset / 数据 / 文档）。
 
 ## 7. 交付物清单
 
