@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "target": {
+    "os": "linux",
+    "isa": "x86_64",
+    "abi": "linux-sysv-x86_64",
+    "target_id": "xeon-8481c-01",
+    "cpu_profile": "sapphire-rapids-8481c",
+    "execution_kind": "native",
+    "executor": "native",
+    "transport": "ssh",
+    "ssh_host": "xeon-8481c-01",
+    "ssh_remote_root": "~/cpu-uarch-explorer"
+  },
+  "probes": {
+    "ptr_chase": "build/linux-x86_64/release/probes/cache-mem/ptr_chase"
+  },
+  "defaults": {
+    "repetitions": 5
+  },
+  "controls": [
+    {
+      "id": "core0",
+      "control": { "mechanism": "taskset", "value": "0" },
+      "command_prefix": ["taskset", "-c", "0"],
+      "notes": "绑物理核 CPU0；SMT sibling 为 CPU56（v0.3 §2.2 SMT 纪律）——本期不主动隔离 sibling，控制口径为运行前确认系统低负载并如实记录"
+    }
+  ],
+  "capabilities_note": "PMU 完整（SPR events / PEBS / LBR，OI-3 已回填 MEASURED）；perf_event_paranoid=4（perf 需 sudo，本期纯计时法不碰）；ssh_host 为 ssh config 别名，真实地址见 data/private/hosts.md"
+}

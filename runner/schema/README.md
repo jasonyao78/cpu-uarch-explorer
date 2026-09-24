@@ -11,6 +11,13 @@
 
 原则：信封强制（v2 的 required 列表）；`schema_version` 必填；`additionalProperties=true`（新增字段不破坏旧读者，**扩展字段必须登记到本 README**）；证据来源与访问分类是两个正交轴。
 
+### 已登记的 target 扩展字段
+
+| 字段 | 类型 | 用途 | 登记日期 |
+|---|---|---|---|
+| `ssh_host` | string | transport=ssh 时的 ssh config 别名（如 `xeon-8481c-01`）；真实地址禁止入库，映射在 `data/private/hosts.md` 与本机 `~/.ssh/config` | 2026-09-25 |
+| `ssh_remote_root` | string | 远端仓库根目录；SshExecutor 执行前 cd 的目标（默认 `~`） | 2026-09-25 |
+
 ## v1（归档）
 
 `record.schema.json`（v1，2026-09-23 基线）：已被 v2 取代，保留作历史参考，新记录一律用 v2。

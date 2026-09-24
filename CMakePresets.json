@@ -18,12 +18,19 @@
       "displayName": "macOS 宿主交叉 x86_64（Rosetta/交叉检查）",
       "binaryDir": "${sourceDir}/build/darwin-x86_64/release",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "CMAKE_OSX_ARCHITECTURES": "x86_64" }
+    },
+    {
+      "name": "linux-x86_64-release",
+      "displayName": "Linux x86-64 Release（Xeon 服务器原生构建）",
+      "binaryDir": "${sourceDir}/build/linux-x86_64/release",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     }
   ],
   "buildPresets": [
     { "name": "macos-arm64-release", "configurePreset": "macos-arm64-release" },
     { "name": "macos-arm64-ubsan", "configurePreset": "macos-arm64-ubsan" },
-    { "name": "darwin-x86_64-release", "configurePreset": "darwin-x86_64-release" }
+    { "name": "darwin-x86_64-release", "configurePreset": "darwin-x86_64-release" },
+    { "name": "linux-x86_64-release", "configurePreset": "linux-x86_64-release" }
   ],
   "testPresets": [
     { "name": "macos-arm64-release", "configurePreset": "macos-arm64-release", "output": { "outputOnFailure": true } },
