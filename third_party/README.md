@@ -6,7 +6,7 @@
 
 | 依赖 | 路径 | 许可证 | 状态 |
 |---|---|---|---|
-| gem5（D9300 O3 fork） | `third_party/gem5` | BSD-3-Clause（上游） | 待用户提供源码（OI-1） |
+| gem5 | `third_party/gem5` | BSD-3-Clause（上游） | 基线已就位：上游 stable v25.1.0.1 @ `f5c5a6e390`（2026-09-24 核实）；**未发现 D9300 修改**；fork→submodule 待办（OI-1，见 `docs/gem5-d9300-intake.md`） |
 
 ## 登记要求
 

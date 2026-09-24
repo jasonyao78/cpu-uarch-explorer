@@ -4,7 +4,7 @@
 
 | 包 | 引入路径 | 来源 | 版本/commit | 许可证 | 补丁 |
 |---|---|---|---|---|---|
-| （暂无） | | | | | |
+| gem5 | `third_party/gem5`（暂为本地克隆，gitignore；待转 submodule） | https://github.com/gem5/gem5.git | stable @ `f5c5a6e390`（v25.1.0.1 线） | BSD-3-Clause（见 third_party/gem5/LICENSE） | 暂无（上游未修改；D9300 工作未随附，见 docs/gem5-d9300-intake.md） |
 
 ## 本地未入库的参考材料（明确**不是**本仓依赖）
 

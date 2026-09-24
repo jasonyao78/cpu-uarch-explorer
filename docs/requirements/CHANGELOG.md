@@ -12,3 +12,10 @@
 - **§7 开源约束**：许可证定为 Apache-2.0；新增 mem-lat.c 来源审计结论引用（ADR-0002）；新增"私有转公开历史全量可见"提醒。
 - **§9 校准误差目标**（新增）：T1 ±1 cycle / ±5~10%，T2 ±10%，T3 ±10~15%；校准顺序与"microbenchmark 校准、综合分只验证"铁律。
 - **过程管理决策入册**：trunk-based Git 策略（ADR-0001）、JSONL 数据模型（ADR-0003）、submodule 统一 third_party/（ADR-0004）、费曼工作流定位。
+
+## v0.3 后修订（2026-09-24，未升版）
+
+- **x86 服务器画像回填**（§2.2）：Ubuntu 24.04.4 LTS / kernel 7.0.0-30 / perf 7.0.12 / paranoid=4（sudo 可用）/ SPR 完整 PMU（PEBS + 32-deep LBR + RAPL）。OI-3 仅剩脚本评审。
+- **M4 Pro PMU 能力实测**（§2.1）：拓扑（10P+4E、cpufamily 399882554）与 powermetrics 采样器清单为 MEASURED；xctrace PMC 与 QoS 分流验证仍待办（OI-5 部分关闭）。
+- **gem5 基线源码就位**（§2.4）：上游 stable v25.1.0.1 @ f5c5a6e390；**未发现 D9300 修改**——D9300 模型工作需定位或决策自建（OI-1 更新，见 docs/gem5-d9300-intake.md）。
+- 个人参考材料移至仓库外 `../cpu-uarch-ref/`（只读），新增受跟踪索引 `docs/reference-materials.md`。
