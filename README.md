@@ -24,6 +24,7 @@
 - `docs/learning/` — 个人学习笔记（费曼工作流，开源时可整目录移除）
 - `probes/` — P0 微基准源码（C++17 + CMake）
 - `runner/` — Python 编排（`schema/` 为统一数据模型；v2 含 experiment / capability / run-record / artifact 四类记录，ADR-0006）
+- `pyproject.toml` / `uv.lock` / `.python-version` — Python 工具链，uv 管理（ADR-0007）
 - `workloads/` — Geekbench / SPEC / CoreMark 适配层（只含 Runner 与解析器，不含商业内容）
 - `analysis/` — 报告生成与校准对比
 - `third_party/` — 全部 submodule（含 gem5，待接入）与 SPDX 许可证清单

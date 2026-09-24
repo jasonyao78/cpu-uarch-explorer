@@ -36,18 +36,23 @@ rsync -a --progress \
 # ../../.git/modules/third_party/gem5 的相对指针，rsync -a 带上 .git 即在服务器侧可用。
 ```
 
-## 1. 系统依赖（Ubuntu 24.04）
+## 1. Python 环境（uv，ADR-0007）
 
 ```bash
-sudo apt update
-sudo apt install -y build-essential scons protobuf-compiler libprotobuf-dev \
-    libgoogle-perftools-dev libpng-dev libcapstone-dev python3-dev python3-pip
-python3 -m pip install -r third_party/gem5/requirements.txt
+# 服务器已装 uv（~/.local/bin/uv；如需重装：curl -LsSf https://astral.sh/uv/install.sh | sh）
+cd /path/on/nvme/cpu-uarch-explorer
+uv sync        # 按 uv.lock 建 .venv（uv 托管 CPython 3.12 + scons + protobuf）
+# gem5 构建前：让 SConstruct 找到与 venv 同源的 python3-config（已实测通过 gem5 embed 检查）
+export PATH="$(uv run python -c 'import sys; print(sys.base_prefix)')/bin:$PATH"
 ```
 
-- `elf.h`（verilated NPU 后端需要）由 `libc6-dev` 提供，已含在 build-essential 内；
-- tcmalloc / capstone / png 为可选项，但建议装（性能与调试功能）；
-- gem5 官方支持的 Python 版本范围内使用系统 python3 即可（Ubuntu 24.04 = 3.12，验证可行；**不要用 conda Python**，macOS 上它未过 gem5 链接检查）。
+## 1b. 系统依赖（Ubuntu 24.04，已具备）
+
+`build-essential`（gcc/g++/make/elf.h）、`protobuf-compiler`（protoc 3.21）、`python3-dev` 已在系统内；scons/protobuf 的 Python 侧由 uv 提供，**无需 apt/pip 混合安装**。tcmalloc / capstone / png 为可选增强，缺失只产生警告。
+
+## 1c. 旧方式存档（勿用）
+
+conda Python（gem5 链接检查失败）；系统 pip 直装（PEP 668 漂移）。详见 ADR-0007。
 
 ## 2. 同步 D9300 overlay
 
@@ -59,7 +64,7 @@ sh third_party/gem5-d9300-patch/gem5/apply_patchset.sh
 
 ```bash
 cd third_party/gem5
-scons build/ARM/gem5.opt -j56 2>&1 | tee build-xeon-arm64.log
+uv run scons build/ARM/gem5.opt -j56 2>&1 | tee build-xeon-arm64.log
 ```
 
 ## 4. 验证与回传

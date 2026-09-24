@@ -1,0 +1,13 @@
+[project]
+name = "cpu-uarch-explorer"
+version = "0.0.0"
+description = "Cross-ISA/OS CPU microarchitecture exploration platform (runner & analysis in Python; probes in C++)"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "scons>=4.8",
+    "protobuf~=5.29",
+]
+
+# Not a packaged project yet: uv manages the environment only.
+[tool.uv]
+package = false
