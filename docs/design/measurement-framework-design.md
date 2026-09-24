@@ -235,19 +235,19 @@ ctest --preset macos-arm64-release
 
 ## 11. 当前状态与已知限制
 
-**已打通**（2026-09-24）：M4 Pro 单平台 "probe → 统一 JSON 数据" 全链；首份实机数据（P/E 双峰 cache sweep，28 case 全 ok，schema 校验通过）；gem5 增量树修剪至 135 文件最小集。
+**已打通**（2026-09-25）：M4 Pro 单平台 "probe → 统一 JSON 数据 → 自动报告" 全链（v0.3 里程碑闭环）；两份实机 sweep 均已生成报告（`report.md` + `latency.svg` 随 run 目录入库）；gem5 增量树修剪至 134 文件最小集并改钉原生基线 v25.0.0.1。
 
 **已知限制**：
 
 - 只有 local 执行器；SSH/ADB/gem5 通道未实现（`transport` 字段已预留）；
 - 只有 ptr_chase 一个测量探针；core/branch/tlb/sync 四域只有 README；
-- 报告层（`analysis/`）未实现——records.jsonl 暂无消费者；
+- 报告层仅支持单 run 报告；跨 run 汇总与校准差异单未做；
 - 环境事务（改 governor/hugepage 需"改完恢复"）只有设计结论（借 GB10 模型重新实现），无代码；
-- gem5 修剪后重建验证进行中（OI-1）；D9300 SE 精简配置未做。
+- gem5 改钉后干净重建验证进行中（OI-1）；D9300 SE 精简配置未做。
 
 ## 12. 下一步（规划，未实现）
 
-1. **analysis/ 报告层**：消费 records.jsonl，生成带 P/E 对比与延迟曲线的报告——v0.3 里程碑"probe → JSON → 自动报告"的最后一段；
+1. ~~analysis/ 报告层~~（✅ 2026-09-25 落地：单 run Markdown + SVG）→ 后续：跨 run 汇总对比、校准差异单（MEASURED vs SIMULATED）；
 2. fake transport/target 契约测试（不依赖真机的 Runner 回归）；
 3. 环境事务模型落地（Linux governor/hugepage 控制的前置）；
 4. gem5 SE 模式精简配置（ptr_chase 进模拟器，校准闭环起点）。
