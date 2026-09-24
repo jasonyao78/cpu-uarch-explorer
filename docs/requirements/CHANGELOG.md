@@ -17,5 +17,6 @@
 
 - **x86 服务器画像回填**（§2.2）：Ubuntu 24.04.4 LTS / kernel 7.0.0-30 / perf 7.0.12 / paranoid=4（sudo 可用）/ SPR 完整 PMU（PEBS + 32-deep LBR + RAPL）。OI-3 仅剩脚本评审。
 - **M4 Pro PMU 能力实测**（§2.1）：拓扑（10P+4E、cpufamily 399882554）与 powermetrics 采样器清单为 MEASURED；xctrace PMC 与 QoS 分流验证仍待办（OI-5 部分关闭）。
+- **OI-5 关闭（2026-09-24 当日补充）**：计时器（41.67ns 分辨率、4.06ns 开销）与 QoS 分流（双峰 3.8×，BACKGROUND=E-core 手段）实测完毕；PMC 转为"装 Xcode 后验证"的环境决策。能力探针落 `probes/platform/`。
 - **gem5 基线源码就位**（§2.4）：上游 stable v25.1.0.1 @ f5c5a6e390；**未发现 D9300 修改**——D9300 模型工作需定位或决策自建（OI-1 更新，见 docs/gem5-d9300-intake.md）。
 - 个人参考材料移至仓库外 `../cpu-uarch-ref/`（只读），新增受跟踪索引 `docs/reference-materials.md`。

@@ -11,3 +11,4 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_subdirectory(probes/cache-mem)
+add_subdirectory(probes/platform)

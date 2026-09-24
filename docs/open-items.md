@@ -41,10 +41,11 @@
 - **现状**：`data/public/legacy/sm8550-cacheline.txt` 证据等级 UNKNOWN（连机主都不记得来源设备）。若溯源失败，保持 UNKNOWN 标注即可。
 - **同时确认**：`sm8650-x4.txt` / `sm8650-a510.txt` 对应哪台设备、测试日期与系统状态。
 
-## OI-5 M4 Pro PMU 能力实测（2026-09-24 更新：拓扑与 powermetrics 已实测）
+## OI-5 M4 Pro PMU 能力实测（2026-09-24 关闭：计时器与 QoS 分流已实测；PMC 转为环境决策）
 
-- **已实测（MEASURED，2026-09-24）**：sysctl 拓扑——2 perflevels，Performance 10 核 + Efficiency 4 核，`hw.cpufamily=399882554`，品牌串 "Apple M4 Pro"；powermetrics——采样器含 cpu_power/gpu_power/ane_power/thermal/sfi/tasks/interrupts 等，支持 text 与 plist（NUL 分隔）输出，`--show-cpu-qos`/`--show-hwp-capability`/`--show-plimits`/`--show-pstates` 开关可用，毫秒级采样率与 SIGINFO 即时采样。详见 v0.3 §2.1。
-- **仍待验证**：Instruments/xctrace per-thread KPC 计数器可用性（需在 M4 Pro 上实际跑一次 CPU Counters 验证）；QoS→P/E 分流可靠性 probe（属 runner/targets capability discovery 的实现内容）；`mach_absolute_time` 实际精度与开销。
+- **计时器（MEASURED，`probes/platform/timer_resolution`）**：timebase 125/3 → 1 tick = 41.67ns；相邻调用 74.8% 零间隔；有效分辨率 41.67ns；调用开销 4.06ns。含义：单次计时区间下限 ~42ns，L1 级测量须 ≥10^5 loads/区间（现有探针远超，量化噪声可平均掉）。
+- **QoS 分流（MEASURED，`probes/platform/qos_steering`）**：延迟链吞吐双峰——USER_INTERACTIVE 1.59 ns/iter、DEFAULT 1.61、BACKGROUND 6.07（比值 3.8×），重复设置可复现 → QoS→P/E 分流可靠生效。BACKGROUND 可作为 E-core 测量的调度手段（macOS 无精确绑核的替代）。注意：绝对值含 volatile-store 转发开销，本探针证明的是分流双峰性，非核间 IPC。
+- **残余（非阻塞，环境决策）**：xctrace/Instruments 未安装（xcrun 确认无 Xcode）。per-thread KPC 计数器（IPC/分支等）非计时法微基准的刚需；如分支 probe 或 throughput 校准需要，安装 Xcode 后验证。powermetrics 作 cluster 级采样补充。
 
 ## OI-6 D9300 实机信息回填
 
