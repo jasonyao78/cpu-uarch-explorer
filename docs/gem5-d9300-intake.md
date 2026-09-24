@@ -129,4 +129,5 @@ src/dev/npu/coral_verilated_backend.cc:8:10: fatal error: 'elf.h' file not found
 - **报错**：`ModuleNotFoundError: No module named 'm5.objects.IQUnit'`（SimObject 参数结构生成阶段）。v25.1 的 O3 重构把 IQ 拆出 `IQUnit`（`src/cpu/o3/IQUnit.py`），v25.1 的 `BaseO3CPU.py` 硬依赖它；而 overlay 的 v25.0 基线 `inst_queue.hh`/`o3/SConscript` 里没有 IQUnit——**v25.0 增量与 v25.1 核心的结构性冲突，不是单点引用问题**。
 - **裁定**：v25.0→v25.1 的移植（746 行有意改动 + O3 重构适配）是独立里程碑的工作；为让校准闭环尽快可用，**submodule 改钉增量树的原生基线 v25.0.0.1**——修剪后的 135 文件同步上去恰好还原原项目的已验证状态，零移植工作量（ADR-0004 已修订；v25.1 移植入 backlog）。
 - **加固**：`apply_patchset.sh` 增加基线断言（HEAD 必须等于 v25.0.0.1 的 commit，否则拒绝同步）与预存脏树检测（OI-8 的 overlay 加固两项落地）。
+- **后续修正**：改钉后 `src/python/SConscript` 回退为"v25.0.0.1 基线 + ndp 3 行"（失败 #1 的 v25.1 移植版在 v25.0 树上引用不存在的 `src/python/pybind11/port.cc`，第三次重建报错确认；改钉后原 overlay 版本才是自洽的）。
 - **待办**：v25.1 移植 milestone（三方 diff 逐文件 port 27 个有意文件；Neoverse V2 模板等 v25.1 资产届时可用）。
