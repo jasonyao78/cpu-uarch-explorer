@@ -56,6 +56,15 @@ def _register_probe(store: ArtifactStore, executor, platform: dict,
     （execute 会话内已 cd），SHA256 经执行器通道在目标机采集——本机读不到
     远端字节，也不允许假装读得到（OI-9 蓝图：artifact 锚定实际执行体）。"""
     configured = platform["probes"][probe_name]
+    if isinstance(configured, dict):
+        # deploy 模式（GB10 三机管线，任务书 §3.4）：本地交叉编译产物 →
+        # 幂等推送目标机并 SHA256 校验；artifact 锚定本地实物的摘要
+        from .deploy import deploy_if_needed, _local_sha256
+        remote_path = deploy_if_needed(platform, probe_name, executor)
+        return (remote_path,
+                store.register_probe_binary_digest(
+                    remote_path, _local_sha256(Path(configured["local"])),
+                    git["commit"], git["dirty"]))
     if platform["target"].get("transport", "local") == "local":
         probe_bin = Path(configured)
         if not probe_bin.is_file():
