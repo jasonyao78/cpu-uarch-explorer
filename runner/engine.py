@@ -148,6 +148,16 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
     cpu_hint = case.control.value if case.control.mechanism == "taskset" else "0"
     snap_before = executor.freq_snapshot(cpu_hint)
 
+    # 辅助快照（GB10 任务书 §5.4：CPU/GPU 共享内存控制器，GPU 负载会干扰
+    # 内存测量——平台配置 aux_snapshots 声明只读采集命令，run 前后各一次）。
+    # 通用机制零平台特判：命令来自配置，引擎不识别 nvidia-smi。
+    aux_entries = platform.get("aux_snapshots", []) or []
+    aux_before: dict = {}
+    for aux in aux_entries:
+        r = executor.execute(aux["command"])
+        if r.returncode == 0:
+            aux_before[aux["name"]] = r.stdout.strip()[:200]
+
     latencies: list[float] = []
     raw_refs: list[str] = []
     first_failure: dict | None = None
@@ -178,6 +188,16 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
     snap_after = executor.freq_snapshot(cpu_hint)
     if snap_before is not None or snap_after is not None:
         env["freq_snapshot"] = {"before_hz": snap_before, "after_hz": snap_after}
+    if aux_entries:
+        aux_after: dict = {}
+        for aux in aux_entries:
+            r = executor.execute(aux["command"])
+            if r.returncode == 0:
+                aux_after[aux["name"]] = r.stdout.strip()[:200]
+        merged = {name: {"before": aux_before.get(name), "after": aux_after.get(name)}
+                  for name in set(aux_before) | set(aux_after)}
+        if merged:
+            env["aux_snapshots"] = merged
 
     if latencies and first_failure is None:
         stats = summarize(latencies)

@@ -16,7 +16,10 @@ from runner.executor.local import ExecutionResult
 from runner.plan import Case, Control
 from runner.resolve import ResolvedValue
 
-PLATFORM = {"target": {"target_id": "fake-01", "transport": "local"}}
+PLATFORM = {"target": {"target_id": "fake-01", "transport": "local"},
+            "aux_snapshots": [{"name": "gpu_util",
+                               "command": ["nvidia-smi", "--query-gpu=utilization.gpu",
+                                           "--format=csv,noheader"]}]}
 PROBE_META = {"name": "ptr_chase", "protocol_version": "1.0",
               "implementation_id": "portable",
               "git": {"commit": "x" * 40, "dirty": False},
@@ -25,7 +28,12 @@ SYSINFO = {"os_version": "t", "kernel": "t", "compiler": "t"}
 
 
 class FakeExec:
+    def __init__(self, aux_stdout="0 %"):
+        self._aux_stdout = aux_stdout
+
     def execute(self, argv, command_prefix=()):
+        if "nvidia-smi" in " ".join(str(a) for a in argv):
+            return ExecutionResult(0, self._aux_stdout + "\n", "", "fake")
         return ExecutionResult(0, "latency_ns=1.0000 page_policy=hugepage-2m page_kb=2048\n",
                                "", "fake")
 
@@ -52,6 +60,16 @@ class TestEngineMetricExtraFields(unittest.TestCase):
                                FakeExec(), store, SYSINFO, PROBE_META["git"])
             self.assertEqual(record["status"], "ok")
             self.assertEqual(record["metrics"][0]["page_policy"], "hugepage-2m")
+
+    def test_aux_snapshots_before_and_after(self):
+        # GB10 §5.4：平台配置声明的只读快照（如 GPU 利用率）随 case 入档
+        with tempfile.TemporaryDirectory() as tmp:
+            store = ArtifactStore(Path(tmp) / "run")
+            record = _run_case(_case(), PLATFORM, PROBE_META, "/probe",
+                               FakeExec(aux_stdout="3 %"), store, SYSINFO, PROBE_META["git"])
+            aux = record["environment"]["aux_snapshots"]["gpu_util"]
+            self.assertEqual(aux["before"], "3 %")
+            self.assertEqual(aux["after"], "3 %")
 
 
 if __name__ == "__main__":
