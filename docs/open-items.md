@@ -33,7 +33,7 @@
 - **ptr_chase 改进 backlog**：见 `probes/cache-mem/README.md`（MONOTONIC_RAW、hugepage+cold 参数化、evict 工具移植评估、chase_migrate 范式）。
 - **runner 蓝图吸收清单**（Phase C / OI-8 的前置设计输入）：声明式 configs + 启动期引用完整性校验、Plan/Run 分离 + environment phase 分组、ProbeAdapter 4 方法 + 错误值返回、ResultStore 原子写 + case_definitions_signature、ResolvedValue{value,source} 参数溯源、exit code 阶梯、adapter↔二进制契约测试。**借分层、协议与测试方式，不借其当前 Runner 实现**（2026-09-24 外部评审实证：working-set 的 MiB/KiB 单位不被识别、静默降级为默认 1024KB；profile 声明的 samples 无消费点、sample_index 恒为 0；journal_tx_ids 从不追加；environment 硬编码 platform=unknown；CLI 以 coordinator=None 构造且调用缺 backend 参数）。fixture 的真实来源须由 capture manifest/命令证明（其历史 fixture 曾手写臆造，见该仓复盘文档），不能因文件存在就默认真实。
 - **环境事务子系统：借模型、重新实现接线**（2026-09-24 评审纠偏，原"整体不吸收"裁定过头）：模型本身已实现 host-wide lock / durable journal / inspect→validate→apply→verify / 失败后逆序 restore / signal 中断恢复 / 未完成事务阻止新运行；coordinator=None 是 CLI/Runner 接线缺陷而非模型无价值。未来控制 Linux governor / hugepage / THP / perf 权限时此为核心模式（**2026-09-25 升级：第一个受控项定为 Xeon cpufreq governor，见 OI-8**）。**不吸收**：其 ARM64 硬编码假设。
-- **GB10 平台**：未来接入按声明式平台 JSON 模式（v0.4 候选）；它是 hugepage/PMU/跨核方法学的最佳宿主，也是可扩展性的天然验收平台。**任务书已备（2026-09-25）：`docs/tasks/2026-09-25-gb10-platform-onboarding.md`（三机管线：Mac 驱动 → Xeon 交叉编译 → GB10 执行；前置依赖 Xeon 任务的 SshExecutor；规格摘要为 PUBLIC_SOURCE，拓扑以机上实测为准）**。
+- **GB10 平台**：未来接入按声明式平台 JSON 模式（v0.4 候选）；它是 hugepage/PMU/跨核方法学的最佳宿主，也是可扩展性的天然验收平台。**任务书已备（2026-09-25）：`docs/tasks/2026-09-25-gb10-platform-onboarding.md`——自驱模式：Mac↔GB10 无 SSH、GB10 可从 GitHub 只读 clone 但不能 push，故代码经 GitHub 下行、GB10 原生编译本地执行、数据经物理介质回传 Mac 侧按 quarantine 流程入库**（网络约束已核实并登记 hosts.md；规格摘要为 PUBLIC_SOURCE，拓扑以机上实测为准）。
 
 ## OI-2 红米设备信息回填（`android-arm64`）
 
