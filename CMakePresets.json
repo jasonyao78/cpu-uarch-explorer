@@ -24,13 +24,28 @@
       "displayName": "Linux x86-64 Release（Xeon 服务器原生构建）",
       "binaryDir": "${sourceDir}/build/linux-x86_64/release",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "linux-aarch64-release",
+      "displayName": "Linux ARM64 Release（GB10 等原生构建；通用 preset，非交叉）",
+      "binaryDir": "${sourceDir}/build/linux-aarch64/release",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "linux-aarch64-cross-release",
+      "displayName": "Linux ARM64 交叉（Xeon 构建 → GB10/Android 执行，静态链接；Android 预演课题）",
+      "binaryDir": "${sourceDir}/build/linux-aarch64-cross/release",
+      "toolchainFile": "${sourceDir}/cmake/toolchain-linux-aarch64.cmake",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     }
   ],
   "buildPresets": [
     { "name": "macos-arm64-release", "configurePreset": "macos-arm64-release" },
     { "name": "macos-arm64-ubsan", "configurePreset": "macos-arm64-ubsan" },
     { "name": "darwin-x86_64-release", "configurePreset": "darwin-x86_64-release" },
-    { "name": "linux-x86_64-release", "configurePreset": "linux-x86_64-release" }
+    { "name": "linux-x86_64-release", "configurePreset": "linux-x86_64-release" },
+    { "name": "linux-aarch64-release", "configurePreset": "linux-aarch64-release" },
+    { "name": "linux-aarch64-cross-release", "configurePreset": "linux-aarch64-cross-release" }
   ],
   "testPresets": [
     { "name": "macos-arm64-release", "configurePreset": "macos-arm64-release", "output": { "outputOnFailure": true } },
