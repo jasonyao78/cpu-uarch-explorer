@@ -323,7 +323,7 @@ sequenceDiagram
 
 ## 8. 补充：本文未覆盖的角落
 
-- **`runner/environment/` 事务协调器**（§3.2 末提及）：GB10 模型的重实现，锁+journal+逆序 restore 完整，等 governor 锁频任务接线；
+- **`runner/environment/` 事务协调器**（§3.2 末提及）：GB10 模型的重实现；✅ 2026-09-26 已接线——声明式 `host_requirements` + 启动 reconcile + `--allow-mutation` 门槛，sudoers 白名单包装脚本使 Xeon 锁频一键化（实证 run `20260926T145530Z`，自动 apply→测量→恢复）；
 - **`scripts/quarantine_intake.py`**：GB10 自驱模式的数据检疫闸门（回传数据先检疫后入 public）；
 - **`runner/deploy.py`**：GB10 三机管线的二进制分发 + SHA256 校验 + 一次重试——GB10 改自驱模式后暂未被使用，但 Android 接入时会成为主路径；
 - **`docs/learning/`**：12 页费曼笔记，新人从 `00-why-this-framework.md` 读起；
