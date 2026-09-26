@@ -27,7 +27,10 @@ PLATFORM = {"target": {"target_id": "fake-01", "transport": "local"}}
 
 
 class FakeEnvExecutor:
-    """可变状态假执行器：governor 文件语义 + sudo 可控成败。"""
+    """可变状态假执行器：governor 文件语义 + sudo 可控成败。
+
+    sudo 语义按现行 controller 实现：调包装脚本
+    `sudo -n /usr/local/bin/cpu-uarch-set-governor <value>`。"""
 
     def __init__(self, governor="powersave", sudo_ok=True):
         self.governor = governor
@@ -37,13 +40,13 @@ class FakeEnvExecutor:
         cmd = " ".join(str(a) for a in argv)
         if cmd.startswith("cat") and "scaling_governor" in cmd:
             return ExecutionResult(0, self.governor + "\n", "", "fake")
-        if "sudo" in cmd:
+        if "cpu-uarch-set-governor" in cmd:
             if not self.sudo_ok:
                 return ExecutionResult(1, "", "sudo: a password is required", "fake")
-            import re
-            m = re.search(r"echo (\S+) \|", cmd)
-            if m:
-                self.governor = m.group(1)
+            value = cmd.split()[-1]
+            if value not in ("performance", "powersave"):
+                return ExecutionResult(1, "", "usage: cpu-uarch-set-governor performance|powersave", "fake")
+            self.governor = value
             return ExecutionResult(0, "", "", "fake")
         return ExecutionResult(1, "", "unscripted command", "fake")
 

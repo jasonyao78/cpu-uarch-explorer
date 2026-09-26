@@ -8,20 +8,33 @@
 非交互通道不挂起等密码，controller 经 `sudo -n` 执行；无免密 sudo 时给出结构化 `env-apply-failed`（已实证，系统不被改变）。一次性配置（人工，在 Xeon 上）：
 
 ```bash
-# 方式一：包装脚本（推荐，sudoers 最窄授权）
+# 1. 包装脚本：参数白名单（performance/powersave 二字），root 属主防篡改
 sudo tee /usr/local/bin/cpu-uarch-set-governor > /dev/null <<'EOF'
 #!/bin/sh
-# 用法: cpu-uarch-set-governor <governor>；写全部 CPU 的 scaling_governor
+# 用法: cpu-uarch-set-governor performance|powersave；写全部 CPU 的 scaling_governor
+case "$1" in
+  performance|powersave) ;;
+  *) echo "usage: $0 performance|powersave" >&2; exit 1 ;;
+esac
 for c in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
     echo "$1" | tee "$c" > /dev/null || exit 1
 done
 EOF
+sudo chown root:root /usr/local/bin/cpu-uarch-set-governor
 sudo chmod 755 /usr/local/bin/cpu-uarch-set-governor
+
+# 2. sudoers 单命令白名单 + 语法校验
 echo 'michael ALL=(ALL) NOPASSWD: /usr/local/bin/cpu-uarch-set-governor' | sudo tee /etc/sudoers.d/cpu-uarch-probe
-sudo visudo -c -f /etc/sudoers.d/cpu-uarch-probe   # 语法校验
+sudo visudo -c -f /etc/sudoers.d/cpu-uarch-probe
+
+# 3. 验证免密可用
+sudo -n /usr/local/bin/cpu-uarch-set-governor performance && cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+sudo -n /usr/local/bin/cpu-uarch-set-governor powersave    # 测完即还原
 ```
 
-> 注：controller 当前的 apply 命令是内联 `sudo -n sh -c 'for ... tee'`——配好 sudoers 后需把 controller 指向包装脚本（一行改动，`runner/environment/controllers.py` 的 `apply`），或直接用路径 B。
+> 安全面：免密 sudo 仅限这一个脚本；脚本内参数白名单使滥用也只能在
+> performance/powersave 间切换（完全可逆、无破坏面）；脚本 root 属主 +
+> 755 防篡改扩权。controller 经 `sudo -n` 调此脚本（已接线）。
 
 ```bash
 # 锁频测量（apply → sweep → 自动逆序 restore；中断后下次 run 自动 reconcile）

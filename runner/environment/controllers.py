@@ -45,17 +45,17 @@ class CpufreqGovernorController:
 
     def apply(self, executor, requested: str) -> str:
         self.validate(requested)
-        # 写全部 CPU：单核写会留下半新半旧的系统状态。
-        script = (f"for c in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do "
-                  f"echo {requested} | sudo -n tee $c > /dev/null || exit 1; done")
-        res = executor.execute(["sudo", "-n", "sh", "-c", script])
+        # 经 sudoers 单命令白名单授权的包装脚本（最小权限：免密 sudo 仅限此
+        # 脚本；脚本内有 performance/powersave 参数白名单与 root 属主加固——
+        # 部署步骤见 docs/runbooks/xeon-governor-lock.md，人工一次性完成）。
+        res = executor.execute(["sudo", "-n", "/usr/local/bin/cpu-uarch-set-governor", requested])
         if res.returncode != 0:
             raise RunnerError(
                 "env-apply-failed",
                 f"governor apply failed: {res.stderr.strip()[:160]}"
-                " | 非交互 sudo 不可用时的出路：① sudoers NOPASSWD 授权"
-                "（echo 'michael ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/devices/system/cpu/*/cpufreq/scaling_governor'"
-                " | sudo tee /etc/sudoers.d/cpu-uarch-probe）② 手动执行上述 for 循环后重试")
+                " | 非交互 sudo 不可用时的出路：① 按 runbook 部署包装脚本 + sudoers"
+                " 白名单（docs/runbooks/xeon-governor-lock.md 路径 A）"
+                " ② 路径 B：人工执行 governor 切换后重试")
         return ""
 
     def verify(self, executor, expected: str) -> bool:
