@@ -329,6 +329,76 @@ sequenceDiagram
 - **`docs/learning/`**：12 页费曼笔记，新人从 `00-why-this-framework.md` 读起；
 - **gem5 侧**（`third_party/`）：v25.0.0.1 + 134 文件最小增量已在 Xeon 验证，建模后置（启动条件：探针套件 + D9300 实机），不在本报告范围。
 
+## 9. 附录：端到端操作演练（组内手动跟跑）
+
+> 目的：把 §1-§8 的静态分析变成一遍肌肉记忆。两条独立链路：**A. 本机（macOS-arm64 / M4 Pro，local transport）**与 **B. 远程 Xeon（linux-x86_64，ssh transport）**。全程**零 sudo**（锁频为 B 的可选进阶）；命令以本文与 runbook 文件为准，用 `sed -n` 取段执行，勿跨窗口手打（防转录纪律见 `docs/runbooks/xeon-governor-lock.md` 头部）。
+> 前置（仅首次）：`uv sync`；`cmake --preset macos-arm64-release && cmake --build --preset macos-arm64-release`。
+
+### A. 本机链路（M4 Pro，约 3 分钟）
+
+```bash
+# A1 能力发现：平台事实的机器生成清单（macOS 无 sysfs → cache/cpufreq 如实 unsupported）
+.venv/bin/python -m runner.cli capabilities --platform configs/platforms/macbook-m4pro-01.json
+
+# A2 plan 预览（无副作用）：28 case = 14 档 buffer × 2 QoS 控制组，参数带来源
+.venv/bin/python -m runner.cli plan \
+  --experiment configs/experiments/ptr-chase-cache-sweep.json \
+  --platform configs/platforms/macbook-m4pro-01.json
+
+# A3 执行：probe → 原始样本落盘 → 解析 → 统计 → run-record v2 逐行落盘
+.venv/bin/python -m runner.cli run \
+  --experiment configs/experiments/ptr-chase-cache-sweep.json \
+  --platform configs/platforms/macbook-m4pro-01.json
+
+# A4 报告：run 目录下生成 report.md + latency.svg（元信息含控制口径与置信度）
+.venv/bin/python -m analysis.cli report --run data/public/runs/<run目录>
+
+# A5 抽查一条 record（观察点见下方"跑完看什么"）
+.venv/bin/python -c "import json; r=json.loads(open('data/public/runs/<run目录>/records.jsonl').readline()); print(json.dumps({k: r[k] for k in ('status','target','environment','metrics')}, indent=1)[:900])"
+```
+
+### B. 远程 Xeon 链路（ssh transport，约 3 分钟测量 + 传输）
+
+```bash
+# B0 前提（仅首次）：~/.ssh/config 有 xeon-8481c-01 别名（真实地址在 data/private/hosts.md，
+#     永不入库）；仓库已 rsync 到服务器（见 AGENTS.md gem5 节的 rsync 模板，注意 --delete 与排除项）
+# B1 服务器侧构建（preset 同构，产物在服务器 build/linux-x86_64/release/）
+ssh xeon-8481c-01 'cd ~/cpu-uarch-explorer && cmake --preset linux-x86_64-release && cmake --build --preset linux-x86_64-release'
+
+# B2 本机经 ssh 通道采 Xeon 能力清单（core-topology 含 112 核 SMT 映射）
+.venv/bin/python -m runner.cli capabilities --platform configs/platforms/xeon-8481c-01.json
+
+# B3 plan 预览（与 A2 同命令换平台配置——跨平台零特判的直观验证）
+
+# B4 执行：70 次 ssh 调用，每条 raw_command 完整入档；freq_snapshot 随 case 采集
+.venv/bin/python -m runner.cli run \
+  --experiment configs/experiments/ptr-chase-cache-sweep.json \
+  --platform configs/platforms/xeon-8481c-01.json
+
+# B5 报告同 A4
+
+# B6（可选进阶，需 runbook 的 sudoers 前提）锁频事务版：apply→测量→自动恢复，journal 落盘
+.venv/bin/python -m runner.cli run \
+  --experiment configs/experiments/ptr-chase-cache-sweep.json \
+  --platform configs/platforms/xeon-8481c-01.json \
+  --env governor=performance --allow-mutation
+.venv/bin/python -m runner.cli env --platform configs/platforms/xeon-8481c-01.json status
+```
+
+### 跑完看什么（对应本文章节的观察点）
+
+| 观察点 | 对应章节 | 怎么验证 |
+|---|---|---|
+| Plan/Run 分离、参数溯源 | §3 | A2 输出里每参数带 `[source]`；run 只是执行 |
+| 控制口径收敛为 command_prefix | §3.2/§4.3 | record 的 `raw_command` 含 `taskpolicy -b`（A）/`taskset -c 0`（B） |
+| Probe ABI 与防编造 | §4 | `metrics[0].statistics`（median/分位数）随 ok 记录；非法输入的 CTest 在 `ctest --preset macos-arm64-release` |
+| 证据链四件套 | §5 | run 目录：records.jsonl（逐行 fsync）/ artifacts.jsonl（SHA256）/ run-manifest.json / raw/（不入库，锚定可再生） |
+| 频率/页策略诚实入档 | §5.4'/§7.2#5 | B 的 `environment.freq_snapshot`（powersave 下常见 800MHz 边界读）；hp2m 实验的 `page_policy` |
+| 分层语义 | §2.1 | `data/private/` 永不入库；设备匿名代号 ↔ hosts.md 真身映射 |
+
+> 纪律提示：演练只跑不提交；如需提交，按 AGENTS.md 铁律 5/6（conventional commits、只提交自己改的文件、CHANGELOG 单独提交）。
+> 故障演练（可选）：`run --env` 期间 Ctrl-C → 下次 run 观察 reconcile 自动恢复（journal 在 `data/private/env-journals/`）。
+
 ---
 
 *分析完毕。所有引用的文件、命令、数据均来自仓库当前状态（HEAD `e25c648`）；文中"实测"数字引自 `data/public/runs/` 与 v0.3 §2 平台画像。*
