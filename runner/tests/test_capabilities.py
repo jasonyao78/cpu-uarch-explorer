@@ -11,7 +11,8 @@
 import unittest
 
 from runner.executor.local import ExecutionResult
-from runner.targets.capabilities import collect_all, collect_cache_topology, collect_cpufreq
+from runner.targets.capabilities import (collect_all, collect_cache_topology,
+                                         collect_core_topology, collect_cpufreq)
 
 
 class FakeExecutor:
@@ -82,6 +83,59 @@ class TestManifestShape(unittest.TestCase):
             self.assertIn(key, manifest)
         self.assertIn("cache-topology", manifest["capabilities"])
         self.assertEqual(manifest["capabilities"]["cache-topology"]["evidence"], "MEASURED")
+
+
+class TestCoreTopology(unittest.TestCase):
+    """核型采集契约（任务书 §2.3）：ARM64 sysfs 逐维存在性、x86 部分缺失
+    如实记 None、macOS sysctl 路径、全缺失降级 supported:false。不许猜。"""
+
+    _LINUX_ARM = """0|589|0-3|3060000|0x410fd820
+1|589|0-3|3060000|0x410fd820
+2|1024|4-7|3400000|0x411fd840
+3|1024|4-7|3400000|0x411fd840"""
+
+    _LINUX_X86 = """0|||3800000|
+1|||3800000|"""
+
+    _MACOS = """hw.nperflevels: 2
+hw.perflevel0.name: Performance
+hw.perflevel0.logicalcpu: 10
+hw.perflevel0.physicalcpu: 10
+hw.perflevel1.name: Efficiency
+hw.perflevel1.logicalcpu: 4
+hw.perflevel1.physicalcpu: 4"""
+
+    def test_arm_linux_full(self):
+        ex = FakeExecutor([("cpu_capacity", ExecutionResult(0, self._LINUX_ARM, "", "fake"))])
+        cap = collect_core_topology(ex)
+        self.assertTrue(cap["supported"])
+        v = cap["values"]
+        self.assertEqual(v["source"], "linux-sysfs")
+        self.assertEqual(v["cpus"]["0"]["capacity"], 589)
+        self.assertEqual(v["cpus"]["2"]["midr_el1"], "0x411fd840")
+        self.assertEqual(v["clusters"]["0-3"], ["0", "1"])
+
+    def test_x86_partial_dims_are_none_not_guessed(self):
+        ex = FakeExecutor([("cpu_capacity", ExecutionResult(0, self._LINUX_X86, "", "fake"))])
+        v = collect_core_topology(ex)["values"]
+        self.assertIsNone(v["cpus"]["0"]["capacity"])   # x86 无 cpu_capacity
+        self.assertEqual(v["cpus"]["0"]["max_freq_khz"], 3800000)
+        self.assertEqual(v["clusters"], {})
+
+    def test_macos_sysctl_path(self):
+        ex = FakeExecutor([("cpu_capacity", ExecutionResult(1, "", "no sysfs", "fake")),
+                           ("hw.nperflevels", ExecutionResult(0, self._MACOS, "", "fake"))])
+        cap = collect_core_topology(ex)
+        self.assertTrue(cap["supported"])
+        v = cap["values"]
+        self.assertEqual(v["source"], "macos-sysctl")
+        self.assertEqual(v["perflevels"][0]["name"], "Performance")
+        self.assertEqual(v["perflevels"][1]["physicalcpu"], "4")
+
+    def test_all_absent_degrades(self):
+        ex = FakeExecutor([("cpu_capacity", ExecutionResult(1, "", "none", "fake")),
+                           ("hw.nperflevels", ExecutionResult(1, "", "none", "fake"))])
+        self.assertFalse(collect_core_topology(ex)["supported"])
 
 
 if __name__ == "__main__":
