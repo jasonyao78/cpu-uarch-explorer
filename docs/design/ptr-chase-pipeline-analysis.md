@@ -304,16 +304,18 @@ sequenceDiagram
 
 ### 7.2 改进空间（按优先级）
 
-| # | 问题                                                       | 证据                                                                             | 建议                                                                                                                                         |
-| - | ---------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1 | **M4 Pro 缺机器生成的 capability-manifest**（§5.5） | `data/public/capabilities/` 只有 Xeon                                          | 为 macOS 写采集器（sysctl perflevels / 计时器 / QoS 探针结果封装），或至少把 §2.1 的实测散文导出为清单 JSON                                 |
-| 2 | **环境事务已实现未接线**                             | `runner/environment/coordinator.py` 存在但 `cli.py` 只有 plan/run 两个子命令 | governor=performance 锁频（Xeon 的第一受控项）需要 CLI 的 env 子命令 + run 前 apply/run 后 restore 接线；Xeon 数据质量（§5.4'）证明这是刚需 |
-| 3 | **探针适配器注册是硬编码**                           | `engine.py` 的 `_ADAPTERS` 字典写死 ptr_chase                                | 新探针（core/branch/TLB）接入前改为注册表模式（ decorator 或 entry-point 式发现），消除"加探针改引擎"                                        |
-| 4 | **SSH 每条命令一个会话**                             | `ssh.py` 每次 execute 都新建 TCP+认证                                          | 当前量级（280 条命令/run）可接受；Android/adb 或更大 sweep 前考虑长连接复用或批量化                                                          |
-| 5 | **频率快照是瞬时值**                                 | engine.py 注释已自承"非区间精确"                                                 | 环境事务落地后升级：Linux 锁频 + 测量期多次采样（或 powermetrics 并发采样入档 macOS 侧）                                                     |
-| 6 | **n=5 时 p25/p75 很粗**                              | statistics 用 inclusive 插值                                                     | 不改统计代码；需要更高置信时把 repetitions 提到 7+（实验 JSON 里一行的事）                                                                   |
-| 7 | **报告层只支持单 run**                               | analysis/README 自述                                                             | 跨 run 汇总（同实验多次复测的漂移分析）是下一个自然增强；校准差异单等 gem5 建模启动后再做                                                    |
-| 8 | **GB10 回传链路未演练**                              | quarantine_intake.py 已备但未跑过真实数据                                        | GB10 首跑即演练；检疫脚本校验项随真实数据演化                                                                                                |
+> 状态列更新至 2026-09-26（锁频一键化落地后）。按 AGENTS.md 铁律 0，**跟踪面是 `docs/open-items.md` OI-10**，本表状态为信息展示；✅=已完成 ⬜=待办 ◐=部分完成。
+
+| # | 问题 | 证据 | 建议 | 状态（2026-09-26） |
+| - | --- | --- | --- | --- |
+| 1 | **M4 Pro 缺机器生成的 capability-manifest**（§5.5） | `data/public/capabilities/` 当时只有 Xeon | 为 macOS 写采集器（sysctl perflevels / 计时器 / QoS 探针结果封装），或至少把 §2.1 的实测散文导出为清单 JSON | ✅ 已完成：`macbook-m4pro-01-20260926T124932Z.json`（core-topology 经 sysctl，P=10/E=4；cache/cpufreq 如实 unsupported） |
+| 2 | **环境事务已实现未接线** | `runner/environment/` 存在但当时无调用路径（证据列"cli 仅 plan/run"亦已过时） | governor=performance 锁频（Xeon 第一受控项）需 CLI 接线 + run 外围事务 | ✅ 已接线并实证：声明式 `host_requirements` + 启动 reconcile + `--allow-mutation`；sudoers 白名单包装脚本；锁频 sweep `20260926T145530Z`（自动 apply→测量→恢复，journal 全终态） |
+| 3 | **探针适配器注册是硬编码** | `engine.py` 的 `_ADAPTERS` 字典写死 ptr_chase | 新探针（core/branch/TLB）接入前改为注册表模式（decorator 或 entry-point 式发现），消除"加探针改引擎" | ⬜ 待办（触发条件：core/branch/TLB 探针接入前） |
+| 4 | **SSH 每条命令一个会话** | `ssh.py` 每次 execute 都新建 TCP+认证 | 当前量级（280 条命令/run）可接受；Android/adb 或更大 sweep 前考虑长连接复用或批量化 | ⬜ 待办（触发条件：Android/adb 通道或大 sweep） |
+| 5 | **频率快照是瞬时值** | engine.py 注释已自承"非区间精确" | 环境事务落地后升级：Linux 锁频 + 测量期多次采样（或 powermetrics 并发采样入档 macOS 侧） | ◐ 部分完成：锁频已落地（800MHz 主问题已解，实证见 #2）；测量期多次采样 / powermetrics 并发仍待立项 |
+| 6 | **n=5 时 p25/p75 很粗** | statistics 用 inclusive 插值 | 不改统计代码；需要更高置信时把 repetitions 提到 7+（实验 JSON 里一行的事） | ✅ 惯例维持（非缺陷；需要时在实验 JSON 提升 repetitions） |
+| 7 | **报告层只支持单 run** | analysis/README 自述 | 跨 run 汇总（同实验多次复测的漂移分析）是下一个自然增强；校准差异单等 gem5 建模启动后再做 | ⬜ 待办（候选下一步：三机对比/跨 run 汇总） |
+| 8 | **GB10 回传链路未演练** | quarantine_intake.py 已备但未跑过真实数据 | GB10 首跑即演练；检疫脚本校验项随真实数据演化 | ⬜ 待办（触发条件：GB10 首跑；等待 GB10 侧执行 runbook §1 能力发现） |
 
 ### 7.3 一个结构性的观察
 
