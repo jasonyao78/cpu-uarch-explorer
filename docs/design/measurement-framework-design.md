@@ -241,7 +241,7 @@ ctest --preset macos-arm64-release
 - ~~只有 local 执行器~~ ✅ 2026-09-25：SSH 通道已实现（SshExecutor + transport 工厂按 ADR-0006 选择，主流程零特判），Xeon（linux-x86_64）平台接入并产出首份跨平台数据；ADB/gem5 通道未实现；
 - 只有 ptr_chase 一个测量探针；core/branch/tlb/sync 四域只有 README；
 - 报告层仅支持单 run 报告；跨 run 汇总与校准差异单未做；
-- 环境事务（改 governor/hugepage 需"改完恢复"）✅ 2026-09-25 落地：journal（before 值先行落盘、状态机、原子写）+ 本地 fcntl/远端 ssh-flock 锁 + apply→verify→逆序 restore + 中断恢复 + 未完成事务阻塞；首个受控项 Xeon governor（`run --env governor=performance --allow-mutation`）；已知简化：单操作者假设、SIGTERM 不转换（详见 runner/environment/ 包 docstring）；频率管理按能力分级：**能锁的平台走事务锁+恢复（Xeon governor=performance 为第一受控项），不能锁的平台（macOS 无锁频能力）走测量期并发采样入档**，频率只读快照作为先行项并入 Xeon 接入（OI-8）；
+- 环境事务（改 governor/hugepage 需"改完恢复"）✅ 2026-09-25 落地：journal（before 值先行落盘、状态机、原子写）+ 本地 fcntl/远端 ssh-flock 锁 + apply→verify→逆序 restore + 中断恢复 + 未完成事务阻塞；首个受控项 Xeon governor（`run --env governor=performance --allow-mutation`）；✅ 2026-09-26 接线完成：平台声明式 `host_requirements` + 启动前 `reconcile_unfinished`（中断残留自动恢复，含 SIGINT/SIGKILL 两路径测试）；Xeon 自动锁频受 sudo 边界约束（结构化 `env-apply-failed`，sudoers 人工步骤见 `docs/runbooks/xeon-governor-lock.md`）；已知简化：单操作者假设、SIGTERM 不转换（详见 runner/environment/ 包 docstring）；频率管理按能力分级：**能锁的平台走事务锁+恢复（Xeon governor=performance 为第一受控项），不能锁的平台（macOS 无锁频能力）走测量期并发采样入档**，频率只读快照作为先行项并入 Xeon 接入（OI-8）；
 - gem5 基建已验证（v25.0.0.1 + 134 文件最小集，Xeon 重建与 SE 冒烟通过）；D9300 SE 精简配置与建模后置（启动条件：探针套件齐备 + D9300 实机入册）。
 
 **Xeon 首测解读（2026-09-25，修订版 v2 —— 修正留痕，measurement-discipline §6）**：

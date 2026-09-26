@@ -23,7 +23,7 @@
 - **传输层**：SSH/ADB Transport 与 gem5 Executor（SSH 随 Xeon 接入任务先行，见 `docs/tasks/2026-09-25-xeon-platform-onboarding.md`）。
 - **验收标准（ADR-0006）**：新增 RISC-V 仅需 toolchain preset + ISA kernels + capability provider + target 配置；runner 主流程零修改、通用 schema 零修改、现有 contract tests 全绿。
 - **前置**：ADR-0006 与 schema v2（2026-09-24 已落盘）。
-- **状态更新（2026-09-25）**：环境事务模型已落地（journal/锁/controllers/coordinator + `run --env` 接线，首个受控项 Xeon governor）——本条从剩余项移除；其余（组合式重构深化、RISC-V preset、gem5 overlay 加固）仍待。
+- **状态更新（2026-09-26）**：环境事务已接线——平台声明式 `host_requirements`（默认拒绝、`--allow-mutation` 门槛）+ 启动前 `reconcile_unfinished` 中断自动恢复（任务书 2026-09-26 完成，测试含 SIGINT/SIGKILL 两路径）；Xeon 自动锁频的 sudo 边界已实证（结构化失败、系统不变），sudoers 配置属人工步骤（`docs/runbooks/xeon-governor-lock.md`）。组合式重构深化、RISC-V preset、gem5 overlay 加固仍待。
 
 ## OI-9 arm64-uarch-probe 借鉴迁移（2026-09-24 登记）
 
