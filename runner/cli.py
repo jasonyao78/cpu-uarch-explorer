@@ -1,8 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0
-"""CLI：python -m runner.cli plan|run
+"""CLI 薄壳：参数解析 → 子命令分发 → 错误阶梯翻译（OI-9 蓝图）。
 
-  plan  预览确定性 case 集合（含参数溯源），不执行、不写盘
-  run   执行并落盘 run-record v2 JSONL + 原始样本 + manifests
+子命令与参数的唯一权威是 main() 里的 argparse 注册——不在此维护枚举
+清单，避免第二份事实随代码漂移（历史 docstring 债，2026-09-27 清偿）：
+
+    .venv/bin/python -m runner.cli --help            # 子命令清单
+    .venv/bin/python -m runner.cli <子命令> --help   # 该子命令全部参数
+
+退出码阶梯：0 全成功 / 1 配置或输入错误 / 2 有 case 失败（数据已落盘）。
 """
 
 from __future__ import annotations
