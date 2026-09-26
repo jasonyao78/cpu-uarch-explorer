@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "target": {
+    "os": "darwin",
+    "isa": "aarch64",
+    "abi": "darwin-aapcs64",
+    "target_id": "macbook-m4pro-01",
+    "cpu_profile": "apple-m4-pro",
+    "execution_kind": "native",
+    "executor": "native",
+    "transport": "local"
+  },
+  "capabilities": {
+    "cache-topology": {
+      "supported": true,
+      "detail": "cpu0 sysfs (/sys/devices/system/cpu/cpu0/cache/index*)",
+      "values": {
+        "levels": [
+          {
+            "level": "",
+            "type": "",
+            "size": "",
+            "ways": "",
+            "shared_cpu_list": ""
+          }
+        ]
+      },
+      "evidence": "MEASURED"
+    },
+    "cpufreq": {
+      "supported": false,
+      "detail": "cpufreq sysfs unreadable: ",
+      "evidence": "MEASURED"
+    },
+    "core-topology": {
+      "supported": true,
+      "detail": "linux sysfs per-cpu (absent dims = None, not guessed)",
+      "values": {
+        "source": "linux-sysfs",
+        "cpus": {
+          "[0-9]*": {
+            "capacity": null,
+            "max_freq_khz": null,
+            "midr_el1": null,
+            "cluster_cpus_list": null
+          }
+        },
+        "clusters": {}
+      },
+      "evidence": "MEASURED"
+    }
+  },
+  "captured_at": "2026-09-26T12:47:07.454486+00:00"
+}

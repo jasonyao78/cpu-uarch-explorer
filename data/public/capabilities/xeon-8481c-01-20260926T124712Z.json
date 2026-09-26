@@ -1,0 +1,978 @@
+{
+  "schema_version": "1.0",
+  "target": {
+    "os": "linux",
+    "isa": "x86_64",
+    "abi": "linux-sysv-x86_64",
+    "target_id": "xeon-8481c-01",
+    "cpu_profile": "sapphire-rapids-8481c",
+    "execution_kind": "native",
+    "executor": "native",
+    "transport": "ssh",
+    "ssh_host": "xeon-8481c-01",
+    "ssh_remote_root": "~/cpu-uarch-explorer"
+  },
+  "capabilities": {
+    "cache-topology": {
+      "supported": true,
+      "detail": "cpu0 sysfs (/sys/devices/system/cpu/cpu0/cache/index*)",
+      "values": {
+        "levels": [
+          {
+            "level": 1,
+            "type": "Data",
+            "size": "48K",
+            "ways": "12",
+            "shared_cpu_list": "0"
+          },
+          {
+            "level": 1,
+            "type": "Instruction",
+            "size": "32K",
+            "ways": "8",
+            "shared_cpu_list": "0"
+          },
+          {
+            "level": 2,
+            "type": "Unified",
+            "size": "2048K",
+            "ways": "16",
+            "shared_cpu_list": "0"
+          },
+          {
+            "level": 3,
+            "type": "Unified",
+            "size": "107520K",
+            "ways": "15",
+            "shared_cpu_list": "0-111"
+          }
+        ]
+      },
+      "evidence": "MEASURED"
+    },
+    "cpufreq": {
+      "supported": true,
+      "detail": "/sys/devices/system/cpu/cpu0/cpufreq",
+      "values": {
+        "driver": "intel_pstate",
+        "governor": "powersave",
+        "available_governors": [
+          "performance",
+          "powersave"
+        ],
+        "min_khz": 800000,
+        "max_khz": 3800000
+      },
+      "evidence": "MEASURED"
+    },
+    "core-topology": {
+      "supported": true,
+      "detail": "linux sysfs per-cpu (absent dims = None, not guessed)",
+      "values": {
+        "source": "linux-sysfs",
+        "cpus": {
+          "0": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "0,56"
+          },
+          "1": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "1,57"
+          },
+          "10": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "10,66"
+          },
+          "100": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "44,100"
+          },
+          "101": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "45,101"
+          },
+          "102": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "46,102"
+          },
+          "103": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "47,103"
+          },
+          "104": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "48,104"
+          },
+          "105": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "49,105"
+          },
+          "106": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "50,106"
+          },
+          "107": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "51,107"
+          },
+          "108": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "52,108"
+          },
+          "109": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "53,109"
+          },
+          "11": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "11,67"
+          },
+          "110": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "54,110"
+          },
+          "111": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "55,111"
+          },
+          "12": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "12,68"
+          },
+          "13": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "13,69"
+          },
+          "14": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "14,70"
+          },
+          "15": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "15,71"
+          },
+          "16": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "16,72"
+          },
+          "17": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "17,73"
+          },
+          "18": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "18,74"
+          },
+          "19": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "19,75"
+          },
+          "2": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "2,58"
+          },
+          "20": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "20,76"
+          },
+          "21": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "21,77"
+          },
+          "22": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "22,78"
+          },
+          "23": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "23,79"
+          },
+          "24": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "24,80"
+          },
+          "25": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "25,81"
+          },
+          "26": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "26,82"
+          },
+          "27": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "27,83"
+          },
+          "28": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "28,84"
+          },
+          "29": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "29,85"
+          },
+          "3": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "3,59"
+          },
+          "30": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "30,86"
+          },
+          "31": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "31,87"
+          },
+          "32": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "32,88"
+          },
+          "33": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "33,89"
+          },
+          "34": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "34,90"
+          },
+          "35": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "35,91"
+          },
+          "36": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "36,92"
+          },
+          "37": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "37,93"
+          },
+          "38": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "38,94"
+          },
+          "39": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "39,95"
+          },
+          "4": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "4,60"
+          },
+          "40": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "40,96"
+          },
+          "41": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "41,97"
+          },
+          "42": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "42,98"
+          },
+          "43": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "43,99"
+          },
+          "44": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "44,100"
+          },
+          "45": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "45,101"
+          },
+          "46": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "46,102"
+          },
+          "47": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "47,103"
+          },
+          "48": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "48,104"
+          },
+          "49": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "49,105"
+          },
+          "5": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "5,61"
+          },
+          "50": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "50,106"
+          },
+          "51": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "51,107"
+          },
+          "52": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "52,108"
+          },
+          "53": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "53,109"
+          },
+          "54": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "54,110"
+          },
+          "55": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "55,111"
+          },
+          "56": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "0,56"
+          },
+          "57": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "1,57"
+          },
+          "58": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "2,58"
+          },
+          "59": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "3,59"
+          },
+          "6": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "6,62"
+          },
+          "60": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "4,60"
+          },
+          "61": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "5,61"
+          },
+          "62": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "6,62"
+          },
+          "63": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "7,63"
+          },
+          "64": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "8,64"
+          },
+          "65": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "9,65"
+          },
+          "66": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "10,66"
+          },
+          "67": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "11,67"
+          },
+          "68": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "12,68"
+          },
+          "69": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "13,69"
+          },
+          "7": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "7,63"
+          },
+          "70": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "14,70"
+          },
+          "71": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "15,71"
+          },
+          "72": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "16,72"
+          },
+          "73": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "17,73"
+          },
+          "74": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "18,74"
+          },
+          "75": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "19,75"
+          },
+          "76": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "20,76"
+          },
+          "77": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "21,77"
+          },
+          "78": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "22,78"
+          },
+          "79": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "23,79"
+          },
+          "8": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "8,64"
+          },
+          "80": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "24,80"
+          },
+          "81": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "25,81"
+          },
+          "82": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "26,82"
+          },
+          "83": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "27,83"
+          },
+          "84": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "28,84"
+          },
+          "85": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "29,85"
+          },
+          "86": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "30,86"
+          },
+          "87": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "31,87"
+          },
+          "88": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "32,88"
+          },
+          "89": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "33,89"
+          },
+          "9": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "9,65"
+          },
+          "90": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "34,90"
+          },
+          "91": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "35,91"
+          },
+          "92": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "36,92"
+          },
+          "93": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "37,93"
+          },
+          "94": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "38,94"
+          },
+          "95": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "39,95"
+          },
+          "96": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "40,96"
+          },
+          "97": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "41,97"
+          },
+          "98": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "42,98"
+          },
+          "99": {
+            "capacity": 1024,
+            "max_freq_khz": 3800000,
+            "midr_el1": null,
+            "cluster_cpus_list": "43,99"
+          }
+        },
+        "clusters": {
+          "0,56": [
+            "0",
+            "56"
+          ],
+          "1,57": [
+            "1",
+            "57"
+          ],
+          "10,66": [
+            "10",
+            "66"
+          ],
+          "44,100": [
+            "44",
+            "100"
+          ],
+          "45,101": [
+            "45",
+            "101"
+          ],
+          "46,102": [
+            "46",
+            "102"
+          ],
+          "47,103": [
+            "47",
+            "103"
+          ],
+          "48,104": [
+            "48",
+            "104"
+          ],
+          "49,105": [
+            "49",
+            "105"
+          ],
+          "50,106": [
+            "50",
+            "106"
+          ],
+          "51,107": [
+            "51",
+            "107"
+          ],
+          "52,108": [
+            "52",
+            "108"
+          ],
+          "53,109": [
+            "53",
+            "109"
+          ],
+          "11,67": [
+            "11",
+            "67"
+          ],
+          "54,110": [
+            "54",
+            "110"
+          ],
+          "55,111": [
+            "55",
+            "111"
+          ],
+          "12,68": [
+            "12",
+            "68"
+          ],
+          "13,69": [
+            "13",
+            "69"
+          ],
+          "14,70": [
+            "14",
+            "70"
+          ],
+          "15,71": [
+            "15",
+            "71"
+          ],
+          "16,72": [
+            "16",
+            "72"
+          ],
+          "17,73": [
+            "17",
+            "73"
+          ],
+          "18,74": [
+            "18",
+            "74"
+          ],
+          "19,75": [
+            "19",
+            "75"
+          ],
+          "2,58": [
+            "2",
+            "58"
+          ],
+          "20,76": [
+            "20",
+            "76"
+          ],
+          "21,77": [
+            "21",
+            "77"
+          ],
+          "22,78": [
+            "22",
+            "78"
+          ],
+          "23,79": [
+            "23",
+            "79"
+          ],
+          "24,80": [
+            "24",
+            "80"
+          ],
+          "25,81": [
+            "25",
+            "81"
+          ],
+          "26,82": [
+            "26",
+            "82"
+          ],
+          "27,83": [
+            "27",
+            "83"
+          ],
+          "28,84": [
+            "28",
+            "84"
+          ],
+          "29,85": [
+            "29",
+            "85"
+          ],
+          "3,59": [
+            "3",
+            "59"
+          ],
+          "30,86": [
+            "30",
+            "86"
+          ],
+          "31,87": [
+            "31",
+            "87"
+          ],
+          "32,88": [
+            "32",
+            "88"
+          ],
+          "33,89": [
+            "33",
+            "89"
+          ],
+          "34,90": [
+            "34",
+            "90"
+          ],
+          "35,91": [
+            "35",
+            "91"
+          ],
+          "36,92": [
+            "36",
+            "92"
+          ],
+          "37,93": [
+            "37",
+            "93"
+          ],
+          "38,94": [
+            "38",
+            "94"
+          ],
+          "39,95": [
+            "39",
+            "95"
+          ],
+          "4,60": [
+            "4",
+            "60"
+          ],
+          "40,96": [
+            "40",
+            "96"
+          ],
+          "41,97": [
+            "41",
+            "97"
+          ],
+          "42,98": [
+            "42",
+            "98"
+          ],
+          "43,99": [
+            "43",
+            "99"
+          ],
+          "5,61": [
+            "5",
+            "61"
+          ],
+          "6,62": [
+            "6",
+            "62"
+          ],
+          "7,63": [
+            "7",
+            "63"
+          ],
+          "8,64": [
+            "8",
+            "64"
+          ],
+          "9,65": [
+            "9",
+            "65"
+          ]
+        }
+      },
+      "evidence": "MEASURED"
+    }
+  },
+  "captured_at": "2026-09-26T12:47:12.787555+00:00"
+}
