@@ -306,16 +306,16 @@ sequenceDiagram
 
 > 状态列更新至 2026-09-26（锁频一键化落地后）。按 AGENTS.md 铁律 0，**跟踪面是 `docs/open-items.md` OI-10**，本表状态为信息展示；✅=已完成 ⬜=待办 ◐=部分完成。
 
-| # | 问题 | 证据 | 建议 | 状态（2026-09-26） |
-| - | --- | --- | --- | --- |
-| 1 | **M4 Pro 缺机器生成的 capability-manifest**（§5.5） | `data/public/capabilities/` 当时只有 Xeon | 为 macOS 写采集器（sysctl perflevels / 计时器 / QoS 探针结果封装），或至少把 §2.1 的实测散文导出为清单 JSON | ✅ 已完成：`macbook-m4pro-01-20260926T124932Z.json`（core-topology 经 sysctl，P=10/E=4；cache/cpufreq 如实 unsupported） |
-| 2 | **环境事务已实现未接线** | `runner/environment/` 存在但当时无调用路径（证据列"cli 仅 plan/run"亦已过时） | governor=performance 锁频（Xeon 第一受控项）需 CLI 接线 + run 外围事务 | ✅ 已接线并实证：声明式 `host_requirements` + 启动 reconcile + `--allow-mutation`；sudoers 白名单包装脚本；锁频 sweep `20260926T145530Z`（自动 apply→测量→恢复，journal 全终态） |
-| 3 | **探针适配器注册是硬编码** | `engine.py` 的 `_ADAPTERS` 字典写死 ptr_chase | 新探针（core/branch/TLB）接入前改为注册表模式（decorator 或 entry-point 式发现），消除"加探针改引擎" | ⬜ 待办（触发条件：core/branch/TLB 探针接入前） |
-| 4 | **SSH 每条命令一个会话** | `ssh.py` 每次 execute 都新建 TCP+认证 | 当前量级（280 条命令/run）可接受；Android/adb 或更大 sweep 前考虑长连接复用或批量化 | ⬜ 待办（触发条件：Android/adb 通道或大 sweep） |
-| 5 | **频率快照是瞬时值** | engine.py 注释已自承"非区间精确" | 环境事务落地后升级：Linux 锁频 + 测量期多次采样（或 powermetrics 并发采样入档 macOS 侧） | ◐ 部分完成：锁频已落地（800MHz 主问题已解，实证见 #2）；测量期多次采样 / powermetrics 并发仍待立项 |
-| 6 | **n=5 时 p25/p75 很粗** | statistics 用 inclusive 插值 | 不改统计代码；需要更高置信时把 repetitions 提到 7+（实验 JSON 里一行的事） | ✅ 惯例维持（非缺陷；需要时在实验 JSON 提升 repetitions） |
-| 7 | **报告层只支持单 run** | analysis/README 自述 | 跨 run 汇总（同实验多次复测的漂移分析）是下一个自然增强；校准差异单等 gem5 建模启动后再做 | ⬜ 待办（候选下一步：三机对比/跨 run 汇总） |
-| 8 | **GB10 回传链路未演练** | quarantine_intake.py 已备但未跑过真实数据 | GB10 首跑即演练；检疫脚本校验项随真实数据演化 | ⬜ 待办（触发条件：GB10 首跑；等待 GB10 侧执行 runbook §1 能力发现） |
+| # | 问题                                                       | 证据                                                                            | 建议                                                                                                         | 状态（2026-09-26）                                                                                                                                                                      |
+| - | ---------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | **M4 Pro 缺机器生成的 capability-manifest**（§5.5） | `data/public/capabilities/` 当时只有 Xeon                                     | 为 macOS 写采集器（sysctl perflevels / 计时器 / QoS 探针结果封装），或至少把 §2.1 的实测散文导出为清单 JSON | ✅ 已完成：`macbook-m4pro-01-20260926T124932Z.json`（core-topology 经 sysctl，P=10/E=4；cache/cpufreq 如实 unsupported）                                                              |
+| 2 | **环境事务已实现未接线**                             | `runner/environment/` 存在但当时无调用路径（证据列"cli 仅 plan/run"亦已过时） | governor=performance 锁频（Xeon 第一受控项）需 CLI 接线 + run 外围事务                                       | ✅ 已接线并实证：声明式`host_requirements` + 启动 reconcile + `--allow-mutation`；sudoers 白名单包装脚本；锁频 sweep `20260926T145530Z`（自动 apply→测量→恢复，journal 全终态） |
+| 3 | **探针适配器注册是硬编码**                           | `engine.py` 的 `_ADAPTERS` 字典写死 ptr_chase                               | 新探针（core/branch/TLB）接入前改为注册表模式（decorator 或 entry-point 式发现），消除"加探针改引擎"         | ⬜ 待办（触发条件：core/branch/TLB 探针接入前）                                                                                                                                         |
+| 4 | **SSH 每条命令一个会话**                             | `ssh.py` 每次 execute 都新建 TCP+认证                                         | 当前量级（280 条命令/run）可接受；Android/adb 或更大 sweep 前考虑长连接复用或批量化                          | ⬜ 待办（触发条件：Android/adb 通道或大 sweep）                                                                                                                                         |
+| 5 | **频率快照是瞬时值**                                 | engine.py 注释已自承"非区间精确"                                                | 环境事务落地后升级：Linux 锁频 + 测量期多次采样（或 powermetrics 并发采样入档 macOS 侧）                     | ◐ 部分完成：锁频已落地（800MHz 主问题已解，实证见#2）；测量期多次采样 / powermetrics 并发仍待立项                                                                                      |
+| 6 | **n=5 时 p25/p75 很粗**                              | statistics 用 inclusive 插值                                                    | 不改统计代码；需要更高置信时把 repetitions 提到 7+（实验 JSON 里一行的事）                                   | ✅ 惯例维持（非缺陷；需要时在实验 JSON 提升 repetitions）                                                                                                                               |
+| 7 | **报告层只支持单 run**                               | analysis/README 自述                                                            | 跨 run 汇总（同实验多次复测的漂移分析）是下一个自然增强；校准差异单等 gem5 建模启动后再做                    | ⬜ 待办（候选下一步：三机对比/跨 run 汇总）                                                                                                                                             |
+| 8 | **GB10 回传链路未演练**                              | quarantine_intake.py 已备但未跑过真实数据                                       | GB10 首跑即演练；检疫脚本校验项随真实数据演化                                                                | ⬜ 待办（触发条件：GB10 首跑；等待 GB10 侧执行 runbook §1 能力发现）                                                                                                                   |
 
 ### 7.3 一个结构性的观察
 
@@ -331,208 +331,255 @@ sequenceDiagram
 
 ## 9. 附录：端到端操作演练（从编译到分析报告，组内手动跟跑）
 
-> **端到端定义：源码 → 编译 → 质量门 → 能力发现 → plan 预览 → run 执行 → 数据校验 → 分析报告**。两条链路：**A. 本机**（macOS-arm64 / M4 Pro，local transport）；**B. 远程 Xeon**（linux-x86_64，ssh transport）。全程零 sudo（B6 锁频为可选进阶）；命令从本文 `sed -n` 取段执行，勿跨窗口手打。
+> **端到端定义：源码 → 编译 → 质量门 → 能力发现 → plan 预览 → run 执行 → 数据校验 → 分析报告**。
+> **块即单元**：每一步 = 一个代码块 = 一次拷贝执行；解释/参数说明/过关判据均为注释行，随块拷贝不影响执行（注释以 `#` 开头，bash 直接跳过）。
+> 两条链路：**A. 本机**（macOS-arm64 / M4 Pro，local transport）；**B. 远程 Xeon**（linux-x86_64，ssh transport）。全程零 sudo（B6 锁频为可选进阶）。勿跨窗口手打（防转录纪律见 `docs/runbooks/xeon-governor-lock.md` 头部）。
 
-### 0. 命令参数速查（全局，先读这节）
-
-**五条完整命令形态**（`.venv/bin/python` 均从仓库根执行；尖括号处替换为实际路径）：
+### 0. 命令速查（五条命令的完整形态）
 
 ```bash
-# ① plan 预览（无副作用，先看再跑）
+# ===== ① plan 预览（无副作用，先看再跑）=====
 .venv/bin/python -m runner.cli plan \
   --experiment <实验JSON> --platform <平台JSON>
 
-# ② run 执行测量（端到端主命令）
+# ===== ② run 执行测量（端到端主命令）=====
 .venv/bin/python -m runner.cli run \
   --experiment <实验JSON> --platform <平台JSON> \
   [--out <输出根目录>] [--env <变更spec> --allow-mutation]
 
-# ③ capabilities 能力发现（平台事实 → capability-manifest）
+# ===== ③ capabilities 能力发现（平台事实 → capability-manifest）=====
 .venv/bin/python -m runner.cli capabilities \
   --platform <平台JSON> [--out <输出根目录>]
 
-# ④ env 事务状态/恢复（host 级变更的审计与崩溃兜底）
+# ===== ④ env 事务状态/恢复（host 变更的审计与崩溃兜底）=====
 .venv/bin/python -m runner.cli env --platform <平台JSON> status
 .venv/bin/python -m runner.cli env --platform <平台JSON> restore --tx <事务id>
 
-# ⑤ report 分析报告（读取 run 目录 → report.md + latency.svg）
+# ===== ⑤ report 分析报告（run 目录 → report.md + latency.svg）=====
 .venv/bin/python -m analysis.cli report --run <run目录>
 ```
 
-**参数语义**：
+参数语义（"位置"指上面五条形态中的哪一条）：
 
-| 参数 | 完整形态中位置 | 含义 |
+| 参数 | 位置 | 含义 |
 |---|---|---|
-| `--experiment <实验JSON>` | ①②（必填） | ExperimentSpec：实验语义（测什么、扫哪些参数档、指标定义），文件在 `configs/experiments/`，如 `ptr-chase-cache-sweep.json` |
-| `--platform <平台JSON>` | ①②③④（必填） | 平台配置：目标机五要素（os/isa/target_id/execution_kind/executor）+ transport 通道 + controls 控制组 + probes 二进制映射，文件在 `configs/platforms/`，如 `macbook-m4pro-01.json` / `xeon-8481c-01.json` |
-| `--out <输出根目录>` | ②③（选填） | ②默认 `data/public/runs`，③默认 `data/public/capabilities`；目录下按 `<UTC时间戳>-<实验id>` 自动建子目录 |
-| `--env <变更spec>` | ②（选填，可多次） | 声明 host 级变更（如 `governor=performance`），走环境事务（apply→测量→逆序恢复，journal 留痕） |
-| `--allow-mutation` | ②（选填） | `--env` 的显式授权门：**缺省拒绝一切 host 突变**，写系统前必须显式给出 |
-| `--run <run目录>` | ⑤（必填） | 一次测量运行产出的目录（②命令结尾会打印 `run_dir=...`，直接复制使用） |
-| `--tx <事务id>` | ④ restore（必填） | journal 事务号；`status` 子命令的未完成列表里可见 |
-| preset 名 | cmake `--preset` | 构建目标三元组/profile 分层（ADR-0008），如 `macos-arm64-release`、`linux-x86_64-release` |
+| `--experiment <实验JSON>` | ①② 必填 | ExperimentSpec（测什么/扫哪些档/指标定义），`configs/experiments/`，如 `ptr-chase-cache-sweep.json` |
+| `--platform <平台JSON>` | ①②③④ 必填 | 平台配置（目标五要素 + transport + 控制组 + 探针映射），`configs/platforms/`，如 `macbook-m4pro-01.json`、`xeon-8481c-01.json` |
+| `--out` | ②③ 选填 | ②默认 `data/public/runs`；③默认 `data/public/capabilities`；自动建 `<UTC时间戳>-<实验id>` 子目录 |
+| `--env <spec>` | ② 选填可多次 | host 级变更（如 `governor=performance`），走环境事务（apply→测量→逆序恢复） |
+| `--allow-mutation` | ② 选填 | `--env` 授权门：缺省拒绝一切 host 突变 |
+| `--run <目录>` | ⑤ 必填 | ②结尾打印的 `run_dir=...`，直接复制 |
+| `--tx <id>` | ④ restore 必填 | journal 事务号，`status` 子命令可见 |
+| preset 名 | cmake `--preset` | 构建三元组/profile 分层（ADR-0008） |
 
 ### A. 本机链路（macOS-arm64 / M4 Pro，全程约 5 分钟）
 
 **A0 环境准备**
 ```bash
+# 按 uv.lock 还原锁定环境（ADR-0007），并确认解释器版本
 uv sync && .venv/bin/python --version
+# 过关判据：版本 3.12.x；.venv/ 不出现在 git status（gitignore 覆盖）
 ```
-- `uv sync`：按 `pyproject.toml` + `uv.lock` + `.python-version` 还原锁定环境（ADR-0007）。
-- 过关判据：版本 3.12.x；`.venv/` 已生成且 `git status` 不显示它（gitignore 覆盖）。
 
 **A1 编译（端到端起点）**
 ```bash
-cmake --preset macos-arm64-release          # 配置：binaryDir=build/macos-arm64/release
-cmake --build --preset macos-arm64-release  # 编译全部探针目标
+# 配置构建目录 build/macos-arm64/release（preset 定义见 CMakePresets.json）
+cmake --preset macos-arm64-release
+# 编译全部探针目标（ptr_chase + 两个平台能力探针）
+cmake --build --preset macos-arm64-release
+# 验证产物格式：应为 macOS ARM64 可执行文件
 file build/macos-arm64/release/probes/cache-mem/ptr_chase
+# 列出平台能力探针产物（timer_resolution / qos_steering）
 ls build/macos-arm64/release/probes/platform/macos-arm64/
+# 过关判据：configure 有 "Build files have been written to" 提示；构建 100%；
+#           file 报 Mach-O 64-bit arm64；ls 列出两个探针
 ```
-- 过关判据：configure 输出 "Build files have been written to: .../build/macos-arm64/release"；构建 100%；`file` 报 "Mach-O 64-bit executable arm64"；目录含 timer_resolution 与 qos_steering 两个平台能力探针。
 
 **A2 质量门（编译产物须守住 Probe ABI）**
 ```bash
+# 运行 6 项边界契约测试（每个测试守什么见下方表格）
 ctest --preset macos-arm64-release
+# 过关判据：6/6 通过（macOS 分支最后一项为 hugepage_unsupported）
 ```
+
 6 个测试与各自守住的契约（`tests/CMakeLists.txt` 定义）：
 
 | 测试名 | 命令形态 | 守什么契约 |
 |---|---|---|
-| `ptr_chase_valid_small` | `-b 64 -s 64 -n 8000` | 合法输入必须**产出数值记录**（golden 正则 `latency_ns=<数字>`） |
-| `ptr_chase_rejects_tiny_loads` | `-n 1` | loads 低于展开因子必须非零退出——杜绝 `nan/inf` 静默入库 |
+| `ptr_chase_valid_small` | `-b 64 -s 64 -n 8000` | 合法输入必须产出数值记录（golden 正则 `latency_ns=<数字>`） |
+| `ptr_chase_rejects_tiny_loads` | `-n 1` | loads 低于展开因子必须非零退出——杜绝 nan/inf 静默入库 |
 | `ptr_chase_rejects_misaligned_stride` | `-s 9` | stride 必须指针宽度整数倍（UBSan 实证过的 misaligned store 防线） |
 | `ptr_chase_rejects_stride_gt_buffer` | `-b 4 -s 999999` | 槽位数 <2 必须拒绝（无符号下溢防线） |
 | `ptr_chase_rejects_zero_buffer` | `-b 0` | 零缓冲拒绝 |
-| `ptr_chase_hugepage_unsupported`（macOS 分支） | `-h` | 无 MAP_HUGETLB 的平台必须返回"能力不支持"（分级，而非假装成功） |
+| `ptr_chase_hugepage_unsupported`（macOS 分支） | `-h` | 无 MAP_HUGETLB 的平台返回"能力不支持"（分级，而非假装成功） |
 
-- 过关判据：6/6 通过。Linux 上最后一个测试换成 `hugepage_fallback_or_ok`（页池缺失时输出须含 `page_policy=` 显式标注）。
+Linux 上最后一项换成 `hugepage_fallback_or_ok`（页池缺失时输出须含 `page_policy=` 显式标注）。
 
 **A3 能力发现（平台事实 → capability-manifest）**
 ```bash
+# --platform 为 local transport 配置 → 采集在本机直接执行
 .venv/bin/python -m runner.cli capabilities \
-  --platform configs/platforms/macbook-m4pro-01.json   # 目标平台配置（local transport → 本机采集）
+  --platform configs/platforms/macbook-m4pro-01.json
+# 过关判据：[ok] core-topology（sysctl 路径，P=10/E=4）；
+#           cache/cpufreq 两条 [--] unsupported 是如实降级、不是故障；
+#           产出 manifest 落盘 data/public/capabilities/
 ```
-- 过关判据：`[ok] core-topology`（sysctl 路径，P=10/E=4）；cache/cpufreq 两条 `[--] unsupported`——macOS 无 sysfs，**如实降级不是故障**；产出文件在 `data/public/capabilities/macbook-m4pro-01-<时间戳>.json`。
 
 **A4 plan 预览（无副作用，先看再跑）**
 ```bash
+# 把 ExperimentSpec × 平台控制组展开成确定性 case 列表：只解析、不执行、不写盘
 .venv/bin/python -m runner.cli plan \
   --experiment configs/experiments/ptr-chase-cache-sweep.json \
-  --platform configs/platforms/macbook-m4pro-01.json | head -6
+  --platform configs/platforms/macbook-m4pro-01.json
+# 过关判据：cases=28（14 档 × 2 QoS 控制组）；每参数带 [source] 溯源；无报错
 ```
-这一步在干什么：把 ExperimentSpec（实验语义）× 平台 controls（控制组）**展开成确定性 case 列表**——每个 case = 一组参数 × 一个控制设置 × repetitions 次重复。**只解析、不执行、不写盘**；所有参数错误（单位写错、buffer 太小、repetitions<1）在 plan 期就爆掉，run 期不再做参数解释。输出逐字段读法（真实输出样例）：
+这一步在干什么、输出怎么读（真实输出样例逐字段注释）：
 
 ```text
 experiment=ptr-chase-cache-sweep protocol=1.0 cases=28 target=macbook-m4pro-01
+#                      ^^^^^^^^^^^^^^^^ case 总数 = 扫描档 × 控制组数
   ptr-chase-cache-sweep:qos-default:b32K-s64B  reps=5  prefix=-
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ case id = 实验名:控制组:b<缓冲>K-s<步长>B
+#                                             reps=5  每 case 重复次数（median 的样本数）
+#                                                    prefix=-  该控制组不加命令前缀（background 组会是 taskpolicy -b）
       buffer_kb=32[experiment-sweep], loads=4194304[derived], stride=64[spec-default], warmup=200000[spec-default]
+#     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 参数溯源：experiment-sweep=扫描档 / derived=plan 期算出 / spec-default=实验 JSON 默认
 ```
-- `cases=28` = 14 档 buffer × 2 个控制组（qos-default / qos-background）；
-- case id 结构 = `实验名:控制组:b<缓冲>K-s<步长>B`；
-- `reps=5` = 每 case 重复 5 次（median 统计的样本数）；
-- `prefix=-` = 该控制组不加命令前缀（qos-background 组会显示 `taskpolicy -b`）；
-- 每参数 `[...]` = **来源溯源**：experiment-sweep（扫描档）/ derived（plan 期算出的 loads）/ spec-default（实验 JSON 默认值）。
-
-- 过关判据：case 数与预期一致（本机 28、Xeon 14）、每个参数都有来源、无报错。
 
 **A5 run 执行（编译产物 → 原始数据）**
 ```bash
+# 执行全部 case（本机 28 个 × 5 重复）：records.jsonl 逐行落盘（每行 flush+fsync）
 .venv/bin/python -m runner.cli run \
   --experiment configs/experiments/ptr-chase-cache-sweep.json \
   --platform configs/platforms/macbook-m4pro-01.json
+# 过关判据：28 行 [ok]（failed 必须带结构化 reason）；结尾 run_dir= 与 summary 自洽
+# 过程观察：另开一窗执行  tail -f <run_dir>/records.jsonl  可见逐行写入
 ```
-- 过关判据：28 行 `[ok]`（若有 failed 必须带结构化 reason 而非数字）；结尾给出 `run_dir` 且 summary 计数自洽。过程观察：另开一窗 `tail -f <run_dir>/records.jsonl`，可见逐行写入（每行 flush+fsync，崩溃最多丢当前行）。
 
 **A6 数据校验（入库前闸门）**
 ```bash
+# 取最新一次 sweep 的 run 目录
 RUN=$(ls -dt data/public/runs/*ptr-chase-cache-sweep | head -1)
+# 逐条过 run-record.v2 schema（jsonschema 严校验）
+uv run --with jsonschema python3 -c "
+import json, jsonschema
+schema = json.load(open('runner/schema/run-record.v2.schema.json'))
+n = sum(1 for line in open('$RUN/records.jsonl') if jsonschema.validate(json.loads(line), schema) is None)
+print(f'{n} records valid')"
+# 一致性自检：记录数 vs manifest、非 ok 必有结构化 failure（不编造数字纪律的回传侧检查）
+python3 scripts/quarantine_intake.py "$RUN"
+# 过关判据：28 records valid；QUARANTINE PASSED
+```
+
+**A7 分析报告（端到端终点）**
+```bash
+# 生成报告（Markdown + SVG 曲线）到 run 目录
+.venv/bin/python -m analysis.cli report --run "$RUN"
+# 人读报告：元信息含探针谱系/证据等级/控制口径/置信度段
+open "$RUN/report.md"
+# 过关判据：run 目录新增 report.md + latency.svg
+```
+
+→ **A 链闭环**：源码 → Mach-O 二进制 → 28 条 schema 合法记录（统计量/溯源/环境快照齐备）→ 人读报告 + SVG 曲线。
+
+### B. 远程 Xeon 链路（linux-x86_64 / ssh transport）
+
+**B0 通道与代码同步（前提）**
+```bash
+# 验证 ssh 别名免密可达（别名定义在 ~/.ssh/config；真实地址在 data/private/hosts.md，永不入库）
+ssh -o BatchMode=yes xeon-8481c-01 'echo ALIVE'
+# 整仓同步到服务器：--delete 防残留幽灵文件；三个排除项=构建产物/系统噪声/本机 venv
+rsync -a --delete --exclude 'build/' --exclude '.DS_Store' --exclude '.venv/' \
+  /Users/michaelyao/workspace/cpu-uarch-explorer/ \
+  michael@10.126.126.128:~/cpu-uarch-explorer/
+# 过关判据：输出 ALIVE；rsync 无错误（.venv 删除类警告无害）
+```
+
+**B1 服务器编译（与 A1 同构 preset，不同宿主）**
+```bash
+# 在 Xeon 上配置并编译（产物落在服务器 build/linux-x86_64/release/）
+ssh -o BatchMode=yes xeon-8481c-01 'cd ~/cpu-uarch-explorer && \
+  cmake --preset linux-x86_64-release && cmake --build --preset linux-x86_64-release'
+# 验证产物格式
+ssh -o BatchMode=yes xeon-8481c-01 'file ~/cpu-uarch-explorer/build/linux-x86_64/release/probes/cache-mem/ptr_chase | cut -c1-80'
+# 过关判据：file 报 ELF 64-bit ... x86-64
+```
+
+**B2 能力发现（本机发起，经 ssh 通道采目标机事实）**
+```bash
+# --platform 为 ssh transport 配置 → 采集命令经执行器通道在 Xeon 上执行
+.venv/bin/python -m runner.cli capabilities \
+  --platform configs/platforms/xeon-8481c-01.json
+# 过关判据：cache-topology 四行（48K/32K/2048K/107520K）；
+#           cpufreq（intel_pstate / powersave / 800000-3800000）；
+#           core-topology 摘要（112 核、SMT 映射）
+```
+
+**B3 plan 预览**
+```bash
+# 与 A4 同一条代码路径只换平台配置——跨平台零特判的直观验证
+.venv/bin/python -m runner.cli plan \
+  --experiment configs/experiments/ptr-chase-cache-sweep.json \
+  --platform configs/platforms/xeon-8481c-01.json
+# 过关判据：cases=14（单控制组 taskset）；target=xeon-8481c-01；prefix 列为 taskset -c 0
+```
+
+**B4 run 执行（ssh transport 全链）**
+```bash
+# 14 个 case × 5 重复 = 70 次 ssh 调用，每条 raw_command 完整入档
+.venv/bin/python -m runner.cli run \
+  --experiment configs/experiments/ptr-chase-cache-sweep.json \
+  --platform configs/platforms/xeon-8481c-01.json
+# 过关判据：14 行 [ok]
+# 抽查一条 record 的 raw_command，应以如下形态开头（requested/actual 双记录）：
+#   ssh -o BatchMode=yes xeon-8481c-01 'cd ~/cpu-uarch-explorer && exec taskset -c 0 ...'
+# environment.freq_snapshot 应存在（powersave 下常见 800MHz 边界读——纪律见 §5.4'）
+```
+
+**B5 数据校验 + 报告（完整命令）**
+```bash
+# 取 Xeon 这次 run 的目录（时间戳最新者）
+RUN=$(ls -dt data/public/runs/*ptr-chase-cache-sweep | head -1)
+# schema 严校验（同 A6）
 uv run --with jsonschema python3 -c "
 import json, jsonschema
 schema = json.load(open('runner/schema/run-record.v2.schema.json'))
 n = sum(1 for line in open('$RUN/records.jsonl') if jsonschema.validate(json.loads(line), schema) is None)
 print(f'{n} records valid')"
 python3 scripts/quarantine_intake.py "$RUN"
-```
-- 过关判据：`28 records valid`；检疫脚本输出 `QUARANTINE PASSED`（schema + 记录数与 manifest 一致 + 非 ok 必有结构化 failure）。
-
-**A7 分析报告（端到端终点）**
-```bash
+# 生成报告（同 A7）
 .venv/bin/python -m analysis.cli report --run "$RUN"
-open "$RUN/report.md"        # 或任意编辑器
+# 过关判据：14 records valid；QUARANTINE PASSED；run 目录新增 report.md + latency.svg
 ```
-- 过关判据：run 目录新增 `report.md` + `latency.svg`；报告元信息含探针谱系（git commit / sha256）、证据等级 MEASURED、控制口径说明与置信度段。
-
-→ **A 链闭环**：源码 → Mach-O 二进制 → 28 条 schema 合法记录（含统计量/溯源/环境快照）→ 人读报告 + SVG 曲线。
-
-### B. 远程 Xeon 链路（linux-x86_64 / ssh transport）
-
-**B0 通道与代码同步（前提）**
-```bash
-ssh -o BatchMode=yes xeon-8481c-01 'echo ALIVE'
-rsync -a --delete --exclude 'build/' --exclude '.DS_Store' --exclude '.venv/' \
-  /Users/michaelyao/workspace/cpu-uarch-explorer/ \
-  michael@10.126.126.128:~/cpu-uarch-explorer/
-```
-- `--delete`：本机删除的文件在服务器同步删除（防残留幽灵文件）；三个 `--exclude`：构建产物/系统噪声/本机 venv 不跨机同步。
-- 过关判据：输出 `ALIVE`；rsync 无错误。别名在 `~/.ssh/config`，真实地址在 `data/private/hosts.md`（永不入库）。
-
-**B1 服务器编译（与 A1 同构 preset，不同宿主）**
-```bash
-ssh -o BatchMode=yes xeon-8481c-01 'cd ~/cpu-uarch-explorer && \
-  cmake --preset linux-x86_64-release && cmake --build --preset linux-x86_64-release && \
-  file build/linux-x86_64/release/probes/cache-mem/ptr_chase | cut -c1-80'
-```
-- 过关判据：`file` 报 `ELF 64-bit ... x86-64`。
-
-**B2 能力发现（本机发起，经 ssh 通道采目标机事实）**
-```bash
-.venv/bin/python -m runner.cli capabilities \
-  --platform configs/platforms/xeon-8481c-01.json   # transport=ssh → 经执行器通道在 Xeon 上采集
-```
-- 过关判据：cache-topology 四行（48K/32K/2048K/107520K）；cpufreq（intel_pstate / powersave / 800000-3800000）；core-topology 摘要（112 核、SMT 映射可读）。
-
-**B3 plan 预览（完整命令）**
-```bash
-.venv/bin/python -m runner.cli plan \
-  --experiment configs/experiments/ptr-chase-cache-sweep.json \
-  --platform configs/platforms/xeon-8481c-01.json | head -6
-```
-- 过关判据：`cases=14`（单控制组 taskset）、`target=xeon-8481c-01`、prefix 列为 `taskset -c 0`——**与 A4 同一条代码路径只换配置**，跨平台零特判的直观验证。
-
-**B4 run 执行（ssh transport 全链）**
-```bash
-.venv/bin/python -m runner.cli run \
-  --experiment configs/experiments/ptr-chase-cache-sweep.json \
-  --platform configs/platforms/xeon-8481c-01.json
-```
-- 过关判据：14 行 `[ok]`。抽查一条 record：`raw_command` 以 `ssh -o BatchMode=yes xeon-8481c-01 'cd ~/cpu-uarch-explorer && exec taskset -c 0 ...'` 开头（requested/actual 双记录）；`environment.freq_snapshot` 存在（powersave 下常见 800MHz 边界读——见 §5.4' 纪律）。
-
-**B5 数据校验 + 报告**——A6/A7 原命令作用于 B4 的 run 目录，判据相同。
 
 **B6（可选进阶）锁频事务版**
 ```bash
+# 环境事务：sudoers 白名单包装脚本 apply → 测量 → 自动逆序 restore，journal 落盘
 .venv/bin/python -m runner.cli run \
   --experiment configs/experiments/ptr-chase-cache-sweep.json \
   --platform configs/platforms/xeon-8481c-01.json \
   --env governor=performance --allow-mutation
+# 查看事务台账：应全终态（无 unfinished）
 .venv/bin/python -m runner.cli env --platform configs/platforms/xeon-8481c-01.json status
+# 前提：sudoers 包装脚本（runbook 路径 A，人工一次性部署）
+# 过关判据：run 内 freq_snapshot 出现 3.2~3.8GHz 读数；journals 全终态；
+#           服务器 governor 已自动还原 powersave
 ```
-前提（sudoers 白名单包装脚本）与原理见 `docs/runbooks/xeon-governor-lock.md`。过关判据：run 内 freq_snapshot 出现 3.2~3.8GHz 读数；status 显示 journals 全终态；服务器 governor 已**自动还原 powersave**。
 
 ### 命令 ↔ 代码映射（每一步背后是我们的哪个模块）
 
 | 步骤 | 你执行的命令 | 代码入口（本仓自研） |
 |---|---|---|
-| A0 环境 | `uv sync` | `pyproject.toml` / `.python-version` / `uv.lock`（ADR-0007 工具链） |
-| A1/B1 编译 | `cmake --preset/--build` | `CMakePresets.json`（ADR-0008）→ `CMakeLists.txt` → `probes/cache-mem/CMakeLists.txt` → 探针源码 `ptr_chase.cpp`（头部"技术原理"注释） |
-| A2 质量门 | `ctest` | `tests/CMakeLists.txt`（add_test 边界契约表） |
-| A3/B2 能力发现 | `runner.cli capabilities` | `runner/cli.py:_cmd_capabilities` → `runner/targets/capabilities.py`（经 `runner/executor/` 通道，跨 transport 同码） |
-| A4/B3 plan | `runner.cli plan` | `runner/cli.py:_cmd_plan` → `runner/spec.py`（配置加载轻校验）→ `runner/plan.py:build_plan`（controls×sweep 展开、派生参数、`runner/resolve.py` 严格单位解析） |
-| A5/B4 run | `runner.cli run` | `runner/cli.py:_cmd_run` → `runner/engine.py:run_plan/_run_case`（执行器 `runner/executor/`、适配器 `runner/adapters/ptr_chase.py`、原始样本 `runner/artifacts.py`、记录 `runner/records.py`、统计 `runner/statistics.py`） |
-| B4 传输 | （run 内部） | `runner/executor/ssh.py`（SshExecutor）+ `runner/executor/__init__.py:make_executor`（唯一选择点） |
-| A6 校验 | jsonschema 片段 + `quarantine_intake.py` | `runner/schema/run-record.v2.schema.json` + `scripts/quarantine_intake.py` |
+| A0 环境 | `uv sync` | `pyproject.toml` / `.python-version` / `uv.lock`（ADR-0007） |
+| A1/B1 编译 | `cmake --preset/--build` | `CMakePresets.json`（ADR-0008）→ `CMakeLists.txt` → `probes/cache-mem/CMakeLists.txt` → `ptr_chase.cpp`（头部"技术原理"注释） |
+| A2 质量门 | `ctest` | `tests/CMakeLists.txt`（add_test 边界契约） |
+| A3/B2 能力发现 | `runner.cli capabilities` | `runner/cli.py:_cmd_capabilities` → `runner/targets/capabilities.py`（经 `runner/executor/` 通道） |
+| A4/B3 plan | `runner.cli plan` | `runner/cli.py:_cmd_plan` → `runner/spec.py` → `runner/plan.py:build_plan`（+ `runner/resolve.py` 严格单位解析） |
+| A5/B4 run | `runner.cli run` | `runner/cli.py:_cmd_run` → `runner/engine.py:run_plan/_run_case`（executor/adapters/artifacts/records/statistics 分层） |
+| B4 传输 | （run 内部） | `runner/executor/ssh.py` + `runner/executor/__init__.py:make_executor`（唯一选择点） |
+| A6/B5 校验 | jsonschema 片段 + `quarantine_intake.py` | `runner/schema/run-record.v2.schema.json` + `scripts/quarantine_intake.py` |
 | A7/B5 报告 | `analysis.cli report` | `analysis/cli.py` → `analysis/load.py` + `analysis/report.py` + `analysis/chart.py`（零依赖 Markdown + SVG） |
-| B6 锁频 | `run --env ... --allow-mutation` | `runner/environment/`（coordinator.py 事务流 / journal.py 台账 / controllers.py 受控项）+ 服务器侧 sudoers 包装脚本（runbook 部署） |
+| B6 锁频 | `run --env ... --allow-mutation` | `runner/environment/`（coordinator/journal/controllers）+ 服务器侧 sudoers 包装脚本（runbook 部署） |
 
 ### 排障速查（同事卡住先看这张表）
 
