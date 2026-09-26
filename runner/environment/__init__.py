@@ -18,8 +18,11 @@ apply 失败给结构化提示（NOPASSWD sudoers 配方或手动执行）。
 SIGHUP 释放 flock。
 """
 
-from .coordinator import EnvironmentError_, execute_environment_tx, restore_transaction
+from .coordinator import (EnvironmentError_, execute_environment_tx,  # noqa: F401
+                          reconcile_unfinished, restore_transaction,
+                          specs_from_host_requirements)
 from .journal import Journal, JournalStore
 
 __all__ = ["EnvironmentError_", "Journal", "JournalStore",
-           "execute_environment_tx", "restore_transaction"]
+           "execute_environment_tx", "reconcile_unfinished",
+           "restore_transaction", "specs_from_host_requirements"]

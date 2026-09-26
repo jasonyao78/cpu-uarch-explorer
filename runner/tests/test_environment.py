@@ -18,7 +18,7 @@ from pathlib import Path
 from runner.environment.coordinator import (EnvironmentError_,
                                             execute_environment_tx,
                                             restore_transaction)
-from runner.environment.journal import JournalStore
+from runner.environment.journal import JournalStore, Mutation
 from runner.environment.controllers import make_controller
 from runner.errors import RunnerError
 from runner.executor.local import ExecutionResult
@@ -127,6 +127,63 @@ class TestEnvironmentTx(unittest.TestCase):
     def test_unknown_controller_rejected(self):
         with self.assertRaises(RunnerError):
             make_controller("filesystem=readonly")
+
+
+class TestReconcileAndSpecs(unittest.TestCase):
+    """中断恢复实证（任务书 §2.1/§5.2）：kill -INT 留下的未完成事务在下次
+    运行前被检测并完成 restore；host_requirements 声明式换算。"""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.store = JournalStore(Path(self._tmp.name))
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_sigint_interrupted_journal_reconciled_before_next_run(self):
+        ex = FakeEnvExecutor(governor="performance")  # 中断现场：已锁未恢复
+        journal = self.store.new("fake-01")
+        journal.mutations.append(Mutation(controller="cpufreq.governor",
+                                          requested="performance", before="powersave",
+                                          after="performance"))
+        journal.transition("applying")
+        journal.transition("applied")
+        self.store.save(journal)
+
+        from runner.environment import reconcile_unfinished
+        remaining = reconcile_unfinished(PLATFORM, store=self.store, executor=ex)
+        self.assertEqual(remaining, [])
+        self.assertEqual(ex.governor, "powersave")  # 已逆序恢复
+        self.assertEqual(self.store.load(journal.tx_id).state, "restored")
+
+    def test_reconcile_failure_keeps_journal_blocking(self):
+        ex = FakeEnvExecutor(governor="performance", sudo_ok=False)  # 恢复也失败
+        journal = self.store.new("fake-01")
+        journal.mutations.append(Mutation(controller="cpufreq.governor",
+                                          requested="performance", before="powersave",
+                                          after="performance"))
+        journal.transition("applying")
+        journal.transition("applied")
+        self.store.save(journal)
+        from runner.environment import reconcile_unfinished
+        remaining = reconcile_unfinished(PLATFORM, store=self.store, executor=ex)
+        self.assertEqual(len(remaining), 1)  # 仍阻塞，交由人工
+
+    def test_keyboardinterrupt_in_work_still_restores(self):
+        # SIGINT 经 KeyboardInterrupt 进入恢复路径（语义钉住，非行为验证）
+        ex = FakeEnvExecutor()
+        def interrupted():
+            raise KeyboardInterrupt("simulated SIGINT")
+        with self.assertRaises(KeyboardInterrupt):
+            execute_environment_tx(PLATFORM, ["governor=performance"], interrupted,
+                                   allow_mutation=True, store=self.store,
+                                   executor=ex, lock=FakeLock())
+        self.assertEqual(ex.governor, "powersave")
+
+    def test_host_requirements_to_specs(self):
+        from runner.environment import specs_from_host_requirements
+        specs = specs_from_host_requirements({"cpufreq.governor": "performance"})
+        self.assertEqual(specs, ["governor=performance"])
 
 
 if __name__ == "__main__":

@@ -46,9 +46,19 @@ def _cmd_run(args) -> int:
     if args.env:
         # host 级状态变更（如锁频）走环境事务：apply→run→restore，journal
         # 全留痕；--allow-mutation 是显式授权门（2026-09-25 讨论裁定）
-        from .environment import execute_environment_tx
+        from .environment import (execute_environment_tx, reconcile_unfinished,
+                                  specs_from_host_requirements)
+        # 声明式 host_requirements（平台配置）+ CLI --env 叠加；启动前调和
+        # 中断残留事务（任务书 §2.1：检测并完成 restore，而非硬拒绝）
+        declared = platform.get("host_requirements") or {}
+        specs = specs_from_host_requirements(declared) + list(args.env)
+        remaining = reconcile_unfinished(platform)
+        if remaining:
+            raise RunnerError("env-unfinished-tx",
+                              f"reconcile failed for: {[j.tx_id for j in remaining]}"
+                              " — 人工处理: runner.cli env status / restore --tx <id>")
         summary = execute_environment_tx(
-            platform, args.env,
+            platform, specs,
             work=lambda: run_plan(plan, platform, run_dir, _REPO_ROOT),
             allow_mutation=args.allow_mutation,
             note=f"experiment={plan.experiment_id}")
@@ -94,9 +104,14 @@ def _cmd_capabilities(args) -> int:
         if not cap["supported"]:
             print(f"[--] {name}: unsupported ({cap['detail']})")
         elif name == "cache-topology":
-            levels = ", ".join(f"L{e['level']}{e['type'][0]}={e['size']}"
+            levels = ", ".join(f"L{e['level']}{e['type'][0] if e['type'] else '?' }={e['size']}"
                                for e in cap["values"]["levels"])
             print(f"[ok] {name}: {levels}")
+        elif name == "core-topology" and cap["values"].get("source") == "linux-sysfs":
+            cpus = cap["values"]["cpus"]
+            caps_set = sorted({e["capacity"] for e in cpus.values()})
+            print(f"[ok] {name}: {len(cpus)} cpus, capacity tiers={caps_set}, "
+                  f"midr readable={'yes' if any(e['midr_el1'] for e in cpus.values()) else 'no'}")
         else:
             print(f"[ok] {name}: {cap['values']}")
     print(f"capability-manifest: {path}")

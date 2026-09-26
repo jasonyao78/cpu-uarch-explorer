@@ -185,3 +185,37 @@ def restore_transaction(tx_id: str, platform: dict, *, store: JournalStore | Non
         store.save(journal)
     finally:
         lock.release()
+
+
+def reconcile_unfinished(platform: dict, *, store: JournalStore | None = None,
+                         executor=None) -> list[Journal]:
+    """启动前调和：检测未完成事务并**自动完成恢复**（任务书 §2.1 中断恢复
+    实证——kill -INT 留下的 applied/applying 事务在下次运行前被 restore，
+    而不是永远硬拒绝）。恢复失败的事务保持未完结并返回，由调用方拒绝运行。
+
+    状态语义：applied=中断于测量中（直接逆序恢复）；applying=中断于
+    apply 中（先落 applied 标记再过恢复路径，after 为空的 mutation 不动）。"""
+    store = store or default_store()
+    executor = executor or make_executor(platform)
+    lock = _default_lock(platform)
+    remaining: list[Journal] = []
+    for journal in store.unfinished():
+        lock.acquire()
+        try:
+            if journal.state == "applying":
+                journal.transition("applied")  # 已过白名单：applying→applied
+            _restore_all(executor, journal)
+            store.save(journal)
+        except EnvironmentError_:
+            store.save(journal)
+            remaining.append(journal)
+        finally:
+            lock.release()
+    return remaining
+
+
+def specs_from_host_requirements(host_requirements: dict) -> list[str]:
+    """平台/实验声明的 host_requirements（{"cpufreq.governor": "performance"}）
+    → coordinator spec 列表（"governor=performance"）。未知键在 make_controller
+    处报错——声明即校验。"""
+    return [f"{key.split('.')[-1]}={value}" for key, value in host_requirements.items()]

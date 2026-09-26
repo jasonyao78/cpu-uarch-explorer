@@ -20,6 +20,8 @@
 | `environment.freq_snapshot` | object | 每 case 前后 `scaling_cur_freq` 瞬时值 `{before_hz, after_hz}`（measurement-discipline §5 落地：锁频前的频率证据；macOS 无此接口则省略，不编造） | 2026-09-25 |
 | `environment.aux_snapshots` | object | 平台配置 `aux_snapshots` 声明的只读采集命令快照 `{name: {before, after}}`（GB10 §5.4：GPU 利用率等；命令失败则该 name 省略） | 2026-09-25 |
 | `probes.<name>` 的 dict 形态 | `{local, remote}` | deploy 模式（交叉编译产物推送目标机，Android 预演课题）——非 GB10 自驱模式 | 2026-09-25 |
+| `host_requirements`（平台配置顶层键） | object | 声明式 host 级需求 `{"cpufreq.governor": "performance"}`：run 时经环境事务执行，**默认拒绝、须 `--allow-mutation`**；启动前自动 reconcile 中断残留事务（2026-09-26 接线任务） | 2026-09-26 |
+| capability `core-topology` 条目 | object | 核型事实：linux-sysfs 逐核 `{capacity, max_freq_khz, midr_el1, cluster_cpus_list}`（缺失维度=null 不猜）或 macos-sysctl `perflevels[]` | 2026-09-26 |
 
 ## v1（归档）
 
