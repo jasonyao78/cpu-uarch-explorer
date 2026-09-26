@@ -81,13 +81,13 @@ cmake --build --preset macos-arm64-release
 
 **编译选项细节**：
 
-| 选项 | 值 | 来源 |
-|---|---|---|
-| 语言标准 | C++17（`CMAKE_CXX_STANDARD_REQUIRED ON`，禁用编译器扩展写法） | 根 CMakeLists |
-| 构建类型 | Release（默认；`-O3 -DNDEBUG`） | 根 CMakeLists 缺省逻辑 + preset |
-| UBSan | 仅 `macos-arm64-ubsan` preset 开 `-fsanitize=undefined -g -O1` | `ENABLE_UBSAN` option |
-| 交叉编译 | `linux-aarch64-cross-release` 走 toolchain 文件（指定 `aarch64-linux-gnu-gcc` + 静态链接） | cmake/toolchain-linux-aarch64.cmake |
-| hugepage 平台差 | **不靠编译选项**：`ptr_chase.cpp` 内 `#ifndef MAP_HUGETLB → CPU_UARCH_NO_HUGEPAGE` 宏自检测（macOS 无该宏，自动走 4K 分支，-h 时退出码 2=unsupported） | 探针源码内 |
+| 选项            | 值                                                                                                                                                                | 来源                                |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| 语言标准        | C++17（`CMAKE_CXX_STANDARD_REQUIRED ON`，禁用编译器扩展写法）                                                                                                   | 根 CMakeLists                       |
+| 构建类型        | Release（默认；`-O3 -DNDEBUG`）                                                                                                                                 | 根 CMakeLists 缺省逻辑 + preset     |
+| UBSan           | 仅`macos-arm64-ubsan` preset 开 `-fsanitize=undefined -g -O1`                                                                                                 | `ENABLE_UBSAN` option             |
+| 交叉编译        | `linux-aarch64-cross-release` 走 toolchain 文件（指定 `aarch64-linux-gnu-gcc` + 静态链接）                                                                    | cmake/toolchain-linux-aarch64.cmake |
+| hugepage 平台差 | **不靠编译选项**：`ptr_chase.cpp` 内 `#ifndef MAP_HUGETLB → CPU_UARCH_NO_HUGEPAGE` 宏自检测（macOS 无该宏，自动走 4K 分支，-h 时退出码 2=unsupported） | 探针源码内                          |
 
 **`build/` 目录分层现状**：`build/macos-arm64/{release,ubsan}/`、`build/darwin-x86_64/release/`（本机）；服务器侧 `build/linux-x86_64/release/`。每个子目录是自包含的 CMake 构建树（CMakeCache.txt 记录配置谱系 + Makefile + 产物）。注意 `cmake/`（源树内，放 toolchain 文件）与 `build/`（产物树，gitignore）是两个不同的东西。
 
@@ -118,7 +118,13 @@ cmake --build --preset macos-arm64-release
 5. **环境采集**（`executor.system_info()`）：os/kernel/compiler——ssh 平台描述的是目标机而非本机；
 6. **辅助快照**（`aux_snapshots`，配置驱动）：平台可在配置里声明只读采集命令（如 GB10 的 GPU 利用率），run 前后各采一次。
 
-另有 `runner/environment/`（事务协调器：锁 → journal → apply → verify → 逆序 restore）已实现但**尚未接线**到 run 主链——它是未来 governor 锁频的载体（OI-8 主线）。
+另有 `runner/environment/`（事务协调器）已实现但**尚未接线**到 run 主链——它是未来 governor 锁频的载体（OI-8 主线）。这里展开一下，因为它是"探测前准备"里最反直觉的部分：
+
+**为什么改个系统设置需要"事务"**：锁频这类操作改的是 **host 级全局状态**（governor 影响整机所有进程），和 `taskset`（只影响子进程）有本质区别。实验改完全局设置必须恢复原状，否则后续所有测量都在被污染的环境里进行。事务协调器就是这个"改完恢复"的安全机制，工作方式像**银行柜台的转账台账**——转账前先在台账上写下"账户原余额"，再动钱；转到一半停电，恢复营业时第一件事是看台账把账还原，而不是在烂账上继续转。
+
+具体流程：**host 级互斥锁**（同一时刻只有一个实验能改环境）→ 写 **journal**（持久化台账：要改哪些项、各项原值、改到第几步）→ apply（执行修改）→ verify（确认生效）→ 跑实验 → **逆序 restore**（按相反顺序还原）。进程被信号杀死也能靠 journal 恢复；存在未完成事务时拒绝开始新实验（上次没还原干净，不许在未知环境上继续测）。
+
+"已实现未接线"的含义：这套代码（`coordinator.py` / `journal.py` / `controllers.py`）写好且测试过，但 `runner.cli` 目前只有 plan/run 两个子命令，引擎的任何代码路径都不会调用它——所以 governor 锁频今天实际上不会发生。Xeon 首跑发现的 800MHz 平线问题（§5.4'）正是它要解决的。
 
 ## 4. 探测过程分析
 
@@ -135,14 +141,14 @@ cmake --build --preset macos-arm64-release
 
 ### 4.2 运行参数全表
 
-| 参数 | 含义 | 默认 | 校验 |
-|---|---|---|---|
-| `-b KB` | 缓冲区大小（工作集） | 8192 | >0 且够 2 个槽位 |
-| `-s bytes` | 槽位步长 | 64 | 必须是指针宽度（8B）整数倍 |
-| `-n loads` | 依赖 load 总数 | 2²⁸（268M） | ≥8 且程序内对齐到 8 的倍数 |
-| `-w loads` | 预热次数（不计入测量） | 200000 | ≥0 |
-| `-h` | 2MB hugepage；页池不足时回退 4K 并在输出标注 `page_policy=fallback-4k` | 关 | Linux only |
-| `-H` | hugepage 严格模式：页池不足直接退出码 2（unsupported） | 关 | Linux only |
+| 参数         | 含义                                                                    | 默认          | 校验                        |
+| ------------ | ----------------------------------------------------------------------- | ------------- | --------------------------- |
+| `-b KB`    | 缓冲区大小（工作集）                                                    | 8192          | >0 且够 2 个槽位            |
+| `-s bytes` | 槽位步长                                                                | 64            | 必须是指针宽度（8B）整数倍  |
+| `-n loads` | 依赖 load 总数                                                          | 2²⁸（268M） | ≥8 且程序内对齐到 8 的倍数 |
+| `-w loads` | 预热次数（不计入测量）                                                  | 200000        | ≥0                         |
+| `-h`       | 2MB hugepage；页池不足时回退 4K 并在输出标注`page_policy=fallback-4k` | 关            | Linux only                  |
+| `-H`       | hugepage 严格模式：页池不足直接退出码 2（unsupported）                  | 关            | Linux only                  |
 
 退出码语义（Probe ABI，ADR-0006 §3）：**0=成功 / 1=输入或环境错误 / 2=能力不支持**。非法输入绝不静默产出记录。
 
@@ -165,10 +171,16 @@ cmake --build --preset macos-arm64-release
 ssh -o BatchMode=yes xeon-8481c-01 'cd ~/cpu-uarch-explorer && exec taskset -c 0 build/linux-x86_64/release/probes/cache-mem/ptr_chase -b 32 -s 64 -n 4194304 -w 200000 -h'
 ```
 
-本机 M4 Pro 的 E 核组则是（探针为绝对路径）：
+本机 M4 Pro 的 E 核组则是（探针为绝对路径，前缀为 `taskpolicy -b` = BACKGROUND QoS → E 核）：
 
 ```bash
 /usr/sbin/taskpolicy -b /Users/michaelyao/workspace/cpu-uarch-explorer/build/macos-arm64/release/probes/cache-mem/ptr_chase -b 32 -s 64 -n 4194304 -w 200000
+```
+
+本机 M4 Pro 的 P 核组（qos-default 控制组）**不加任何前缀**——`command_prefix` 为空，以默认 QoS 运行（默认档落在 P 核，OI-5 实测双峰）：
+
+```bash
+/Users/michaelyao/workspace/cpu-uarch-explorer/build/macos-arm64/release/probes/cache-mem/ptr_chase -b 32 -s 64 -n 4194304 -w 200000
 ```
 
 ## 5. 数据生成与分析
@@ -197,16 +209,22 @@ analysis.cli report --run <run目录>
      → report.md + latency.svg 写回 run 目录
 ```
 
+**统计量词汇表**（每条 ok 记录里 `statistics` 块的五个数）：median（中位数：5 次测量排序后中间那个，某次被系统中断拖慢 10 倍也拉不动它——干扰只会拖慢不会加速，分布右偏，median 天然鲁棒）；min/max（最好/最差的一次，min 常作"无干扰下限"参考）；p25/p75（25%/75% 分位数：一半数据落在 [p25, p75] 区间，这是数据的"躯干"范围，区间窄 = 测量稳）。
+
+**为什么没有 p95**：样本量只有 5。5 个点的 95 分位插值出来几乎就是 max，不提供新信息——假精确。p95/p99 这类尾部分位数要 ≥20 个样本才有意义；quartile 是小样本下仍有信息量的折中。将来 repetitions 提到 20+ 时再考虑加尾部指标。
+
 ### 5.2 analysis/ 目录
 
-| 文件 | 职责 |
-|---|---|
-| `load.py` | 读 run 目录；只收 schema_version=2.0 的记录；**failed 记录隔离**（单列不进图表） |
+| 文件          | 职责                                                                                                                                    |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `load.py`   | 读 run 目录；只收 schema_version=2.0 的记录；**failed 记录隔离**（单列不进图表）                                                  |
 | `report.py` | Markdown 报告：元信息块（测量纪律 §7 全项）、数据表、双峰比值（声明不作常量）、台阶推断（相邻档位比值 >1.5×，标注为推断）、置信度评级 |
-| `chart.py` | 纯 stdlib 手写 log-log SVG（不引 matplotlib，保持零依赖）；XML 转义防注入 |
-| `cli.py` | `report --run <目录>`，产出写回 run 目录作为派生档案 |
+| `chart.py`  | 纯 stdlib 手写 log-log SVG（不引 matplotlib，保持零依赖）；XML 转义防注入                                                               |
+| `cli.py`    | `report --run <目录>`，产出写回 run 目录作为派生档案                                                                                  |
 
 ### 5.3 data/ 目录
+
+> **为什么不引 matplotlib**（§5.2 chart.py 的决策展开）：报告层与 runner 共用"stdlib 零运行时依赖"的纪律（ADR-0003 精神——任何平台 clone 下来就能跑，不建 venv 也能跑），而 matplotlib 会拖进 numpy 等一整条依赖链，为一张"两条折线 + 对数轴"的图引入版本与平台脆弱性不值得。手写 SVG 约 80 行、完全可控、文本格式可 git diff、浏览器和 GitHub 直接渲染。**XML 转义防注入**的必要性：图表系列名来自平台配置文件里的控制组 id——配置文件按不可信输入对待，不转义会破坏 XML 结构甚至被注入内容。若未来需要复杂图表（多 run 对比、热力图），再评估引入绘图库，届时应隔离为报告层的可选依赖而非框架依赖。
 
 `data/public/runs/` 下每个 run 目录：`records.jsonl`（28 条记录，每 case 一条）+ `artifacts.jsonl`（141 条清单：1 个二进制 + 140 个原始样本）+ `run-manifest.json` + `report.md` + `latency.svg` 入库；`raw/`（280 个原始输出文件）**不入库**——可再生中间产物，SHA256 在 manifest 里锚定完整性（v0.3 §7 数据策略）。`capabilities/` 存平台能力清单，`legacy/` 存来源不可考的历史数据，`private/` 永不入库。
 
@@ -286,16 +304,16 @@ sequenceDiagram
 
 ### 7.2 改进空间（按优先级）
 
-| # | 问题 | 证据 | 建议 |
-|---|---|---|---|
-| 1 | **M4 Pro 缺机器生成的 capability-manifest**（§5.5） | `data/public/capabilities/` 只有 Xeon | 为 macOS 写采集器（sysctl perflevels / 计时器 / QoS 探针结果封装），或至少把 §2.1 的实测散文导出为清单 JSON |
-| 2 | **环境事务已实现未接线** | `runner/environment/coordinator.py` 存在但 `cli.py` 只有 plan/run 两个子命令 | governor=performance 锁频（Xeon 的第一受控项）需要 CLI 的 env 子命令 + run 前 apply/run 后 restore 接线；Xeon 数据质量（§5.4'）证明这是刚需 |
-| 3 | **探针适配器注册是硬编码** | `engine.py` 的 `_ADAPTERS` 字典写死 ptr_chase | 新探针（core/branch/TLB）接入前改为注册表模式（ decorator 或 entry-point 式发现），消除"加探针改引擎" |
-| 4 | **SSH 每条命令一个会话** | `ssh.py` 每次 execute 都新建 TCP+认证 | 当前量级（280 条命令/run）可接受；Android/adb 或更大 sweep 前考虑长连接复用或批量化 |
-| 5 | **频率快照是瞬时值** | engine.py 注释已自承"非区间精确" | 环境事务落地后升级：Linux 锁频 + 测量期多次采样（或 powermetrics 并发采样入档 macOS 侧） |
-| 6 | **n=5 时 p25/p75 很粗** | statistics 用 inclusive 插值 | 不改统计代码；需要更高置信时把 repetitions 提到 7+（实验 JSON 里一行的事） |
-| 7 | **报告层只支持单 run** | analysis/README 自述 | 跨 run 汇总（同实验多次复测的漂移分析）是下一个自然增强；校准差异单等 gem5 建模启动后再做 |
-| 8 | **GB10 回传链路未演练** | quarantine_intake.py 已备但未跑过真实数据 | GB10 首跑即演练；检疫脚本校验项随真实数据演化 |
+| # | 问题                                                       | 证据                                                                             | 建议                                                                                                                                         |
+| - | ---------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | **M4 Pro 缺机器生成的 capability-manifest**（§5.5） | `data/public/capabilities/` 只有 Xeon                                          | 为 macOS 写采集器（sysctl perflevels / 计时器 / QoS 探针结果封装），或至少把 §2.1 的实测散文导出为清单 JSON                                 |
+| 2 | **环境事务已实现未接线**                             | `runner/environment/coordinator.py` 存在但 `cli.py` 只有 plan/run 两个子命令 | governor=performance 锁频（Xeon 的第一受控项）需要 CLI 的 env 子命令 + run 前 apply/run 后 restore 接线；Xeon 数据质量（§5.4'）证明这是刚需 |
+| 3 | **探针适配器注册是硬编码**                           | `engine.py` 的 `_ADAPTERS` 字典写死 ptr_chase                                | 新探针（core/branch/TLB）接入前改为注册表模式（ decorator 或 entry-point 式发现），消除"加探针改引擎"                                        |
+| 4 | **SSH 每条命令一个会话**                             | `ssh.py` 每次 execute 都新建 TCP+认证                                          | 当前量级（280 条命令/run）可接受；Android/adb 或更大 sweep 前考虑长连接复用或批量化                                                          |
+| 5 | **频率快照是瞬时值**                                 | engine.py 注释已自承"非区间精确"                                                 | 环境事务落地后升级：Linux 锁频 + 测量期多次采样（或 powermetrics 并发采样入档 macOS 侧）                                                     |
+| 6 | **n=5 时 p25/p75 很粗**                              | statistics 用 inclusive 插值                                                     | 不改统计代码；需要更高置信时把 repetitions 提到 7+（实验 JSON 里一行的事）                                                                   |
+| 7 | **报告层只支持单 run**                               | analysis/README 自述                                                             | 跨 run 汇总（同实验多次复测的漂移分析）是下一个自然增强；校准差异单等 gem5 建模启动后再做                                                    |
+| 8 | **GB10 回传链路未演练**                              | quarantine_intake.py 已备但未跑过真实数据                                        | GB10 首跑即演练；检疫脚本校验项随真实数据演化                                                                                                |
 
 ### 7.3 一个结构性的观察
 
