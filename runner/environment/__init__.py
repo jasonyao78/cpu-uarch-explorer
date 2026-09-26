@@ -14,8 +14,8 @@ data/private/env-journals/（本地，永不入库），崩溃后可用
 apply 失败给结构化提示（NOPASSWD sudoers 配方或手动执行）。
 
 已知简化（留待后续硬化）：单操作者假设（journal 阻塞 + flock 劝告性
-检查）；SIGTERM 不转换（仅 SIGINT）；远端锁依赖 ssh 断连时远端
-SIGHUP 释放 flock。
+检查）；SIGTERM 不转换（仅 SIGINT）；远端锁释放走旗标文件（不依赖
+SIGHUP 传播，2026-09-26 orphan 锁实证后修正）。
 """
 
 from .coordinator import (EnvironmentError_, execute_environment_tx,  # noqa: F401

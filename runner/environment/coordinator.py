@@ -50,18 +50,28 @@ class _LocalFlock:
 
 
 class _RemoteFlock:
-    """后台 ssh 持有远端 flock：acquire 读回执行确认；-n 非阻塞，被占即失败。"""
+    """后台 ssh 持有远端 flock：acquire 读回执行确认；-n 非阻塞，被占即失败。
+
+    释放用**旗标文件**而非信号传播——2026-09-26 实证：本地 ssh
+    terminate 后远端 flock/sleep 孤儿化（PPID=1）继续持有锁 2 小时
+    （ssh 断连不保证 SIGHUP 到达远端会话首进程）。release = 远端 touch
+    旗标，远端循环自退出，本地等待进程结束；超时再 terminate 兜底。"""
 
     def __init__(self, host: str, remote_root: str):
         self._host = host
         self._statedir = f"{remote_root}/.local-state/cpu-uarch-explorer"
         self._proc = None
 
+    def _script(self) -> str:
+        lock = f"{self._statedir}/mutation.lock"
+        flag = f"{self._statedir}/mutation.lock.release"
+        return (f"mkdir -p {self._statedir} && rm -f {flag} && "
+                f"flock -n {lock} -c 'echo ACQUIRED; "
+                f"while [ ! -f {flag} ]; do sleep 1; done'")
+
     def acquire(self) -> None:
-        script = (f"mkdir -p {self._statedir} && "
-                  f"flock -n {self._statedir}/mutation.lock -c 'echo ACQUIRED; sleep 86400'")
         self._proc = subprocess.Popen(
-            ["ssh", "-o", "BatchMode=yes", self._host, script],
+            ["ssh", "-o", "BatchMode=yes", self._host, self._script()],
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
         line = self._proc.stdout.readline().strip()
         if line != "ACQUIRED":
@@ -70,10 +80,17 @@ class _RemoteFlock:
             raise EnvironmentError_("env-locked", f"remote mutation lock held (host {self._host})")
 
     def release(self) -> None:
-        if self._proc is not None:
-            self._proc.terminate()
-            self._proc.wait(timeout=10)
-            self._proc = None
+        if self._proc is None:
+            return
+        flag = f"{self._statedir}/mutation.lock.release"
+        # 远端自释放：touch 旗标，holder 循环退出，ssh 进程随之结束
+        subprocess.run(["ssh", "-o", "BatchMode=yes", self._host, f"touch {flag}"],
+                       capture_output=True, timeout=30)
+        try:
+            self._proc.wait(timeout=15)
+        except subprocess.TimeoutExpired:
+            self._proc.terminate()  # 兜底：旗标机制失效时回到信号路径
+        self._proc = None
 
 
 def _default_lock(platform: dict):

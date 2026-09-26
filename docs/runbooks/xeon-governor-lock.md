@@ -1,5 +1,8 @@
 # Runbook：Xeon 锁频测量（环境事务接线后的两条路径）
 
+> **防转录纪律（2026-09-26 起）**：本 runbook 是可执行命令的唯一权威来源——
+> 在服务器上用 `sed -n '/^## 路径/,/^```$/p' docs/runbooks/xeon-governor-lock.md`
+> 取出段落直接执行，不跨窗口手打；每条命令自带 `&& cat` 断言，失败当场暴露。
 > 背景：powersave 下指针追逐全程 800MHz 不升频（`data/public/runs/20260924T184842Z` freq_snapshot 实证）——计时法 ns 绝对值不可跨档比较。锁频 = host 级状态突变，**必须走环境事务**（journal 留痕、逆序恢复、中断 reconcile）。
 > 口径声明（任务书 §5.5）：performance **不等于固定频率**——turbo/热漂移仍在，records 带 freq_snapshot 如实入档，报告写"已锁 performance 档，实测频率见快照"。
 

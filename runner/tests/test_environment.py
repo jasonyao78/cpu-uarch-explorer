@@ -189,5 +189,18 @@ class TestReconcileAndSpecs(unittest.TestCase):
         self.assertEqual(specs, ["governor=performance"])
 
 
+class TestRemoteFlockScript(unittest.TestCase):
+    """远端锁脚本契约：非阻塞 flock + 旗标自释放循环（2026-09-26 orphan
+    锁实证后的修正——release 不依赖 ssh 信号传播）。"""
+
+    def test_holder_script_structure(self):
+        from runner.environment.coordinator import _RemoteFlock
+        script = _RemoteFlock("h", "~")._script()
+        self.assertIn("flock -n", script)
+        self.assertIn("mutation.lock.release", script)
+        self.assertIn("while [ ! -f", script)   # 旗标循环
+        self.assertIn("rm -f", script)          # acquire 前清残留旗标
+
+
 if __name__ == "__main__":
     unittest.main()
