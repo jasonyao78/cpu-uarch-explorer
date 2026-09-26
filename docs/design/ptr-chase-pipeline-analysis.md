@@ -333,17 +333,44 @@ sequenceDiagram
 
 > **端到端定义：源码 → 编译 → 质量门 → 能力发现 → plan 预览 → run 执行 → 数据校验 → 分析报告**。两条链路：**A. 本机**（macOS-arm64 / M4 Pro，local transport）；**B. 远程 Xeon**（linux-x86_64，ssh transport）。全程零 sudo（B6 锁频为可选进阶）；命令从本文 `sed -n` 取段执行，勿跨窗口手打。
 
-### 0. 命令参数速查（全局，先读这张表）
+### 0. 命令参数速查（全局，先读这节）
 
-| 参数 | 出现位置 | 含义 |
+**五条完整命令形态**（`.venv/bin/python` 均从仓库根执行；尖括号处替换为实际路径）：
+
+```bash
+# ① plan 预览（无副作用，先看再跑）
+.venv/bin/python -m runner.cli plan \
+  --experiment <实验JSON> --platform <平台JSON>
+
+# ② run 执行测量（端到端主命令）
+.venv/bin/python -m runner.cli run \
+  --experiment <实验JSON> --platform <平台JSON> \
+  [--out <输出根目录>] [--env <变更spec> --allow-mutation]
+
+# ③ capabilities 能力发现（平台事实 → capability-manifest）
+.venv/bin/python -m runner.cli capabilities \
+  --platform <平台JSON> [--out <输出根目录>]
+
+# ④ env 事务状态/恢复（host 级变更的审计与崩溃兜底）
+.venv/bin/python -m runner.cli env --platform <平台JSON> status
+.venv/bin/python -m runner.cli env --platform <平台JSON> restore --tx <事务id>
+
+# ⑤ report 分析报告（读取 run 目录 → report.md + latency.svg）
+.venv/bin/python -m analysis.cli report --run <run目录>
+```
+
+**参数语义**：
+
+| 参数 | 完整形态中位置 | 含义 |
 |---|---|---|
-| `--experiment <JSON>` | plan / run | ExperimentSpec：实验语义（测什么、扫哪些参数档、指标定义），在 `configs/experiments/` |
-| `--platform <JSON>` | plan / run / capabilities / env | 平台配置：目标机五要素（os/isa/target_id/execution_kind/executor）+ transport + controls 控制组 + probes 二进制映射，在 `configs/platforms/` |
-| `--run`（analysis） | report | 一次测量运行产出的目录（records/artifacts/manifest/report 的家） |
-| `--out` | run / capabilities | 输出根目录（默认 `data/public/runs` / `data/public/capabilities`） |
-| `--env <spec>` | run | 声明 host 级变更（如 `governor=performance`），走环境事务 |
-| `--allow-mutation` | run | `--env` 的显式授权门（缺省拒绝一切 host 突变） |
-| preset 名 | cmake | 构建目标三元组/profile 分层（ADR-0008），如 `macos-arm64-release` |
+| `--experiment <实验JSON>` | ①②（必填） | ExperimentSpec：实验语义（测什么、扫哪些参数档、指标定义），文件在 `configs/experiments/`，如 `ptr-chase-cache-sweep.json` |
+| `--platform <平台JSON>` | ①②③④（必填） | 平台配置：目标机五要素（os/isa/target_id/execution_kind/executor）+ transport 通道 + controls 控制组 + probes 二进制映射，文件在 `configs/platforms/`，如 `macbook-m4pro-01.json` / `xeon-8481c-01.json` |
+| `--out <输出根目录>` | ②③（选填） | ②默认 `data/public/runs`，③默认 `data/public/capabilities`；目录下按 `<UTC时间戳>-<实验id>` 自动建子目录 |
+| `--env <变更spec>` | ②（选填，可多次） | 声明 host 级变更（如 `governor=performance`），走环境事务（apply→测量→逆序恢复，journal 留痕） |
+| `--allow-mutation` | ②（选填） | `--env` 的显式授权门：**缺省拒绝一切 host 突变**，写系统前必须显式给出 |
+| `--run <run目录>` | ⑤（必填） | 一次测量运行产出的目录（②命令结尾会打印 `run_dir=...`，直接复制使用） |
+| `--tx <事务id>` | ④ restore（必填） | journal 事务号；`status` 子命令的未完成列表里可见 |
+| preset 名 | cmake `--preset` | 构建目标三元组/profile 分层（ADR-0008），如 `macos-arm64-release`、`linux-x86_64-release` |
 
 ### A. 本机链路（macOS-arm64 / M4 Pro，全程约 5 分钟）
 
