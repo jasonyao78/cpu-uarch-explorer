@@ -27,6 +27,8 @@ ssh 平台的 `target.ssh_host` 用 **ssh config 别名**（如 `xeon-8481c-01`�
 
 ## 铁律（违反即返工）
 
+0. **待办不丢**：任何"现在不做"的决定都要有落点——任务书"非目标"排除项、评审遗留、口头拍板的后置项，一律登记 `docs/open-items.md`（带归属主题与触发条件）；设计文档里的改进表不是跟踪面。
+
 1. **数据纪律**：测量遵守 `docs/methodology/measurement-discipline.md`；违反纪律的数据进 `data/quarantine/`（保留审计），禁止晋升 baseline。绝不编造数值——失败记录用空 metrics + 结构化 `failure`（schema v2 强制）。
 2. **数据分层**：`data/public/` 可入库；`data/private/`、`data/restricted/` 永不入库；run 的 `raw/` 样本不入库（SHA256 manifest 锚定，可再生）。设备一律用匿名代号（如 `macbook-m4pro-01`），真实映射在 `data/private/hosts.md`。
 3. **注释纪律**：`docs/methodology/comment-discipline.md`——模块锚点、契约 docstring、决策留出处；改代码不改注释视为缺陷。

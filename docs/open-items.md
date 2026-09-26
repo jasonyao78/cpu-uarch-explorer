@@ -81,3 +81,15 @@
 - **内容**：第三方 CPUSUIT Benchmark 探针工程（无 LICENSE，含 xbyak_aarch64 第三方库）+ Michael 自己的 gem5 DDR 时延分析 + DDR 时序分析 + 未知作者 PPTX。
 - **初步评估**（详见 req-v0.3 置信度注记）：CPUSUIT 覆盖度（ROB 探测、port 分析等）对 probes/ 规划有 HIGH 参考价值，但**无 LICENSE 不可搬代码**，仅限方法学借鉴；gem5 DDR 分析为本人作品，可评估后移入 `docs/`（注意其绑定 gem5 commit 3dc9dcc）。
 - **处置待决策**：逐文件确认作者与许可证 → 决定 移入 docs / 登记为方法学参考 / 忽略。
+
+## OI-10 改进项登记（2026-09-26，源自 ptr-chase-pipeline-analysis §7.2）
+
+> 任务书"非目标"节的排除项必须有 OI 落点——排除不等于丢弃。以下五项各有归属主题，触发条件满足时转为任务书。
+
+| 项 | 内容 | 归属/触发条件 |
+|---|---|---|
+| 适配器注册表 | `engine.py` 的 `_ADAPTERS` 硬编码 ptr_chase，加探针要改引擎 | 触发：core/branch/TLB 任一**新探针任务**立项时并入 |
+| SSH 会话复用 | `ssh.py` 每条命令一个 TCP+认证会话 | 触发：单 run 命令数显著放大（多核型 sweep/更多重复）或 adb 通道接入时 |
+| 测量期频率多次采样 | freq_snapshot 目前是 case 前后瞬时值；powermetrics 并发采样（macOS）未做 | 触发：锁频后数据仍漂移、或 T1 ±1 cycle 校准启动时 |
+| 跨 run 汇总报告 | analysis/ 只支持单 run | 触发：同一实验第二次复测入库后（漂移分析需求自然出现） |
+| p95/p99 尾部统计 | n=5 时无意义（插值≈max） | 触发：repetitions ≥20 的实验出现时 |
