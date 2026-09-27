@@ -20,6 +20,43 @@
   "defaults": {
     "repetitions": 5
   },
+  "environment_profiles": {
+    "controlled-baseline": {
+      "host_requirements": {
+        "cpufreq.governor": "performance"
+      },
+      "measurement_environment": {
+        "collector": "android-controlled-quiet-v2",
+        "required": true,
+        "preconditions": {
+          "wakefulness": ["Dozing"],
+          "screen_on": false,
+          "force_idle": false,
+          "active_camera": false,
+          "services": {
+            "mi_thermald": "running"
+          },
+          "cpufreq_governor": "performance",
+          "cpufreq_max_khz": {
+            "policy0": 2265600,
+            "policy2": 2707200,
+            "policy5": 2707200,
+            "policy7": 2745600
+          },
+          "max_cpu_temp_c": 90.0
+        },
+        "stable_fields": [
+          "airplane_mode",
+          "power.screen_on",
+          "device_idle.force_idle",
+          "services.mi_thermald",
+          "cpufreq.*.governor",
+          "cpufreq.*.min_khz",
+          "cpufreq.*.max_khz"
+        ]
+      }
+    }
+  },
   "aux_snapshots": [
     {
       "name": "thermal_status",
@@ -58,6 +95,6 @@
       "notes": "Cortex-A520 little（cpu0；与 cpu1 共享 L2）；toybox 掩码 1 = CPU0。"
     }
   ],
-  "environment_control_note": "默认平台配置不停止 thermal/perf 服务。mi_thermald 抑制只允许作为短时、显式、可恢复且带温度中止线的独立实验条件；受控安静态 v2 落地前不采集新容量数据。",
+  "environment_control_note": "默认平台配置不停止 thermal/perf 服务。controlled-baseline 必须由 --environment-profile 显式选择，只事务化切换 governor；screen/DeviceIdle/airplane/camera/thermal/cpufreq limits 均只观测并门禁。mi_thermald 抑制只允许作为短时、显式、可恢复且带温度中止线的独立实验条件。",
   "capabilities_note": "MEASURED 2026-09-27：SM8650 拓扑为 1×X4(cpu7)+5×A720(cpu2-6)+2×A520(cpu0-1)，4 个 cpufreq policy；KernelSU root、armv8_pmuv3(type=8)、cs_etm、llcc-pmu(type=9) 已确认注册。SOURCE BASELINE：X4 L2 2MiB、A720 L2 512KiB/核、A520 L2 512KiB/双核、共享 CPU L3 12MiB，另有独立 LLCC。历史 runs 20260927T060512Z/075007Z/082635Z/083827Z 使用固定 warmup=200000（64B stride 覆盖约 12.2MiB）且实际页 backing 未控制，只保留为原始观察，不用于容量校准。X4 L2=1MiB、L3/SLC 合并级、X4/A520 保护份额、相机抢占 LLCC 均未成立为事实。LLCC PMU type=9 已注册；旧 config=0x00..0x27 扫描未覆盖下游驱动的 config=0x1000，因此可用性仍 OPEN。详见 docs/reviews/2026-09-27-sm8650-cache-evidence-reassessment.md。"
 }

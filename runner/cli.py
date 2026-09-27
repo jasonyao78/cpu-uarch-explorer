@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -28,13 +29,67 @@ from .targets.capabilities import collect_all
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
+def _resolve_environment_profile(platform: dict, name: str | None) -> tuple[dict, dict]:
+    """Return an isolated active platform plus merged declarative mutations."""
+    active = dict(platform)
+    requirements = dict(platform.get("host_requirements") or {})
+    if not name:
+        return active, requirements
+    profiles = platform.get("environment_profiles") or {}
+    profile = profiles.get(name) if isinstance(profiles, dict) else None
+    if not isinstance(profile, dict):
+        raise RunnerError("config-invalid", f"unknown environment profile: {name!r}")
+    profile_requirements = profile.get("host_requirements") or {}
+    measurement_environment = profile.get("measurement_environment")
+    if not isinstance(profile_requirements, dict) or not isinstance(measurement_environment, dict):
+        raise RunnerError("config-invalid",
+                          f"environment profile {name!r} requires host_requirements"
+                          " and measurement_environment objects")
+    for key, value in profile_requirements.items():
+        if key in requirements and requirements[key] != value:
+            raise RunnerError("env-conflicting-request",
+                              f"conflicting declared requirement for {key}: "
+                              f"{requirements[key]!r} vs {value!r}")
+        requirements[key] = value
+    active["measurement_environment"] = deepcopy(measurement_environment)
+    active["active_environment_profile"] = name
+    return active, requirements
+
+
+def _resolve_environment_specs(requirements: dict,
+                               cli_specs: list[str] | None) -> list[str]:
+    """Merge declared and CLI mutations by canonical controller key."""
+    from .environment import specs_from_host_requirements
+    from .environment.controllers import make_controller
+    requested_specs = specs_from_host_requirements(requirements) + list(cli_specs or [])
+    resolved: list[str] = []
+    seen: dict[str, str] = {}
+    for spec in requested_specs:
+        controller, requested = make_controller(spec)
+        controller.validate(requested)
+        previous = seen.get(controller.key)
+        if previous is not None and previous != requested:
+            raise RunnerError("env-conflicting-request",
+                              f"conflicting requests for {controller.key}: "
+                              f"{previous!r} vs {requested!r}")
+        if previous is None:
+            seen[controller.key] = requested
+            resolved.append(spec)
+    return resolved
+
+
 def _cmd_plan(args) -> int:
     """plan 子命令：打印确定性 case 预览（含参数来源与重复次数），无副作用。"""
     spec = load_experiment(args.experiment)
-    platform = load_platform(args.platform)
+    platform, requirements = _resolve_environment_profile(
+        load_platform(args.platform), getattr(args, "environment_profile", None))
     plan = build_plan(spec, platform)
     print(f"experiment={plan.experiment_id} protocol={plan.protocol_version} "
           f"cases={len(plan.cases)} target={plan.target.get('target_id')}")
+    if platform.get("active_environment_profile"):
+        mutations = _resolve_environment_specs(requirements, None)
+        print(f"environment_profile={platform['active_environment_profile']} "
+              f"mutations={','.join(mutations) or '-'}")
     for case in plan.cases:
         params = ", ".join(f"{k}={v.value}[{v.source}]" for k, v in case.params)
         print(f"  {case.id}  reps={case.repetitions}  prefix={' '.join(case.control.command_prefix) or '-'}\n"
@@ -44,19 +99,21 @@ def _cmd_plan(args) -> int:
 
 def _cmd_run(args) -> int:
     spec = load_experiment(args.experiment)
-    platform = load_platform(args.platform)
+    platform, requirements = _resolve_environment_profile(
+        load_platform(args.platform), getattr(args, "environment_profile", None))
     plan = build_plan(spec, platform)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     run_dir = Path(args.out) / f"{stamp}-{plan.experiment_id}"
-    if args.env:
+    specs = _resolve_environment_specs(requirements, args.env)
+    if specs:
         # host 级状态变更（如锁频）走环境事务：apply→run→restore，journal
         # 全留痕；--allow-mutation 是显式授权门（2026-09-25 讨论裁定）
-        from .environment import (execute_environment_tx, reconcile_unfinished,
-                                  specs_from_host_requirements)
-        # 声明式 host_requirements（平台配置）+ CLI --env 叠加；启动前调和
+        from .environment import execute_environment_tx, reconcile_unfinished
+        if not args.allow_mutation:
+            raise RunnerError("env-mutation-not-allowed",
+                              "environment profile mutations require --allow-mutation")
+        # 声明式 host_requirements（平台/profile）+ CLI --env 叠加；启动前调和
         # 中断残留事务（任务书 §2.1：检测并完成 restore，而非硬拒绝）
-        declared = platform.get("host_requirements") or {}
-        specs = specs_from_host_requirements(declared) + list(args.env)
         remaining = reconcile_unfinished(platform)
         if remaining:
             raise RunnerError("env-unfinished-tx",
@@ -134,6 +191,8 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--platform", required=True)
         if name in ("plan", "run"):
             p.add_argument("--experiment", required=True)
+            p.add_argument("--environment-profile", default=None,
+                           help="平台定义的环境 profile（显式选择，不设默认）")
         if name == "run":
             p.add_argument("--out", default="data/public/runs")
             p.add_argument("--env", action="append", default=None,

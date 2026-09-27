@@ -22,7 +22,14 @@
 | `environment.aux_snapshots` | object | 平台配置 `aux_snapshots` 声明的只读采集命令快照 `{name: {before, after}}`（GB10 §5.4：GPU 利用率等；命令失败则该 name 省略） | 2026-09-25 |
 | `probes.<name>` 的 dict 形态 | `{local, remote}` | deploy 模式（交叉编译产物推送目标机，Android 预演课题）——非 GB10 自驱模式 | 2026-09-25 |
 | `host_requirements`（平台配置顶层键） | object | 声明式 host 级需求 `{"cpufreq.governor": "performance"}`：run 时经环境事务执行，**默认拒绝、须 `--allow-mutation`**；启动前自动 reconcile 中断残留事务（2026-09-26 接线任务） | 2026-09-26 |
+| `environment_profiles.<name>`（平台配置） | object | 显式选择的测量环境 profile：把可恢复的 `host_requirements` 与只读 `measurement_environment` 门禁绑定；不选择 profile 时不隐式改变设备状态 | 2026-09-27 |
 | capability `core-topology` 条目 | object | 核型事实：linux-sysfs 逐核 `{capacity, max_freq_khz, midr_el1, cluster_cpus_list}`（缺失维度=null 不猜）或 macos-sysctl `perflevels[]` | 2026-09-26 |
+
+### 已登记的 environment 扩展字段
+
+| 字段 | 类型 | 用途 | 登记日期 |
+|---|---|---|---|
+| `environment.state_snapshot` | object | case 前后 Android 状态证据及 `policy_result`；含 cpufreq 各 policy、wakefulness、DeviceIdle、airplane、活动相机、thermal、服务和 loadavg。前置失败不执行 probe，后置漂移保留 raw 但输出空 metrics | 2026-09-27 |
 
 ### 已登记的 ptr_chase metric 扩展字段
 
