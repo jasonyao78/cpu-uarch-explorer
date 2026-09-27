@@ -35,21 +35,11 @@
 - **环境事务子系统：借模型、重新实现接线**（2026-09-24 评审纠偏，原"整体不吸收"裁定过头）：模型本身已实现 host-wide lock / durable journal / inspect→validate→apply→verify / 失败后逆序 restore / signal 中断恢复 / 未完成事务阻止新运行；coordinator=None 是 CLI/Runner 接线缺陷而非模型无价值。未来控制 Linux governor / hugepage / THP / perf 权限时此为核心模式（**2026-09-25 升级：第一个受控项定为 Xeon cpufreq governor，见 OI-8**）。**不吸收**：其 ARM64 硬编码假设。
 - **GB10 平台**：未来接入按声明式平台 JSON 模式（v0.4 候选）；它是 hugepage/PMU/跨核方法学的最佳宿主，也是可扩展性的天然验收平台。**任务书已备（2026-09-25）：`docs/tasks/2026-09-25-gb10-platform-onboarding.md`——自驱模式：Mac↔GB10 无 SSH、GB10 可从 GitHub 只读 clone 但不能 push，故代码经 GitHub 下行、GB10 原生编译本地执行、数据经物理介质回传 Mac 侧按 quarantine 流程入库**（网络约束已核实并登记 hosts.md；规格摘要为 PUBLIC_SOURCE，拓扑以机上实测为准）。
 
-## OI-2 红米设备信息回填（`android-arm64`）
+## OI-2 红米设备信息回填（android-arm64）（2026-09-27 大更新：身份与拓扑全部实测，root 进行中）
 
-- **阻塞**：§2.3 画像补全、Android target 适配、capability discovery 基线。
-- **回填命令**（adb）：
-  ```bash
-  adb shell getprop ro.product.model ro.product.name ro.board.platform \
-    ro.build.version.release ro.build.version.security_patch
-  adb shell 'cat /proc/version'
-  adb shell 'cat /proc/sys/kernel/perf_event_paranoid'   # PMU 权限，-1/0 最佳
-  adb shell 'ls /sys/bus/event_source/devices/'          # PMU 设备节点
-  adb shell 'cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors scaling_cur_governor'
-  adb shell 'ls /sys/class/thermal/'
-  adb shell 'id'                                          # 确认 root
-  ```
-- **备注**：demo 历史数据含 SM8550 与 SM8650 两份（见 OI-4），当前设备大概率为其一。
+- **已回填（MEASURED，2026-09-27，adb 未 root 状态）**：Redmi K70 Pro（23117RK66C/manet）；SM8650 = 1×X4(cpu7, midr 0x410fd821) + 5×A720(cpu2-6, 0x410fd811) + 2×A520(cpu0-1, 0x410fd801)；Android 15 / HyperOS 2.0.208.0.VNMCNXM；kernel 6.1.118-android14-11-ab13320413；BL 已解锁；governor=walt（可用 performance/powersave/schedutil）；cache size 属性高通内核不提供（manifest 记 None）；transport=adb 已接入（AdbExecutor + redmi-k70pro-01 平台配置 + 能力清单入库）。
+- **root 进行中（2026-09-27）**：官方 ROM（OS2.0.208 线刷包，bigota/cdnorg 小米 CDN）下载 → 提取 stock init_boot（回滚备份+补丁基底）→ KernelSU Manager 手机端"选择并修补"（LKM）→ fastboot 刷入 → 验证。信任链：官方 bits + 本机/本机 App 打补丁，不经第三方补丁镜像站。
+- **root 后回填**：PMU（perf_event_paranoid / event_source 设备）、锁频能力（walt→performance 可控性，走环境事务）、thermal 区、midr 已提前可读（意外收获：无需 root）。
 
 ## OI-3 x86 服务器信息回填与探测脚本评审（2026-09-24 更新：信息已回填，仅剩脚本评审）
 
@@ -57,10 +47,10 @@
 - **方法学提示**：perf 采集一律走 sudo；全核计数时注意 NMI watchdog 占用的计数器缺口；PEBS/LBR 可用意味着 frontend/分支分析可做 precise 采样。
 - **脚本评审（状态更新 2026-09-25）**：用户外部 x86 探测脚本始终未提供；linux-x86_64 平台已改经本仓 runner（ssh transport + taskset 控制）接入并产出首份 sweep（`data/public/runs/20260924T174644Z-ptr-chase-cache-sweep`）。外部脚本若日后提供仍可按三维度评审；平台接入项视为完成。
 
-## OI-4 SM8550 历史数据溯源
+## OI-4 SM8550 历史数据溯源（2026-09-27 部分关闭）
 
-- **阻塞**：无（已决定不进校准决策），仅影响历史档案的标注。
-- **现状**：`data/public/legacy/sm8550-cacheline.txt` 证据等级 UNKNOWN（连机主都不记得来源设备）。若溯源失败，保持 UNKNOWN 标注即可。
+- **已解决**：`sm8650-x4.txt` / `sm8650-a510.txt` 溯源 = **`redmi-k70pro-01`（本机）**——该文件用 `taskset 80`（CPU7）测量，与 2026-09-27 实测拓扑 CPU7=X4 prime 精确吻合，SoC 型号 SM8650 一致。证据等级 DERIVED（推断，三证据链一致）；数据文件保持原标注。
+- **仍待**：`sm8550-cacheline.txt` 来源仍 UNKNOWN（本机为 SM8650，8550 数据来自他机）——保持 UNKNOWN 标注，不用于校准。
 - **同时确认**：`sm8650-x4.txt` / `sm8650-a510.txt` 对应哪台设备、测试日期与系统状态。
 
 ## OI-5 M4 Pro PMU 能力实测（2026-09-24 关闭：计时器与 QoS 分流已实测；PMC 转为环境决策）
