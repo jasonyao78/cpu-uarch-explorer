@@ -24,14 +24,14 @@
     {
       "id": "x4-prime",
       "control": { "mechanism": "taskset", "value": "7" },
-      "command_prefix": ["taskset", "-c", "7"],
-      "notes": "Cortex-X4 prime（capacity=1024，max 3302.4MHz，cluster 7）——历史 demo 的 taskset 80（CPU7）即此核"
+      "command_prefix": ["taskset", "80"],
+      "notes": "Cortex-X4 prime（capacity=1024，max 3302.4MHz，cluster 7）。Android toybox taskset 为十六进制掩码位置参数（taskset 80 = CPU7），与 util-linux 的 -c 语法不同；历史 demo 的 'taskset 80' 即此语法"
     },
     {
       "id": "a520-little",
       "control": { "mechanism": "taskset", "value": "0" },
-      "command_prefix": ["taskset", "-c", "0"],
-      "notes": "Cortex-A520 little（capacity=379，max 2265.6MHz，cluster 0-1）"
+      "command_prefix": ["taskset", "1"],
+      "notes": "Cortex-A520 little（capacity=379，max 2265.6MHz，cluster 0-1，与 cpu1 共享 L2）；toybox 掩码 1 = CPU0"
     }
   ],
   "capabilities_note": "拓扑实测 2026-09-27（未 root，MEASURED）：1×X4(cpu7, midr 0x410fd821) + 5×A720(cpu2-6, 0x410fd811，923/867 两档) + 2×A520(cpu0-1, 0x410fd801)；cache size 属性高通内核不提供（manifest 记 None 不猜）；governor=walt；root=KernelSU LKM 进行中（BL 已解锁）；PMU/锁频/thermal 待 root 后回填"
