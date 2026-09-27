@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Android 受控安静态快照：解析真实格式，采集只读且关键字段缺失即失败。"""
 
+from copy import deepcopy
 import unittest
 
 from runner.environment.android_state import (collect_android_state,
@@ -10,6 +11,7 @@ from runner.environment.android_state import (collect_android_state,
                                               parse_loadavg,
                                               parse_thermal)
 from runner.errors import RunnerError
+from runner.environment.policy import evaluate_preconditions, evaluate_stability
 from runner.executor.adb import AdbExecutor
 from runner.executor.local import ExecutionResult
 
@@ -58,6 +60,31 @@ Thermal Status: 0
     Temperature{mValue=89.9, mType=0, mName=CPU7, mStatus=0}
     Temperature{mValue=57.7, mType=1, mName=GPU0, mStatus=0}
 """
+
+POLICY = {
+    "collector": "android-controlled-quiet-v2",
+    "required": True,
+    "preconditions": {
+        "wakefulness": ["Dozing"],
+        "screen_on": False,
+        "force_idle": False,
+        "active_camera": False,
+        "services": {"mi_thermald": "running"},
+        "cpufreq_governor": "performance",
+        "cpufreq_max_khz": {
+            "policy0": 2265600,
+            "policy2": 2707200,
+            "policy5": 2707200,
+            "policy7": 2745600,
+        },
+        "max_cpu_temp_c": 90.0,
+    },
+    "stable_fields": [
+        "airplane_mode", "power.screen_on", "device_idle.force_idle",
+        "services.mi_thermald", "cpufreq.*.governor",
+        "cpufreq.*.min_khz", "cpufreq.*.max_khz",
+    ],
+}
 
 
 class TestAndroidStateParsers(unittest.TestCase):
@@ -159,6 +186,43 @@ class TestAndroidStateCollector(unittest.TestCase):
             collect_android_state(ex)
         self.assertEqual(cm.exception.code, "env-snapshot-failed")
         self.assertIn("thermalservice", str(cm.exception))
+
+
+class TestAndroidQuietStatePolicy(unittest.TestCase):
+    def setUp(self):
+        self.snapshot = collect_android_state(ScriptedAdbExecutor())
+        for fields in self.snapshot["cpufreq"].values():
+            fields["governor"] = "performance"
+
+    def test_valid_snapshot_and_stability(self):
+        self.assertEqual(evaluate_preconditions(self.snapshot, POLICY), [])
+        self.assertEqual(evaluate_stability(
+            self.snapshot, deepcopy(self.snapshot), POLICY), [])
+
+    def test_precondition_violation_codes_are_machine_readable(self):
+        bad = deepcopy(self.snapshot)
+        bad["camera"]["active"] = True
+        bad["thermal"]["max_cpu_c"] = 90.1
+        bad["cpufreq"]["policy7"]["max_khz"] = 3110400
+        self.assertEqual(evaluate_preconditions(bad, POLICY), [
+            "camera-active",
+            "cpufreq-max-mismatch:policy7",
+            "thermal-over-limit",
+        ])
+
+    def test_stability_expands_cpufreq_wildcards(self):
+        after = deepcopy(self.snapshot)
+        after["airplane_mode"] = True
+        after["cpufreq"]["policy5"]["min_khz"] += 1
+        self.assertEqual(evaluate_stability(self.snapshot, after, POLICY), [
+            "state-drift:airplane_mode",
+            "state-drift:cpufreq.policy5.min_khz",
+        ])
+
+    def test_malformed_policy_is_rejected(self):
+        with self.assertRaises(RunnerError) as cm:
+            evaluate_preconditions(self.snapshot, {"preconditions": {"wakefulness": "Dozing"}})
+        self.assertEqual(cm.exception.code, "env-policy-invalid")
 
 
 if __name__ == "__main__":

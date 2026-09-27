@@ -22,7 +22,9 @@ from pathlib import Path
 
 from .adapters.ptr_chase import PtrChaseAdapter
 from .artifacts import ArtifactStore
-from .errors import ParseError
+from .errors import ParseError, RunnerError
+from .environment.policy import (collect_environment_state,
+                                 evaluate_preconditions, evaluate_stability)
 from .executor import make_executor
 from .plan import Case, Plan
 from .records import (JsonlWriter, build_run_record, environment_block,  # noqa: F401
@@ -140,6 +142,34 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
     provenance = {k: rv.source for k, rv in case.params}
     argv = [probe_path] + adapter.build_argv(params)
     env = environment_block(case.control.mechanism, case.control.value, system_info)
+    environment_policy = platform.get("measurement_environment")
+    state_before: dict | None = None
+    if environment_policy is not None:
+        try:
+            state_before = collect_environment_state(executor, environment_policy)
+            violations = evaluate_preconditions(state_before, environment_policy)
+        except RunnerError as error:
+            env["state_snapshot"] = {
+                "policy_result": {"valid": False, "stage": "before",
+                                  "violations": [error.code]},
+            }
+            return build_run_record(
+                status="failed", target=platform["target"], probe=probe_meta,
+                environment=env, params=params, params_provenance=provenance,
+                metrics=[], raw_command="",
+                failure={"reason": "environment-snapshot-failed", "detail": str(error)})
+        env["state_snapshot"] = {
+            "before": state_before,
+            "policy_result": {"valid": not violations, "stage": "before",
+                              "violations": violations},
+        }
+        if violations:
+            return build_run_record(
+                status="failed", target=platform["target"], probe=probe_meta,
+                environment=env, params=params, params_provenance=provenance,
+                metrics=[], raw_command="",
+                failure={"reason": "environment-precondition-failed",
+                         "detail": ",".join(violations)})
 
     # 频率快照（measurement-discipline §5；2026-09-25 讨论裁定"快照先行"）：
     # 锁频落地前，每条记录至少能回答"测量时核频多少"。瞬时值非区间精确
@@ -198,6 +228,33 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
                   for name in set(aux_before) | set(aux_after)}
         if merged:
             env["aux_snapshots"] = merged
+
+    if environment_policy is not None:
+        try:
+            state_after = collect_environment_state(executor, environment_policy)
+            post_violations = evaluate_preconditions(state_after, environment_policy)
+            post_violations.extend(
+                evaluate_stability(state_before, state_after, environment_policy))
+            post_violations = sorted(set(post_violations))
+        except RunnerError as error:
+            env["state_snapshot"]["policy_result"] = {
+                "valid": False, "stage": "after", "violations": [error.code]}
+            return build_run_record(
+                status="failed", target=platform["target"], probe=probe_meta,
+                environment=env, params=params, params_provenance=provenance,
+                metrics=[], raw_command=raw_command,
+                failure={"reason": "environment-snapshot-failed", "detail": str(error)})
+        env["state_snapshot"]["after"] = state_after
+        env["state_snapshot"]["policy_result"] = {
+            "valid": not post_violations, "stage": "after",
+            "violations": post_violations}
+        if post_violations:
+            return build_run_record(
+                status="failed", target=platform["target"], probe=probe_meta,
+                environment=env, params=params, params_provenance=provenance,
+                metrics=[], raw_command=raw_command,
+                failure={"reason": "environment-postcondition-failed",
+                         "detail": ",".join(post_violations)})
 
     if latencies and first_failure is None:
         stats = summarize(latencies)

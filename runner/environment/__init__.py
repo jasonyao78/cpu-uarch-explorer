@@ -23,8 +23,11 @@ from .coordinator import (EnvironmentError_, execute_environment_tx,  # noqa: F4
                           specs_from_host_requirements)
 from .journal import Journal, JournalStore
 from .android_state import collect_android_state
+from .policy import (collect_environment_state, evaluate_preconditions,
+                     evaluate_stability)
 
 __all__ = ["EnvironmentError_", "Journal", "JournalStore",
            "execute_environment_tx", "reconcile_unfinished",
            "restore_transaction", "specs_from_host_requirements",
-           "collect_android_state"]
+           "collect_android_state", "collect_environment_state",
+           "evaluate_preconditions", "evaluate_stability"]
