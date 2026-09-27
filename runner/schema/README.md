@@ -48,6 +48,13 @@
 | `page_policy_actual` | string | `platform-default` / `base` / `thp` / `mixed` / `hugetlb-2m` 实际 backing | 2026-09-27 |
 | `anon_huge_kb` | non-negative integer | Linux `/proc/self/smaps` 对目标 VMA 观测到的 `AnonHugePages` 总量 | 2026-09-27 |
 | `page_policy`, `page_kb` | string, non-negative integer | 兼容既有 reader 的摘要；新判断必须优先使用 requested/actual 字段 | 2026-09-27 |
+| `pmu_type`, `pmu_config` | non-negative integer | `pmu.<label>.count` 的 Linux perf PMU type/config；来自 ExperimentSpec 的显式事件描述 | 2026-09-28 |
+| `time_enabled_ns`, `time_running_ns` | non-negative integer | 每个 PMU observation 的 perf enabled/running delta；零 running 拒绝，multiplex 判定由二者比值审计 | 2026-09-28 |
+
+ExperimentSpec 的可选固定参数 `pmu_events` 登记为
+`[{"name": <安全小写标签>, "type": <uint32>, "config": <uint64/base-0 string>}]`；
+Runner 在 plan 期归一化为整数，probe 以重复的
+`--pmu-event label:type:config` 接收。旧 spec 不声明该参数时执行路径不变。
 
 ## v1（归档）
 

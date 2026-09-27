@@ -105,6 +105,45 @@ class TestPtrChaseContract(unittest.TestCase):
                     conflicting_name: 1,
                 })
 
+    def test_adapter_builds_repeated_pmu_events(self):
+        argv = self.adapter.build_argv({
+            "buffer_kb": 64,
+            "stride": 64,
+            "loads": 8000,
+            "warmup": 1000,
+            "pmu_events": [
+                {"name": "cycles", "type": 8, "config": 0x11},
+                {"name": "l2d_cache_refill", "type": 8, "config": 0x17},
+            ],
+        })
+        descriptors = [argv[index + 1] for index, value in enumerate(argv)
+                       if value == "--pmu-event"]
+        self.assertEqual(descriptors, ["cycles:8:17", "l2d_cache_refill:8:23"])
+
+    def test_well_formed_pmu_event_is_unsupported_on_macos(self):
+        proc = self._run([
+            "-b", "64", "-s", "64", "-n", "8000",
+            "--pmu-event", "cycles:8:0x11",
+        ])
+        self.assertEqual(proc.returncode, 2)
+        self.assertNotIn("latency_ns", proc.stdout)
+
+    def test_malformed_pmu_event_is_input_error(self):
+        proc = self._run([
+            "-b", "64", "-s", "64", "-n", "8000",
+            "--pmu-event", "not-a-descriptor",
+        ])
+        self.assertEqual(proc.returncode, 1)
+        self.assertNotIn("latency_ns", proc.stdout)
+
+        duplicate = self._run([
+            "-b", "64", "-s", "64", "-n", "8000",
+            "--pmu-event", "cycles:8:0x11",
+            "--pmu-event", "cycles:8:0x17",
+        ])
+        self.assertEqual(duplicate.returncode, 1)
+        self.assertNotIn("latency_ns", duplicate.stdout)
+
     def test_parser_refuses_nan_inf_and_garbage(self):
         for bad in ("latency_ns=nan", "latency_ns=inf", "", "no fields here"):
             with self.assertRaises(ParseError, msg=f"{bad!r} must be refused"):
@@ -152,6 +191,43 @@ class TestPtrChaseContract(unittest.TestCase):
         )
         for stdout in invalid:
             with self.assertRaises(ParseError, msg=f"{stdout!r} must be refused"):
+                self.adapter.parse_output(stdout, "")
+
+    def test_parser_emits_one_metric_per_complete_pmu_event(self):
+        stdout = (
+            "latency_ns=1.25 "
+            "pmu_cycles_type=8 pmu_cycles_config=17 pmu_cycles_count=0 "
+            "pmu_cycles_time_enabled_ns=1000 pmu_cycles_time_running_ns=1000 "
+            "pmu_l2d_cache_refill_type=8 pmu_l2d_cache_refill_config=23 "
+            "pmu_l2d_cache_refill_count=250 "
+            "pmu_l2d_cache_refill_time_enabled_ns=1001 "
+            "pmu_l2d_cache_refill_time_running_ns=1001"
+        )
+        metrics = self.adapter.parse_output(stdout, "")
+        self.assertEqual(
+            [metric["name"] for metric in metrics],
+            ["latency_ns", "pmu.cycles.count", "pmu.l2d_cache_refill.count"],
+        )
+        self.assertEqual(metrics[1]["value"], 0)
+        self.assertEqual(metrics[1]["pmu_type"], 8)
+        self.assertEqual(metrics[1]["pmu_config"], 0x11)
+        self.assertEqual(metrics[1]["time_running_ns"], 1000)
+        self.assertEqual(metrics[2]["value"], 250)
+
+    def test_parser_rejects_incomplete_or_unscheduled_pmu_event(self):
+        invalid = (
+            "latency_ns=1 pmu_cycles_count=1",
+            "latency_ns=1 pmu_cycles_type=8 pmu_cycles_config=17 "
+            "pmu_cycles_count=1 pmu_cycles_time_enabled_ns=1000",
+            "latency_ns=1 pmu_cycles_type=8 pmu_cycles_config=17 "
+            "pmu_cycles_count=1 pmu_cycles_time_enabled_ns=1000 "
+            "pmu_cycles_time_running_ns=0",
+            "latency_ns=1 pmu_cycles_type=8 pmu_cycles_config=17 "
+            "pmu_cycles_count=1 pmu_cycles_time_enabled_ns=999 "
+            "pmu_cycles_time_running_ns=1000",
+        )
+        for stdout in invalid:
+            with self.subTest(stdout=stdout), self.assertRaises(ParseError):
                 self.adapter.parse_output(stdout, "")
 
 

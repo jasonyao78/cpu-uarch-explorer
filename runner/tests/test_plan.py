@@ -275,6 +275,63 @@ class TestPlan(unittest.TestCase):
                 with self.assertRaisesRegex(RunnerError, "base_pages must be 0 or 1"):
                     build_plan(base_spec, PLATFORM)
 
+    def test_pmu_events_are_normalized_and_recorded(self):
+        pmu_spec = {
+            **PASS_SPEC,
+            "parameters": [
+                *PASS_SPEC["parameters"],
+                {
+                    "name": "pmu_events",
+                    "type": "pmu-event-list",
+                    "default": [
+                        {"name": "cycles", "type": 8, "config": "0x11"},
+                        {"name": "l2d_cache_refill", "type": 8, "config": 0x17},
+                    ],
+                },
+            ],
+            "execution": {
+                **PASS_SPEC["execution"],
+                "fixed_params": ["stride", "warmup_passes", "pmu_events"],
+            },
+        }
+        plan = build_plan(pmu_spec, {**PLATFORM, "controls": []})
+        expected = [
+            {"name": "cycles", "type": 8, "config": 0x11},
+            {"name": "l2d_cache_refill", "type": 8, "config": 0x17},
+        ]
+        self.assertTrue(all(case.param_value("pmu_events") == expected for case in plan.cases))
+        self.assertTrue(all(
+            dict(case.params)["pmu_events"].source == "spec-default"
+            for case in plan.cases
+        ))
+
+    def test_invalid_pmu_events_fail_at_plan_time(self):
+        invalid_lists = (
+            [{"name": "Cycles", "type": 8, "config": 0x11}],
+            [{"name": "cycles", "type": True, "config": 0x11}],
+            [{"name": "cycles", "type": 1 << 32, "config": 0x11}],
+            [{"name": "cycles", "type": 8, "config": "xyz"}],
+            [
+                {"name": "cycles", "type": 8, "config": 0x11},
+                {"name": "cycles", "type": 8, "config": 0x17},
+            ],
+        )
+        for invalid in invalid_lists:
+            with self.subTest(invalid=invalid):
+                spec = {
+                    **PASS_SPEC,
+                    "parameters": [
+                        *PASS_SPEC["parameters"],
+                        {"name": "pmu_events", "type": "pmu-event-list", "default": invalid},
+                    ],
+                    "execution": {
+                        **PASS_SPEC["execution"],
+                        "fixed_params": ["stride", "warmup_passes", "pmu_events"],
+                    },
+                }
+                with self.assertRaisesRegex(RunnerError, "pmu_events"):
+                    build_plan(spec, PLATFORM)
+
 
 if __name__ == "__main__":
     unittest.main()

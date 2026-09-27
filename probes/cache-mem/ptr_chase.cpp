@@ -49,22 +49,36 @@
 //    /proc/self/smaps，分别输出 requested policy、actual backing 和
 //    AnonHugePages。非 Linux 平台请求这些 Linux 能力时退出码 2。
 //
+// 可选 core PMU：Linux `--pmu-event label:type:config` 可重复；每个 event
+// 在同一 timed loop 前 reset/enable/baseline，t1 后先 read 再 disable，输出
+// raw count delta 与 enabled/running time。未请求时不改变既有测量路径。
+//
 // 输出：key=value 行（buffer_kb / stride / loads / elapsed_ns / latency_ns /
 // warmup_loads / warmup_passes_effective / warmup_state / page_policy /
 // page_policy_requested / page_policy_actual / anon_huge_kb / page_kb），由
 // runner 层包装为 record.schema.json 记录。
 
 #include <algorithm>
+#include <cerrno>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <fstream>
+#include <getopt.h>
+#include <limits>
 #include <random>
+#include <set>
 #include <string>
+#include <utility>
+#include <vector>
 #include <unistd.h>
 #include <sys/mman.h>
+
+#if defined(CPU_UARCH_HAVE_LINUX_PERF)
+#include "perf_counter.h"
+#endif
 
 // MAP_HUGETLB 为 Linux 专有（2MB 默认大页）；macOS 等平台无此能力，
 // 请求 hugepage 时以退出码 2（能力不支持）回应（Probe ABI，原理"附加"节）。
@@ -89,6 +103,59 @@
 namespace {
 
 constexpr int kUnroll = 8; // 同链展开：摊薄循环控制开销，不引入 MLP（原理 §3）
+constexpr size_t kMaxPmuEvents = 16;
+
+struct PmuEventRequest {
+    std::string label;
+    uint32_t type;
+    uint64_t config;
+};
+
+bool safe_pmu_label(const std::string& label) {
+    if (label.empty())
+        return false;
+    for (unsigned char ch : label) {
+        const bool valid = (ch >= 'a' && ch <= 'z')
+                        || (ch >= '0' && ch <= '9') || ch == '_';
+        if (!valid)
+            return false;
+    }
+    return true;
+}
+
+bool parse_u64_base0(const std::string& text, uint64_t* value) {
+    if (text.empty() || text[0] == '-')
+        return false;
+    errno = 0;
+    char* end = nullptr;
+    const unsigned long long parsed = std::strtoull(text.c_str(), &end, 0);
+    if (errno != 0 || end == text.c_str() || *end != '\0')
+        return false;
+    *value = static_cast<uint64_t>(parsed);
+    return true;
+}
+
+bool parse_pmu_event(const char* text, PmuEventRequest* request) {
+    if (text == nullptr)
+        return false;
+    const std::string descriptor(text);
+    const size_t first = descriptor.find(':');
+    const size_t second = first == std::string::npos
+        ? std::string::npos : descriptor.find(':', first + 1);
+    if (first == std::string::npos || second == std::string::npos
+            || descriptor.find(':', second + 1) != std::string::npos)
+        return false;
+    const std::string label = descriptor.substr(0, first);
+    uint64_t type = 0;
+    uint64_t config = 0;
+    if (!safe_pmu_label(label)
+            || !parse_u64_base0(descriptor.substr(first + 1, second - first - 1), &type)
+            || type > std::numeric_limits<uint32_t>::max()
+            || !parse_u64_base0(descriptor.substr(second + 1), &config))
+        return false;
+    *request = PmuEventRequest{label, static_cast<uint32_t>(type), config};
+    return true;
+}
 
 double now_ns() {
     struct timespec ts;
@@ -98,7 +165,8 @@ double now_ns() {
 
 void usage(const char* prog) {
     std::fprintf(stderr,
-        "usage: %s -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-B|-h|-H|-T]\n"
+        "usage: %s -b KB -s stride_bytes [-n loads] [-w warmup_loads] "
+        "[-B|-h|-H|-T] [--pmu-event label:type:config]...\n"
         "  -b  buffer size in KB            (default 8192)\n"
         "  -s  stride between chain slots, must be a multiple of %zu (default 64)\n"
         "  -n  total dependent loads, >= %d (default 268435456)\n"
@@ -106,7 +174,8 @@ void usage(const char* prog) {
         "  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)\n"
         "  -H  2MB hugepage strict (exit 2 if pool unavailable)\n"
         "  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps\n"
-        "  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps\n",
+        "  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps\n"
+        "  --pmu-event label:type:config  Linux per-thread counting event (repeatable)\n",
         prog, sizeof(char*), kUnroll);
 }
 
@@ -209,9 +278,16 @@ int main(int argc, char** argv) {
     long long warmup = 0;
     bool warmup_set = false;
     bool want_hp = false, strict_hp = false, want_thp = false, want_base = false;
+    std::vector<PmuEventRequest> pmu_requests;
 
+    enum : int { kPmuEvent = 1000 };
+    const option long_options[] = {
+        {"pmu-event", required_argument, nullptr, kPmuEvent},
+        {nullptr, 0, nullptr, 0},
+    };
     int opt;
-    while ((opt = getopt(argc, argv, "b:s:n:w:hHTB")) != -1) {
+    while ((opt = getopt_long(argc, argv, "b:s:n:w:hHTB",
+                              long_options, nullptr)) != -1) {
         switch (opt) {
         case 'b': buffer_kb = std::strtoull(optarg, nullptr, 10); break;
         case 's': stride = std::strtoull(optarg, nullptr, 10); break;
@@ -221,9 +297,18 @@ int main(int argc, char** argv) {
         case 'H': want_hp = true; strict_hp = true; break;
         case 'T': want_thp = true; break;
         case 'B': want_base = true; break;
+        case kPmuEvent: {
+            PmuEventRequest request;
+            if (!parse_pmu_event(optarg, &request))
+                die(argv[0], "pmu-event must be label:uint32-type:uint64-config");
+            pmu_requests.push_back(std::move(request));
+            break;
+        }
         default: usage(argv[0]); return 1;
         }
     }
+    if (optind != argc)
+        die(argv[0], "unexpected positional argument");
 
     // 输入校验（原理 §6）：任何一项不过即非零退出，不产出记录
     if (buffer_kb == 0)
@@ -237,6 +322,19 @@ int main(int argc, char** argv) {
     if (static_cast<int>(want_hp) + static_cast<int>(want_thp)
             + static_cast<int>(want_base) > 1)
         die(argv[0], "cannot request both; page policies are mutually exclusive");
+    if (pmu_requests.size() > kMaxPmuEvents)
+        die(argv[0], "too many PMU events (maximum 16)");
+    std::set<std::string> pmu_labels;
+    for (const auto& request : pmu_requests) {
+        if (!pmu_labels.insert(request.label).second)
+            die(argv[0], "PMU event labels must be unique");
+    }
+#if !defined(CPU_UARCH_HAVE_LINUX_PERF)
+    if (!pmu_requests.empty()) {
+        std::fprintf(stderr, "unsupported: Linux perf_event_open is not available\n");
+        return 2;
+    }
+#endif
 #if CPU_UARCH_NO_THP
     if (want_thp) {
         std::fprintf(stderr, "unsupported: MADV_HUGEPAGE not available on this platform\n");
@@ -396,6 +494,34 @@ int main(int argc, char** argv) {
     for (long long i = 0; i < warmup; ++i)
         p = *reinterpret_cast<char**>(p);
 
+#if defined(CPU_UARCH_HAVE_LINUX_PERF)
+    std::vector<cpu_uarch::PerfEventSpec> perf_specs;
+    perf_specs.reserve(pmu_requests.size());
+    for (const auto& request : pmu_requests)
+        perf_specs.push_back({request.label, request.type, request.config});
+    cpu_uarch::PerfCounterSession perf_session(std::move(perf_specs));
+    cpu_uarch::PerfCounterError perf_error;
+    if (!perf_session.open_for_current_thread(&perf_error)) {
+        const int exit_code = cpu_uarch::perf_open_errno_is_unsupported(
+            perf_error.error_number) ? 2 : 1;
+        std::fprintf(stderr, "%s: stage=%s errno=%d error=%s\n",
+                     exit_code == 2 ? "unsupported" : "error",
+                     perf_error.stage.c_str(), perf_error.error_number,
+                     std::strerror(perf_error.error_number));
+        free(perm);
+        munmap(mapping_base, mapping_bytes);
+        return exit_code;
+    }
+    if (!perf_session.start(&perf_error)) {
+        std::fprintf(stderr, "error: stage=%s errno=%d error=%s\n",
+                     perf_error.stage.c_str(), perf_error.error_number,
+                     std::strerror(perf_error.error_number));
+        free(perm);
+        munmap(mapping_base, mapping_bytes);
+        return 1;
+    }
+#endif
+
     const double t0 = now_ns();
     const long long iters = loads / kUnroll;
     for (long long i = 0; i < iters; ++i) {
@@ -410,6 +536,18 @@ int main(int argc, char** argv) {
     }
     const double t1 = now_ns();
 
+#if defined(CPU_UARCH_HAVE_LINUX_PERF)
+    std::vector<cpu_uarch::PerfEventObservation> perf_observations;
+    if (!perf_session.stop(&perf_observations, &perf_error)) {
+        std::fprintf(stderr, "error: stage=%s errno=%d error=%s\n",
+                     perf_error.stage.c_str(), perf_error.error_number,
+                     std::strerror(perf_error.error_number));
+        free(perm);
+        munmap(mapping_base, mapping_bytes);
+        return 1;
+    }
+#endif
+
     // volatile sink：追逐结果必须物化，整条链不可被优化掉（原理 §5）
     volatile uintptr_t sink = reinterpret_cast<uintptr_t>(p);
     (void)sink;
@@ -423,10 +561,27 @@ int main(int argc, char** argv) {
     std::printf("buffer_kb=%zu stride=%zu loads=%lld elapsed_ns=%.0f latency_ns=%.4f "
                 "warmup_loads=%lld warmup_passes_effective=%.6f warmup_state=%s "
                 "page_policy=%s page_kb=%u page_policy_requested=%s "
-                "page_policy_actual=%s anon_huge_kb=%zu\n",
+                "page_policy_actual=%s anon_huge_kb=%zu",
                 buffer_kb, stride, loads, elapsed, latency, warmup, warmup_passes,
                 warmup_state, page_policy.c_str(), page_kb, page_policy_requested,
                 page_policy_actual, anon_huge_kb);
+#if defined(CPU_UARCH_HAVE_LINUX_PERF)
+    for (const auto& observation : perf_observations) {
+        std::printf(
+            " pmu_%s_type=%u pmu_%s_config=%llu pmu_%s_count=%llu "
+            "pmu_%s_time_enabled_ns=%llu pmu_%s_time_running_ns=%llu",
+            observation.spec.label.c_str(), observation.spec.type,
+            observation.spec.label.c_str(),
+            static_cast<unsigned long long>(observation.spec.config),
+            observation.spec.label.c_str(),
+            static_cast<unsigned long long>(observation.count),
+            observation.spec.label.c_str(),
+            static_cast<unsigned long long>(observation.time_enabled_ns),
+            observation.spec.label.c_str(),
+            static_cast<unsigned long long>(observation.time_running_ns));
+    }
+#endif
+    std::putchar('\n');
 
     free(perm);
     munmap(mapping_base, mapping_bytes);

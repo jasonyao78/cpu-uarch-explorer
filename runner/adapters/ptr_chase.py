@@ -8,17 +8,23 @@ Probe ABI（与源码头部注释一致）：
   退出码: 0 成功 / 1 输入或环境错误 / 2 能力不支持（hugepage 无平台能力或
           strict 模式缺页池；fallback 非 strict 模式下成功但标注 fallback-4k）
 
-measurement-discipline §2：hugepage 是 Linux 正式测量前提；fallback 必须
-显式可见——page_policy 随 metric 入档（requested/actual 双记录原则）。
+measurement-discipline §2：请求页策略与实际 backing 必须分字段保存；
+page_policy 随 metric 入档（requested/actual 双记录原则）。
 """
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from runner.errors import ParseError
 
 from .base import parse_key_value_lines, require_finite_number
+
+_PMU_LABEL_RE = re.compile(r"^[a-z0-9_]+$")
+_PMU_SUFFIXES = (
+    "_time_enabled_ns", "_time_running_ns", "_config", "_count", "_type",
+)
 
 
 def _binary_flag(params: dict[str, Any], name: str) -> int:
@@ -30,9 +36,44 @@ def _binary_flag(params: dict[str, Any], name: str) -> int:
     raise ParseError(f"{name} must be 0 or 1, got {raw!r}")
 
 
+def _pmu_events(params: dict[str, Any]) -> list[dict[str, int | str]]:
+    raw = params.get("pmu_events", [])
+    if not isinstance(raw, list):
+        raise ParseError(f"pmu_events must be a list, got {raw!r}")
+    normalized: list[dict[str, int | str]] = []
+    labels: set[str] = set()
+    for index, event in enumerate(raw):
+        if not isinstance(event, dict) or set(event) != {"name", "type", "config"}:
+            raise ParseError(f"pmu_events[{index}] must contain exactly name/type/config")
+        label = event["name"]
+        event_type = event["type"]
+        config = event["config"]
+        if not isinstance(label, str) or not _PMU_LABEL_RE.fullmatch(label):
+            raise ParseError(f"pmu_events[{index}].name is unsafe: {label!r}")
+        if label in labels:
+            raise ParseError(f"pmu_events has duplicate name {label!r}")
+        if type(event_type) is not int or not 0 <= event_type <= (1 << 32) - 1:
+            raise ParseError(f"pmu_events[{index}].type is not uint32: {event_type!r}")
+        if type(config) is not int or not 0 <= config <= (1 << 64) - 1:
+            raise ParseError(f"pmu_events[{index}].config is not uint64: {config!r}")
+        labels.add(label)
+        normalized.append({"name": label, "type": event_type, "config": config})
+    return normalized
+
+
+def _require_uint(fields: dict[str, str], key: str, maximum: int) -> int:
+    raw = fields.get(key)
+    if raw is None or not raw.isdigit():
+        raise ParseError(f"field {key!r} must be an unsigned integer: {raw!r}")
+    value = int(raw)
+    if value > maximum:
+        raise ParseError(f"field {key!r} exceeds {maximum}: {raw!r}")
+    return value
+
+
 class PtrChaseAdapter:
     probe_name = "ptr_chase"
-    protocol_version = "1.1"
+    protocol_version = "1.2"
     implementation_id = "portable"
 
     def build_argv(self, params: dict[str, Any]) -> list[str]:
@@ -59,6 +100,11 @@ class PtrChaseAdapter:
             argv.append("-T")
         if base_pages:
             argv.append("-B")
+        for event in _pmu_events(params):
+            argv.extend([
+                "--pmu-event",
+                f"{event['name']}:{event['type']}:{event['config']}",
+            ])
         return argv
 
     def parse_output(self, stdout: str, stderr: str) -> list[dict[str, Any]]:
@@ -133,4 +179,47 @@ class PtrChaseAdapter:
             if not raw_page_kb.isdigit():
                 raise ParseError(f"page_kb must be a non-negative integer: {raw_page_kb!r}")
             metric["page_kb"] = int(raw_page_kb)
-        return [metric]
+        labels: list[str] = []
+        seen_labels: set[str] = set()
+        for key in fields:
+            if not key.startswith("pmu_"):
+                continue
+            label = None
+            for suffix in _PMU_SUFFIXES:
+                if key.endswith(suffix):
+                    label = key[len("pmu_"):-len(suffix)]
+                    break
+            if label is None or not _PMU_LABEL_RE.fullmatch(label):
+                raise ParseError(f"invalid PMU output field: {key!r}")
+            if label not in seen_labels:
+                seen_labels.add(label)
+                labels.append(label)
+
+        metrics = [metric]
+        for label in labels:
+            prefix = f"pmu_{label}_"
+            event_type = _require_uint(fields, prefix + "type", (1 << 32) - 1)
+            config = _require_uint(fields, prefix + "config", (1 << 64) - 1)
+            count = _require_uint(fields, prefix + "count", (1 << 64) - 1)
+            enabled = _require_uint(
+                fields, prefix + "time_enabled_ns", (1 << 64) - 1,
+            )
+            running = _require_uint(
+                fields, prefix + "time_running_ns", (1 << 64) - 1,
+            )
+            if running == 0:
+                raise ParseError(f"PMU event {label!r} has zero running time")
+            if running > enabled:
+                raise ParseError(
+                    f"PMU event {label!r} running time exceeds enabled time"
+                )
+            metrics.append({
+                "name": f"pmu.{label}.count",
+                "value": count,
+                "unit": "events",
+                "pmu_type": event_type,
+                "pmu_config": config,
+                "time_enabled_ns": enabled,
+                "time_running_ns": running,
+            })
+        return metrics

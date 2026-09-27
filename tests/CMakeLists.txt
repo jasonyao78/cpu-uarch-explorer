@@ -79,6 +79,11 @@ add_test(NAME ptr_chase_rejects_base_and_thp
          COMMAND ${PT} -b 4096 -s 64 -n 8000 -B -T)
 set_tests_properties(ptr_chase_rejects_base_and_thp PROPERTIES WILL_FAIL TRUE)
 
+add_test(NAME ptr_chase_rejects_malformed_pmu_event
+         COMMAND ${PT} -b 64 -s 64 -n 8000
+                 --pmu-event not-a-descriptor)
+set_tests_properties(ptr_chase_rejects_malformed_pmu_event PROPERTIES WILL_FAIL TRUE)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(PCS $<TARGET_FILE:pmu_counter_smoke>)
 

@@ -11,6 +11,7 @@ plan 只做解析与展开，不产生任何副作用（不执行、不写盘）
 from __future__ import annotations
 
 import itertools
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -18,6 +19,7 @@ from .errors import RunnerError
 from .resolve import ResolvedValue, parse_size_bytes, parse_size_kb, resolve_param
 
 MAX_PROBE_LOADS = (1 << 63) - 1
+_PMU_LABEL_RE = re.compile(r"^[a-z0-9_]+$")
 
 
 @dataclass(frozen=True)
@@ -80,6 +82,49 @@ def _binary_flag(name: str, rv: ResolvedValue | None) -> int:
     if type(raw) is str and raw in ("0", "1"):
         return int(raw)
     raise RunnerError("plan-error", f"{name} must be 0 or 1, got {raw!r}")
+
+
+def _normalize_pmu_events(rv: ResolvedValue | None) -> list[dict[str, int | str]]:
+    """Validate a portable ExperimentSpec PMU list before any probe runs."""
+    if rv is None:
+        return []
+    raw = rv.value
+    if not isinstance(raw, list):
+        raise RunnerError("plan-error", f"pmu_events must be a list, got {raw!r}")
+    normalized: list[dict[str, int | str]] = []
+    labels: set[str] = set()
+    for index, event in enumerate(raw):
+        if not isinstance(event, dict) or set(event) != {"name", "type", "config"}:
+            raise RunnerError(
+                "plan-error",
+                f"pmu_events[{index}] must contain exactly name/type/config",
+            )
+        label = event["name"]
+        if not isinstance(label, str) or not _PMU_LABEL_RE.fullmatch(label):
+            raise RunnerError(
+                "plan-error", f"pmu_events[{index}].name is unsafe: {label!r}",
+            )
+        if label in labels:
+            raise RunnerError("plan-error", f"pmu_events has duplicate name {label!r}")
+        event_type = event["type"]
+        if (type(event_type) is not int or event_type < 0
+                or event_type > (1 << 32) - 1):
+            raise RunnerError(
+                "plan-error", f"pmu_events[{index}].type is not uint32: {event_type!r}",
+            )
+        config_raw = event["config"]
+        try:
+            config = (int(config_raw, 0) if isinstance(config_raw, str)
+                      else config_raw if type(config_raw) is int else None)
+        except ValueError:
+            config = None
+        if config is None or config < 0 or config > (1 << 64) - 1:
+            raise RunnerError(
+                "plan-error", f"pmu_events[{index}].config is not uint64: {config_raw!r}",
+            )
+        labels.add(label)
+        normalized.append({"name": label, "type": event_type, "config": config})
+    return normalized
 
 
 def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) -> Plan:
@@ -188,6 +233,8 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                     "plan-error",
                     "ptr_chase cannot request both; page policies are mutually exclusive",
                 )
+            pmu_events_rv = params.get("pmu_events")
+            pmu_events = _normalize_pmu_events(pmu_events_rv)
 
             case_params = {
                 "buffer_kb": ResolvedValue(buffer_kb, params["buffer"].source),
@@ -208,6 +255,10 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
             if base_pages_rv is not None:
                 case_params["base_pages"] = ResolvedValue(
                     base_pages, base_pages_rv.source,
+                )
+            if pmu_events_rv is not None:
+                case_params["pmu_events"] = ResolvedValue(
+                    pmu_events, pmu_events_rv.source,
                 )
             case_id = (f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"
                        + ("-hp2m" if hugepage else "")
