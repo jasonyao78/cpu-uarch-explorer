@@ -22,7 +22,10 @@ latency_ns / warmup / 页策略），由 Runner 层包装为 `record.schema.json
   `-T` 请求 `MADV_HUGEPAGE`，首次触页后解析 `/proc/self/smaps`，分别输出
   `page_policy_requested`、`page_policy_actual=base|thp|mixed` 与
   `anon_huge_kb`；不能由“无 hugetlb pool”推出“无 hugepage”，也不能把
-  madvise 成功当作实际 THP。
+  madvise 成功当作实际 THP。Linux 普通匿名映射在目标区间两侧保留
+  `PROT_NONE` guard page，使 `/proc/self/smaps` 的 VMA 级
+  `AnonHugePages` 可保守、精确地归属于被测 buffer；guard page 不参与访问，
+  也不改变中间区间的 default/THP 策略。
 - `CLOCK_MONOTONIC_RAW` 替代 `CLOCK_MONOTONIC`（减小时钟调整抖动）。
 - cold 模式参数化（驱逐后冷测 + 输出温度标签）——遵守 `docs/methodology/measurement-discipline.md`。
 - `evict_slc` 类驱逐工具的移植评估（独立小进程，BSD-3 同源，引用需登记来源）。

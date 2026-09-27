@@ -235,13 +235,15 @@ int main(int argc, char** argv) {
 #endif
 
     const size_t bytes = buffer_kb * 1024;
+    size_t normal_map_bytes = bytes;
 #if defined(__linux__)
     const long base_page_bytes_raw = sysconf(_SC_PAGESIZE);
-    const size_t normal_map_bytes = base_page_bytes_raw > 0
-        ? (bytes + static_cast<size_t>(base_page_bytes_raw) - 1)
-            / static_cast<size_t>(base_page_bytes_raw)
-            * static_cast<size_t>(base_page_bytes_raw)
-        : bytes;
+    if (base_page_bytes_raw <= 0) {
+        std::fprintf(stderr, "error: cannot determine Linux base page size\n");
+        return 1;
+    }
+    const size_t base_page_bytes = static_cast<size_t>(base_page_bytes_raw);
+    normal_map_bytes = (bytes + base_page_bytes - 1) / base_page_bytes * base_page_bytes;
 #endif
     const size_t slots = bytes / stride;
     if (slots < 2)
@@ -256,25 +258,52 @@ int main(int argc, char** argv) {
     // hugetlb 成功时返回显式大页映射；nullptr 表示走普通匿名映射。THP 只
     // 能作用于后者，且最终状态必须由 smaps 观测，不能由请求结果推断。
     char* hp_buf = map_hugetlb_buffer(bytes, want_hp, strict_hp);
-    size_t map_bytes = bytes;
+    char* mapping_base = hp_buf;
+    size_t mapping_bytes = bytes;
 #if !CPU_UARCH_NO_HUGEPAGE
     if (hp_buf != nullptr) {
         constexpr size_t kHp = 2 * 1024 * 1024;
-        map_bytes = (bytes + kHp - 1) / kHp * kHp;
+        mapping_bytes = (bytes + kHp - 1) / kHp * kHp;
     }
 #endif
-    char* buf = hp_buf != nullptr ? hp_buf
-              : static_cast<char*>(mmap(nullptr, bytes, PROT_READ | PROT_WRITE,
-                                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
-    if (buf == MAP_FAILED) {
-        std::perror("mmap");
-        return 1;
+    char* buf = hp_buf;
+    if (buf == nullptr) {
+#if defined(__linux__)
+        // 匿名 mmap 可与邻接、属性相同的 VMA 合并；Android 实测默认映射因此
+        // 无法把 VMA 级 AnonHugePages 精确归到目标 buffer。两侧 PROT_NONE
+        // guard page 强制目标 RW 段成为边界精确的独立 VMA，不改变中间页的
+        // default/THP policy，也不放宽 smaps 的保守归属规则。
+        mapping_bytes = normal_map_bytes + 2 * base_page_bytes;
+        mapping_base = static_cast<char*>(mmap(
+            nullptr, mapping_bytes, PROT_NONE,
+            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
+        if (mapping_base == MAP_FAILED) {
+            std::perror("mmap guarded buffer");
+            return 1;
+        }
+        buf = mapping_base + base_page_bytes;
+        if (mprotect(buf, normal_map_bytes, PROT_READ | PROT_WRITE) != 0) {
+            std::perror("mprotect guarded buffer");
+            munmap(mapping_base, mapping_bytes);
+            return 1;
+        }
+#else
+        mapping_base = static_cast<char*>(mmap(
+            nullptr, bytes, PROT_READ | PROT_WRITE,
+            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
+        if (mapping_base == MAP_FAILED) {
+            std::perror("mmap");
+            return 1;
+        }
+        buf = mapping_base;
+        mapping_bytes = bytes;
+#endif
     }
 
 #if !CPU_UARCH_NO_THP
     if (want_thp && madvise(buf, bytes, MADV_HUGEPAGE) != 0) {
         std::perror("madvise(MADV_HUGEPAGE)");
-        munmap(buf, map_bytes);
+        munmap(mapping_base, mapping_bytes);
         return 1;
     }
 #endif
@@ -283,6 +312,7 @@ int main(int argc, char** argv) {
     size_t* perm = static_cast<size_t*>(malloc(slots * sizeof(size_t)));
     if (!perm) {
         std::perror("malloc");
+        munmap(mapping_base, mapping_bytes);
         return 1;
     }
     for (size_t i = 0; i < slots; ++i) perm[i] = i;
@@ -313,7 +343,7 @@ int main(int argc, char** argv) {
         if (!read_anon_huge_kb(buf, normal_map_bytes, &anon_huge_kb)) {
             std::fprintf(stderr, "error: cannot inspect target mapping in /proc/self/smaps\n");
             free(perm);
-            munmap(buf, map_bytes);
+            munmap(mapping_base, mapping_bytes);
             return 1;
         }
         if (anon_huge_kb == 0) {
@@ -374,6 +404,6 @@ int main(int argc, char** argv) {
                 page_policy_actual, anon_huge_kb);
 
     free(perm);
-    munmap(buf, map_bytes);
+    munmap(mapping_base, mapping_bytes);
     return 0;
 }
