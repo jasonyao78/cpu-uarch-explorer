@@ -47,6 +47,8 @@ if(APPLE)
   set_tests_properties(ptr_chase_hugepage_unsupported PROPERTIES WILL_FAIL TRUE)
   add_test(NAME ptr_chase_thp_unsupported COMMAND ${PT} -b 4096 -s 64 -n 8000 -T)
   set_tests_properties(ptr_chase_thp_unsupported PROPERTIES WILL_FAIL TRUE)
+  add_test(NAME ptr_chase_base_pages_unsupported COMMAND ${PT} -b 4096 -s 64 -n 8000 -B)
+  set_tests_properties(ptr_chase_base_pages_unsupported PROPERTIES WILL_FAIL TRUE)
 else()
   add_test(NAME ptr_chase_default_page_backing_observed
            COMMAND ${PT} -b 4096 -s 64 -n 8000)
@@ -62,11 +64,20 @@ else()
   set_tests_properties(ptr_chase_thp_requested_and_observed PROPERTIES
       PASS_REGULAR_EXPRESSION
       "page_policy_requested=thp-madvise page_policy_actual=(base|thp|mixed) anon_huge_kb=[0-9]+")
+  add_test(NAME ptr_chase_base_pages_requested_and_observed
+           COMMAND ${PT} -b 4096 -s 64 -n 8000 -B)
+  set_tests_properties(ptr_chase_base_pages_requested_and_observed PROPERTIES
+      PASS_REGULAR_EXPRESSION
+      "page_policy_requested=base-madvise page_policy_actual=base anon_huge_kb=0")
 endif()
 
 add_test(NAME ptr_chase_rejects_conflicting_page_requests
          COMMAND ${PT} -b 4096 -s 64 -n 8000 -T -h)
 set_tests_properties(ptr_chase_rejects_conflicting_page_requests PROPERTIES WILL_FAIL TRUE)
+
+add_test(NAME ptr_chase_rejects_base_and_thp
+         COMMAND ${PT} -b 4096 -s 64 -n 8000 -B -T)
+set_tests_properties(ptr_chase_rejects_base_and_thp PROPERTIES WILL_FAIL TRUE)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(PCS $<TARGET_FILE:pmu_counter_smoke>)

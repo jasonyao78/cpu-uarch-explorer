@@ -42,11 +42,12 @@
 //    2=能力不支持（保留）。校验项：stride 为指针宽度的整数倍、
 //    loads ≥ 展开因子、槽位数 ≥ 2。
 //
-// 附加：页策略（-h / -H / -T；measurement-discipline §2 落地）
+// 附加：页策略（-B / -h / -H / -T；measurement-discipline §2 落地）
 //    `-h/-H` 请求显式 hugetlb（fallback/strict）；`-T` 请求 Linux THP
-//    (`MADV_HUGEPAGE`)。请求成功不等于实际大页 backing：普通匿名映射在首次
-//    写入后解析 /proc/self/smaps，分别输出 requested policy、actual backing
-//    和 AnonHugePages。非 Linux 平台请求这些 Linux 能力时退出码 2。
+//    (`MADV_HUGEPAGE`)；`-B` 用 `MADV_NOHUGEPAGE` 显式请求 base pages。
+//    请求成功不等于实际 backing：普通匿名映射在首次写入后解析
+//    /proc/self/smaps，分别输出 requested policy、actual backing 和
+//    AnonHugePages。非 Linux 平台请求这些 Linux 能力时退出码 2。
 //
 // 输出：key=value 行（buffer_kb / stride / loads / elapsed_ns / latency_ns /
 // warmup_loads / warmup_passes_effective / warmup_state / page_policy /
@@ -79,6 +80,12 @@
 #define CPU_UARCH_NO_THP 1
 #endif
 
+#if defined(__linux__) && defined(MADV_NOHUGEPAGE)
+#define CPU_UARCH_NO_BASE_PAGE_ADVICE 0
+#else
+#define CPU_UARCH_NO_BASE_PAGE_ADVICE 1
+#endif
+
 namespace {
 
 constexpr int kUnroll = 8; // 同链展开：摊薄循环控制开销，不引入 MLP（原理 §3）
@@ -91,14 +98,15 @@ double now_ns() {
 
 void usage(const char* prog) {
     std::fprintf(stderr,
-        "usage: %s -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-h|-H|-T]\n"
+        "usage: %s -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-B|-h|-H|-T]\n"
         "  -b  buffer size in KB            (default 8192)\n"
         "  -s  stride between chain slots, must be a multiple of %zu (default 64)\n"
         "  -n  total dependent loads, >= %d (default 268435456)\n"
         "  -w  exact warmup loads          (default: 2 complete ring passes)\n"
         "  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)\n"
         "  -H  2MB hugepage strict (exit 2 if pool unavailable)\n"
-        "  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps\n",
+        "  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps\n"
+        "  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps\n",
         prog, sizeof(char*), kUnroll);
 }
 
@@ -200,10 +208,10 @@ int main(int argc, char** argv) {
     long long loads = 268435456; // 2^28；按计时器分辨率反推的最小安全量级（原理 §4）
     long long warmup = 0;
     bool warmup_set = false;
-    bool want_hp = false, strict_hp = false, want_thp = false;
+    bool want_hp = false, strict_hp = false, want_thp = false, want_base = false;
 
     int opt;
-    while ((opt = getopt(argc, argv, "b:s:n:w:hHT")) != -1) {
+    while ((opt = getopt(argc, argv, "b:s:n:w:hHTB")) != -1) {
         switch (opt) {
         case 'b': buffer_kb = std::strtoull(optarg, nullptr, 10); break;
         case 's': stride = std::strtoull(optarg, nullptr, 10); break;
@@ -212,6 +220,7 @@ int main(int argc, char** argv) {
         case 'h': want_hp = true; break;
         case 'H': want_hp = true; strict_hp = true; break;
         case 'T': want_thp = true; break;
+        case 'B': want_base = true; break;
         default: usage(argv[0]); return 1;
         }
     }
@@ -225,11 +234,18 @@ int main(int argc, char** argv) {
         die(argv[0], "loads must be >= the unroll factor (8)");
     if (warmup < 0)
         die(argv[0], "warmup must be >= 0");
-    if (want_hp && want_thp)
-        die(argv[0], "hugetlb (-h/-H) and THP (-T) are mutually exclusive");
+    if (static_cast<int>(want_hp) + static_cast<int>(want_thp)
+            + static_cast<int>(want_base) > 1)
+        die(argv[0], "cannot request both; page policies are mutually exclusive");
 #if CPU_UARCH_NO_THP
     if (want_thp) {
         std::fprintf(stderr, "unsupported: MADV_HUGEPAGE not available on this platform\n");
+        return 2;
+    }
+#endif
+#if CPU_UARCH_NO_BASE_PAGE_ADVICE
+    if (want_base) {
+        std::fprintf(stderr, "unsupported: MADV_NOHUGEPAGE not available on this platform\n");
         return 2;
     }
 #endif
@@ -307,6 +323,13 @@ int main(int argc, char** argv) {
         return 1;
     }
 #endif
+#if !CPU_UARCH_NO_BASE_PAGE_ADVICE
+    if (want_base && madvise(buf, normal_map_bytes, MADV_NOHUGEPAGE) != 0) {
+        std::perror("madvise(MADV_NOHUGEPAGE)");
+        munmap(mapping_base, mapping_bytes);
+        return 1;
+    }
+#endif
 
     // Fisher–Yates 洗牌：uniform_int_distribution 保证无偏，固定种子保证可复现（原理 §2）
     size_t* perm = static_cast<size_t*>(malloc(slots * sizeof(size_t)));
@@ -328,8 +351,9 @@ int main(int argc, char** argv) {
         *reinterpret_cast<char**>(buf + perm[i] * stride) = buf + perm[i + 1] * stride;
     *reinterpret_cast<char**>(buf + perm[slots - 1] * stride) = buf + perm[0] * stride;
 
-    const char* page_policy_requested = want_thp ? "thp-madvise"
-        : (want_hp ? (strict_hp ? "hugetlb-strict" : "hugetlb-fallback") : "default");
+    const char* page_policy_requested = want_base ? "base-madvise"
+        : (want_thp ? "thp-madvise"
+        : (want_hp ? (strict_hp ? "hugetlb-strict" : "hugetlb-fallback") : "default"));
     const char* page_policy_actual = "platform-default";
     std::string page_policy = "platform-default";
     size_t anon_huge_kb = 0;
@@ -356,7 +380,8 @@ int main(int argc, char** argv) {
             page_policy_actual = "mixed";
             page_kb = 0;
         }
-        const char* prefix = want_thp ? "thp" : (want_hp ? "fallback" : "default");
+        const char* prefix = want_base ? "base-madvise"
+            : (want_thp ? "thp" : (want_hp ? "fallback" : "default"));
         if (std::strcmp(page_policy_actual, "base") == 0)
             page_policy = std::string(prefix) + "-4k";
         else if (std::strcmp(page_policy_actual, "thp") == 0)

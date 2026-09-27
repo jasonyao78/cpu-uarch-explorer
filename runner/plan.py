@@ -181,9 +181,12 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
             hugepage = _binary_flag("hugepage", hp_rv)
             thp_rv = params.get("thp")
             thp = _binary_flag("thp", thp_rv)
-            if hugepage and thp:
+            base_pages_rv = params.get("base_pages")
+            base_pages = _binary_flag("base_pages", base_pages_rv)
+            if hugepage + thp + base_pages > 1:
                 raise RunnerError(
-                    "plan-error", "ptr_chase cannot request both hugepage and thp",
+                    "plan-error",
+                    "ptr_chase cannot request both; page policies are mutually exclusive",
                 )
 
             case_params = {
@@ -202,9 +205,14 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                 case_params["hugepage"] = ResolvedValue(hugepage, hp_rv.source)
             if thp_rv is not None:
                 case_params["thp"] = ResolvedValue(thp, thp_rv.source)
+            if base_pages_rv is not None:
+                case_params["base_pages"] = ResolvedValue(
+                    base_pages, base_pages_rv.source,
+                )
             case_id = (f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"
                        + ("-hp2m" if hugepage else "")
-                       + ("-thp" if thp else ""))
+                       + ("-thp" if thp else "")
+                       + ("-base" if base_pages else ""))
             cases.append(Case(id=case_id, probe=probe, control=control,
                               params=tuple(sorted(case_params.items())),
                               repetitions=repetitions))

@@ -51,6 +51,11 @@ class TestPtrChaseContract(unittest.TestCase):
         self.assertEqual(proc.returncode, 2)
         self.assertNotIn("latency_ns", proc.stdout)
 
+    def test_base_pages_are_explicitly_unsupported_on_macos(self):
+        proc = self._run(["-b", "64", "-s", "64", "-n", "8000", "-B"])
+        self.assertEqual(proc.returncode, 2)
+        self.assertNotIn("latency_ns", proc.stdout)
+
     def test_conflicting_page_requests_are_input_error(self):
         proc = self._run(["-b", "64", "-s", "64", "-n", "8000", "-T", "-h"])
         self.assertEqual(proc.returncode, 1)
@@ -80,6 +85,26 @@ class TestPtrChaseContract(unittest.TestCase):
                     "thp": invalid,
                 })
 
+    def test_adapter_builds_base_page_request_and_rejects_conflict(self):
+        argv = self.adapter.build_argv({
+            "buffer_kb": 64,
+            "stride": 64,
+            "loads": 8000,
+            "warmup": 1000,
+            "base_pages": 1,
+        })
+        self.assertIn("-B", argv)
+        for conflicting_name in ("thp", "hugepage"):
+            with self.subTest(conflicting_name=conflicting_name), self.assertRaises(ParseError):
+                self.adapter.build_argv({
+                    "buffer_kb": 64,
+                    "stride": 64,
+                    "loads": 8000,
+                    "warmup": 1000,
+                    "base_pages": 1,
+                    conflicting_name: 1,
+                })
+
     def test_parser_refuses_nan_inf_and_garbage(self):
         for bad in ("latency_ns=nan", "latency_ns=inf", "", "no fields here"):
             with self.assertRaises(ParseError, msg=f"{bad!r} must be refused"):
@@ -107,6 +132,15 @@ class TestPtrChaseContract(unittest.TestCase):
         self.assertEqual(metric["page_policy_actual"], "mixed")
         self.assertEqual(metric["anon_huge_kb"], 2048)
         self.assertEqual(metric["page_kb"], 0)
+
+        base = self.adapter.parse_output(
+            "latency_ns=1.0 page_policy=base-madvise-4k page_kb=4 "
+            "page_policy_requested=base-madvise page_policy_actual=base "
+            "anon_huge_kb=0",
+            "",
+        )[0]
+        self.assertEqual(base["page_policy_requested"], "base-madvise")
+        self.assertEqual(base["page_policy_actual"], "base")
 
     def test_parser_refuses_invalid_page_backing_fields(self):
         invalid = (

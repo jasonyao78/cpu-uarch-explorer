@@ -2,7 +2,7 @@
 """ptr_chase adapter：指针追逐内存延迟探针（probes/cache-mem/ptr_chase.cpp）。
 
 Probe ABI（与源码头部注释一致）：
-  argv:  -b buffer_kb -s stride_bytes -n loads -w warmup [-h|-H|-T]
+  argv:  -b buffer_kb -s stride_bytes -n loads -w warmup [-B|-h|-H|-T]
   stdout: buffer_kb=.. .. latency_ns=.. warmup_loads=..
           warmup_passes_effective=.. warmup_state=.. page_policy=.. page_kb=..
   退出码: 0 成功 / 1 输入或环境错误 / 2 能力不支持（hugepage 无平台能力或
@@ -38,7 +38,7 @@ class PtrChaseAdapter:
     def build_argv(self, params: dict[str, Any]) -> list[str]:
         """参数 dict → probe argv。缺参数/类型错误抛 ParseError（plan 期已校验，
         此处是最后一道防线）。hugepage 非 0 时加 -h（fallback 允许）；
-        thp 非 0 时加 -T；二者互斥。"""
+        thp 非 0 时加 -T；base_pages 非 0 时加 -B；三类页请求互斥。"""
         try:
             buffer_kb = int(params["buffer_kb"])
             stride = int(params["stride"])
@@ -48,14 +48,17 @@ class PtrChaseAdapter:
             raise ParseError(f"ptr_chase argv build failed: {e}")
         hugepage = _binary_flag(params, "hugepage")
         thp = _binary_flag(params, "thp")
-        if hugepage and thp:
-            raise ParseError("ptr_chase cannot request both hugepage and thp")
+        base_pages = _binary_flag(params, "base_pages")
+        if hugepage + thp + base_pages > 1:
+            raise ParseError("ptr_chase page policies are mutually exclusive")
         argv = ["-b", str(buffer_kb), "-s", str(stride),
                 "-n", str(loads), "-w", str(warmup)]
         if hugepage:
             argv.append("-h")
         if thp:
             argv.append("-T")
+        if base_pages:
+            argv.append("-B")
         return argv
 
     def parse_output(self, stdout: str, stderr: str) -> list[dict[str, Any]]:
@@ -108,7 +111,8 @@ class PtrChaseAdapter:
                 raise ParseError(f"incomplete page backing fields; missing {missing}")
             requested = fields["page_policy_requested"]
             if requested not in (
-                "default", "hugetlb-fallback", "hugetlb-strict", "thp-madvise",
+                "default", "base-madvise", "hugetlb-fallback", "hugetlb-strict",
+                "thp-madvise",
             ):
                 raise ParseError(f"invalid page_policy_requested: {requested!r}")
             actual = fields["page_policy_actual"]

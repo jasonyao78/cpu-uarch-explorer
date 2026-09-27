@@ -44,7 +44,7 @@
 | `warmup_loads` | non-negative integer | 实际执行的精确 warmup load 数；新协议由 `warmup_passes × slots` 派生，legacy 可为任意非负值 | 2026-09-27 |
 | `warmup_passes_effective` | non-negative number | `warmup_loads / slots`，审计 legacy 非整数遍历与完整环覆盖率 | 2026-09-27 |
 | `warmup_state` | `warm` or `cold-warm0` | 明确 `-w 0` 只是零预热，不冒充真正 cold | 2026-09-27 |
-| `page_policy_requested` | string | `default` / `hugetlb-fallback` / `hugetlb-strict` / `thp-madvise` 请求语义 | 2026-09-27 |
+| `page_policy_requested` | string | `default` / `base-madvise` / `hugetlb-fallback` / `hugetlb-strict` / `thp-madvise` 请求语义 | 2026-09-27（2026-09-28 增补 base） |
 | `page_policy_actual` | string | `platform-default` / `base` / `thp` / `mixed` / `hugetlb-2m` 实际 backing | 2026-09-27 |
 | `anon_huge_kb` | non-negative integer | Linux `/proc/self/smaps` 对目标 VMA 观测到的 `AnonHugePages` 总量 | 2026-09-27 |
 | `page_policy`, `page_kb` | string, non-negative integer | 兼容既有 reader 的摘要；新判断必须优先使用 requested/actual 字段 | 2026-09-27 |

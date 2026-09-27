@@ -225,6 +225,56 @@ class TestPlan(unittest.TestCase):
                 with self.assertRaisesRegex(RunnerError, "thp must be 0 or 1"):
                     build_plan(thp_spec, PLATFORM)
 
+    def test_base_page_request_is_recorded_and_conflicts_are_rejected(self):
+        base_spec = {
+            **PASS_SPEC,
+            "parameters": [
+                *PASS_SPEC["parameters"],
+                {"name": "base_pages", "type": "int", "default": 1},
+            ],
+            "execution": {
+                **PASS_SPEC["execution"],
+                "fixed_params": ["stride", "warmup_passes", "base_pages"],
+            },
+        }
+        plan = build_plan(base_spec, {**PLATFORM, "controls": []})
+        self.assertTrue(all(case.param_value("base_pages") == 1 for case in plan.cases))
+
+        for conflicting_name in ("thp", "hugepage"):
+            with self.subTest(conflicting_name=conflicting_name):
+                conflict = {
+                    **base_spec,
+                    "parameters": [
+                        *base_spec["parameters"],
+                        {"name": conflicting_name, "type": "int", "default": 1},
+                    ],
+                    "execution": {
+                        **base_spec["execution"],
+                        "fixed_params": [
+                            "stride", "warmup_passes", "base_pages", conflicting_name,
+                        ],
+                    },
+                }
+                with self.assertRaisesRegex(RunnerError, "page policies are mutually exclusive"):
+                    build_plan(conflict, PLATFORM)
+
+    def test_invalid_base_page_request_rejected(self):
+        for invalid in (2, 0.5, True, "01"):
+            with self.subTest(invalid=invalid):
+                base_spec = {
+                    **PASS_SPEC,
+                    "parameters": [
+                        *PASS_SPEC["parameters"],
+                        {"name": "base_pages", "type": "int", "default": invalid},
+                    ],
+                    "execution": {
+                        **PASS_SPEC["execution"],
+                        "fixed_params": ["stride", "warmup_passes", "base_pages"],
+                    },
+                }
+                with self.assertRaisesRegex(RunnerError, "base_pages must be 0 or 1"):
+                    build_plan(base_spec, PLATFORM)
+
 
 if __name__ == "__main__":
     unittest.main()
