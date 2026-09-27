@@ -20,6 +20,7 @@ import hashlib
 from pathlib import Path
 
 from .errors import RunnerError
+from .executor.adb import AdbExecutor
 from .executor.ssh import SshExecutor
 
 _DEFAULT_RETRIES = 1  # 任务书 §5.6：容忍一次重试，二次失败才记 failed
@@ -38,12 +39,24 @@ def _remote_sha256(executor, remote_path: str) -> str | None:
 
 
 def _default_push(platform: dict, local_path: Path, remote_path: str) -> None:
-    """scp 推送（BatchMode 硬失败语义同 SshExecutor）；推送前确保远端目录。"""
+    """按 transport 推送二进制：ssh → scp；adb → adb push。推送前确保远端目录。"""
     import subprocess
-    host = platform["target"].get("ssh_host")
+    target = platform["target"]
+    if target.get("transport") == "adb":
+        parent = str(remote_path).rsplit("/", 1)[0] or "/data/local/tmp"
+        res = AdbExecutor(workdir=target.get("adb_workdir", "/data/local/tmp")) \
+            .execute(["mkdir", "-p", parent])
+        if res.returncode != 0:
+            raise RunnerError("deploy-failed", f"remote mkdir -p {parent} failed: {res.stderr.strip()[:120]}")
+        res = subprocess.run(["adb", "push", str(local_path), remote_path],
+                             capture_output=True, text=True)
+        if res.returncode != 0:
+            raise RunnerError("deploy-failed", f"adb push failed: {res.stderr.strip()[:160]}")
+        return
+    host = target.get("ssh_host")
     if not host:
         raise RunnerError("deploy-failed", "deploy requires target.ssh_host (ssh config alias)")
-    executor = SshExecutor(host, platform["target"].get("ssh_remote_root", "~"))
+    executor = SshExecutor(host, target.get("ssh_remote_root", "~"))
     parent = str(remote_path).rsplit("/", 1)[0] or "~"
     res = executor.execute(["mkdir", "-p", parent])
     if res.returncode != 0:

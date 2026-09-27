@@ -17,6 +17,7 @@
 |---|---|---|---|
 | `ssh_host` | string | transport=ssh 时的 ssh config 别名（如 `xeon-8481c-01`）；真实地址禁止入库，映射在 `data/private/hosts.md` 与本机 `~/.ssh/config` | 2026-09-25 |
 | `ssh_remote_root` | string | 远端仓库根目录；SshExecutor 执行前 cd 的目标（默认 `~`） | 2026-09-25 |
+| `adb_workdir` | string | AdbExecutor 的设备侧工作目录（默认 `/data/local/tmp`）；cd 容错（目录未建时退回默认目录，采集脚本全绝对路径不受影响） | 2026-09-27 |
 | `environment.freq_snapshot` | object | 每 case 前后 `scaling_cur_freq` 瞬时值 `{before_hz, after_hz}`（measurement-discipline §5 落地：锁频前的频率证据；macOS 无此接口则省略，不编造） | 2026-09-25 |
 | `environment.aux_snapshots` | object | 平台配置 `aux_snapshots` 声明的只读采集命令快照 `{name: {before, after}}`（GB10 §5.4：GPU 利用率等；命令失败则该 name 省略） | 2026-09-25 |
 | `probes.<name>` 的 dict 形态 | `{local, remote}` | deploy 模式（交叉编译产物推送目标机，Android 预演课题）——非 GB10 自驱模式 | 2026-09-25 |

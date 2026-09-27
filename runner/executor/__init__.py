@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 from ..errors import RunnerError
+from .adb import AdbExecutor
 from .local import LocalExecutor
 from .ssh import SshExecutor
 
@@ -16,7 +17,8 @@ from .ssh import SshExecutor
 def make_executor(platform: dict):
     """按 platform.target.transport 构造执行器：local → LocalExecutor；
     ssh → SshExecutor（host/remote_root 取 target 扩展字段，登记于
-    runner/schema/README.md）。"""
+    runner/schema/README.md）；adb → AdbExecutor（Android；设备序列号走
+    ANDROID_SERIAL 环境变量，不入库）。"""
     transport = platform.get("target", {}).get("transport", "local")
     if transport == "local":
         return LocalExecutor()
@@ -29,7 +31,9 @@ def make_executor(platform: dict):
                 "transport=ssh requires target.ssh_host（ssh config 别名；"
                 "真实地址见 data/private/hosts.md，禁止入库）")
         return SshExecutor(host, target.get("ssh_remote_root", "~"))
+    if transport == "adb":
+        return AdbExecutor(workdir=platform["target"].get("adb_workdir", "/data/local/tmp"))
     raise RunnerError("config-invalid", f"unsupported transport: {transport!r}")
 
 
-__all__ = ["LocalExecutor", "SshExecutor", "make_executor"]
+__all__ = ["LocalExecutor", "SshExecutor", "AdbExecutor", "make_executor"]

@@ -39,8 +39,10 @@ def collect_cache_topology(executor) -> dict[str, Any]:
             continue  # 未展开的通配符字面行（非 Linux sysfs）——跳过，不算有效层级
         levels.append({
             "level": int(parts[0]) if parts[0].strip().isdigit() else parts[0],
-            "type": parts[1], "size": parts[2],
-            "ways": parts[3], "shared_cpu_list": parts[4],
+            "type": parts[1] or None,
+            "size": parts[2] or None,      # 部分内核（如高通）不提供 size 属性——None，不猜
+            "ways": parts[3] or None,
+            "shared_cpu_list": parts[4] or None,
         })
     if not levels:
         return {"supported": False, "detail": "no cache index nodes on target"}
