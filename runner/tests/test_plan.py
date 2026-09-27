@@ -178,8 +178,12 @@ class TestPlan(unittest.TestCase):
         for path in paths:
             with self.subTest(path=path.name):
                 spec = json.loads(path.read_text(encoding="utf-8"))
+                protocol_12_prefixes = (
+                    "ptr-chase-sm8650-x4-l2-",
+                    "ptr-chase-sm8650-x4-pmu-ctrl-",
+                )
                 expected_protocol = (
-                    "1.2" if path.name.startswith("ptr-chase-sm8650-x4-l2-") else "1.1"
+                    "1.2" if path.name.startswith(protocol_12_prefixes) else "1.1"
                 )
                 self.assertEqual(spec["protocol_version"], expected_protocol)
                 parameter_names = {param["name"] for param in spec["parameters"]}
@@ -206,8 +210,15 @@ class TestPlan(unittest.TestCase):
                         ],
                     }
                 plan = build_plan(spec, case_platform)
+                expected_case_counts = {
+                    "ptr-chase-sm8650-x4-pmu-ctrl-cache.json": 5,
+                    "ptr-chase-sm8650-x4-pmu-ctrl-tlb.json": 2,
+                }
                 if path.name.startswith("ptr-chase-sm8650-x4-l2-"):
                     self.assertEqual(len(plan.cases), 14)
+                    self.assertTrue(all(case.repetitions == 10 for case in plan.cases))
+                elif path.name in expected_case_counts:
+                    self.assertEqual(len(plan.cases), expected_case_counts[path.name])
                     self.assertTrue(all(case.repetitions == 10 for case in plan.cases))
                 for case in plan.cases:
                     params = dict(case.params)
