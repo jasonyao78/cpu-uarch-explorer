@@ -52,3 +52,15 @@
 - **频率管理设计入册（2026-09-25）**：按能力分级——能锁频的平台（Linux cpufreq）走环境事务锁+恢复（OI-8 升级为主线任务，第一受控项 = Xeon governor=performance；host 级突变禁止走 command_prefix）；不能锁的（macOS 无锁频能力）走测量期 powermetrics 并发采样入档；先行低成本项"频率只读快照"（`environment.freq_snapshot`）并入 Xeon 接入任务书范围。
 - **第三份任务书（2026-09-26）**：`docs/tasks/2026-09-26-env-transaction-and-core-topology.md`——环境事务接线（含 `--allow-mutation` 授权门槛与中断恢复实证）+ Xeon governor=performance 锁频重跑 + capability 采集器核型维度（Linux sysfs cpu_capacity/MIDR/cluster + macOS sysctl perflevels）+ M4 Pro 机器生成清单补登记；明确排除设计文档 §7.2 其余改进项（任务边界讨论见当日记录）。；同日新增 **OI-10**（§7.2 改进项五项登记进 open-items 跟踪面，含归属主题与触发条件）+ AGENTS.md 铁律第 0 条（'现在不做'的决定必须有 OI 落点，排除不等于丢弃）
 - **平台接入任务书（2026-09-25）**：`docs/tasks/` 新增两份 agent 可执行任务说明书——Xeon 平台接入（SSH executor + taskset 控制 + 频率快照）与 GB10 平台接入。GB10 网络约束核实（2026-09-25）：与 Mac 无 SSH 通道、可从 GitHub 只读 clone 不能 push → **自驱模式**：代码经 GitHub 下行、GB10 原生编译本地执行（transport=local）、数据物理介质回传、Mac 侧按 quarantine 流程收口入库；交叉编译管线降级为 Android 预演课题，不再阻塞 GB10 接入。
+- **SM8650 cache 证据重审（2026-09-27，取代当日 v2–v10 的当前结论，
+  不改写历史）**：外部 TRM/设备树/cache-properties 证据确立平台基线为
+  X4 L2 2 MiB、A720 L2 512 KiB/核、A520 L2 512 KiB/双核、八核共享
+  L3 12 MiB，另有独立 LLCC。既有 run 固定 `warmup=200000`，64 B stride
+  时覆盖量约 12.2 MiB，与原 12 MiB 结论发生结构性混杂；4 KiB 页还未控制
+  PFN/color 与 TLB/page walk。故 X4 L2=1 MiB、L3/SLC 合并级、静态保护
+  份额、相机抢占 LLCC 和 LLCC PMU 无事件全部撤回为 OPEN/REJECTED；历史
+  records 保留但退出容量校准链。此前扫描 `config=0x00..0x27` 未覆盖下游
+  驱动的 `0x1000` 事件。下一顺序固定为 warmup/THP 实际 backing → 受控
+  安静态 → X4 私有 L2 校准 → core/LLCC PMU → L3/LLCC 与干扰实验。平台
+  配置同时撤销默认 `svc.thermal=stopped`：停 `mi_thermald` 只能是短时、
+  显式、有温度中止线且可恢复的独立条件，不能冒充通用 baseline。

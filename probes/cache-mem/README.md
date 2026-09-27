@@ -6,16 +6,21 @@
 
 方法学：在按 stride 切分的缓冲区内构建**随机单环链**（Fisher–Yates 洗牌），沿严格依赖的指针链追逐 N 次，单调钟计时求平均延迟。随机顺序使硬件预取器难以跟踪；每迭代对**同一条链**展开 8 次摊薄循环控制开销——展开不引入额外访存级并行（MLP），这是测量正确性的关键（2026-09-23 冒烟测试曾用 4 条独立链，L1 测量值被 MLP 摊薄近 4 倍而失真，已修正）。
 
-输出：`key=value` 机器可解析行（buffer_kb / stride / loads / elapsed_ns / latency_ns），由 Runner 层包装为 `record.schema.json` 记录。
+输出：`key=value` 机器可解析行（buffer_kb / stride / loads / elapsed_ns /
+latency_ns / warmup / 页策略），由 Runner 层包装为 `record.schema.json` 记录。
 
 已知局限（v1）：
 
 - 循环控制开销残余 <1 cycle/load，L1 级测量略偏悲观方向，解读 L1 数值时留意（v0.3 §9 校准需交叉方法验证）。
-- 未做页着色/大页控制；TLB 效应与 cache 效应在小步长区间耦合，解读时注意。
+- 随机置换只随机化逻辑访问顺序，未控制 4 KiB 物理页的 PFN/color；TLB、
+  page walk、PIPT cache set/bank 冲突仍可能与 cache 效应耦合。
 
 ## 后续迭代方向（backlog，方法学迁移 OI-9）
 
-- ~~hugepage 开关~~ ✅ 2026-09-25 已实现：`-h`（缺页池回退 4K 并显式标注）/`-H`（严格，退出 2）；输出含 `page_policy`/`page_kb`，随 metric 入档。
+- ~~hugetlb 开关~~ ✅ 2026-09-25 已实现：`-h`（缺页池回退并显式标注）/
+  `-H`（严格，退出 2）。待补 THP `MADV_HUGEPAGE` 请求与
+  `/proc/self/smaps` 实际 backing（base/THP/mixed）双重记录；不能由“无
+  hugetlb pool”推出“无 hugepage”。
 - `CLOCK_MONOTONIC_RAW` 替代 `CLOCK_MONOTONIC`（减小时钟调整抖动）。
 - cold 模式参数化（驱逐后冷测 + 输出温度标签）——遵守 `docs/methodology/measurement-discipline.md`。
 - `evict_slc` 类驱逐工具的移植评估（独立小进程，BSD-3 同源，引用需登记来源）。
@@ -25,6 +30,12 @@
 
 ### runner 侧配套 backlog（2026-09-27 LLCC 方法学讨论）
 
-- P0 零代码项：红米 `-h` hugepage 口径实测（验证 ≥16M 尾部 TLB 混杂分量）；相机预览/亮屏差分（工作负载替代寄存器差分，验证 6MB CPU/GPU 共享与 CAM/ISLAND slice 竞争）。
-- P1：armv8 PMU 事件采样进 runner（`l2d_cache_refill` 等，与 chase 同步采；LLCC/DDR 计数器仍 blocked——llcc-pmu 零事件定案）。
+- **SUPERSEDED（2026-09-27 证据重审）**：旧 P0 的单次相机/亮屏差分已
+  因互相矛盾而否决，不能验证 6 MiB 共享或 camera slice 竞争；重测必须
+  配对/随机交错并保存 active camera client 前后状态。
+- P1：先修完整 ring pass warmup 与 THP 实际 backing，再做 X4 2 MiB L2
+  校准；私有 L2 不能识别时停止外层 cache 解读。
+- P1：armv8 core PMU 事件（L2/L3 refill、DTLB walk）与 chase 同步采；
+  LLCC PMU 先走用户态 `perf_event_open(type=9, config=0x1000)`。此前
+  `0x00..0x27` 的 `ENOENT` 未覆盖该事件，不能定案为“零事件”。
 - P2：cross-core 干扰编排进 experiment spec（probe 保持单一职责，并发在 runner 层）。

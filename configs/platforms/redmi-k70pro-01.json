@@ -20,9 +20,6 @@
   "defaults": {
     "repetitions": 5
   },
-  "host_requirements": {
-    "svc.thermal": "stopped"
-  },
   "aux_snapshots": [
     {
       "name": "thermal_status",
@@ -35,20 +32,32 @@
     { "policy": 5, "cpus": [5, 6], "core_type": "a720", "cpuinfo_max_khz": 2956800, "capacity": 867 },
     { "policy": 7, "cpus": [7], "core_type": "x4", "cpuinfo_max_khz": 3302400, "capacity": 1024 }
   ],
-  "freq_domains_note": "频率域实测 2026-09-27（4 个 cpufreq policy）。方法论裁定：平台画像双维登记——核型（midr）用于微架构分类，频率域用于实验操作（锁频/频率快照/计数按 policy 生效）；实验控制与结论归因以频率域为准。scaling_max_freq 被 HAL 限幅（policy7: cpuinfo 3302400 → scaling_max 2745600）",
+  "freq_domains_note": "频率域实测 2026-09-27（4 个 cpufreq policy）。核型用于微架构分类，频率域用于实验操作。scaling_cur_freq/scaling_max_freq 是 cpufreq 报告值或请求限制，不作为测量区间实际硬件时钟的独立证明；cycles 换算须标 DERIVED。",
+  "cache_hierarchy_baseline": {
+    "status": "PLATFORM_BASELINE",
+    "source": "Arm Cortex-X4 TRM + Linux SM8650 cache properties/device tree",
+    "line_bytes": 64,
+    "x4_l2_kib_per_core": 2048,
+    "a720_l2_kib_per_core": 512,
+    "a520_l2_kib_per_pair": 512,
+    "shared_cpu_l3_kib": 12288,
+    "llcc": "separate-system-cache-present",
+    "notes": "名义层级与容量来自公开硬件描述，不代表本仓已测得的运行时有效容量。"
+  },
   "controls": [
     {
       "id": "x4-prime",
       "control": { "mechanism": "taskset", "value": "7" },
       "command_prefix": ["taskset", "80"],
-      "notes": "Cortex-X4 prime（capacity=1024，max 3302.4MHz，cluster 7）。Android toybox taskset 为十六进制掩码位置参数（taskset 80 = CPU7），与 util-linux 的 -c 语法不同；历史 demo 的 'taskset 80' 即此语法"
+      "notes": "Cortex-X4 prime（cpu7）。Android toybox taskset 使用十六进制掩码位置参数，taskset 80 = CPU7。"
     },
     {
       "id": "a520-little",
       "control": { "mechanism": "taskset", "value": "0" },
       "command_prefix": ["taskset", "1"],
-      "notes": "Cortex-A520 little（capacity=379，max 2265.6MHz，cluster 0-1，与 cpu1 共享 L2）；toybox 掩码 1 = CPU0"
+      "notes": "Cortex-A520 little（cpu0；与 cpu1 共享 L2）；toybox 掩码 1 = CPU0。"
     }
   ],
-  "capabilities_note": "拓扑实测 2026-09-27（MEASURED）：1×X4(cpu7, midr 0x410fd821) + 5×A720(cpu2-6, 0x410fd811) + 2×A520(cpu0-1, 0x410fd801)。按核型是 1+5+2，按频率域是 1+3+2+2（4 个 cpufreq policy 实测：policy0=cpu0-1 A520@2265600 / policy2=cpu2-4 A720@3148800 / policy5=cpu5-6 A720@2956800 / policy7=X4@3302400；capacity 379/923/867/1024 一一对应）；注意 scaling_max_freq 被 HAL 限幅（policy7 cpuinfo_max=3302400 但 scaling_max=2745600，锁频 sweep 实钉 2745600）；cache size 属性高通内核不提供（None 不猜）；governor=walt（root 后可切 performance，环境事务 su -c 分支已落地：controller 按执行器分流，Android 走 su -c 写全部 CPU governor）；PMU：paranoid=-1 + armv8_pmuv3(type=8) + cs_etm + llcc-pmu(type=9)；root=KernelSU LKM ✅ 2026-09-27。锁频 sweep 20260927T075007Z（performance 事务，freq 钉死 X4=2745600kHz/A520=2265600kHz，root freq_snapshot 链生效）：X4 台阶 64K→2.05ns(L1d=64K≈4cyc)、512K→1M 跳 5.2ns(L2=1M≈6-7cyc)、1M-16M 平坦 5.2-6.4ns(SLC 单级≈14-18cyc，非两级合并——SM8650 无 per-cluster L3，末级=LLCC；X4 16M 无罚系 bonus-way 溢出)、32M=14.7ns、64M+=61-109ns(DRAM)；A520：64K→5.1ns(L1d=64K)、512K→1M 跳 17.6ns(L2 对共享 512K)、8M→16M 跳 165ns(DRAM 路径 374-593cyc，显著慢于 X4 167-300cyc)。SLC slice 架构（源码 llcc-qcom.c sm8650_data 佐证 2026-09-27）：CPUSS slice max_cap=5MB 软上限 + bonus_ways=0xffffff 可溢出（有效容量随其他 slice 空闲度浮动，解释 X4 16M 仍命中）；ISLAND1 5888KB/23-way 保留为 camera carve-out；GPU 3096KB/DISP 6144KB/CMPT 4096KB 等常驻 slice 持续占用 → CPU 实际可溢出空间<表观；max_cap 为逻辑软上限，物理容量=banks×ways×line，不可从表求和。与公开资料'L3≈12MB'的相容性：sweep 档位为倍频程（8/16/32M），12M 膝点落在采样间隙，且 bonus 溢出把膝点抹成浮动斜坡——X4 16M=6.4ns 系溢出命中（当时有效≥16M），A520 8M→16M 跳变（20→165ns）恰与 ~12M 有效边界一致；钉死需加密档位（8-24M 每 2M）+ 灭屏降其他 slice 占用复测。SLC 膝点加密复测 20260927T082635Z（ptr-chase-slc-dense，4-32M 十档，灭屏 stayon + performance 锁频，20/20 ok）：**6MB 假设证伪**——X4 在 8/10/12M 全速命中（5.55/5.65/5.83ns）；**12MB 假设与 X4 全速平台边界吻合**（14M 起 6.0→16M 6.9 渐进，20M=10.3/24M=11.7/32M=16.4 系 bonus 池稀释区，非硬膝点，物理边界>32M）；**A520 结构性不对称实锤**（灭屏下仍存）：全速仅至 8M（19.6ns），10M 混合（26.1），12M 起 miss 主导（72→255ns）——A520 有效容量 ~8-10M，较 X4 少 ~4M，按核型的分配权重/QoS 差异。方法论固定：SLC 相关实验口径=灭屏（svc power stayon usb 保唤醒）+ 锁频 + 加密档位；32M 两次复测 14.7/16.4ns（背景/温度散布 ~13%）。llcc-pmu 负结果：PMU 已注册(type=9)但零事件——DT 节点无事件属性，perf_event_open 全 config 0x00-0x27 ENOENT 实测（cpu0/4/7 同）；llcc-qcom.c 为 slice 配置驱动非 perfmon 驱动，PMU 事件表仍缺源码。热管理层实测 2026-09-27：mi_thermald（小米温控守护）在跑且动态管理 scaling_max（stop 后重启，policy7 scaling_max 2745600→3110400，实锤其为活动控制者）；但双层频率闸门实证——①停 mi_thermald + 手写 scaling_max=3302400 + performance，负载下 cur_freq 仍封顶 2745600 → 3302400 为 boost 频率，需 vendor.miperf/perf2-hal 的 perf lock 才能解锁；②锁频 sweep 期间 Thermal Status=0（未触发限频，CPU Tj 78-84°C、电池 32°C）、freq 快照全程恒定 → 已有数据未被热节流过，但 mi_thermald 可随时下调 scaling_max，长跑 benchmark 必须采 thermal 时间序列。后续：环境事务扩展 thermal 抑制 controller（停/启 mi_thermald + scaling_max 固定 + 前后 thermal 快照），仅用于分钟级微基准（Tj<95°C 安全窗口）。thermal 抑制已落地（svc.thermal controller，host_requirements 自动附带，E2E run 20260927T083827Z 双 mutation 恢复+每 case thermal_status 快照）。共享性干扰实验 2026-09-27（重流 32M 并发，performance 未锁事务外快速口径）：cpu2-4 重流下 X4 8M/12M 不变（5.52/5.97ns vs 单独 5.55/5.83-5.90）、16M 退化至 8.66ns；X4 重流下 A520 ≤6M 不变（18.1-18.2）、8M 微升（20.3）→ 各核型有静态保护份额（X4≈12M / A520≈8M，与核型权重一致），溢出区为竞争敏感共享 bonus 池。方法学缺口登记：①延迟法不可分辨同物理阵列的 L3/SLC（SCID 同阵列、延迟相近即合并）——官方 12MB L3 + 6MB SLC 若为逻辑分区口径，与实测'12M 保护份额+溢出'不矛盾，但物理分层不可由单核延迟法证实；②GPU 共享性未测（需 GPU 负载源，如相机预览场景）；③≥16M 尾部稀释混有 4K 页 TLB 效应（16M=4096 页超 L2 TLB 覆盖）"
+  "environment_control_note": "默认平台配置不停止 thermal/perf 服务。mi_thermald 抑制只允许作为短时、显式、可恢复且带温度中止线的独立实验条件；受控安静态 v2 落地前不采集新容量数据。",
+  "capabilities_note": "MEASURED 2026-09-27：SM8650 拓扑为 1×X4(cpu7)+5×A720(cpu2-6)+2×A520(cpu0-1)，4 个 cpufreq policy；KernelSU root、armv8_pmuv3(type=8)、cs_etm、llcc-pmu(type=9) 已确认注册。SOURCE BASELINE：X4 L2 2MiB、A720 L2 512KiB/核、A520 L2 512KiB/双核、共享 CPU L3 12MiB，另有独立 LLCC。历史 runs 20260927T060512Z/075007Z/082635Z/083827Z 使用固定 warmup=200000（64B stride 覆盖约 12.2MiB）且实际页 backing 未控制，只保留为原始观察，不用于容量校准。X4 L2=1MiB、L3/SLC 合并级、X4/A520 保护份额、相机抢占 LLCC 均未成立为事实。LLCC PMU type=9 已注册；旧 config=0x00..0x27 扫描未覆盖下游驱动的 config=0x1000，因此可用性仍 OPEN。详见 docs/reviews/2026-09-27-sm8650-cache-evidence-reassessment.md。"
 }
