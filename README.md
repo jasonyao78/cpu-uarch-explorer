@@ -4,12 +4,15 @@
 
 当前状态：需求基线 **v0.3**（tag `req-v0.3`）。M4 Pro 最小闭环、Xeon
 平台接入和 gem5 D9300 增量树重建已完成；SM8650 的旧 cache 容量结论经
-证据重审后重新开放。2026-09-28 已完成 warmup/页 backing、Android 受控环境
-事务和 LLCC PMU `type=9/config=0x1000` 响应性 smoke。当前门禁是把 core/LLCC
-PMU 与同一次 `ptr_chase` case 同步记录，再做 X4 私有 L2 边界校准
-（512 KiB–3 MiB）；通过前
-不解释外层 L3/LLCC 容量（见 OI-11）。gem5 微架构建模继续后置到探针校准
-闭环和 D9300 实机就位之后（见 OI-1/OI-6）。
+证据重审后重新开放。2026-09-28 SM8650 测量链闭环到新口径：core PMU 与
+`ptr_chase` 同窗采样、事件语义正向控制（L1 系与 `dtlb_walk`
+SEMANTICS-VERIFIED；`l2d/l3d_refill` 起始沿有效、幅度禁换算）与 X4 私有
+L2 细扫完成——512→640 KiB 跳变裁定为 L1 置换共振假象，`l2d_cache_refill`
+有效起始沿区间 **[768, 1216) KiB**，名义 2 MiB 私有 L2 被实测否决、
+1 MiB 为最一致解释（残差与置信度见
+`docs/reviews/2026-09-28-sm8650-x4-l2-fine-sweep.md`）。下一阶段为最小
+root LLCC sidecar + 外层 L3/LLCC 实验（进入前待用户确认，见 OI-11）。
+gem5 微架构建模继续后置到探针校准闭环和 D9300 实机就位之后（见 OI-1/OI-6）。
 
 ## 平台矩阵
 
