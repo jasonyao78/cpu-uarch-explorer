@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-sm8650-x4-l2-thp",
+  "title": "SM8650 Cortex-X4 私有 L2 边界校准（THP 请求/实际 backing 分组）",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    { "name": "buffer", "type": "size", "range": "512KiB..3MiB，X4 L2 候选边界细扫" },
+    { "name": "stride", "type": "size", "default": "64B" },
+    { "name": "warmup_passes", "type": "int", "default": 2 },
+    { "name": "loads_per_slot", "type": "int", "default": 8 },
+    { "name": "min_loads", "type": "int", "default": 16777216 },
+    { "name": "repetitions", "type": "int", "default": 10 },
+    { "name": "thp", "type": "int", "default": 1 },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        { "name": "cycles", "type": 8, "config": "0x11" },
+        { "name": "l2d_cache_refill", "type": 8, "config": "0x17" },
+        { "name": "l3d_cache_refill", "type": 8, "config": "0x2a" },
+        { "name": "dtlb_walk", "type": 8, "config": "0x34" }
+      ]
+    }
+  ],
+  "preconditions": [
+    "redmi-k70pro-01 controlled-baseline profile 前后门禁通过",
+    "CPU7 Cortex-X4；四个 core PMU event 同窗且 time_running > 0",
+    "每个 repetition 为新进程/新匿名映射；按 smaps actual backing 分组"
+  ],
+  "metrics": [
+    { "name": "latency_ns", "unit": "ns", "statistic": "median" },
+    { "name": "pmu.cycles.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l2d_cache_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l3d_cache_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.dtlb_walk.count", "unit": "events", "statistic": "median" }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "controls": ["x4-prime"],
+    "params": { "repetitions": 10 },
+    "sweep": {
+      "buffer": [
+        "512KiB", "640KiB", "768KiB", "896KiB", "1MiB", "1152KiB",
+        "1280KiB", "1536KiB", "1792KiB", "2MiB", "2304KiB", "2560KiB",
+        "2816KiB", "3MiB"
+      ]
+    },
+    "fixed_params": [
+      "stride", "warmup_passes", "loads_per_slot", "min_loads", "thp",
+      "pmu_events"
+    ]
+  },
+  "notes": "THP 只是请求；base/mixed/thp 由每个 repetition 的 smaps 证据裁定，禁止跨 actual backing 合并。"
+}

@@ -11,6 +11,13 @@
 
 原则：信封强制（v2 的 required 列表）；`schema_version` 必填；`additionalProperties=true`（新增字段不破坏旧读者，**扩展字段必须登记到本 README**）；证据来源与访问分类是两个正交轴。
 
+### 已登记的 ExperimentSpec 扩展字段
+
+| 字段 | 类型 | 用途 | 登记日期 |
+|---|---|---|---|
+| `execution.controls` | non-empty unique string array | 按 id 选择 platform `controls` 子集；保持控制定义归平台所有，实验只声明需要哪些控制，未知 id 在 plan 期失败 | 2026-09-28 |
+| `execution.params.repetitions` | positive integer | 实验级显式重复数，优先于平台默认；用于 ≥10 次等方法学门禁，计划预览必须显示实际值 | 2026-09-28 |
+
 ### 已登记的 target 扩展字段
 
 | 字段 | 类型 | 用途 | 登记日期 |

@@ -61,6 +61,25 @@ class TestPlan(unittest.TestCase):
         self.assertEqual(len(plan.cases), 4)  # 2 controls × 2 buffers
         self.assertEqual(len({c.id for c in plan.cases}), 4)  # 确定性唯一 id
 
+    def test_experiment_can_select_named_platform_controls(self):
+        selected = {
+            **SPEC,
+            "execution": {**SPEC["execution"], "controls": ["c1"]},
+        }
+        plan = build_plan(selected, PLATFORM)
+        self.assertEqual(len(plan.cases), 2)
+        self.assertEqual({case.control.id for case in plan.cases}, {"c1"})
+
+    def test_unknown_or_empty_control_selection_fails_at_plan_time(self):
+        for selection in ([], ["missing"], ["c0", "c0"], "c0"):
+            with self.subTest(selection=selection):
+                selected = {
+                    **SPEC,
+                    "execution": {**SPEC["execution"], "controls": selection},
+                }
+                with self.assertRaisesRegex(RunnerError, "execution.controls"):
+                    build_plan(selected, PLATFORM)
+
     def test_repetitions_actually_consumed(self):
         # GB10 教训：samples=7 声明了却从不执行。这里 repetitions 必须落到每个 case。
         plan = build_plan(SPEC, PLATFORM)
@@ -159,7 +178,10 @@ class TestPlan(unittest.TestCase):
         for path in paths:
             with self.subTest(path=path.name):
                 spec = json.loads(path.read_text(encoding="utf-8"))
-                self.assertEqual(spec["protocol_version"], "1.1")
+                expected_protocol = (
+                    "1.2" if path.name.startswith("ptr-chase-sm8650-x4-l2-") else "1.1"
+                )
+                self.assertEqual(spec["protocol_version"], expected_protocol)
                 parameter_names = {param["name"] for param in spec["parameters"]}
                 self.assertIn("warmup_passes", parameter_names)
                 self.assertNotIn("warmup", parameter_names)
@@ -169,7 +191,24 @@ class TestPlan(unittest.TestCase):
                     self.assertIn("thp", parameter_names)
                     self.assertNotIn("hugepage", parameter_names)
 
-                plan = build_plan(spec, platform)
+                case_platform = platform
+                selected_controls = spec["execution"].get("controls")
+                if selected_controls:
+                    case_platform = {
+                        **platform,
+                        "controls": [
+                            {
+                                "id": control_id,
+                                "control": {"mechanism": "taskset", "value": "7"},
+                                "command_prefix": ["taskset", "80"],
+                            }
+                            for control_id in selected_controls
+                        ],
+                    }
+                plan = build_plan(spec, case_platform)
+                if path.name.startswith("ptr-chase-sm8650-x4-l2-"):
+                    self.assertEqual(len(plan.cases), 14)
+                    self.assertTrue(all(case.repetitions == 10 for case in plan.cases))
                 for case in plan.cases:
                     params = dict(case.params)
                     slots = case.param_value("buffer_kb") * 1024 // case.param_value("stride")

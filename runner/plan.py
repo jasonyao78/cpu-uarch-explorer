@@ -52,9 +52,10 @@ class Plan:
     target: dict[str, Any] = field(default_factory=dict)
 
 
-def _parse_controls(platform: dict) -> list[Control]:
+def _parse_controls(platform: dict, requested_ids: Any = None) -> list[Control]:
     """平台配置的 controls 列表 → Control 对象；未配置任何控制手段时返回
-    显式的 none 控制——"没有控制"本身也是必须入档的测量条件。"""
+    显式的 none 控制——"没有控制"本身也是必须入档的测量条件。ExperimentSpec
+    可用 execution.controls 选择已命名控制；未知、重复或空选择在 plan 期拒绝。"""
     controls = []
     for c in platform.get("controls", []) or []:
         controls.append(Control(
@@ -65,7 +66,23 @@ def _parse_controls(platform: dict) -> list[Control]:
         ))
     if not controls:  # 无控制手段 = 显式的 none，不是省略
         controls.append(Control(id="uncontrolled", mechanism="none", value=""))
-    return controls
+    by_id = {control.id: control for control in controls}
+    if len(by_id) != len(controls):
+        raise RunnerError("plan-error", "platform controls contain duplicate ids")
+    if requested_ids is None:
+        return controls
+    if (not isinstance(requested_ids, list) or not requested_ids
+            or any(not isinstance(item, str) or not item for item in requested_ids)
+            or len(set(requested_ids)) != len(requested_ids)):
+        raise RunnerError(
+            "plan-error", "execution.controls must be a non-empty list of unique ids",
+        )
+    unknown = [control_id for control_id in requested_ids if control_id not in by_id]
+    if unknown:
+        raise RunnerError(
+            "plan-error", f"execution.controls contains unknown ids: {unknown!r}",
+        )
+    return [by_id[control_id] for control_id in requested_ids]
 
 
 def _binary_flag(name: str, rv: ResolvedValue | None) -> int:
@@ -153,7 +170,7 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
         raise RunnerError("plan-error", "execution.sweep is empty")
 
     cases: list[Case] = []
-    for control in _parse_controls(platform):
+    for control in _parse_controls(platform, exe.get("controls")):
         for combo in itertools.product(*(sweep[n] for n in sweep_names)):
             sweep_values = dict(zip(sweep_names, combo))
             params: dict[str, ResolvedValue] = {}

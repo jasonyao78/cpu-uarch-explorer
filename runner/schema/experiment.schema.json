@@ -4,7 +4,7 @@
   "title": "experiment-spec",
   "description": "实验语义定义（ExperimentSpec，ADR-0006）：测什么、参数、前置条件、指标定义。实现层：portable harness + 可选 ISA kernels；运行记录须带 protocol_version 与 implementation_id。",
   "type": "object",
-  "required": ["schema_version", "id", "protocol_version", "harness", "metrics"],
+  "required": ["schema_version", "id", "protocol_version", "harness", "metrics", "execution"],
   "properties": {
     "schema_version": { "const": "1.0" },
     "id": { "type": "string" },
@@ -38,6 +38,24 @@
         },
         "additionalProperties": true
       }
+    },
+    "execution": {
+      "type": "object",
+      "required": ["probe", "sweep"],
+      "properties": {
+        "probe": { "type": "string" },
+        "controls": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "可选：按 id 选择 platform.controls 子集；未知 id 在 plan 期拒绝"
+        },
+        "sweep": { "type": "object", "minProperties": 1 },
+        "fixed_params": { "type": "array", "items": { "type": "string" } },
+        "params": { "type": "object" }
+      },
+      "additionalProperties": true
     },
     "notes": { "type": "string" }
   },

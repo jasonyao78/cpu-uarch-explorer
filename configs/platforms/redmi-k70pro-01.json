@@ -13,7 +13,7 @@
   },
   "probes": {
     "ptr_chase": {
-      "local": "build/linux-aarch64/release/probes/cache-mem/ptr_chase",
+      "local": "build/linux-aarch64-cross/release/probes/cache-mem/ptr_chase",
       "remote": "/data/local/tmp/cpu-uarch/ptr_chase"
     }
   },
@@ -96,5 +96,5 @@
     }
   ],
   "environment_control_note": "默认平台配置不停止 thermal/perf 服务。controlled-baseline 必须由 --environment-profile 显式选择，只事务化切换 governor；screen/DeviceIdle/airplane/camera/thermal/cpufreq limits 均只观测并门禁。mi_thermald 抑制只允许作为短时、显式、可恢复且带温度中止线的独立实验条件。",
-  "capabilities_note": "MEASURED 2026-09-27：SM8650 拓扑为 1×X4(cpu7)+5×A720(cpu2-6)+2×A520(cpu0-1)，4 个 cpufreq policy；KernelSU root、armv8_pmuv3(type=8)、cs_etm、llcc-pmu(type=9) 已确认注册。SOURCE BASELINE：X4 L2 2MiB、A720 L2 512KiB/核、A520 L2 512KiB/双核、共享 CPU L3 12MiB，另有独立 LLCC。历史 runs 20260927T060512Z/075007Z/082635Z/083827Z 使用固定 warmup=200000（64B stride 覆盖约 12.2MiB）且实际页 backing 未控制，只保留为原始观察，不用于容量校准。X4 L2=1MiB、L3/SLC 合并级、X4/A520 保护份额、相机抢占 LLCC 均未成立为事实。LLCC PMU type=9 已注册；旧 config=0x00..0x27 扫描未覆盖下游驱动的 config=0x1000，因此可用性仍 OPEN。详见 docs/reviews/2026-09-27-sm8650-cache-evidence-reassessment.md。"
+  "capabilities_note": "MEASURED 2026-09-27/28：SM8650 拓扑为 1×X4(cpu7)+5×A720(cpu2-6)+2×A520(cpu0-1)，4 个 cpufreq policy；KernelSU root、armv8_pmuv3(type=8)、cs_etm、llcc-pmu(type=9) 已确认注册。core PMU type=8 可由 adb shell 计数；LLCC config=0x1000 对 streaming read 稳定响应，但有效 LLCC event open 需 root，config=0x27 负控为 ENOENT。SOURCE BASELINE：X4 L2 2MiB、A720 L2 512KiB/核、A520 L2 512KiB/双核、共享 CPU L3 12MiB，另有独立 LLCC；均不代表本仓已测得的有效容量。历史 runs 20260927T060512Z/075007Z/082635Z/083827Z 使用固定 warmup=200000（64B stride 覆盖约 12.2MiB）且实际页 backing 未控制，只保留为原始观察，不用于容量校准。X4 L2=1MiB、L3/SLC 合并级、X4/A520 保护份额、相机抢占 LLCC 均未成立为事实。详见 docs/reviews/2026-09-27-sm8650-cache-evidence-reassessment.md 与 LLCC PMU smoke 裁定。"
 }

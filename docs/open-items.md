@@ -111,8 +111,8 @@
 |---|---|---|---|
 | P0 warmup/页策略正确性 | `warmup_passes` 完整遍历；THP 请求与 smaps 实际 backing 分开记录 | 所有新 SM8650 容量实验的前置门禁 | ✅ 完成（`a8a6ac6`、`1532274`） |
 | P0 受控安静态 v2 | 显式 profile；逐 policy 精确恢复；Android 状态 before/after；前后门禁 fail-closed | 新 SM8650 校准实验前置；临时 control-path smoke 只验控制链，不产容量数据 | ✅ 完成（`a1f52b6`–`0895270`、`d405460`；验收见 runbook §7） |
-| P0 X4 私有 L2 校准 | 512 KiB–3 MiB 细扫，4 KiB/实际 THP 对照，≥10 次新分配，联合 L2 refill/DTLB | 协议修复后第一项实机实验；失败则停止外层解读 | ⬜ 待办 |
-| P1 PMU 采样通道 | armv8 PMU 与 chase 同步；LLCC `type=9/config=0x1000` 响应性与权限边界已独立验证 | X4 L2 校准所需；core 由 shell probe 采样，LLCC 需最小 root sidecar；root userspace 路径已通，不触发 LKM | 🚧 smoke 完成（`4281cb3`、`d31ba55`、`95ae11e`），同步接线待办 |
+| P0 X4 私有 L2 校准 | 512 KiB–3 MiB 细扫，4 KiB/实际 THP 对照，≥10 次新分配，联合 L2 refill/DTLB | 协议修复后第一项实机实验；失败则停止外层解读 | 🚧 protocol 1.2 双矩阵已定义，实机执行待办 |
+| P1 PMU 采样通道 | armv8 PMU 与 chase 同步；LLCC `type=9/config=0x1000` 响应性与权限边界已独立验证 | X4 L2 用 shell core PMU 同窗采样；外层 cache 再接最小 root LLCC sidecar；root userspace 路径已通，不触发 LKM | 🚧 core 同窗实现（`04f99b4`），设备 preflight 待办；LLCC sidecar 后置外层阶段 |
 | P1 多链带宽模式 | ptr_chase `--chains N`：吞吐 cliff 作为独立物理量（Probe ABI 变更） | latency + PMU 仍不能区分外层结构时单独立项 | ⬜ 待办 |
 | P2 逐 rep 双峰检测 | statistics.py 分位数/双峰标记（median-of-5 掩盖双峰，Xeon 有前科） | 触发：P1 多链模式立项时并入 | ⬜ 待办 |
 | P2 干扰编排进 spec | cross-core/相机/GPU 条件采用配对或随机交错；相机前后验证 active client | L2/L3/PMU 基线通过后；禁止一次性手跑归因 | ⬜ 待办 |
