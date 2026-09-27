@@ -7,7 +7,9 @@
 // workload. Qualcomm's downstream LLCC driver keeps a driver-side cumulative
 // total, so PERF_EVENT_IOC_RESET cannot be assumed to make the next read zero:
 // the reported observation is always final - an immediate post-enable
-// baseline. The raw endpoints are emitted for audit.
+// baseline. The final read is deliberately issued while the event is still
+// enabled: some downstream drivers update event->count only while their
+// private hw state is not STOPPED. The raw endpoints are emitted for audit.
 
 #include <cerrno>
 #include <climits>
@@ -362,18 +364,19 @@ int main(int argc, char** argv) {
         return runtime_error("workload", saved);
     }
 
+    ReadValue final{};
+    if (!read_counter(fd, &final)) {
+        const int saved = errno != 0 ? errno : EIO;
+        ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
+        close(fd);
+        munmap(mapping, buffer_bytes);
+        return runtime_error("read-final", saved);
+    }
     if (ioctl(fd, PERF_EVENT_IOC_DISABLE, 0) != 0) {
         const int saved = errno;
         close(fd);
         munmap(mapping, buffer_bytes);
         return runtime_error("perf-disable", saved);
-    }
-    ReadValue final{};
-    if (!read_counter(fd, &final)) {
-        const int saved = errno != 0 ? errno : EIO;
-        close(fd);
-        munmap(mapping, buffer_bytes);
-        return runtime_error("read-final", saved);
     }
     close(fd);
     munmap(mapping, buffer_bytes);

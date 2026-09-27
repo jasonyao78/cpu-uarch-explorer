@@ -74,8 +74,10 @@ Primary references:
    `disabled=1` and
    `PERF_FORMAT_TOTAL_TIME_ENABLED|PERF_FORMAT_TOTAL_TIME_RUNNING`; do not set
    exclude filters because uncore PMUs may advertise `PERF_PMU_CAP_NO_EXCLUDE`.
-6. Read baseline immediately after reset/enable, execute the workload, then
-   disable and read final. Output one machine-readable line containing at
+6. Read baseline immediately after reset/enable, execute the workload, read
+   final while still enabled, then disable. The read-before-disable order is
+   required because the downstream LLCC driver updates `event->count` only
+   while its private hw state is not stopped. Output one machine-readable line containing at
    least `status`, `pmu`, `type`, `config`, `scope`, `cpu`, `workload`,
    `count_initial`, `count_final`, `count_delta`, `time_enabled_ns`,
    `time_running_ns`, and `bytes_read`.
