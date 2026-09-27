@@ -20,3 +20,11 @@
 - cold 模式参数化（驱逐后冷测 + 输出温度标签）——遵守 `docs/methodology/measurement-discipline.md`。
 - `evict_slc` 类驱逐工具的移植评估（独立小进程，BSD-3 同源，引用需登记来源）。
 - 跨核迁移延迟探针（chase_migrate 范式：绑核建链 → warm → 迁核确认 → 测同链，penalty = dst − src）。
+- **多链带宽模式（--chains N）**——2026-09-27 LLCC 方法学讨论定级 P1：MLP=1 延迟轴对容量/替换策略不敏感（SM8650 实证 14-32M 缓坡无膝点），吞吐 cliff 是独立第二物理量；触及 Probe ABI，单独评审后动。
+- 逐 rep 分布 + 双峰检测（statistics.py，定级 P2，runner 侧，独立于 probe）。
+
+### runner 侧配套 backlog（2026-09-27 LLCC 方法学讨论）
+
+- P0 零代码项：红米 `-h` hugepage 口径实测（验证 ≥16M 尾部 TLB 混杂分量）；相机预览/亮屏差分（工作负载替代寄存器差分，验证 6MB CPU/GPU 共享与 CAM/ISLAND slice 竞争）。
+- P1：armv8 PMU 事件采样进 runner（`l2d_cache_refill` 等，与 chase 同步采；LLCC/DDR 计数器仍 blocked——llcc-pmu 零事件定案）。
+- P2：cross-core 干扰编排进 experiment spec（probe 保持单一职责，并发在 runner 层）。
