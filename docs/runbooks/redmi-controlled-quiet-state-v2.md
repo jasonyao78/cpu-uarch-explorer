@@ -138,3 +138,28 @@ python3 -m runner.cli env \
 尤其是停 thermal：只能用于分钟级独立实验，必须预先定义温度中止线、证明
 服务确实保持 stopped，并验证恢复成功。量产机上的长跑 benchmark 禁止停热
 保护。
+
+## 7. 2026-09-27 control-path 验收
+
+本节只验收环境控制与恢复链，不把单点延迟纳入 cache 容量证据：
+
+1. 提交 `0895270` 的第一次 4 MiB 临时 smoke 正确失败：Android 将默认匿名
+   映射与邻接 VMA 合并，`/proc/self/smaps` 的 VMA 级 `AnonHugePages` 无法
+   精确归属于目标 buffer。probe 退出 1，run-record `metrics=[]`，事务
+   `6f8b56dd6564` 仍完成精确恢复。这里没有为了“跑通”而放宽归属规则。
+2. 提交 `d405460` 为 Linux 普通匿名映射增加两侧 `PROT_NONE` guard page，
+   使目标 RW 区间具有精确 VMA 边界；本地 Release 11/11、UBSan 12/12、
+   Runner 116/116、Analysis 7/7，以及 Linux x86 default/THP 实测均通过。
+3. 同一临时 case 重跑成功：run id
+   `63c94b7b-8b4a-4eb1-9c5a-17374eb01bfd`，AArch64 artifact SHA-256
+   `2b2728f82ebcb31f556442ec3a32750886e5b117bf607ef9a3a57e415fa6111e`。
+   before/after 的四个 governor 均为 `performance`，min/max 未漂移，
+   `mi_thermald=running`、相机无 active client、policy 无 violation；事务
+   `323d65a25ace` 状态为 `restored`。
+4. 恢复后只读检查确认四个 policy 的 governor/min/max 与事务前逐项一致：
+   governor 全部回到 `walt`，max 分别为 2265600/2707200/2707200/2745600
+   kHz，min 分别为 556800/614400/499200/672000 kHz；unfinished journal=0。
+
+smoke 报出的 7.3997 ns 只证明 probe 在受控事务内完成，**不证明**任何 L2、
+L3 或 LLCC 容量。临时 run、journal、交叉编译产物和设备端 smoke 二进制在
+验收后删除，不进入 `data/`。
