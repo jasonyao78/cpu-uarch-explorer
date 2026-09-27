@@ -6,5 +6,11 @@
 if(APPLE)
     add_subdirectory(macos-arm64)
 endif()
-# future: if(CMAKE_SYSTEM_NAME STREQUAL "Linux") add_subdirectory(linux-x86_64) ...
-# future: android-arm64 probes are built with the NDK toolchain file instead.
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_subdirectory(linux)
+endif()
+
+# Android arm64 currently consumes statically linked Linux UAPI probes produced
+# by the linux-aarch64 cross preset; Android-specific APIs still belong in a
+# separate backend directory when one is needed.

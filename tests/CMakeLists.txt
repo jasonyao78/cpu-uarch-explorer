@@ -67,3 +67,31 @@ endif()
 add_test(NAME ptr_chase_rejects_conflicting_page_requests
          COMMAND ${PT} -b 4096 -s 64 -n 8000 -T -h)
 set_tests_properties(ptr_chase_rejects_conflicting_page_requests PROPERTIES WILL_FAIL TRUE)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(PCS $<TARGET_FILE:pmu_counter_smoke>)
+
+  add_test(NAME pmu_counter_smoke_rejects_malformed_config
+           COMMAND ${PCS} --pmu software --config xyz --scope thread
+                   --workload idle --duration-ms 1 --buffer-mib 1)
+  set_tests_properties(pmu_counter_smoke_rejects_malformed_config PROPERTIES
+      WILL_FAIL TRUE FAIL_REGULAR_EXPRESSION "status=ok")
+
+  add_test(NAME pmu_counter_smoke_rejects_zero_duration
+           COMMAND ${PCS} --pmu software --config 1 --scope thread
+                   --workload idle --duration-ms 0 --buffer-mib 1)
+  set_tests_properties(pmu_counter_smoke_rejects_zero_duration PROPERTIES
+      WILL_FAIL TRUE FAIL_REGULAR_EXPRESSION "status=ok")
+
+  add_test(NAME pmu_counter_smoke_rejects_unknown_workload
+           COMMAND ${PCS} --pmu software --config 1 --scope thread
+                   --workload guess --duration-ms 1 --buffer-mib 1)
+  set_tests_properties(pmu_counter_smoke_rejects_unknown_workload PROPERTIES
+      WILL_FAIL TRUE FAIL_REGULAR_EXPRESSION "status=ok")
+
+  add_test(NAME pmu_counter_smoke_requires_cpu_for_cpu_scope
+           COMMAND ${PCS} --pmu software --config 1 --scope cpu
+                   --workload idle --duration-ms 1 --buffer-mib 1)
+  set_tests_properties(pmu_counter_smoke_requires_cpu_for_cpu_scope PROPERTIES
+      WILL_FAIL TRUE FAIL_REGULAR_EXPRESSION "status=ok")
+endif()
