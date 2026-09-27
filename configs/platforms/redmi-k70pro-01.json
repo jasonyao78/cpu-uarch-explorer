@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "target": {
+    "os": "android",
+    "isa": "aarch64",
+    "abi": "android-bionic-aarch64",
+    "target_id": "redmi-k70pro-01",
+    "cpu_profile": "sm8650-8gen3",
+    "execution_kind": "native",
+    "executor": "native",
+    "transport": "adb",
+    "adb_workdir": "/data/local/tmp/cpu-uarch"
+  },
+  "probes": {
+    "ptr_chase": {
+      "local": "build/linux-aarch64/release/probes/cache-mem/ptr_chase",
+      "remote": "/data/local/tmp/cpu-uarch/ptr_chase"
+    }
+  },
+  "defaults": {
+    "repetitions": 5
+  },
+  "controls": [
+    {
+      "id": "x4-prime",
+      "control": { "mechanism": "taskset", "value": "7" },
+      "command_prefix": ["taskset", "-c", "7"],
+      "notes": "Cortex-X4 prime（capacity=1024，max 3302.4MHz，cluster 7）——历史 demo 的 taskset 80（CPU7）即此核"
+    },
+    {
+      "id": "a520-little",
+      "control": { "mechanism": "taskset", "value": "0" },
+      "command_prefix": ["taskset", "-c", "0"],
+      "notes": "Cortex-A520 little（capacity=379，max 2265.6MHz，cluster 0-1）"
+    }
+  ],
+  "capabilities_note": "拓扑实测 2026-09-27（未 root，MEASURED）：1×X4(cpu7, midr 0x410fd821) + 5×A720(cpu2-6, 0x410fd811，923/867 两档) + 2×A520(cpu0-1, 0x410fd801)；cache size 属性高通内核不提供（manifest 记 None 不猜）；governor=walt；root=KernelSU LKM 进行中（BL 已解锁）；PMU/锁频/thermal 待 root 后回填"
+}

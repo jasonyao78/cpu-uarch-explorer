@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "target": {
+    "os": "android",
+    "isa": "aarch64",
+    "abi": "android-bionic-aarch64",
+    "target_id": "redmi-k70pro-01",
+    "cpu_profile": "sm8650-8gen3",
+    "execution_kind": "native",
+    "executor": "native",
+    "transport": "adb",
+    "adb_workdir": "/data/local/tmp/cpu-uarch"
+  },
+  "capabilities": {
+    "cache-topology": {
+      "supported": true,
+      "detail": "cpu0 sysfs (/sys/devices/system/cpu/cpu0/cache/index*)",
+      "values": {
+        "levels": [
+          {
+            "level": 1,
+            "type": "Data",
+            "size": null,
+            "ways": null,
+            "shared_cpu_list": "0"
+          },
+          {
+            "level": 1,
+            "type": "Instruction",
+            "size": null,
+            "ways": null,
+            "shared_cpu_list": "0"
+          },
+          {
+            "level": 2,
+            "type": "Unified",
+            "size": null,
+            "ways": null,
+            "shared_cpu_list": "0-1"
+          },
+          {
+            "level": 3,
+            "type": "Unified",
+            "size": null,
+            "ways": null,
+            "shared_cpu_list": "0-7"
+          }
+        ]
+      },
+      "evidence": "MEASURED"
+    },
+    "cpufreq": {
+      "supported": true,
+      "detail": "/sys/devices/system/cpu/cpu0/cpufreq",
+      "values": {
+        "driver": "qcom-cpufreq-hw",
+        "governor": "walt",
+        "available_governors": [
+          "walt",
+          "conservative",
+          "powersave",
+          "performance",
+          "schedutil"
+        ],
+        "min_khz": 364800,
+        "max_khz": 2265600
+      },
+      "evidence": "MEASURED"
+    },
+    "core-topology": {
+      "supported": true,
+      "detail": "linux sysfs per-cpu (absent dims = None, not guessed)",
+      "values": {
+        "source": "linux-sysfs",
+        "cpus": {
+          "0": {
+            "capacity": 379,
+            "max_freq_khz": 2265600,
+            "midr_el1": "0x00000000410fd801",
+            "cluster_cpus_list": "0-1"
+          },
+          "1": {
+            "capacity": 379,
+            "max_freq_khz": 2265600,
+            "midr_el1": "0x00000000410fd801",
+            "cluster_cpus_list": "0-1"
+          },
+          "2": {
+            "capacity": 923,
+            "max_freq_khz": 3148800,
+            "midr_el1": "0x00000000410fd811",
+            "cluster_cpus_list": "2-4"
+          },
+          "3": {
+            "capacity": 923,
+            "max_freq_khz": 3148800,
+            "midr_el1": "0x00000000410fd811",
+            "cluster_cpus_list": "2-4"
+          },
+          "4": {
+            "capacity": 923,
+            "max_freq_khz": 3148800,
+            "midr_el1": "0x00000000410fd811",
+            "cluster_cpus_list": "2-4"
+          },
+          "5": {
+            "capacity": 867,
+            "max_freq_khz": 2956800,
+            "midr_el1": "0x00000000410fd811",
+            "cluster_cpus_list": "5-6"
+          },
+          "6": {
+            "capacity": 867,
+            "max_freq_khz": 2956800,
+            "midr_el1": "0x00000000410fd811",
+            "cluster_cpus_list": "5-6"
+          },
+          "7": {
+            "capacity": 1024,
+            "max_freq_khz": 3302400,
+            "midr_el1": "0x00000000410fd821",
+            "cluster_cpus_list": "7"
+          }
+        },
+        "clusters": {
+          "0-1": [
+            "0",
+            "1"
+          ],
+          "2-4": [
+            "2",
+            "3",
+            "4"
+          ],
+          "5-6": [
+            "5",
+            "6"
+          ],
+          "7": [
+            "7"
+          ]
+        }
+      },
+      "evidence": "MEASURED"
+    }
+  },
+  "captured_at": "2026-09-27T05:47:09.117078+00:00"
+}
