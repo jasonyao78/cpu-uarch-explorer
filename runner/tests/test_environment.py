@@ -21,6 +21,7 @@ from runner.environment.coordinator import (EnvironmentError_,
 from runner.environment.journal import JournalStore, Mutation
 from runner.environment.controllers import make_controller
 from runner.errors import RunnerError
+from runner.executor.adb import AdbExecutor
 from runner.executor.local import ExecutionResult
 
 PLATFORM = {"target": {"target_id": "fake-01", "transport": "local"}}
@@ -43,10 +44,7 @@ class FakeEnvExecutor:
         if "cpu-uarch-set-governor" in cmd:
             if not self.sudo_ok:
                 return ExecutionResult(1, "", "sudo: a password is required", "fake")
-            value = cmd.split()[-1]
-            if value not in ("performance", "powersave"):
-                return ExecutionResult(1, "", "usage: cpu-uarch-set-governor performance|powersave", "fake")
-            self.governor = value
+            self.governor = cmd.split()[-1]
             return ExecutionResult(0, "", "", "fake")
         return ExecutionResult(1, "", "unscripted command", "fake")
 
@@ -60,6 +58,31 @@ class FakeLock:
 
     def release(self):
         self.released = True
+
+
+class FakeAdbExecutor(AdbExecutor):
+    """Android 假执行器（isinstance AdbExecutor 走 su -c 分支）：
+    governor 文件语义 + su 可控成败。语义按 controller 实现：调
+    `su -c 'for c in .../scaling_governor; do echo <value> > $c ...; done'`。"""
+
+    def __init__(self, governor="walt", su_ok=True):
+        self.governor = governor
+        self.su_ok = su_ok
+
+    def execute(self, argv, command_prefix=()):
+        cmd = " ".join(str(a) for a in argv)
+        if cmd.startswith("cat") and "scaling_governor" in cmd:
+            return ExecutionResult(0, self.governor + "\n", "", "fake")
+        if cmd.startswith("su -c"):
+            if not self.su_ok:
+                return ExecutionResult(1, "", "su: permission denied", "fake")
+            parts = cmd.split()
+            value = parts[parts.index("echo") + 1]
+            if any(ch in value for ch in "/ ;|&$`"):
+                return ExecutionResult(1, "", "unsafe value", "fake")
+            self.governor = value
+            return ExecutionResult(0, "", "", "fake")
+        return ExecutionResult(1, "", "unscripted command", "fake")
 
 
 class TestEnvironmentTx(unittest.TestCase):
@@ -130,6 +153,48 @@ class TestEnvironmentTx(unittest.TestCase):
     def test_unknown_controller_rejected(self):
         with self.assertRaises(RunnerError):
             make_controller("filesystem=readonly")
+
+
+class TestAndroidGovernorTx(unittest.TestCase):
+    """Android 分支（2026-09-27 K70 Pro KernelSU Root 落地）：controller
+    经 su -c 写全部 CPU governor；事务语义与 Linux 分支一致（apply →
+    work → 逆序 restore、journal 留痕、su 失败结构化）。"""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.store = JournalStore(Path(self._tmp.name))
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _tx(self, executor, work=lambda: {"ok": 1}, specs=("governor=performance",)):
+        return execute_environment_tx(PLATFORM, list(specs), work,
+                                      allow_mutation=True, store=self.store,
+                                      executor=executor, lock=FakeLock())
+
+    def test_su_c_happy_path_restores(self):
+        ex = FakeAdbExecutor(governor="walt")
+        self.assertEqual(self._tx(ex), {"ok": 1})
+        self.assertEqual(ex.governor, "walt")  # restore 回 before 值
+
+    def test_su_failure_is_structured_and_no_mutation(self):
+        ex = FakeAdbExecutor(su_ok=False)
+        with self.assertRaises(EnvironmentError_) as cm:
+            self._tx(ex)
+        self.assertEqual(cm.exception.code, "env-apply-failed")
+        self.assertEqual(ex.governor, "walt")
+
+    def test_linux_branch_rejects_su_form(self):
+        # isinstance 分支保证：Linux 执行器永不收到 su -c——经 sudo 脚本路径成功
+        ex = FakeEnvExecutor(governor="walt")
+        self._tx(ex)
+        self.assertEqual(ex.governor, "walt")  # restore 回 walt（非 Adb 亦走事务）
+
+    def test_unsafe_governor_value_rejected_before_apply(self):
+        ex = FakeAdbExecutor()
+        with self.assertRaises(EnvironmentError_) as cm:
+            self._tx(ex, specs=("governor=performance; rm -rf /",))
+        self.assertEqual(cm.exception.code, "env-invalid-request")
 
 
 class TestReconcileAndSpecs(unittest.TestCase):

@@ -71,14 +71,17 @@ class AdbExecutor:
         }
 
     def freq_snapshot(self, cpu_hint: str) -> dict | None:
-        """设备频率快照：scaling_cur_freq 在 Android 上常限 root，回退
-        cpuinfo_cur_freq（shell 可读）；两者皆失败返回 None。"""
-        res = self.execute(["sh", "-c",
-                            f"cat /sys/devices/system/cpu/cpu{cpu_hint or '0'}/cpufreq/scaling_cur_freq "
-                            f"2>/dev/null || cat /sys/devices/system/cpu/cpu{cpu_hint or '0'}/cpufreq/cpuinfo_cur_freq"])
-        if res.returncode != 0:
-            return None
-        try:
-            return {"khz": int(res.stdout.strip()), "source": "cpufreq (scaling or cpuinfo)"}
-        except ValueError:
-            return None
+        """设备频率快照：scaling_cur_freq 在 Android 上常限 root——链式尝试
+        shell 直读 → su -c root 读（KernelSU LKM，2026-09-27 K70 Pro 实证）
+        → cpuinfo_cur_freq 兜底（shell 可读但非调度器实频）；皆失败返回 None。"""
+        base = f"/sys/devices/system/cpu/cpu{cpu_hint or '0'}/cpufreq"
+        attempts = (
+            (["sh", "-c", f"cat {base}/scaling_cur_freq 2>/dev/null"], "scaling_cur_freq"),
+            (["sh", "-c", f"su -c cat {base}/scaling_cur_freq 2>/dev/null"], "scaling_cur_freq (root)"),
+            (["sh", "-c", f"cat {base}/cpuinfo_cur_freq 2>/dev/null"], "cpuinfo_cur_freq"),
+        )
+        for argv, source in attempts:
+            res = self.execute(argv)
+            if res.returncode == 0 and res.stdout.strip().isdigit():
+                return {"khz": int(res.stdout.strip()), "source": f"cpufreq ({source})"}
+        return None

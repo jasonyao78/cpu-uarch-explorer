@@ -64,6 +64,28 @@ class TestAdbCommandConstruction(unittest.TestCase):
             m.side_effect = OSError("offline")
             self.assertIsNone(ex.freq_snapshot("0"))
 
+    def test_freq_snapshot_root_chain(self):
+        # 链式：shell 直读 scaling 失败 → su -c root 读 scaling 成功（K70 Pro 场景）
+        ex = AdbExecutor()
+        with mock.patch("runner.executor.adb.subprocess.run") as m:
+            m.side_effect = [_completed(1, "", "Permission denied"),
+                             _completed(0, "3302400\n", "")]
+            snap = ex.freq_snapshot("7")
+            self.assertEqual(snap["khz"], 3302400)
+            self.assertIn("root", snap["source"])
+            # 第二次调用确为 su -c 形式
+            self.assertIn("su -c", m.call_args.args[0][2])
+
+    def test_freq_snapshot_non_numeric_ignored(self):
+        # 非数字输出（如空/垃圾）不当作频率，继续链或返回 None
+        ex = AdbExecutor()
+        with mock.patch("runner.executor.adb.subprocess.run") as m:
+            m.side_effect = [_completed(0, "\n", ""), _completed(0, "abc\n", ""),
+                             _completed(0, "2000000\n", "")]
+            snap = ex.freq_snapshot("0")
+            self.assertEqual(snap["khz"], 2000000)
+            self.assertEqual(snap["source"], "cpufreq (cpuinfo_cur_freq)")
+
 
 class TestTransportSelection(unittest.TestCase):
     def test_adb_selected_from_platform(self):

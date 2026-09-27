@@ -34,5 +34,5 @@
       "notes": "Cortex-A520 little（capacity=379，max 2265.6MHz，cluster 0-1，与 cpu1 共享 L2）；toybox 掩码 1 = CPU0"
     }
   ],
-  "capabilities_note": "拓扑实测 2026-09-27（MEASURED）：1×X4(cpu7, midr 0x410fd821) + 5×A720(cpu2-6, 0x410fd811) + 2×A520(cpu0-1, 0x410fd801)；cache size 属性高通内核不提供（None 不猜）；governor=walt（root 后实测可切 performance，见 runbook redmi-manet-kernelsu-root）；PMU：paranoid=-1 + armv8_pmuv3 + llcc-pmu + cs_etm；root=KernelSU LKM ✅ 2026-09-27"
+  "capabilities_note": "拓扑实测 2026-09-27（MEASURED）：1×X4(cpu7, midr 0x410fd821) + 5×A720(cpu2-6, 0x410fd811) + 2×A520(cpu0-1, 0x410fd801)；cache size 属性高通内核不提供（None 不猜）；governor=walt（root 后可切 performance，环境事务 su -c 分支已落地：controller 按执行器分流，Android 走 su -c 写全部 CPU governor）；PMU：paranoid=-1 + armv8_pmuv3(type=8) + cs_etm + llcc-pmu(type=9)；root=KernelSU LKM ✅ 2026-09-27。锁频 sweep 20260927T075007Z（performance 事务，freq 钉死 X4=2745600kHz/A520=2265600kHz，root freq_snapshot 链生效）：X4 台阶 64K→2.05ns(L1d=64K≈4cyc)、512K→1M 跳 5.2ns(L2=1M≈6-7cyc)、1M-16M 平坦 5.2-6.4ns(L3+SLC 合并级≈14-18cyc，X4 低延迟有效容量≥16M)、32M=14.7ns、64M+=61-109ns(DRAM)；A520：64K→5.1ns(L1d=64K)、512K→1M 跳 17.6ns(L2 对共享 512K)、8M→16M 跳 165ns(DRAM 路径 374-593cyc，显著慢于 X4 167-300cyc)。llcc-pmu 负结果：PMU 已注册(type=9)但零事件——DT 节点无事件属性，perf_event_open 全 config 0x00-0x27 ENOENT 实测（cpu0/4/7 同），SLC 不可经 llcc-pmu 分离，L3/SLC 只能以合并级报告"
 }

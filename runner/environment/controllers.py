@@ -27,10 +27,18 @@ class Controller(Protocol):
 
 
 class CpufreqGovernorController:
-    """Linux cpufreq governor 变更（第一个受控项，2026-09-25 讨论裁定）。"""
+    """Linux cpufreq governor 变更（第一个受控项，2026-09-25 讨论裁定）。
+
+    提权通道按执行器分流：Linux = sudoers 白名单包装脚本（最小权限）；
+    Android = su -c 直写 sysfs（KernelSU LKM，无白名单脚本概念——validate
+    已拦截 shell 元字符，注入安全）。"""
     key = "cpufreq.governor"
     requires_privilege = True
     _GOVERNOR = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+    _ANDROID_WRITE = (
+        "for c in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do "
+        "echo {gov} > $c 2>/dev/null || exit 1; done"
+    )
 
     def inspect(self, executor) -> str:
         res = executor.execute(["cat", self._GOVERNOR])
@@ -45,6 +53,15 @@ class CpufreqGovernorController:
 
     def apply(self, executor, requested: str) -> str:
         self.validate(requested)
+        from ..executor.adb import AdbExecutor  # 延迟导入：避免 controllers→executor 环
+        if isinstance(executor, AdbExecutor):
+            res = executor.execute(["su", "-c", self._ANDROID_WRITE.format(gov=requested)])
+            if res.returncode != 0:
+                raise RunnerError(
+                    "env-apply-failed",
+                    f"governor apply failed: {res.stderr.strip()[:160]}"
+                    " | Android 出路：确认 KernelSU Root 生效且授权 shell（adb shell su -c id）")
+            return ""
         # 经 sudoers 单命令白名单授权的包装脚本（最小权限：免密 sudo 仅限此
         # 脚本；脚本内有 performance/powersave 参数白名单与 root 属主加固——
         # 部署步骤见 docs/runbooks/xeon-governor-lock.md，人工一次性完成）。
