@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-sm8650-x4-pmu-ctrl-cache",
+  "title": "SM8650 Cortex-X4 core PMU cache 事件语义正向控制",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    { "name": "buffer", "type": "size", "range": "16KiB..16MiB，L1-fit / L1-overflow / L2-overflow / L3-overflow 规模锚点" },
+    { "name": "stride", "type": "size", "default": "64B" },
+    { "name": "warmup_passes", "type": "int", "default": 2 },
+    { "name": "loads_per_slot", "type": "int", "default": 8 },
+    { "name": "min_loads", "type": "int", "default": 16777216 },
+    { "name": "repetitions", "type": "int", "default": 10 },
+    { "name": "base_pages", "type": "int", "default": 1 },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        { "name": "cycles", "type": 8, "config": "0x11" },
+        { "name": "l1d_cache_refill", "type": 8, "config": "0x03" },
+        { "name": "l1d_cache", "type": 8, "config": "0x04" },
+        { "name": "l2d_cache", "type": 8, "config": "0x16" },
+        { "name": "l2d_cache_refill", "type": 8, "config": "0x17" },
+        { "name": "l3d_cache_refill", "type": 8, "config": "0x2a" }
+      ]
+    }
+  ],
+  "preconditions": [
+    "redmi-k70pro-01 controlled-baseline profile 前后门禁通过",
+    "CPU7 Cortex-X4；六个 core PMU event 同窗且 time_running == time_enabled（拒绝复用）",
+    "每个 repetition 为新进程/新匿名映射；actual backing 必须为 base"
+  ],
+  "metrics": [
+    { "name": "latency_ns", "unit": "ns", "statistic": "median" },
+    { "name": "pmu.cycles.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l1d_cache_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l1d_cache.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l2d_cache.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l2d_cache_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l3d_cache_refill.count", "unit": "events", "statistic": "median" }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "controls": ["x4-prime"],
+    "params": { "repetitions": 10 },
+    "sweep": {
+      "buffer": ["16KiB", "32KiB", "512KiB", "8MiB", "16MiB"]
+    },
+    "fixed_params": [
+      "stride", "warmup_passes", "loads_per_slot", "min_loads",
+      "base_pages", "pmu_events"
+    ]
+  },
+  "notes": "事件语义正向控制，不是容量实验：规模锚点先验已知期望计数级（计划 docs/superpowers/plans/2026-09-28-sm8650-pmu-positive-control.md）。任何事件不达标即 SEMANTICS-UNVERIFIED，停止容量推断。事件编码依据 ARM-software/data pmu/cortex-x4.json（TRM 衍生，counters=6）。"
+}
