@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "target": {
+    "os": "darwin",
+    "isa": "aarch64",
+    "abi": "darwin-aapcs64",
+    "target_id": "macbook-m4pro-01",
+    "cpu_profile": "apple-m4-pro",
+    "execution_kind": "native",
+    "executor": "native",
+    "transport": "local"
+  },
+  "capabilities": {
+    "cache-topology": {
+      "supported": false,
+      "detail": "no cache index nodes on target",
+      "evidence": "MEASURED"
+    },
+    "cpufreq": {
+      "supported": false,
+      "detail": "cpufreq sysfs unreadable: ",
+      "evidence": "MEASURED"
+    },
+    "core-topology": {
+      "supported": true,
+      "detail": "macOS sysctl hw.perflevel*",
+      "values": {
+        "source": "macos-sysctl",
+        "nperflevels": 2,
+        "perflevels": [
+          {
+            "name": "Performance",
+            "logicalcpu": "10",
+            "physicalcpu": "10"
+          },
+          {
+            "name": "Efficiency",
+            "logicalcpu": "4",
+            "physicalcpu": "4"
+          }
+        ]
+      },
+      "evidence": "MEASURED"
+    }
+  },
+  "captured_at": "2026-09-26T16:17:46.093088+00:00"
+}

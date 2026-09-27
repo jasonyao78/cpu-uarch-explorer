@@ -22,5 +22,8 @@ data/public/runs/*/raw/
 # OS noise
 .DS_Store
 
+# 个人笔记工具配置（Obsidian 工作区设置，与项目内容无关）
+.obsidian/
+
 # gem5 in-tree build outputs (submodule's own .gitignore also covers build/)
 third_party/gem5/build/
