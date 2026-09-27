@@ -48,6 +48,41 @@ class FakeExec:
         return None
 
 
+class MultiMetricExec(FakeExec):
+    def execute(self, argv, command_prefix=()):
+        if "nvidia-smi" in " ".join(str(a) for a in argv):
+            return ExecutionResult(0, self._aux_stdout + "\n", "", "fake")
+        self.probe_calls += 1
+        return ExecutionResult(0, f"sample={self.probe_calls}\n", "", "fake")
+
+
+class MultiMetricAdapter:
+    def build_argv(self, params):
+        return []
+
+    def parse_output(self, stdout, stderr):
+        sample = int(stdout.split("=", 1)[1])
+        return [
+            {
+                "name": "latency_ns", "value": float(2 * sample - 1), "unit": "ns",
+                "page_policy_requested": "base-madvise",
+                "anon_huge_kb": 4 * (sample - 1),
+            },
+            {
+                "name": "pmu.cycles.count", "value": float(100 * sample),
+                "unit": "events", "pmu_type": 8, "pmu_config": 0x11,
+                "time_enabled_ns": 1000 + sample,
+                "time_running_ns": 1000 + sample,
+            },
+        ]
+
+
+class MismatchedMetricAdapter(MultiMetricAdapter):
+    def parse_output(self, stdout, stderr):
+        metrics = super().parse_output(stdout, stderr)
+        return metrics if "sample=1" in stdout else metrics[:1]
+
+
 def _case() -> Case:
     params = (("buffer_kb", ResolvedValue(64, "s")), ("stride", ResolvedValue(64, "s")),
               ("loads", ResolvedValue(8000, "d")), ("warmup", ResolvedValue(0, "s")))
@@ -74,6 +109,68 @@ class TestEngineMetricExtraFields(unittest.TestCase):
             aux = record["environment"]["aux_snapshots"]["gpu_util"]
             self.assertEqual(aux["before"], "3 %")
             self.assertEqual(aux["after"], "3 %")
+
+    def test_every_metric_preserves_per_sample_observations(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = ArtifactStore(Path(tmp) / "run")
+            with mock.patch.dict(
+                "runner.engine._ADAPTERS", {"ptr_chase": MultiMetricAdapter()}
+            ):
+                record = _run_case(
+                    _case(), PLATFORM, PROBE_META, "/probe",
+                    MultiMetricExec(), store, SYSINFO, PROBE_META["git"],
+                )
+
+        self.assertEqual(record["status"], "ok")
+        by_name = {metric["name"]: metric for metric in record["metrics"]}
+        self.assertEqual(set(by_name), {"latency_ns", "pmu.cycles.count"})
+
+        latency = by_name["latency_ns"]
+        self.assertEqual(latency["value"], 2.0)
+        self.assertEqual(latency["page_policy_requested"], "base-madvise")
+        self.assertNotIn("anon_huge_kb", latency)
+        self.assertEqual(
+            [observation["value"] for observation in latency["observations"]],
+            [1.0, 3.0],
+        )
+        self.assertEqual(
+            [observation["sample_index"] for observation in latency["observations"]],
+            [0, 1],
+        )
+        self.assertEqual(
+            [observation["anon_huge_kb"] for observation in latency["observations"]],
+            [0, 4],
+        )
+        self.assertTrue(all(
+            observation["raw_sample_ref"].startswith("raw-samples:c1.s")
+            for observation in latency["observations"]
+        ))
+
+        cycles = by_name["pmu.cycles.count"]
+        self.assertEqual(cycles["value"], 150.0)
+        self.assertEqual(cycles["pmu_type"], 8)
+        self.assertEqual(cycles["pmu_config"], 0x11)
+        self.assertNotIn("time_enabled_ns", cycles)
+        self.assertEqual(
+            [observation["time_enabled_ns"] for observation in cycles["observations"]],
+            [1001, 1002],
+        )
+
+    def test_metric_set_drift_fails_the_case(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = ArtifactStore(Path(tmp) / "run")
+            with mock.patch.dict(
+                "runner.engine._ADAPTERS", {"ptr_chase": MismatchedMetricAdapter()}
+            ):
+                record = _run_case(
+                    _case(), PLATFORM, PROBE_META, "/probe",
+                    MultiMetricExec(), store, SYSINFO, PROBE_META["git"],
+                )
+
+        self.assertEqual(record["status"], "failed")
+        self.assertEqual(record["failure"]["reason"], "metric-aggregation-error")
+        self.assertIn("metric set mismatch", record["failure"]["detail"])
+        self.assertEqual(record["metrics"], [])
 
 
 QUIET_POLICY = {

@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 from .adapters.ptr_chase import PtrChaseAdapter
@@ -36,6 +37,101 @@ _ADAPTERS = {a.probe_name: a for a in (PtrChaseAdapter(),)}
 
 # Probe ABI 退出码 → run 状态（ADR-0006 §3）
 _EXIT_STATUS = {0: "ok", 1: "failed", 2: "unsupported"}
+
+
+def _aggregate_sample_metrics(
+        samples: list[tuple[int, str, list[dict]]]) -> list[dict]:
+    """Aggregate adapter metrics without discarding per-process evidence.
+
+    Every repetition must expose the same unique metric names and units. Each
+    raw value and its adapter-provided fields remain in ``observations``;
+    additional fields are copied to metric top level only when invariant over
+    all repetitions. This prevents first-sample metadata from masquerading as
+    a property of the complete case.
+    """
+    if not samples:
+        raise ParseError("cannot aggregate an empty sample set")
+
+    first_metrics = samples[0][2]
+    order = [metric.get("name") for metric in first_metrics]
+    if not order or any(not isinstance(name, str) or not name for name in order):
+        raise ParseError("every metric must have a non-empty string name")
+    if len(set(order)) != len(order):
+        raise ParseError(f"duplicate metric names in sample 0: {order!r}")
+
+    indexed_samples: list[tuple[int, str, dict[str, dict]]] = []
+    for sample_index, raw_ref, metrics in samples:
+        by_name: dict[str, dict] = {}
+        for metric in metrics:
+            name = metric.get("name")
+            if not isinstance(name, str) or not name:
+                raise ParseError(
+                    f"sample {sample_index} metric has no valid name: {metric!r}"
+                )
+            if name in by_name:
+                raise ParseError(
+                    f"sample {sample_index} has duplicate metric {name!r}"
+                )
+            if "value" not in metric or "unit" not in metric:
+                raise ParseError(
+                    f"sample {sample_index} metric {name!r} lacks value/unit"
+                )
+            value = metric["value"]
+            if (isinstance(value, bool) or not isinstance(value, (int, float))
+                    or not math.isfinite(value)):
+                raise ParseError(
+                    f"sample {sample_index} metric {name!r} has non-finite "
+                    f"numeric value {value!r}"
+                )
+            by_name[name] = metric
+        if set(by_name) != set(order):
+            raise ParseError(
+                f"sample {sample_index} metric set mismatch: "
+                f"expected {sorted(order)!r}, got {sorted(by_name)!r}"
+            )
+        indexed_samples.append((sample_index, raw_ref, by_name))
+
+    aggregated: list[dict] = []
+    reserved = {
+        "name", "value", "unit", "sample_index", "raw_sample_ref",
+        "observations", "statistics", "repetitions", "raw_samples_ref",
+    }
+    for name in order:
+        metrics = [by_name[name] for _, _, by_name in indexed_samples]
+        unit = metrics[0]["unit"]
+        if any(metric["unit"] != unit for metric in metrics[1:]):
+            raise ParseError(f"metric {name!r} unit differs across samples")
+        values = [metric["value"] for metric in metrics]
+        stats = summarize(values)
+        observations = []
+        for (sample_index, raw_ref, _), metric in zip(indexed_samples, metrics):
+            observation = {
+                "sample_index": sample_index,
+                "value": metric["value"],
+                "raw_sample_ref": raw_ref,
+            }
+            observation.update({
+                key: value for key, value in metric.items() if key not in reserved
+            })
+            observations.append(observation)
+
+        aggregate = {
+            "name": name,
+            "value": stats["median"],
+            "unit": unit,
+            "repetitions": len(metrics),
+            "statistics": stats,
+            "raw_samples_ref": samples[0][1],
+            "observations": observations,
+        }
+        first_extra = {
+            key: value for key, value in metrics[0].items() if key not in reserved
+        }
+        for key, value in first_extra.items():
+            if all(key in metric and metric[key] == value for metric in metrics[1:]):
+                aggregate[key] = value
+        aggregated.append(aggregate)
+    return aggregated
 
 
 def _failure_reason(result) -> tuple[str, dict]:
@@ -134,9 +230,9 @@ def run_plan(plan: Plan, platform: dict, run_dir: Path, repo_root: Path) -> dict
 def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
               executor, store: ArtifactStore, system_info: dict, git: dict) -> dict:
     """执行单个 case：按 case.repetitions 重复执行（sample_index 递增），
-    每趟原始输出落盘；全部成功才产 ok 记录（median 统计），任何失败产出
-    status=failed/unsupported + 结构化 failure + 空 metrics（schema v2
-    条件化约束），成功样本数写入 detail 供审计。"""
+    每趟原始输出落盘；全部成功才按 metric name 聚合并保留逐样本 observation，
+    任何失败产出 status=failed/unsupported + 结构化 failure + 空 metrics
+    （schema v2 条件化约束），成功样本数写入 detail 供审计。"""
     adapter = _ADAPTERS[case.probe]
     params = {k: rv.value for k, rv in case.params}
     provenance = {k: rv.source for k, rv in case.params}
@@ -188,10 +284,9 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
         if r.returncode == 0:
             aux_before[aux["name"]] = r.stdout.strip()[:200]
 
-    latencies: list[float] = []
+    sample_metrics: list[tuple[int, str, list[dict]]] = []
     raw_refs: list[str] = []
     first_failure: dict | None = None
-    first_ok_extra: dict | None = None  # adapter 附加字段（如 page_policy）随 metric 入档
     raw_command = ""
     for sample_index in range(case.repetitions):
         result = executor.execute(argv, case.control.command_prefix)
@@ -205,10 +300,7 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
             continue
         try:
             metrics = adapter.parse_output(result.stdout, result.stderr)
-            latencies.append(metrics[0]["value"])
-            if first_ok_extra is None:
-                first_ok_extra = {k: v for k, v in metrics[0].items()
-                                  if k not in ("name", "value", "unit")}
+            sample_metrics.append((sample_index, raw_refs[-1], metrics))
         except ParseError as e:
             if first_failure is None:
                 first_failure = {"reason": "parse-error", "detail": str(e)}
@@ -256,22 +348,22 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
                 failure={"reason": "environment-postcondition-failed",
                          "detail": ",".join(post_violations)})
 
-    if latencies and first_failure is None:
-        stats = summarize(latencies)
-        metrics = [{
-            "name": "latency_ns", "value": stats["median"], "unit": "ns",
-            "repetitions": len(latencies), "statistics": stats,
-            "raw_samples_ref": raw_refs[0],
-            **(first_ok_extra or {}),
-        }]
-        return build_run_record(status="ok", target=platform["target"], probe=probe_meta,
-                                environment=env, params=params, params_provenance=provenance,
-                                metrics=metrics, raw_command=raw_command)
+    if sample_metrics and first_failure is None:
+        try:
+            metrics = _aggregate_sample_metrics(sample_metrics)
+        except ParseError as error:
+            first_failure = {"reason": "metric-aggregation-error", "detail": str(error)}
+        else:
+            return build_run_record(
+                status="ok", target=platform["target"], probe=probe_meta,
+                environment=env, params=params, params_provenance=provenance,
+                metrics=metrics, raw_command=raw_command,
+            )
 
     # 部分样本失败也按 failed 记（保守口径），成功样本数写进 detail 供审计
     failure = dict(first_failure or {"reason": "no-ok-samples"})
     failure["detail"] = (failure.get("detail", "") +
-                         f" | ok_samples={len(latencies)}/{case.repetitions}").strip(" |")
+                         f" | ok_samples={len(sample_metrics)}/{case.repetitions}").strip(" |")
     return build_run_record(status="failed" if failure["reason"] != "capability-unsupported" else "unsupported",
                             target=platform["target"], probe=probe_meta, environment=env,
                             params=params, params_provenance=provenance,

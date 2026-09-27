@@ -31,6 +31,12 @@
 |---|---|---|---|
 | `environment.state_snapshot` | object | case 前后 Android 状态证据及 `policy_result`；含 cpufreq 各 policy、wakefulness、DeviceIdle、airplane、活动相机、thermal、服务和 loadavg。前置失败不执行 probe，后置漂移保留 raw 但输出空 metrics | 2026-09-27 |
 
+### 已登记的通用 metric 扩展字段
+
+| 字段 | 类型 | 用途 | 登记日期 |
+|---|---|---|---|
+| `metrics[].observations` | array | 每个 repetition 的 `{sample_index, value, raw_sample_ref, ...样本级字段}`；解决聚合记录只保留首样本附加证据的问题。metric 顶层只复制所有 repetition 完全一致的附加字段 | 2026-09-28 |
+
 ### 已登记的 ptr_chase metric 扩展字段
 
 | 字段 | 类型 | 用途 | 登记日期 |

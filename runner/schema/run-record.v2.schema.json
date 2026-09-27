@@ -90,7 +90,22 @@
             },
             "additionalProperties": true
           },
-          "raw_samples_ref": { "type": "string", "description": "artifact-manifest id（原始样本）" }
+          "raw_samples_ref": { "type": "string", "description": "首个原始样本的 artifact-manifest id（兼容字段；完整逐样本引用见 observations）" },
+          "observations": {
+            "type": "array",
+            "minItems": 1,
+            "description": "逐 repetition 的原始 metric 值、raw 引用和样本级附加证据",
+            "items": {
+              "type": "object",
+              "required": ["sample_index", "value", "raw_sample_ref"],
+              "properties": {
+                "sample_index": { "type": "integer", "minimum": 0 },
+                "value": { "type": "number" },
+                "raw_sample_ref": { "type": "string" }
+              },
+              "additionalProperties": true
+            }
+          }
         },
         "additionalProperties": true
       }
