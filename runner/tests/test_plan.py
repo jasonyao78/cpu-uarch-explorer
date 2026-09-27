@@ -211,13 +211,13 @@ class TestPlan(unittest.TestCase):
                     }
                 plan = build_plan(spec, case_platform)
                 expected_case_counts = {
+                    "ptr-chase-sm8650-x4-l2-base.json": 14,
+                    "ptr-chase-sm8650-x4-l2-thp.json": 14,
+                    "ptr-chase-sm8650-x4-l2-fine.json": 21,
                     "ptr-chase-sm8650-x4-pmu-ctrl-cache.json": 5,
                     "ptr-chase-sm8650-x4-pmu-ctrl-tlb.json": 2,
                 }
-                if path.name.startswith("ptr-chase-sm8650-x4-l2-"):
-                    self.assertEqual(len(plan.cases), 14)
-                    self.assertTrue(all(case.repetitions == 10 for case in plan.cases))
-                elif path.name in expected_case_counts:
+                if path.name in expected_case_counts:
                     self.assertEqual(len(plan.cases), expected_case_counts[path.name])
                     self.assertTrue(all(case.repetitions == 10 for case in plan.cases))
                 for case in plan.cases:
