@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-sm8650-x4-pmu-ctrl-tlb",
+  "title": "SM8650 Cortex-X4 core PMU TLB 事件语义正向控制",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    { "name": "buffer", "type": "size", "range": "512KiB..16MiB，128 vs 4096 随机 4KiB 页的 walk 规模对照" },
+    { "name": "stride", "type": "size", "default": "64B" },
+    { "name": "warmup_passes", "type": "int", "default": 2 },
+    { "name": "loads_per_slot", "type": "int", "default": 8 },
+    { "name": "min_loads", "type": "int", "default": 16777216 },
+    { "name": "repetitions", "type": "int", "default": 10 },
+    { "name": "base_pages", "type": "int", "default": 1 },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        { "name": "cycles", "type": 8, "config": "0x11" },
+        { "name": "l1d_tlb_refill", "type": 8, "config": "0x05" },
+        { "name": "dtlb_walk", "type": 8, "config": "0x34" }
+      ]
+    }
+  ],
+  "preconditions": [
+    "redmi-k70pro-01 controlled-baseline profile 前后门禁通过",
+    "CPU7 Cortex-X4；三个 core PMU event 同窗且 time_running == time_enabled（拒绝复用）",
+    "每个 repetition 为新进程/新匿名映射；actual backing 必须为 base"
+  ],
+  "metrics": [
+    { "name": "latency_ns", "unit": "ns", "statistic": "median" },
+    { "name": "pmu.cycles.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l1d_tlb_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.dtlb_walk.count", "unit": "events", "statistic": "median" }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "controls": ["x4-prime"],
+    "params": { "repetitions": 10 },
+    "sweep": {
+      "buffer": ["512KiB", "16MiB"]
+    },
+    "fixed_params": [
+      "stride", "warmup_passes", "loads_per_slot", "min_loads",
+      "base_pages", "pmu_events"
+    ]
+  },
+  "notes": "事件语义正向控制，不是容量实验：512KiB=128 页应近零 walk，16MiB=4096 随机页应产生规模 walk（计划 docs/superpowers/plans/2026-09-28-sm8650-pmu-positive-control.md）。事件编码依据 ARM-software/data pmu/cortex-x4.json。"
+}
