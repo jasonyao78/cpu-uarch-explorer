@@ -13,6 +13,7 @@ FakeExecutor 维护可变 governor 状态；锁为假锁；store 用临时目录
 
 import tempfile
 import unittest
+import re
 from pathlib import Path
 
 from runner.environment.coordinator import (EnvironmentError_,
@@ -67,15 +68,31 @@ class FakeAdbExecutor(AdbExecutor):
 
     def __init__(self, governor="walt", su_ok=True):
         self.governor = governor
+        self.min_khz = 556800
+        self.max_khz = 2265600
         self.su_ok = su_ok
 
     def execute(self, argv, command_prefix=()):
         cmd = " ".join(str(a) for a in argv)
+        if "cpu_uarch_cpufreq_inspect_v1" in cmd:
+            return ExecutionResult(
+                0, f"policy0|{self.governor}|{self.min_khz}|{self.max_khz}\n", "", "fake")
         if cmd.startswith("cat") and "scaling_governor" in cmd:
             return ExecutionResult(0, self.governor + "\n", "", "fake")
         if cmd.startswith("su -c"):
             if not self.su_ok:
                 return ExecutionResult(1, "", "su: permission denied", "fake")
+            if "cpu_uarch_cpufreq_restore_v1" in cmd:
+                base = r"/sys/devices/system/cpu/cpufreq/policy0/"
+                min_match = re.search(rf"echo (\d+) > {base}scaling_min_freq", cmd)
+                max_match = re.search(rf"echo (\d+) > {base}scaling_max_freq", cmd)
+                gov_match = re.search(rf"echo ([A-Za-z0-9_-]+) > {base}scaling_governor", cmd)
+                if not (min_match and max_match and gov_match):
+                    return ExecutionResult(1, "", "malformed restore", "fake")
+                self.min_khz = int(min_match.group(1))
+                self.max_khz = int(max_match.group(1))
+                self.governor = gov_match.group(1)
+                return ExecutionResult(0, "", "", "fake")
             parts = cmd.split()
             value = parts[parts.index("echo") + 1]
             if any(ch in value for ch in "/ ;|&$`"):
@@ -83,6 +100,43 @@ class FakeAdbExecutor(AdbExecutor):
             self.governor = value
             return ExecutionResult(0, "", "", "fake")
         return ExecutionResult(1, "", "unscripted command", "fake")
+
+
+class FakeMultiPolicyAdbExecutor(AdbExecutor):
+    """四 policy 假设备：覆盖异构 governor/min/max 的精确恢复契约。"""
+
+    def __init__(self):
+        self.policies = {
+            "policy0": {"governor": "walt", "min_khz": 556800, "max_khz": 2265600},
+            "policy2": {"governor": "schedutil", "min_khz": 614400, "max_khz": 2707200},
+            "policy5": {"governor": "walt", "min_khz": 499200, "max_khz": 2707200},
+            "policy7": {"governor": "powersave", "min_khz": 672000, "max_khz": 2745600},
+        }
+
+    def execute(self, argv, command_prefix=()):
+        cmd = " ".join(str(a) for a in argv)
+        if cmd.startswith("cat") and "cpu0/cpufreq/scaling_governor" in cmd:
+            return ExecutionResult(0, self.policies["policy0"]["governor"] + "\n", "", "fake")
+        if "cpu_uarch_cpufreq_inspect_v1" in cmd:
+            rows = [f"{name}|{state['governor']}|{state['min_khz']}|{state['max_khz']}"
+                    for name, state in sorted(self.policies.items())]
+            return ExecutionResult(0, "\n".join(rows) + "\n", "", "fake")
+        if cmd.startswith("su -c") and "scaling_governor" in cmd:
+            if "cpu_uarch_cpufreq_restore_v1" in cmd:
+                for field, key in (("scaling_min_freq", "min_khz"),
+                                   ("scaling_max_freq", "max_khz"),
+                                   ("scaling_governor", "governor")):
+                    pattern = rf"echo ([^ ;]+) > /sys/devices/system/cpu/cpufreq/(policy\d+)/{field}"
+                    for value, policy in re.findall(pattern, cmd):
+                        self.policies[policy][key] = int(value) if key.endswith("khz") else value
+            else:
+                match = re.search(r"echo ([^ ;]+) > (?:.*scaling_governor|\$c)", cmd)
+                if not match:
+                    return ExecutionResult(1, "", "missing governor value", "fake")
+                for state in self.policies.values():
+                    state["governor"] = match.group(1)
+            return ExecutionResult(0, "", "", "fake")
+        return ExecutionResult(1, "", "unscripted: " + cmd, "fake")
 
 
 class TestEnvironmentTx(unittest.TestCase):
@@ -121,9 +175,11 @@ class TestEnvironmentTx(unittest.TestCase):
         ex = FakeEnvExecutor(sudo_ok=False)
         with self.assertRaises(EnvironmentError_) as cm:
             self._tx(ex, lambda: None)
-        self.assertEqual(cm.exception.code, "env-apply-failed")
+        # 非零退出不能证明远端没有部分写入；恢复也无法执行时必须升级为
+        # restore-failed 并保留阻塞 journal，不能假装环境已知干净。
+        self.assertEqual(cm.exception.code, "env-restore-failed")
         self.assertEqual(ex.governor, "powersave")  # 系统未被改变
-        self.assertEqual(self.store.unfinished(), [])  # apply-failed 是终态
+        self.assertEqual(len(self.store.unfinished()), 1)
 
     def test_unfinished_tx_blocks_new_tx(self):
         ex = FakeEnvExecutor()
@@ -181,8 +237,9 @@ class TestAndroidGovernorTx(unittest.TestCase):
         ex = FakeAdbExecutor(su_ok=False)
         with self.assertRaises(EnvironmentError_) as cm:
             self._tx(ex)
-        self.assertEqual(cm.exception.code, "env-apply-failed")
+        self.assertEqual(cm.exception.code, "env-restore-failed")
         self.assertEqual(ex.governor, "walt")
+        self.assertEqual(len(self.store.unfinished()), 1)
 
     def test_linux_branch_rejects_su_form(self):
         # isinstance 分支保证：Linux 执行器永不收到 su -c——经 sudo 脚本路径成功
@@ -195,6 +252,18 @@ class TestAndroidGovernorTx(unittest.TestCase):
         with self.assertRaises(EnvironmentError_) as cm:
             self._tx(ex, specs=("governor=performance; rm -rf /",))
         self.assertEqual(cm.exception.code, "env-invalid-request")
+
+    def test_all_policy_state_is_restored_exactly(self):
+        ex = FakeMultiPolicyAdbExecutor()
+        before = {name: dict(state) for name, state in ex.policies.items()}
+
+        def assert_applied():
+            self.assertEqual({state["governor"] for state in ex.policies.values()},
+                             {"performance"})
+            return {"ok": 1}
+
+        self.assertEqual(self._tx(ex, work=assert_applied), {"ok": 1})
+        self.assertEqual(ex.policies, before)
 
 
 class FakeAdbThermalExecutor(AdbExecutor):
@@ -282,6 +351,37 @@ class TestThermalDaemonTx(unittest.TestCase):
         self._tx(combined, specs=("governor=performance", "thermal=stopped"))
         self.assertEqual(combined.governor, "walt")       # governor 已 restore
         self.assertEqual(combined.svc_state, "running")   # thermal 已 restore
+
+    def test_second_controller_failure_restores_first_mutation(self):
+        class Combined(FakeAdbExecutor, FakeAdbThermalExecutor):
+            pass
+
+        combined = Combined.__new__(Combined)
+        FakeAdbExecutor.__init__(combined, governor="walt")
+        combined.svc_state = "running"
+        governor_execute = combined.execute
+
+        def dispatch(argv, command_prefix=()):
+            cmd = " ".join(str(a) for a in argv)
+            if "getprop init.svc.mi_thermald" in cmd:
+                return ExecutionResult(0, combined.svc_state + "\n", "", "fake")
+            if cmd == "su -c stop mi_thermald":
+                return ExecutionResult(1, "", "simulated thermal apply failure", "fake")
+            if cmd == "su -c start mi_thermald":
+                combined.svc_state = "running"
+                return ExecutionResult(0, "", "", "fake")
+            return governor_execute(argv, command_prefix)
+
+        combined.execute = dispatch
+        with self.assertRaises(EnvironmentError_) as cm:
+            self._tx(combined, specs=("governor=performance", "thermal=stopped"))
+        self.assertEqual(cm.exception.code, "env-apply-failed")
+        self.assertEqual(combined.governor, "walt")
+        journal_path = next(iter(self.store.root.glob("*.json")))
+        journal = self.store.load(journal_path.stem)
+        self.assertEqual(journal.state, "restored")
+        self.assertTrue(journal.mutations[1].apply_started)
+        self.assertIn("simulated thermal apply failure", journal.mutations[1].apply_error)
 
 
 class TestReconcileAndSpecs(unittest.TestCase):

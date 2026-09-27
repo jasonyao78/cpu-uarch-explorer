@@ -1,10 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
-"""事务协调器：锁 → journal(before) → apply → verify → work() → 逆序 restore。
+"""事务协调器：锁 → journal(before/intent) → apply → verify → work() → 逆序 restore。
 
 GB10 模型重实现的接线层（OI-9 裁定）。互斥两层：journal 未完成事务
 阻塞（单操作者假设的硬互斥）+ 目标机 flock 劝告性检查（跨工具最佳
 努力；持有期间防止别的 shell 改 governor）。中断（SIGINT）经
 KeyboardInterrupt 进入恢复路径后重抛；SIGTERM 不转换（已知简化）。
+
+每条 mutation 在 apply 前持久化 before 与 apply_started 意图。非零返回也
+不能证明目标没有部分写入，因此 apply 失败会保守地逆序恢复所有已开始项；
+恢复失败的 journal 保持 unfinished，阻塞后续 mutation，等待人工 reconcile。
 
 锁实现：local = fcntl.flock 本机文件；ssh = 后台 ssh + 远端 flock
 持有进程（ssh 断连 → 远端 SIGHUP → 锁释放）。锁接口可注入（测试用
@@ -19,7 +23,7 @@ from pathlib import Path
 
 from ..errors import RunnerError
 from ..executor import make_executor
-from .controllers import make_controller
+from .controllers import controller_from_key, make_controller
 from .journal import Journal, JournalStore, Mutation, default_store
 
 
@@ -101,38 +105,52 @@ def _default_lock(platform: dict):
     return _LocalFlock(default_store().root)
 
 
-def _apply_all(executor, journal: Journal, specs: list[str]) -> None:
+def _apply_all(executor, journal: Journal, specs: list[str], store: JournalStore) -> None:
     journal.transition("applying")
+    store.save(journal)
     for spec in specs:
-        controller, requested = make_controller(spec)
-        before = controller.inspect(executor)  # 变更前实际值：restore 的依据
-        journal.mutations.append(Mutation(controller=controller.key, requested=requested, before=before))
+        try:
+            controller, requested = make_controller(spec)
+            controller.validate(requested)
+            before = controller.inspect(executor)  # 变更前实际值：restore 的依据
+        except RunnerError as e:
+            raise EnvironmentError_(e.code, str(e)) from e
+        mutation = Mutation(controller=controller.key, requested=requested, before=before)
+        journal.mutations.append(mutation)
+        store.save(journal)  # 先记 before，再记录即将开始 apply 的意图
+        mutation.apply_started = True
+        store.save(journal)
         try:
             controller.apply(executor, requested)
             after = controller.inspect(executor)
         except RunnerError as e:
-            journal.mutations[-1].apply_error = str(e)
-            journal.transition("apply-failed")
+            mutation.apply_error = str(e)
+            store.save(journal)
             # 统一提升为环境事务错误家族（code/message 保留），CLI 与测试
             # 面对单一异常类型
             raise EnvironmentError_(e.code, str(e)) from e
-        journal.mutations[-1].after = after
+        mutation.after = after
+        store.save(journal)
         if not controller.verify(executor, requested):
-            journal.transition("apply-failed")
+            mutation.apply_error = f"requested {requested!r} but actual {after!r}"
+            store.save(journal)
             raise EnvironmentError_("env-verify-failed",
                                     f"{controller.key}: requested {requested!r} but actual {after!r}")
     journal.transition("applied")
+    store.save(journal)
 
 
 def _restore_all(executor, journal: Journal) -> None:
     journal.transition("restoring")
     failures = []
     for m in reversed(journal.mutations):  # 逆序恢复（GB10 模型）
-        if not m.after:
-            continue  # apply 未成功的不碰
-        controller, _ = make_controller(f"{m.controller.split('.')[-1]}={m.requested}")
+        if not m.apply_started:
+            continue
+        controller = controller_from_key(m.controller)
         try:
             controller.apply(executor, m.before)
+            if not controller.verify(executor, m.before):
+                failures.append(f"{m.controller}: restore verification failed")
         except RunnerError as e:
             failures.append(f"{m.controller}: {e}")
     journal.transition("restored" if not failures else "restore-failed")
@@ -165,11 +183,20 @@ def execute_environment_tx(platform: dict, specs: list[str], work, *,
     try:
         store.save(journal)
         try:
-            _apply_all(executor, journal, specs)
-        except BaseException:
-            store.save(journal)  # apply-failed 终态必须落盘，否则 unfinished 永久阻塞
+            _apply_all(executor, journal, specs, store)
+        except BaseException as apply_error:
+            if any(m.apply_started for m in journal.mutations):
+                try:
+                    _restore_all(executor, journal)
+                except BaseException as restore_error:
+                    store.save(journal)
+                    raise EnvironmentError_(
+                        "env-restore-failed",
+                        f"apply failed: {apply_error} | rollback failed: {restore_error}") from apply_error
+            else:
+                journal.transition("apply-failed")
+            store.save(journal)
             raise
-        store.save(journal)
         try:
             result = work()
         except BaseException:
@@ -187,7 +214,7 @@ def execute_environment_tx(platform: dict, specs: list[str], work, *,
 
 
 def restore_transaction(tx_id: str, platform: dict, *, store: JournalStore | None = None,
-                        executor=None) -> None:
+                        executor=None, lock=None) -> None:
     """崩溃后人工重放：按 journal 的 before 值逆序恢复（幂等：仅处理
     after 已写入的 mutation；已 restored 的 journal 直接返回）。"""
     store = store or default_store()
@@ -195,7 +222,7 @@ def restore_transaction(tx_id: str, platform: dict, *, store: JournalStore | Non
     if journal.state == "restored":
         return
     executor = executor or make_executor(platform)
-    lock = _default_lock(platform)
+    lock = lock if lock is not None else _default_lock(platform)
     lock.acquire()
     try:
         _restore_all(executor, journal)
@@ -219,8 +246,6 @@ def reconcile_unfinished(platform: dict, *, store: JournalStore | None = None,
     for journal in store.unfinished():
         lock.acquire()
         try:
-            if journal.state == "applying":
-                journal.transition("applied")  # 已过白名单：applying→applied
             _restore_all(executor, journal)
             store.save(journal)
         except EnvironmentError_:

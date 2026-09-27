@@ -21,12 +21,13 @@ from pathlib import Path
 
 from ..records import now_iso, write_json_atomic
 
-_TERMINAL = ("restored", "restore-failed", "apply-failed")
+_TERMINAL = ("restored", "apply-failed")
 _TRANSITIONS = {
     "created": {"applying", "apply-failed"},
-    "applying": {"applied", "apply-failed"},
+    "applying": {"applied", "apply-failed", "restoring"},
     "applied": {"restoring"},
     "restoring": {"restored", "restore-failed"},
+    "restore-failed": {"restoring"},
 }
 
 
@@ -38,6 +39,9 @@ class Mutation:
     before: str
     after: str = ""
     apply_error: str = ""
+    # 持久化的保守恢复标记：在调用 controller.apply 前写为 True。即使
+    # 进程在 apply 与 after 快照之间中断，下次 reconcile 也会回写 before。
+    apply_started: bool = False
 
 
 @dataclass
@@ -74,9 +78,18 @@ class JournalStore:
 
     def load(self, tx_id: str) -> Journal:
         data = json.loads((self.root / f"{tx_id}.json").read_text(encoding="utf-8"))
+        mutations = []
+        for raw in data.get("mutations", []):
+            item = dict(raw)
+            # v1 journal 没有 apply_started；存在 after 即证明 apply 已完成。
+            if item.get("after"):
+                item["apply_started"] = True
+            else:
+                item.setdefault("apply_started", False)
+            mutations.append(Mutation(**item))
         return Journal(tx_id=data["tx_id"], platform_id=data["platform_id"],
                        created_at=data["created_at"], state=data["state"],
-                       mutations=[Mutation(**m) for m in data.get("mutations", [])],
+                       mutations=mutations,
                        note=data.get("note", ""))
 
     def unfinished(self) -> list[Journal]:

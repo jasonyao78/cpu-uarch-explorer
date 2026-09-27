@@ -6,13 +6,16 @@ apply 经执行器通道执行，可能因 sudo 权限失败——**非交互通
 密码**，失败返回结构化提示（RunnerError），journal 记录 before 值后
 安全退出（系统未被改变，无需 restore）。
 
-CpufreqGovernorController：写全部 CPU 的 scaling_governor（测量可能
-迁移或扩核；单核写会留半新半旧状态）。requires_privilege 为 True——
-CLI 层强制 --allow-mutation 门控。
+CpufreqGovernorController：Linux 保留包装脚本接口；Android 以 policy 为
+单位采集 governor/min/max 的完整 before 状态，只改变 governor，并在恢复
+时逐 policy 回写原值（单读 cpu0 会掩盖半新半旧状态）。requires_privilege
+为 True——CLI 层强制 --allow-mutation 门控。
 """
 
 from __future__ import annotations
 
+import json
+import re
 from typing import Protocol
 
 from ..errors import RunnerError
@@ -23,6 +26,7 @@ class Controller(Protocol):
     requires_privilege: bool
 
     def inspect(self, executor) -> str: ...
+    def validate(self, requested: str) -> None: ...
     def apply(self, executor, requested: str) -> str: ...  # 成功返回 ""，失败抛 RunnerError
 
 
@@ -30,8 +34,9 @@ class CpufreqGovernorController:
     """Linux cpufreq governor 变更（第一个受控项，2026-09-25 讨论裁定）。
 
     提权通道按执行器分流：Linux = sudoers 白名单包装脚本（最小权限）；
-    Android = su -c 直写 sysfs（KernelSU LKM，无白名单脚本概念——validate
-    已拦截 shell 元字符，注入安全）。"""
+    Android = su -c 直写 sysfs（KernelSU LKM，无白名单脚本概念）。Android
+    inspect 返回 canonical JSON；该 JSON 只供 journal 的内部 restore 路径，
+    用户请求仍是经过白名单校验的 governor 名。"""
     key = "cpufreq.governor"
     requires_privilege = True
     _GOVERNOR = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
@@ -39,8 +44,67 @@ class CpufreqGovernorController:
         "for c in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do "
         "echo {gov} > $c 2>/dev/null || exit 1; done"
     )
+    _ANDROID_INSPECT = (
+        ": cpu_uarch_cpufreq_inspect_v1; "
+        "for p in /sys/devices/system/cpu/cpufreq/policy*; do "
+        "n=${p##*/}; g=$(cat $p/scaling_governor) || exit 1; "
+        "lo=$(cat $p/scaling_min_freq) || exit 1; "
+        "hi=$(cat $p/scaling_max_freq) || exit 1; "
+        "printf '%s|%s|%s|%s\\n' \"$n\" \"$g\" \"$lo\" \"$hi\"; done"
+    )
+
+    @staticmethod
+    def _valid_governor(value: str) -> bool:
+        return bool(re.fullmatch(r"[A-Za-z0-9_-]+", value))
+
+    @classmethod
+    def _parse_android_state(cls, value: str) -> dict[str, dict[str, int | str]]:
+        try:
+            raw = json.loads(value)
+        except (TypeError, json.JSONDecodeError) as exc:
+            raise RunnerError("env-invalid-request", "invalid cpufreq restore state JSON") from exc
+        if not isinstance(raw, dict) or not raw:
+            raise RunnerError("env-invalid-request", "cpufreq restore state must be a non-empty object")
+        state: dict[str, dict[str, int | str]] = {}
+        for policy, fields in raw.items():
+            if not re.fullmatch(r"policy\d+", str(policy)) or not isinstance(fields, dict):
+                raise RunnerError("env-invalid-request", f"invalid cpufreq policy state: {policy!r}")
+            governor = fields.get("governor")
+            min_khz = fields.get("min_khz")
+            max_khz = fields.get("max_khz")
+            if not isinstance(governor, str) or not cls._valid_governor(governor):
+                raise RunnerError("env-invalid-request", f"unsafe governor value: {governor!r}")
+            if (isinstance(min_khz, bool) or not isinstance(min_khz, int) or min_khz <= 0 or
+                    isinstance(max_khz, bool) or not isinstance(max_khz, int) or max_khz <= 0 or
+                    min_khz > max_khz):
+                raise RunnerError("env-invalid-request", f"invalid cpufreq limits for {policy}")
+            state[str(policy)] = {"governor": governor,
+                                  "min_khz": min_khz, "max_khz": max_khz}
+        return state
+
+    def _inspect_android(self, executor) -> str:
+        res = executor.execute(["su", "-c", self._ANDROID_INSPECT])
+        if res.returncode != 0:
+            raise RunnerError("env-inspect-failed",
+                              f"cannot inspect Android cpufreq policies: {res.stderr.strip()[:160]}")
+        state: dict[str, dict[str, int | str]] = {}
+        for line in res.stdout.splitlines():
+            parts = line.strip().split("|")
+            if len(parts) != 4 or not re.fullmatch(r"policy\d+", parts[0]):
+                raise RunnerError("env-inspect-failed", f"malformed cpufreq policy row: {line!r}")
+            policy, governor, min_text, max_text = parts
+            if not self._valid_governor(governor) or not min_text.isdigit() or not max_text.isdigit():
+                raise RunnerError("env-inspect-failed", f"malformed cpufreq policy row: {line!r}")
+            state[policy] = {"governor": governor,
+                             "min_khz": int(min_text), "max_khz": int(max_text)}
+        if not state:
+            raise RunnerError("env-inspect-failed", "no Android cpufreq policies found")
+        return json.dumps(state, sort_keys=True, separators=(",", ":"))
 
     def inspect(self, executor) -> str:
+        from ..executor.adb import AdbExecutor
+        if isinstance(executor, AdbExecutor):
+            return self._inspect_android(executor)
         res = executor.execute(["cat", self._GOVERNOR])
         if res.returncode != 0:
             raise RunnerError("env-inspect-failed",
@@ -48,14 +112,39 @@ class CpufreqGovernorController:
         return res.stdout.strip()
 
     def validate(self, requested: str) -> None:
-        if not requested or any(ch in requested for ch in "/ ;|&$`"):
+        if requested.startswith("{"):
+            self._parse_android_state(requested)
+            return
+        if not self._valid_governor(requested):
             raise RunnerError("env-invalid-request", f"unsafe governor value: {requested!r}")
 
     def apply(self, executor, requested: str) -> str:
         self.validate(requested)
         from ..executor.adb import AdbExecutor  # 延迟导入：避免 controllers→executor 环
         if isinstance(executor, AdbExecutor):
-            res = executor.execute(["su", "-c", self._ANDROID_WRITE.format(gov=requested)])
+            if requested.startswith("{"):
+                target = self._parse_android_state(requested)
+                current = self._parse_android_state(self._inspect_android(executor))
+                if set(target) != set(current):
+                    raise RunnerError("env-apply-failed",
+                                      "cpufreq policy set changed since transaction start")
+                commands = [": cpu_uarch_cpufreq_restore_v1"]
+                for policy in sorted(target, key=lambda p: int(p.removeprefix("policy"))):
+                    wanted = target[policy]
+                    present = current[policy]
+                    base = f"/sys/devices/system/cpu/cpufreq/{policy}"
+                    limit_writes = [("scaling_min_freq", wanted["min_khz"]),
+                                    ("scaling_max_freq", wanted["max_khz"])]
+                    if wanted["min_khz"] > present["max_khz"]:
+                        limit_writes.reverse()
+                    for field, value in limit_writes:
+                        commands.append(f"echo {value} > {base}/{field} || exit 1")
+                    commands.append(
+                        f"echo {wanted['governor']} > {base}/scaling_governor || exit 1")
+                script = "; ".join(commands)
+            else:
+                script = self._ANDROID_WRITE.format(gov=requested)
+            res = executor.execute(["su", "-c", script])
             if res.returncode != 0:
                 raise RunnerError(
                     "env-apply-failed",
@@ -77,20 +166,16 @@ class CpufreqGovernorController:
 
     def verify(self, executor, expected: str) -> bool:
         try:
-            return self.inspect(executor) == expected
+            actual = self.inspect(executor)
+            from ..executor.adb import AdbExecutor
+            if isinstance(executor, AdbExecutor):
+                state = self._parse_android_state(actual)
+                if expected.startswith("{"):
+                    return state == self._parse_android_state(expected)
+                return all(fields["governor"] == expected for fields in state.values())
+            return actual == expected
         except RunnerError:
             return False
-
-
-def make_controller(spec: str) -> tuple[Controller, str]:
-    """spec 'governor=performance' → (controller, requested)。新增受控项
-    在此登记——与 make_executor 同一"唯一选择点"纪律。"""
-    key, _, value = spec.partition("=")
-    if key == "governor":
-        return CpufreqGovernorController(), value
-    if key == "thermal":
-        return SvcThermalDaemonController(), value
-    raise RunnerError("env-unknown-controller", f"unsupported env spec: {spec!r} (supported: governor=<name>, thermal=stopped|running)")
 
 
 class SvcThermalDaemonController:
@@ -141,3 +226,29 @@ class SvcThermalDaemonController:
             return self.inspect(executor) == expected
         except RunnerError:
             return False
+
+
+_CONTROLLERS = {
+    "governor": CpufreqGovernorController,
+    "cpufreq.governor": CpufreqGovernorController,
+    "thermal": SvcThermalDaemonController,
+    "svc.thermal": SvcThermalDaemonController,
+}
+
+
+def controller_from_key(key: str) -> Controller:
+    """Resolve both CLI aliases and durable canonical journal keys."""
+    try:
+        return _CONTROLLERS[key]()
+    except KeyError as exc:
+        raise RunnerError(
+            "env-unknown-controller",
+            f"unsupported environment controller: {key!r}") from exc
+
+
+def make_controller(spec: str) -> tuple[Controller, str]:
+    """Parse ``alias=value`` while journals retain each controller's key."""
+    key, sep, value = spec.partition("=")
+    if not sep:
+        raise RunnerError("env-invalid-request", f"environment spec lacks '=': {spec!r}")
+    return controller_from_key(key), value
