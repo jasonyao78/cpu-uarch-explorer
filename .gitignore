@@ -1,5 +1,6 @@
 # Build artifacts: single entry build/<target-triple>/<profile> (ADR-0008)
 build/
+.worktrees/
 *.o
 *.out
 
