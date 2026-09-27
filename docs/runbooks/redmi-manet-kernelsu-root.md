@@ -83,21 +83,25 @@ Repacking boot image
 
 这表明本次采用的是 `KernelSU LKM mode`（Loadable Kernel Module）：KernelSU 的内核功能不是预先静态编译到设备原始内核中，而是通过与当前 GKI/KMI 兼容的内核模块，在启动过程中加载到内核。
 
-整体启动和 Root 授权路径：
+**深入：LKM 究竟如何被加载（当前上游 `ksuinit` 路径）**。当前主线的加载机制**不是**修改 kernel cmdline，也**不是**追加普通 `init.rc` service，而是修补 init_boot ramdisk，让 `ksuinit` 临时充当第一阶段的 `/init`：
 
-```text
-Bootloader 启动当前槽内核
-→ 加载当前槽 init_boot
-→ 启动阶段装载 KernelSU LKM 模块
-→ 注册 KernelSU 内核功能，初始化用户空间协同组件
-→ Manager 配置授权列表和 App Profile
-→ 进程发起 su 请求
-→ 内核校验调用者身份和授权策略
-→ 已授权：设置受控 UID/GID/capabilities，切换 SELinux 安全上下文
-→ 未授权：拒绝
+1. 内核完成初始化、解包 ramdisk 后执行 `/init`（PID 1）——修补后这个入口是 `ksuinit`；真正的 init 被保留为 `/init.real`（后备路径 `/system/bin/init`）；
+2. `ksuinit` 初始化 `/dev/kmsg` 日志、挂载 `/proc`、检查内核中是否已有 KernelSU（`has_kernelsu()`）——避免对已静态编入内核或已加载的场景重复加载；
+3. 若尚未加载：读取 `/kernelsu.ko` 与 `/ksu_config`，**由 ksuinit 自身调用内核模块加载接口**（不是 shell 执行 `insmod`）——`.ko` 的 ELF 解析、vermagic/KMI 校验、符号解析、重定位均在内核完成；
+4. 加载完成后，`ksuinit` 删除 `/init` 链接、重建指向 `/init.real` 的链接，然后 **`execve("/init")` 把 PID 1 交还真正的 Android init**（非 fork——无额外进程层级），此后 Android init 才开始解析 `init.rc`。
+
+**为什么不走普通 `init.rc` 加载**：init.rc 路径要求 Android init 先启动并加载 SELinux policy、`insmod` 需对应 SELinux 权限、模块加载受签名/SELinux/内核配置限制；且 KernelSU 需要在更早阶段进入内核——在部分安全状态建立前完成加载，再由 `ksuinit` 透明移交。`/init` 包装器让"加载发生得足够早 + 完成后透明移交"同时成立。
+
+**实证方法**（对本文 patched 镜像可做的验证）：分别解包 stock 与 patched `init_boot`，对比 ramdisk 文件清单并检查关键条目：
+
+```bash
+cd stock_ramdisk && find . -print | sort > ../stock.list
+cd ../patched_ramdisk && find . -print | sort > ../patched.list
+cd .. && diff -u stock.list patched.list
+ls -l patched_ramdisk/init patched_ramdisk/init.real patched_ramdisk/kernelsu.ko patched_ramdisk/ksu_config
 ```
 
-不同 KernelSU 版本的内部接口和 hook 实现可能发生变化，因此不应把某个历史版本的单一 hook 点视为永久 ABI。稳定不变的核心逻辑是：
+稳定不变的核心逻辑是：
 
 1. KernelSU 的可信执行逻辑位于内核；
 2. Manager 负责配置授权策略，而不是直接赋予自身 Root；
@@ -174,6 +178,17 @@ Root 成功 ≠ 所有模块都会兼容或自动生效
 
 ---
 
+### 1.8 SELinux 的两层修改（深入）
+
+KernelSU 对 SELinux 的影响分两类，**不能混为一谈**：
+
+**第一层：扩展全局内存态策略。** SELinux 决策 = 主体 SID + 客体 SID + class + permission 查 `policydb`。KernelSU 上游 `kernel/selinux/`（`sepolicy.c` 操作 policydb/avtab，`rules.c` 注入规则）加锁后向**活动** policydb 增加 KernelSU 所需 type/allow/transition 规则，然后**刷新 AVC**（`avc_ss_reset` 等并发布策略更新通知）——否则旧的拒绝决策仍被缓存生效。这不是把 SELinux 设为 Permissive：**Enforcing 继续，策略被扩展**。
+
+**第二层：切换获准进程的 SID。** SELinux 内核比较用整数 SID 而非字符串。授权时 KernelSU（`selinux.c`：`security_secctx_to_secid`）把目标 context（如 `u:r:ksu:s0`）转换为 SID，写入为新进程准备的新 credentials 的安全结构，再 `commit_creds`——目标进程从原 domain 切换到 KernelSU Root domain。
+
+**修改的是磁盘上的 sepolicy 文件吗？主要不是。** 本次未刷写 `/system`、`/vendor` 的 sepolicy 文件；变化发生在内核活动 policydb、AVC 缓存与获准进程的 SID。重启后原始策略重新加载，KernelSU LKM 再次初始化并重新应用运行时扩展——即"**每次开机动态扩展内存态策略**"，而非永久覆写厂商 sepolicy。
+
+**安全本质**：SELinux 约束普通进程，但 KernelSU LKM 与 SELinux 内核代码同处 EL1 信任边界——它**有能力**添加极宽规则；是否只添加必要规则，需源码审计确认（`kernel/selinux/rules.c`）。
 ## 2. 安装前置条件（本次 LKM 方式的必要条件）
 
 以下前置条件是本次通过修补并刷写 `init_boot` 安装 KernelSU LKM 的必要条件。
@@ -221,6 +236,13 @@ Android GKI 官方说明：<https://source.android.com/docs/core/architecture/ke
 如果 Bootloader 仍然锁定，通常不能通过 fastboot 写入非官方签名的 patched image。
 
 需要区分"KernelSU 运行所需条件"和"通过 fastboot 安装 KernelSU 所需条件"：KernelSU 的内核代码本身并不以 Bootloader 解锁作为运行逻辑条件；但要将修改后的启动镜像写入量产设备，通常必须先解锁 Bootloader。对于已经由 ROM 或内核开发者预集成 KernelSU 的系统，不一定需要用户再次执行 fastboot 刷写。
+
+可把解锁理解为同时打开**两扇门**：
+
+- **写入门禁**：锁定 Bootloader 通常拒绝 fastboot 改写启动信任链分区（boot/init_boot/vendor_boot/vbmeta）——即使 patched 镜像已生成也写不进去；
+- **启动信任门禁**：AVB 以 vbmeta 中的公钥与分区摘要校验启动链。patched 镜像的 SHA-256 与 stock 不同（本文实测 `93bf…` vs `9c77…`），Locked 状态下不再匹配 OEM 信任链，典型结果是拒绝启动/红色错误状态/进入恢复，具体行为因 OEM 实现而异。
+
+`orange` 状态的准确含义：设备已解锁、系统完整性不再由锁定的 OEM 信任链完全保证，但 Bootloader **允许用户选择启动该软件**。这不等于"AVB 代码完全不运行"或"dm-verity 全部关闭"——本文不修改 vbmeta、不用 `--disable-verity` 即可启动，是该设备在 unlocked 状态下的行为，**不能推广到所有厂商**。
 
 ### 2.6 启动验证链必须允许当前启动状态
 
@@ -336,10 +358,11 @@ KernelSU 能够提供 Root 的根本原因是：**它将可信权限控制逻辑
 本次 LKM 流程的完整链路：
 
 ```text
-同版本 init_boot.img → Manager 注入兼容 KMI 的 LKM → 重打包生成 patched init_boot
-→ Bootloader 从 init_boot_b 启动 → 启动阶段加载 KernelSU LKM → 内核组件开始工作
-→ Manager 配置授权和 App Profile → 请求进程调用 su → 内核校验调用者身份
-→ 内核建立 UID 0 和相应安全上下文 → 命令在 u:r:ksu:s0 中运行
+Bootloader 解锁 → 允许 fastboot 改写 init_boot → 允许启动不匹配 OEM 签名的 patched init_boot
+→ 内核解包 patched ramdisk → ksuinit 作为临时 PID 1 执行 → ksuinit 加载 kernelsu.ko
+→ KernelSU 进入内核态 → ksuinit execve 真正 Android init → KernelSU 扩展内存态 SELinux policydb
+→ 刷新 AVC → 应用请求 Root → KernelSU 检查授权 → 建立 UID 0 credentials
+→ 设置 KernelSU 对应 SELinux SID → Root 进程在 Enforcing 状态下运行
 ```
 
 本次最终输出 `uid=0(root) gid=0(root) groups=0(root) context=u:r:ksu:s0`，证明上述链路已经实际生效。
@@ -360,6 +383,12 @@ KernelSU 官方资料：
 - Manager 身份管理代码：<https://github.com/tiann/KernelSU/tree/main/kernel/manager>
 - SELinux 代码：<https://github.com/tiann/KernelSU/tree/main/kernel/selinux>
 - 用户空间代码：<https://github.com/tiann/KernelSU/tree/main/userspace>
+- SELinux 策略注入（本文 §1.8 依据）：`kernel/selinux/sepolicy.c`、`rules.c`、`selinux.c`
+  <https://github.com/tiann/KernelSU/tree/main/kernel/selinux>
+- ksuinit 启动加载（本文 §1.3 依据）：`userspace/ksuinit/src/init.rs`、`main.rs`；`userspace/ksud/src/boot_patch.rs`
+- 内核初始化入口：`kernel/core/init.c` <https://github.com/tiann/KernelSU/tree/main/kernel/core>
+- Android Bootloader 锁定/解锁：<https://source.android.com/docs/core/architecture/bootloader/locking_unlocking>
+- Android Verified Boot 设备状态：<https://source.android.com/docs/security/features/verifiedboot/device-state>
 - 非 GKI 历史集成文档：<https://kernelsu.org/guide/how-to-integrate-for-non-gki.html>
 
 Android 官方资料：Generic Kernel Image <https://source.android.com/docs/core/architecture/kernel/generic-kernel-image>
