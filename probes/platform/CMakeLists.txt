@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
-# Platform-specific capability probes, scoped by backend id (the same
-# values as the `backend` enum in runner/schema/record.schema.json).
-# A subdir is added only when the build host matches that backend; this
-# keeps e.g. mach-specific probes out of Linux/Android cross builds.
+# Platform-specific capability probes, scoped by their narrowest platform API
+# boundary. A subdir is added only when the target OS provides that API; this
+# keeps Mach-specific probes out of Linux builds while allowing Linux UAPI
+# probes to be reused across x86-64, AArch64, and future RISC-V targets.
 if(APPLE)
     add_subdirectory(macos-arm64)
 endif()

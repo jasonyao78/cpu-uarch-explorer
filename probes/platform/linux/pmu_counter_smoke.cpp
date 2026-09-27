@@ -2,9 +2,11 @@
 // Linux perf counting-event smoke probe.
 //
 // This is deliberately a capability probe, not a cache-geometry benchmark.
-// It validates that one sysfs-named PMU/config can be opened, enabled, read,
-// and made to observe either an idle interval or a bounded streaming-read
-// workload. Qualcomm's downstream LLCC driver keeps a driver-side cumulative
+// It validates that one PMU/config can be opened, enabled, read, and made to
+// observe either an idle interval or a bounded streaming-read workload. The
+// PMU type may be resolved from a safe sysfs name or supplied explicitly when
+// sysfs discovery is outside the caller's privilege boundary. Qualcomm's
+// downstream LLCC driver keeps a driver-side cumulative
 // total, so PERF_EVENT_IOC_RESET cannot be assumed to make the next read zero:
 // the reported observation is always final - an immediate post-enable
 // baseline. The final read is deliberately issued while the event is still
@@ -37,6 +39,8 @@ constexpr size_t kCacheLineBytes = 64;
 
 struct Options {
     std::string pmu;
+    uint32_t type = 0;
+    bool type_set = false;
     uint64_t config = 0;
     bool config_set = false;
     std::string scope;
@@ -58,7 +62,8 @@ volatile uint64_t g_sink = 0;
 void usage(const char* program) {
     std::fprintf(
         stderr,
-        "usage: %s --pmu NAME --config N --scope cpu|thread [--cpu N] "
+        "usage: %s (--pmu NAME | --type N) --config N "
+        "--scope cpu|thread [--cpu N] "
         "--workload idle|stream-read --duration-ms N --buffer-mib N\n",
         program);
 }
@@ -107,6 +112,7 @@ Options parse_options(int argc, char** argv) {
     Options options;
     enum : int {
         kPmu = 1000,
+        kType,
         kConfig,
         kScope,
         kCpu,
@@ -116,6 +122,7 @@ Options parse_options(int argc, char** argv) {
     };
     const option long_options[] = {
         {"pmu", required_argument, nullptr, kPmu},
+        {"type", required_argument, nullptr, kType},
         {"config", required_argument, nullptr, kConfig},
         {"scope", required_argument, nullptr, kScope},
         {"cpu", required_argument, nullptr, kCpu},
@@ -133,6 +140,15 @@ Options parse_options(int argc, char** argv) {
         case kPmu:
             options.pmu = optarg;
             break;
+        case kType: {
+            uint64_t parsed_type = 0;
+            if (!parse_u64(optarg, &parsed_type)
+                    || parsed_type > std::numeric_limits<uint32_t>::max())
+                die_usage(argv[0], "type must be a 32-bit unsigned integer");
+            options.type = static_cast<uint32_t>(parsed_type);
+            options.type_set = true;
+            break;
+        }
         case kConfig:
             if (!parse_u64(optarg, &options.config))
                 die_usage(argv[0], "config must be a base-0 unsigned integer");
@@ -165,7 +181,10 @@ Options parse_options(int argc, char** argv) {
 
     if (optind != argc)
         die_usage(argv[0], "unexpected positional argument");
-    if (!safe_pmu_name(options.pmu))
+    const bool pmu_set = !options.pmu.empty();
+    if (pmu_set == options.type_set)
+        die_usage(argv[0], "exactly one of --pmu or --type is required");
+    if (pmu_set && !safe_pmu_name(options.pmu))
         die_usage(argv[0], "pmu must contain only letters, digits, '.', '_' or '-'");
     if (!options.config_set)
         die_usage(argv[0], "--config is required");
@@ -292,10 +311,12 @@ int main(int argc, char** argv) {
     if (options.cpu_set && !pin_to_cpu(options.cpu))
         return runtime_error("sched_setaffinity", errno);
 
-    uint32_t pmu_type = 0;
-    int type_error = 0;
-    if (!read_pmu_type(options.pmu, &pmu_type, &type_error))
-        return unsupported("read-pmu-type", type_error);
+    uint32_t pmu_type = options.type;
+    if (!options.type_set) {
+        int type_error = 0;
+        if (!read_pmu_type(options.pmu, &pmu_type, &type_error))
+            return unsupported("read-pmu-type", type_error);
+    }
 
     const uint64_t mib = 1024ULL * 1024ULL;
     if (options.buffer_mib > std::numeric_limits<size_t>::max() / mib)
@@ -390,11 +411,13 @@ int main(int argc, char** argv) {
     const uint64_t time_enabled = final.time_enabled - initial.time_enabled;
     const uint64_t time_running = final.time_running - initial.time_running;
     std::printf(
-        "status=ok pmu=%s type=%u config=%llu scope=%s cpu=%d workload=%s "
+        "status=ok pmu=%s type_source=%s type=%u config=%llu "
+        "scope=%s cpu=%d workload=%s "
         "count_initial=%llu count_final=%llu count_delta=%llu "
         "time_enabled_ns=%llu time_running_ns=%llu bytes_read=%llu "
         "buffer_mib=%llu duration_ms=%llu\n",
-        options.pmu.c_str(), pmu_type,
+        options.type_set ? "explicit" : options.pmu.c_str(),
+        options.type_set ? "explicit" : "sysfs", pmu_type,
         static_cast<unsigned long long>(options.config), options.scope.c_str(),
         options.cpu_set ? options.cpu : -1, options.workload.c_str(),
         static_cast<unsigned long long>(initial.value),

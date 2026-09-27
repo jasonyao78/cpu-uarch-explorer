@@ -71,27 +71,48 @@ set_tests_properties(ptr_chase_rejects_conflicting_page_requests PROPERTIES WILL
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(PCS $<TARGET_FILE:pmu_counter_smoke>)
 
-  add_test(NAME pmu_counter_smoke_rejects_malformed_config
-           COMMAND ${PCS} --pmu software --config xyz --scope thread
-                   --workload idle --duration-ms 1 --buffer-mib 1)
-  set_tests_properties(pmu_counter_smoke_rejects_malformed_config PROPERTIES
-      WILL_FAIL TRUE FAIL_REGULAR_EXPRESSION "status=ok")
+  function(add_pmu_rejection_test name expected_regex)
+    add_test(NAME ${name}
+      COMMAND ${CMAKE_COMMAND}
+        "-DPROGRAM=${PCS}"
+        "-DEXPECT_REGEX=${expected_regex}"
+        "-DARGS=${ARGN}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/assert_nonzero.cmake")
+  endfunction()
 
-  add_test(NAME pmu_counter_smoke_rejects_zero_duration
-           COMMAND ${PCS} --pmu software --config 1 --scope thread
-                   --workload idle --duration-ms 0 --buffer-mib 1)
-  set_tests_properties(pmu_counter_smoke_rejects_zero_duration PROPERTIES
-      WILL_FAIL TRUE FAIL_REGULAR_EXPRESSION "status=ok")
-
-  add_test(NAME pmu_counter_smoke_rejects_unknown_workload
-           COMMAND ${PCS} --pmu software --config 1 --scope thread
-                   --workload guess --duration-ms 1 --buffer-mib 1)
-  set_tests_properties(pmu_counter_smoke_rejects_unknown_workload PROPERTIES
-      WILL_FAIL TRUE FAIL_REGULAR_EXPRESSION "status=ok")
-
-  add_test(NAME pmu_counter_smoke_requires_cpu_for_cpu_scope
-           COMMAND ${PCS} --pmu software --config 1 --scope cpu
-                   --workload idle --duration-ms 1 --buffer-mib 1)
-  set_tests_properties(pmu_counter_smoke_requires_cpu_for_cpu_scope PROPERTIES
-      WILL_FAIL TRUE FAIL_REGULAR_EXPRESSION "status=ok")
+  add_pmu_rejection_test(
+    pmu_counter_smoke_rejects_malformed_config
+    "config must be a base-0 unsigned integer"
+    --pmu software --config xyz --scope thread
+    --workload idle --duration-ms 1 --buffer-mib 1)
+  add_pmu_rejection_test(
+    pmu_counter_smoke_rejects_zero_duration
+    "duration-ms must be in 1..600000"
+    --pmu software --config 1 --scope thread
+    --workload idle --duration-ms 0 --buffer-mib 1)
+  add_pmu_rejection_test(
+    pmu_counter_smoke_rejects_unknown_workload
+    "workload must be idle or stream-read"
+    --pmu software --config 1 --scope thread
+    --workload guess --duration-ms 1 --buffer-mib 1)
+  add_pmu_rejection_test(
+    pmu_counter_smoke_requires_cpu_for_cpu_scope
+    "cpu scope requires --cpu"
+    --pmu software --config 1 --scope cpu
+    --workload idle --duration-ms 1 --buffer-mib 1)
+  add_pmu_rejection_test(
+    pmu_counter_smoke_rejects_missing_type_source
+    "exactly one of --pmu or --type is required"
+    --config 1 --scope thread --workload idle
+    --duration-ms 1 --buffer-mib 1)
+  add_pmu_rejection_test(
+    pmu_counter_smoke_rejects_conflicting_type_sources
+    "exactly one of --pmu or --type is required"
+    --pmu software --type 1 --config 1 --scope thread
+    --workload idle --duration-ms 1 --buffer-mib 1)
+  add_pmu_rejection_test(
+    pmu_counter_smoke_rejects_type_overflow
+    "type must be a 32-bit unsigned integer"
+    --type 4294967296 --config 1 --scope thread
+    --workload idle --duration-ms 1 --buffer-mib 1)
 endif()
