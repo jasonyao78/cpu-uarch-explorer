@@ -49,11 +49,26 @@
   不代表测量区间的精确硬件频率。L1 换算后接近整数周期也只能作为一致性
   支持，不能反向证明频率准确；禁止据此把 derived cycles 当作实测值。
 
-## 6. 数据修正留痕
+## 6. 受控环境与失效语义
+
+- “受控安静态”不等于“纯净态”：锁 governor、Doze、飞行模式或停服务都会
+  改变被测系统。报告必须列出请求状态、before/after 实测状态和恢复结果。
+- host 级 mutation 必须走 durable journal：inspect → 持久化 before/apply
+  intent → apply → verify → 测量 → 逆序 restore → verify。非零退出不能证明
+  没有部分写入；恢复失败时后续实验必须被阻塞。
+- Android 默认 baseline 保持 thermal/perf 服务运行，不 force-idle、不杀
+  任意后台包、不 drop caches、不改飞行模式或 scaling min/max。以上条件只能
+  作为单独 profile 和 A/B 条件。
+- required 状态证据缺失或前置门禁失败时不得执行 probe；测量后状态漂移时
+  raw 可保留审计，但数值 metrics 必须作废。相机状态只看 Active Camera
+  Clients 当前区块，不能由历史事件或 HAL 枚举推断。
+- SM8650 操作流程见 `docs/runbooks/redmi-controlled-quiet-state-v2.md`。
+
+## 7. 数据修正留痕
 
 - **禁止静默改数**：旧值 → 新值 → 原因必须写入 revision history（参考 SUPERSEDED_PARTIAL 模式）。
 - 修正后旧数据保持可溯（git 历史 + revision 表）。
 
-## 7. 报告模板（每个测量数字必须携带）
+## 8. 报告模板（每个测量数字必须携带）
 
 温度模式 / 页策略 / 重复次数与统计量 / 置信度 / 核型与频率 / 证据等级 / 测量日期。

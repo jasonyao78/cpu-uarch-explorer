@@ -8,7 +8,7 @@ from contextlib import redirect_stdout
 from types import SimpleNamespace
 from unittest import mock
 
-from runner.cli import (_cmd_plan, _cmd_run, _resolve_environment_profile,
+from runner.cli import (_cmd_env, _cmd_plan, _cmd_run, _resolve_environment_profile,
                         _resolve_environment_specs)
 from runner.errors import RunnerError
 
@@ -109,6 +109,39 @@ class TestEnvironmentProfileCLI(unittest.TestCase):
             with self.assertRaises(RunnerError) as cm:
                 _cmd_run(self._run_args(allow_mutation=False))
         self.assertEqual(cm.exception.code, "env-mutation-not-allowed")
+
+    def test_env_inspect_is_read_only_and_reports_violations(self):
+        args = Namespace(platform="p.json", action="inspect", tx=None,
+                         environment_profile="controlled-baseline")
+        snapshot = {"schema_version": "1.0"}
+        executor = object()
+        with (mock.patch("runner.cli.load_platform", return_value=PLATFORM),
+              mock.patch("runner.cli.make_executor", return_value=executor),
+              mock.patch("runner.environment.collect_environment_state",
+                         return_value=snapshot) as collect,
+              mock.patch("runner.environment.evaluate_preconditions",
+                         return_value=["thermal-over-limit"])):
+            out = io.StringIO()
+            with redirect_stdout(out):
+                self.assertEqual(_cmd_env(args), 1)
+        collect.assert_called_once_with(executor, PROFILE_POLICY)
+        self.assertIn('"valid": false', out.getvalue())
+        self.assertIn('"thermal-over-limit"', out.getvalue())
+
+    def test_env_inspect_treats_declared_governor_change_as_covered(self):
+        args = Namespace(platform="p.json", action="inspect", tx=None,
+                         environment_profile="controlled-baseline")
+        with (mock.patch("runner.cli.load_platform", return_value=PLATFORM),
+              mock.patch("runner.cli.make_executor", return_value=object()),
+              mock.patch("runner.environment.collect_environment_state",
+                         return_value={"schema_version": "1.0"}),
+              mock.patch("runner.environment.evaluate_preconditions",
+                         return_value=["cpufreq-governor-mismatch:policy7"])):
+            out = io.StringIO()
+            with redirect_stdout(out):
+                self.assertEqual(_cmd_env(args), 0)
+        self.assertIn('"ready_for_transaction": true', out.getvalue())
+        self.assertIn('"covered_by_mutation"', out.getvalue())
 
 
 if __name__ == "__main__":

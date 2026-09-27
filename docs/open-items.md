@@ -102,7 +102,8 @@
 
 | 项 | 内容 | 归属/触发条件 | 状态 |
 |---|---|---|---|
-| P0 warmup/页策略正确性 | `warmup_passes` 完整遍历；THP 请求与 smaps 实际 backing 分开记录 | 所有新 SM8650 容量实验的前置门禁 | 🚧 实施中 |
+| P0 warmup/页策略正确性 | `warmup_passes` 完整遍历；THP 请求与 smaps 实际 backing 分开记录 | 所有新 SM8650 容量实验的前置门禁 | ✅ 完成（`a8a6ac6`、`1532274`） |
+| P0 受控安静态 v2 | 显式 profile；逐 policy 精确恢复；Android 状态 before/after；前后门禁 fail-closed | 新 SM8650 校准实验前置；先完成临时 control-path smoke，不产容量数据 | 🚧 实施中（验证分支） |
 | P0 X4 私有 L2 校准 | 512 KiB–3 MiB 细扫，4 KiB/实际 THP 对照，≥10 次新分配，联合 L2 refill/DTLB | 协议修复后第一项实机实验；失败则停止外层解读 | ⬜ 待办 |
 | P1 PMU 采样通道 | armv8 PMU 与 chase 同步；LLCC 先测 `type=9/config=0x1000` | X4 L2 校准所需；用户态路径失败后才评审 LKM | ⬜ 待办 |
 | P1 多链带宽模式 | ptr_chase `--chains N`：吞吐 cliff 作为独立物理量（Probe ABI 变更） | latency + PMU 仍不能区分外层结构时单独立项 | ⬜ 待办 |

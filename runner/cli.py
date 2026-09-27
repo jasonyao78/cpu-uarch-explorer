@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 from copy import deepcopy
+import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -131,7 +132,38 @@ def _cmd_run(args) -> int:
 
 
 def _cmd_env(args) -> int:
-    """env 子命令：status 列出未完成事务；restore 按 journal 重放恢复。"""
+    """Inspect device state or manage durable mutation journals."""
+    if args.action == "inspect":
+        from .environment import (collect_environment_state,
+                                  evaluate_preconditions)
+        platform, requirements = _resolve_environment_profile(
+            load_platform(args.platform), getattr(args, "environment_profile", None))
+        policy = platform.get("measurement_environment")
+        if not isinstance(policy, dict):
+            raise RunnerError("config-invalid",
+                              "env inspect requires --environment-profile")
+        executor = make_executor(platform)
+        snapshot = collect_environment_state(executor, policy)
+        violations = evaluate_preconditions(snapshot, policy)
+        mutation_specs = _resolve_environment_specs(requirements, None)
+        covers_governor = any(spec.startswith("governor=") for spec in mutation_specs)
+        covered = [violation for violation in violations
+                   if covers_governor and
+                   violation.startswith("cpufreq-governor-mismatch:")]
+        uncovered = [violation for violation in violations if violation not in covered]
+        print(json.dumps({
+            "environment_profile": platform.get("active_environment_profile"),
+            "snapshot": snapshot,
+            "policy_result": {
+                "valid": not uncovered,
+                "ready_for_transaction": not uncovered,
+                "violations": uncovered,
+                "covered_by_mutation": covered,
+                "observed_violations": violations,
+            },
+        }, ensure_ascii=False, indent=2, sort_keys=True))
+        return EXIT_OK if not uncovered else EXIT_USAGE
+
     from .environment import restore_transaction
     from .environment.journal import default_store
     store = default_store()
@@ -202,8 +234,10 @@ def main(argv: list[str] | None = None) -> int:
         if name == "capabilities":
             p.add_argument("--out", default="data/public/capabilities")
         if name == "env":
-            p.add_argument("action", choices=["status", "restore"])
+            p.add_argument("action", choices=["status", "inspect", "restore"])
             p.add_argument("--tx", default=None, help="restore 的事务 id")
+            p.add_argument("--environment-profile", default=None,
+                           help="inspect 使用的平台环境 profile")
         p.set_defaults(fn=fn)
     args = parser.parse_args(argv)
     try:
