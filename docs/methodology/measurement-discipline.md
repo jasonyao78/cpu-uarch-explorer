@@ -20,7 +20,8 @@
   不是“消除 TLB 噪声”，也不是所有平台的强制前提。页大小与能力按平台
   记录；请求策略（hugetlb/THP/default）和实际 backing（base/hugetlb/THP/
   mixed）必须分字段保存。`madvise(MADV_HUGEPAGE)` 成功不等于获得 THP，
-  必须由 `/proc/self/smaps` 等观测确认。4 KiB 页数据可以作为对照，但须标注
+  必须由 `/proc/self/smaps` 等观测确认；本仓 `ptr_chase -T` 已按此输出
+  `page_policy_requested/page_policy_actual/anon_huge_kb`。4 KiB 页数据可以作为对照，但须标注
   预期 TLB 开销与物理映射不确定度。
 - **macOS**：无 hugepage/clflush 对应能力——capability manifest 标注 `unsupported`，证据等级按 ADR-0005/0006 降级路径处理，不得硬测硬报。
 - **物理映射**：Fisher–Yates 等随机链只控制逻辑访问顺序，不等同于 cache

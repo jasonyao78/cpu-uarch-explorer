@@ -66,6 +66,22 @@ def _parse_controls(platform: dict) -> list[Control]:
     return controls
 
 
+def _binary_flag(name: str, rv: ResolvedValue | None) -> int:
+    """解析 ExperimentSpec 的 0/1 开关；拒绝 float/bool/非规范字符串。
+
+    旧配置曾把 hugepage 的 JSON 值写成字符串 "1"，因此兼容规范的
+    "0"/"1"，但不允许 int() 把 0.5、True 或 "01" 静默归一化。
+    """
+    if rv is None:
+        return 0
+    raw = rv.value
+    if type(raw) is int and raw in (0, 1):
+        return raw
+    if type(raw) is str and raw in ("0", "1"):
+        return int(raw)
+    raise RunnerError("plan-error", f"{name} must be 0 or 1, got {raw!r}")
+
+
 def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) -> Plan:
     """展开确定性 case 集合：controls × sweep 笛卡尔积，每 case 携带
     repetitions 与参数溯源。所有单位解析/派生计算在此完成——plan 期报错，
@@ -162,9 +178,13 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
             # hugepage：实验声明时才进入 case（测量语义参数，measurement-discipline
             # §2）；未声明的实验完全不出现该键——旧配置零影响。
             hp_rv = params.get("hugepage")
-            hugepage = int(hp_rv.value) if hp_rv is not None else 0
-            if hugepage not in (0, 1):
-                raise RunnerError("plan-error", f"hugepage must be 0 or 1, got {hugepage}")
+            hugepage = _binary_flag("hugepage", hp_rv)
+            thp_rv = params.get("thp")
+            thp = _binary_flag("thp", thp_rv)
+            if hugepage and thp:
+                raise RunnerError(
+                    "plan-error", "ptr_chase cannot request both hugepage and thp",
+                )
 
             case_params = {
                 "buffer_kb": ResolvedValue(buffer_kb, params["buffer"].source),
@@ -180,8 +200,11 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                 )
             if hp_rv is not None:
                 case_params["hugepage"] = ResolvedValue(hugepage, hp_rv.source)
+            if thp_rv is not None:
+                case_params["thp"] = ResolvedValue(thp, thp_rv.source)
             case_id = (f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"
-                       + ("-hp2m" if hugepage else ""))
+                       + ("-hp2m" if hugepage else "")
+                       + ("-thp" if thp else ""))
             cases.append(Case(id=case_id, probe=probe, control=control,
                               params=tuple(sorted(case_params.items())),
                               repetitions=repetitions))

@@ -45,9 +45,20 @@ set_tests_properties(ptr_chase_rejects_zero_buffer PROPERTIES WILL_FAIL TRUE)
 if(APPLE)
   add_test(NAME ptr_chase_hugepage_unsupported COMMAND ${PT} -b 4096 -s 64 -n 8000 -h)
   set_tests_properties(ptr_chase_hugepage_unsupported PROPERTIES WILL_FAIL TRUE)
+  add_test(NAME ptr_chase_thp_unsupported COMMAND ${PT} -b 4096 -s 64 -n 8000 -T)
+  set_tests_properties(ptr_chase_thp_unsupported PROPERTIES WILL_FAIL TRUE)
 else()
   add_test(NAME ptr_chase_hugepage_fallback_or_ok
            COMMAND ${PT} -b 4096 -s 64 -n 8000 -h)
   set_tests_properties(ptr_chase_hugepage_fallback_or_ok PROPERTIES
       PASS_REGULAR_EXPRESSION "page_policy=")
+  add_test(NAME ptr_chase_thp_requested_and_observed
+           COMMAND ${PT} -b 4096 -s 64 -n 8000 -T)
+  set_tests_properties(ptr_chase_thp_requested_and_observed PROPERTIES
+      PASS_REGULAR_EXPRESSION
+      "page_policy_requested=thp-madvise page_policy_actual=(base|thp|mixed) anon_huge_kb=[0-9]+")
 endif()
+
+add_test(NAME ptr_chase_rejects_conflicting_page_requests
+         COMMAND ${PT} -b 4096 -s 64 -n 8000 -T -h)
+set_tests_properties(ptr_chase_rejects_conflicting_page_requests PROPERTIES WILL_FAIL TRUE)

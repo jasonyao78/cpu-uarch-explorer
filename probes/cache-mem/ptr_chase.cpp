@@ -42,25 +42,26 @@
 //    2=能力不支持（保留）。校验项：stride 为指针宽度的整数倍、
 //    loads ≥ 展开因子、槽位数 ≥ 2。
 //
-// 附加：hugepage 支持（-h / -H；measurement-discipline §2 落地）
-//    Linux 正式测量须用 2MB hugepage：① 4K 页在工作集超出 TLB 覆盖后
-//    每档叠加页遍历开销，把 LLC 平台期拉成斜坡；② buddy 分配器给出的
-//    4K 物理页布局可能不均，随机链在 L3 set 上冲突（2026-09-25 Xeon
-//    实测：96MiB 档 5 次重复内双峰 60ns vs 108-141ns，铁证）。2MB 大页
-//    同时缓解两者。`-h` 缺页池时回退 4K 并在输出标注 fallback（显式
-//    标注纪律）；`-H` 严格模式缺页池直接退出码 2（能力不支持）。
-//    macOS 无 MAP_HUGETLB：请求 -h/-H 一律退出码 2，不假装支持。
+// 附加：页策略（-h / -H / -T；measurement-discipline §2 落地）
+//    `-h/-H` 请求显式 hugetlb（fallback/strict）；`-T` 请求 Linux THP
+//    (`MADV_HUGEPAGE`)。请求成功不等于实际大页 backing：普通匿名映射在首次
+//    写入后解析 /proc/self/smaps，分别输出 requested policy、actual backing
+//    和 AnonHugePages。非 Linux 平台请求这些 Linux 能力时退出码 2。
 //
 // 输出：key=value 行（buffer_kb / stride / loads / elapsed_ns / latency_ns /
 // warmup_loads / warmup_passes_effective / warmup_state / page_policy /
-// page_kb），由 runner 层包装为 record.schema.json 记录。
+// page_policy_requested / page_policy_actual / anon_huge_kb / page_kb），由
+// runner 层包装为 record.schema.json 记录。
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <fstream>
 #include <random>
+#include <string>
 #include <unistd.h>
 #include <sys/mman.h>
 
@@ -70,6 +71,12 @@
 #define CPU_UARCH_NO_HUGEPAGE 1
 #else
 #define CPU_UARCH_NO_HUGEPAGE 0
+#endif
+
+#if defined(__linux__) && defined(MADV_HUGEPAGE)
+#define CPU_UARCH_NO_THP 0
+#else
+#define CPU_UARCH_NO_THP 1
 #endif
 
 namespace {
@@ -84,13 +91,14 @@ double now_ns() {
 
 void usage(const char* prog) {
     std::fprintf(stderr,
-        "usage: %s -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-h|-H]\n"
+        "usage: %s -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-h|-H|-T]\n"
         "  -b  buffer size in KB            (default 8192)\n"
         "  -s  stride between chain slots, must be a multiple of %zu (default 64)\n"
         "  -n  total dependent loads, >= %d (default 268435456)\n"
         "  -w  exact warmup loads          (default: 2 complete ring passes)\n"
         "  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)\n"
-        "  -H  2MB hugepage strict (exit 2 if pool unavailable)\n",
+        "  -H  2MB hugepage strict (exit 2 if pool unavailable)\n"
+        "  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps\n",
         prog, sizeof(char*), kUnroll);
 }
 
@@ -100,40 +108,88 @@ void usage(const char* prog) {
     std::exit(1);
 }
 
-// hugepage 分配：尺寸向上取整到 2MB 对齐 + MAP_HUGETLB；缺页池时 strict 退出 2、
-// 非 strict 回退 4K（page_policy 显式标注，requested/actual 纪律）。
-char* map_buffer(size_t bytes, bool want_hp, bool strict_hp,
-                 const char* prog, const char** policy, unsigned* page_kb) {
+// hugetlb 分配：尺寸向上取整到 2MB 对齐 + MAP_HUGETLB；缺页池时 strict
+// 退出 2、非 strict 回退普通匿名映射（实际 backing 稍后独立观测）。
+char* map_hugetlb_buffer(size_t bytes, bool want_hp, bool strict_hp) {
 #if CPU_UARCH_NO_HUGEPAGE
     (void)bytes; (void)strict_hp;
     if (want_hp) {
         std::fprintf(stderr, "unsupported: MAP_HUGETLB not available on this platform\n");
         std::exit(2);
     }
-    *policy = "default-4k"; *page_kb = 4;
     return nullptr;  // 未触发，下行统一走默认 mmap
 #else
-    if (!want_hp) {
-        *policy = "default-4k"; *page_kb = 4;
+    if (!want_hp)
         return nullptr;
-    }
     constexpr size_t kHp = 2 * 1024 * 1024;
     const size_t hp_bytes = (bytes + kHp - 1) / kHp * kHp;
     char* buf = static_cast<char*>(mmap(nullptr, hp_bytes, PROT_READ | PROT_WRITE,
                                         MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0));
     if (buf != MAP_FAILED) {
-        *policy = "hugepage-2m"; *page_kb = 2048;
         return buf;
     }
     if (strict_hp) {
         std::fprintf(stderr, "unsupported: hugepage pool unavailable (strict mode)\n");
         std::exit(2);
     }
-    std::fprintf(stderr, "warning: hugepage pool unavailable, falling back to 4K pages "
-                         "(results keep [fallback-4k] tag; see measurement-discipline §2)\n");
-    *policy = "fallback-4k"; *page_kb = 4;
+    std::fprintf(stderr, "warning: hugepage pool unavailable, falling back to a "
+                         "default anonymous mapping; actual backing will be inspected\n");
     return nullptr;
 #endif
+}
+
+unsigned base_page_kb() {
+    const long bytes = sysconf(_SC_PAGESIZE);
+    return bytes > 0 ? static_cast<unsigned>(bytes / 1024) : 0;
+}
+
+[[maybe_unused]] bool read_anon_huge_kb(
+        const char* buf, size_t bytes, size_t* anon_huge_kb) {
+    std::ifstream smaps("/proc/self/smaps");
+    if (!smaps)
+        return false;
+
+    const uintptr_t target_begin = reinterpret_cast<uintptr_t>(buf);
+    const uintptr_t target_end = target_begin + bytes;
+    bool overlaps = false;
+    bool saw_target_vma = false;
+    bool attribution_exact = true;
+    size_t covered_bytes = 0;
+    size_t total = 0;
+    std::string line;
+    while (std::getline(smaps, line)) {
+        unsigned long long begin = 0, end = 0;
+        if (std::sscanf(line.c_str(), "%llx-%llx", &begin, &end) == 2) {
+            overlaps = static_cast<uintptr_t>(end) > target_begin
+                    && static_cast<uintptr_t>(begin) < target_end;
+            if (overlaps) {
+                // AnonHugePages 是 VMA 级汇总。若 VMA 超出目标映射，不能把
+                // 邻接匿名区的大页归到本 buffer；只有整段 AnonHugePages=0
+                // 时，仍可无歧义地判成 base backing。
+                if (static_cast<uintptr_t>(begin) < target_begin
+                        || static_cast<uintptr_t>(end) > target_end)
+                    attribution_exact = false;
+                saw_target_vma = true;
+                const uintptr_t overlap_begin =
+                    std::max(static_cast<uintptr_t>(begin), target_begin);
+                const uintptr_t overlap_end =
+                    std::min(static_cast<uintptr_t>(end), target_end);
+                covered_bytes += static_cast<size_t>(overlap_end - overlap_begin);
+            }
+            continue;
+        }
+        if (overlaps) {
+            size_t value = 0;
+            if (std::sscanf(line.c_str(), "AnonHugePages: %zu kB", &value) == 1)
+                total += value;
+        }
+    }
+    if (!saw_target_vma || covered_bytes < bytes)
+        return false;
+    if (total > 0 && !attribution_exact)
+        return false;
+    *anon_huge_kb = total;
+    return true;
 }
 
 } // namespace
@@ -144,10 +200,10 @@ int main(int argc, char** argv) {
     long long loads = 268435456; // 2^28；按计时器分辨率反推的最小安全量级（原理 §4）
     long long warmup = 0;
     bool warmup_set = false;
-    bool want_hp = false, strict_hp = false;
+    bool want_hp = false, strict_hp = false, want_thp = false;
 
     int opt;
-    while ((opt = getopt(argc, argv, "b:s:n:w:hH")) != -1) {
+    while ((opt = getopt(argc, argv, "b:s:n:w:hHT")) != -1) {
         switch (opt) {
         case 'b': buffer_kb = std::strtoull(optarg, nullptr, 10); break;
         case 's': stride = std::strtoull(optarg, nullptr, 10); break;
@@ -155,6 +211,7 @@ int main(int argc, char** argv) {
         case 'w': warmup = std::strtoll(optarg, nullptr, 10); warmup_set = true; break;
         case 'h': want_hp = true; break;
         case 'H': want_hp = true; strict_hp = true; break;
+        case 'T': want_thp = true; break;
         default: usage(argv[0]); return 1;
         }
     }
@@ -168,8 +225,24 @@ int main(int argc, char** argv) {
         die(argv[0], "loads must be >= the unroll factor (8)");
     if (warmup < 0)
         die(argv[0], "warmup must be >= 0");
+    if (want_hp && want_thp)
+        die(argv[0], "hugetlb (-h/-H) and THP (-T) are mutually exclusive");
+#if CPU_UARCH_NO_THP
+    if (want_thp) {
+        std::fprintf(stderr, "unsupported: MADV_HUGEPAGE not available on this platform\n");
+        return 2;
+    }
+#endif
 
     const size_t bytes = buffer_kb * 1024;
+#if defined(__linux__)
+    const long base_page_bytes_raw = sysconf(_SC_PAGESIZE);
+    const size_t normal_map_bytes = base_page_bytes_raw > 0
+        ? (bytes + static_cast<size_t>(base_page_bytes_raw) - 1)
+            / static_cast<size_t>(base_page_bytes_raw)
+            * static_cast<size_t>(base_page_bytes_raw)
+        : bytes;
+#endif
     const size_t slots = bytes / stride;
     if (slots < 2)
         die(argv[0], "buffer too small for this stride (need at least 2 slots)");
@@ -180,10 +253,9 @@ int main(int argc, char** argv) {
     }
     loads -= loads % kUnroll;
 
-    // hugepage 分配（-h/-H）；nullptr 表示走默认 4K 路径
-    const char* page_policy = "default-4k";
-    unsigned page_kb = 4;
-    char* hp_buf = map_buffer(bytes, want_hp, strict_hp, argv[0], &page_policy, &page_kb);
+    // hugetlb 成功时返回显式大页映射；nullptr 表示走普通匿名映射。THP 只
+    // 能作用于后者，且最终状态必须由 smaps 观测，不能由请求结果推断。
+    char* hp_buf = map_hugetlb_buffer(bytes, want_hp, strict_hp);
     size_t map_bytes = bytes;
 #if !CPU_UARCH_NO_HUGEPAGE
     if (hp_buf != nullptr) {
@@ -198,6 +270,14 @@ int main(int argc, char** argv) {
         std::perror("mmap");
         return 1;
     }
+
+#if !CPU_UARCH_NO_THP
+    if (want_thp && madvise(buf, bytes, MADV_HUGEPAGE) != 0) {
+        std::perror("madvise(MADV_HUGEPAGE)");
+        munmap(buf, map_bytes);
+        return 1;
+    }
+#endif
 
     // Fisher–Yates 洗牌：uniform_int_distribution 保证无偏，固定种子保证可复现（原理 §2）
     size_t* perm = static_cast<size_t*>(malloc(slots * sizeof(size_t)));
@@ -217,6 +297,44 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i + 1 < slots; ++i)
         *reinterpret_cast<char**>(buf + perm[i] * stride) = buf + perm[i + 1] * stride;
     *reinterpret_cast<char**>(buf + perm[slots - 1] * stride) = buf + perm[0] * stride;
+
+    const char* page_policy_requested = want_thp ? "thp-madvise"
+        : (want_hp ? (strict_hp ? "hugetlb-strict" : "hugetlb-fallback") : "default");
+    const char* page_policy_actual = "platform-default";
+    std::string page_policy = "platform-default";
+    size_t anon_huge_kb = 0;
+    unsigned page_kb = base_page_kb();
+    if (hp_buf != nullptr) {
+        page_policy_actual = "hugetlb-2m";
+        page_policy = "hugepage-2m";
+        page_kb = 2048;
+    } else {
+#if defined(__linux__)
+        if (!read_anon_huge_kb(buf, normal_map_bytes, &anon_huge_kb)) {
+            std::fprintf(stderr, "error: cannot inspect target mapping in /proc/self/smaps\n");
+            free(perm);
+            munmap(buf, map_bytes);
+            return 1;
+        }
+        if (anon_huge_kb == 0) {
+            page_policy_actual = "base";
+            page_kb = base_page_kb();
+        } else if (anon_huge_kb * 1024 >= normal_map_bytes) {
+            page_policy_actual = "thp";
+            page_kb = 2048;
+        } else {
+            page_policy_actual = "mixed";
+            page_kb = 0;
+        }
+        const char* prefix = want_thp ? "thp" : (want_hp ? "fallback" : "default");
+        if (std::strcmp(page_policy_actual, "base") == 0)
+            page_policy = std::string(prefix) + "-4k";
+        else if (std::strcmp(page_policy_actual, "thp") == 0)
+            page_policy = std::string(prefix) + "-thp";
+        else
+            page_policy = std::string(prefix) + "-mixed";
+#endif
+    }
 
     // 预热：让页错误、TLB、缓存都进入稳态，不计入测量
     char* p = buf + perm[0] * stride;
@@ -249,9 +367,11 @@ int main(int argc, char** argv) {
 
     std::printf("buffer_kb=%zu stride=%zu loads=%lld elapsed_ns=%.0f latency_ns=%.4f "
                 "warmup_loads=%lld warmup_passes_effective=%.6f warmup_state=%s "
-                "page_policy=%s page_kb=%u\n",
+                "page_policy=%s page_kb=%u page_policy_requested=%s "
+                "page_policy_actual=%s anon_huge_kb=%zu\n",
                 buffer_kb, stride, loads, elapsed, latency, warmup, warmup_passes,
-                warmup_state, page_policy, page_kb);
+                warmup_state, page_policy.c_str(), page_kb, page_policy_requested,
+                page_policy_actual, anon_huge_kb);
 
     free(perm);
     munmap(buf, map_bytes);

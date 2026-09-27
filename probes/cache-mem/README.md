@@ -18,9 +18,11 @@ latency_ns / warmup / 页策略），由 Runner 层包装为 `record.schema.json
 ## 后续迭代方向（backlog，方法学迁移 OI-9）
 
 - ~~hugetlb 开关~~ ✅ 2026-09-25 已实现：`-h`（缺页池回退并显式标注）/
-  `-H`（严格，退出 2）。待补 THP `MADV_HUGEPAGE` 请求与
-  `/proc/self/smaps` 实际 backing（base/THP/mixed）双重记录；不能由“无
-  hugetlb pool”推出“无 hugepage”。
+  `-H`（严格，退出 2）。~~THP 实际 backing~~ ✅ 2026-09-27 已实现：
+  `-T` 请求 `MADV_HUGEPAGE`，首次触页后解析 `/proc/self/smaps`，分别输出
+  `page_policy_requested`、`page_policy_actual=base|thp|mixed` 与
+  `anon_huge_kb`；不能由“无 hugetlb pool”推出“无 hugepage”，也不能把
+  madvise 成功当作实际 THP。
 - `CLOCK_MONOTONIC_RAW` 替代 `CLOCK_MONOTONIC`（减小时钟调整抖动）。
 - cold 模式参数化（驱逐后冷测 + 输出温度标签）——遵守 `docs/methodology/measurement-discipline.md`。
 - `evict_slc` 类驱逐工具的移植评估（独立小进程，BSD-3 同源，引用需登记来源）。

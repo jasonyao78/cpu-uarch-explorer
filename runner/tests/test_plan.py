@@ -165,6 +165,9 @@ class TestPlan(unittest.TestCase):
                 self.assertNotIn("warmup", parameter_names)
                 self.assertIn("warmup_passes", spec["execution"]["fixed_params"])
                 self.assertNotIn("warmup", spec["execution"]["fixed_params"])
+                if path.name == "ptr-chase-cache-sweep-hp2m.json":
+                    self.assertIn("thp", parameter_names)
+                    self.assertNotIn("hugepage", parameter_names)
 
                 plan = build_plan(spec, platform)
                 for case in plan.cases:
@@ -175,6 +178,52 @@ class TestPlan(unittest.TestCase):
                         case.param_value("warmup_passes") * slots,
                     )
                     self.assertEqual(params["warmup"].source, "derived")
+
+    def test_thp_request_is_recorded_and_conflicts_are_rejected(self):
+        thp_spec = {
+            **PASS_SPEC,
+            "parameters": [
+                *PASS_SPEC["parameters"],
+                {"name": "thp", "type": "int", "default": 1},
+            ],
+            "execution": {
+                **PASS_SPEC["execution"],
+                "fixed_params": ["stride", "warmup_passes", "thp"],
+            },
+        }
+        plan = build_plan(thp_spec, {**PLATFORM, "controls": []})
+        self.assertTrue(all(case.param_value("thp") == 1 for case in plan.cases))
+
+        conflict = {
+            **thp_spec,
+            "parameters": [
+                *thp_spec["parameters"],
+                {"name": "hugepage", "type": "int", "default": 1},
+            ],
+            "execution": {
+                **thp_spec["execution"],
+                "fixed_params": ["stride", "warmup_passes", "thp", "hugepage"],
+            },
+        }
+        with self.assertRaisesRegex(RunnerError, "cannot request both"):
+            build_plan(conflict, PLATFORM)
+
+    def test_invalid_thp_request_rejected(self):
+        for invalid in (2, 0.5, True, "01"):
+            with self.subTest(invalid=invalid):
+                thp_spec = {
+                    **PASS_SPEC,
+                    "parameters": [
+                        *PASS_SPEC["parameters"],
+                        {"name": "thp", "type": "int", "default": invalid},
+                    ],
+                    "execution": {
+                        **PASS_SPEC["execution"],
+                        "fixed_params": ["stride", "warmup_passes", "thp"],
+                    },
+                }
+                with self.assertRaisesRegex(RunnerError, "thp must be 0 or 1"):
+                    build_plan(thp_spec, PLATFORM)
 
 
 if __name__ == "__main__":

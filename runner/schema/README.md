@@ -24,6 +24,18 @@
 | `host_requirements`（平台配置顶层键） | object | 声明式 host 级需求 `{"cpufreq.governor": "performance"}`：run 时经环境事务执行，**默认拒绝、须 `--allow-mutation`**；启动前自动 reconcile 中断残留事务（2026-09-26 接线任务） | 2026-09-26 |
 | capability `core-topology` 条目 | object | 核型事实：linux-sysfs 逐核 `{capacity, max_freq_khz, midr_el1, cluster_cpus_list}`（缺失维度=null 不猜）或 macos-sysctl `perflevels[]` | 2026-09-26 |
 
+### 已登记的 ptr_chase metric 扩展字段
+
+| 字段 | 类型 | 用途 | 登记日期 |
+|---|---|---|---|
+| `warmup_loads` | non-negative integer | 实际执行的精确 warmup load 数；新协议由 `warmup_passes × slots` 派生，legacy 可为任意非负值 | 2026-09-27 |
+| `warmup_passes_effective` | non-negative number | `warmup_loads / slots`，审计 legacy 非整数遍历与完整环覆盖率 | 2026-09-27 |
+| `warmup_state` | `warm` or `cold-warm0` | 明确 `-w 0` 只是零预热，不冒充真正 cold | 2026-09-27 |
+| `page_policy_requested` | string | `default` / `hugetlb-fallback` / `hugetlb-strict` / `thp-madvise` 请求语义 | 2026-09-27 |
+| `page_policy_actual` | string | `platform-default` / `base` / `thp` / `mixed` / `hugetlb-2m` 实际 backing | 2026-09-27 |
+| `anon_huge_kb` | non-negative integer | Linux `/proc/self/smaps` 对目标 VMA 观测到的 `AnonHugePages` 总量 | 2026-09-27 |
+| `page_policy`, `page_kb` | string, non-negative integer | 兼容既有 reader 的摘要；新判断必须优先使用 requested/actual 字段 | 2026-09-27 |
+
 ## v1（归档）
 
 `record.schema.json`（v1，2026-09-23 基线）：已被 v2 取代，保留作历史参考，新记录一律用 v2。
