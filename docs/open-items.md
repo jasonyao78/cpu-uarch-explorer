@@ -85,3 +85,17 @@
 | 测量期频率多次采样 | freq_snapshot 目前是 case 前后瞬时值；powermetrics 并发采样（macOS）未做 | 触发：锁频后数据仍漂移、或 T1 ±1 cycle 校准启动时 | ⬜ 待办（锁频已落地，主问题缓解；多次采样仍待） |
 | 跨 run 汇总报告 | analysis/ 只支持单 run | 触发：同一实验第二次复测入库后（漂移分析需求自然出现） | ⬜ 待办 |
 | p95/p99 尾部统计 | n=5 时无意义（插值≈max） | 触发：repetitions ≥20 的实验出现时 | ⬜ 待办 |
+
+## OI-11 LLCC 深度探测与 ptr_chase 升级（2026-09-27 登记，源自 SM8650 SLC 方法学讨论）
+
+> 背景：四层容量语义定案（物理 SRAM / slice 配置 / reserved / CPU 有效）——我们测的 12MB 是**CPU 有效容量**（行为层），与官方分区数字（配置层）不可直接比；差分判据三件套（latency/DDR traffic/LLCC counter）当前只满足 latency 一项。P0 实测结果：①`-h` hugepage 本机无页池（fallback-4k 打标），≥16M 尾部永久带 TLB 混杂 caveat；②手动一次性差分噪声太大（亮屏/相机场景结果互相矛盾：16M 亮屏 8.33ns vs 灭屏 6.5-6.9 vs 相机 6.23），**差分实验必须与 sweep 同等规格**（事务化+灭屏+锁频+thermal 抑制+多批），不得手跑一次性。backlog 明细见 `probes/cache-mem/README.md`。
+
+| 项 | 内容 | 归属/触发条件 | 状态 |
+|---|---|---|---|
+| P1 多链带宽模式 | ptr_chase `--chains N`：吞吐 cliff 作为容量第二物理量（Probe ABI 变更） | 触发：P0-2 规范化差分仍无法区分 L3/SLC 合并级时立项评审 | ⬜ 待办 |
+| P1 PMU 采样通道 | armv8 PMU（l2d_cache_refill 等）与 chase 同步采进 runner；LLCC/DDR 计数器仍 blocked | 触发：LKM-M2 取证失败或 ptr_chase ABI 评审通过时 | ⬜ 待办 |
+| P2 逐 rep 双峰检测 | statistics.py 分位数/双峰标记（median-of-5 掩盖双峰，Xeon 有前科） | 触发：P1 多链模式立项时并入 | ⬜ 待办 |
+| P2 干扰编排进 spec | cross-core/相机/GPU 负载差分作为 experiment spec 一等公民（runner 层并发，probe 保单一职责） | 触发：差分实验再次手跑时（本项的替代物就是停止手跑） | ⬜ 待办 |
+| LKM-M1 只读 dump | ioremap 0x25000000 读 ATTR/HW_INFO/LB_CNT + kprobe 导 drv_data（不依赖 llcc 符号；kprobe 已注册实证） | 前置取证：manet 内核源码/Module.symvers、CONFIG_MODULE_SIG_FORCE 状态 | ⬜ 待取证 |
+| LKM-M2 perfmon 直读 | ioremap 0x24095000 lagg-base 直接读计数器，绕过零事件 sysfs 驱动 → SLC hit-rate 曲线 | 同 LKM-M1 前置；M2 依赖 M1 的加载通路验证 | ⬜ 待取证 |
+| LKM-M3 slice 受控实验 | 读写 slice/驱逐实验 | **红线**：仅开发环境，量产机禁写；M1/M2 全通后单独立项 | ⬜ 搁置 |
