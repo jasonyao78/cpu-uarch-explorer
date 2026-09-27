@@ -34,5 +34,5 @@
       "notes": "Cortex-A520 little（capacity=379，max 2265.6MHz，cluster 0-1，与 cpu1 共享 L2）；toybox 掩码 1 = CPU0"
     }
   ],
-  "capabilities_note": "拓扑实测 2026-09-27（未 root，MEASURED）：1×X4(cpu7, midr 0x410fd821) + 5×A720(cpu2-6, 0x410fd811，923/867 两档) + 2×A520(cpu0-1, 0x410fd801)；cache size 属性高通内核不提供（manifest 记 None 不猜）；governor=walt；root=KernelSU LKM 进行中（BL 已解锁）；PMU/锁频/thermal 待 root 后回填"
+  "capabilities_note": "拓扑实测 2026-09-27（MEASURED）：1×X4(cpu7, midr 0x410fd821) + 5×A720(cpu2-6, 0x410fd811) + 2×A520(cpu0-1, 0x410fd801)；cache size 属性高通内核不提供（None 不猜）；governor=walt（root 后实测可切 performance，见 runbook redmi-manet-kernelsu-root）；PMU：paranoid=-1 + armv8_pmuv3 + llcc-pmu + cs_etm；root=KernelSU LKM ✅ 2026-09-27"
 }

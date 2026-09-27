@@ -38,8 +38,9 @@
 ## OI-2 红米设备信息回填（android-arm64）（2026-09-27 大更新：身份与拓扑全部实测，root 进行中）
 
 - **已回填（MEASURED，2026-09-27，adb 未 root 状态）**：Redmi K70 Pro（23117RK66C/manet）；SM8650 = 1×X4(cpu7, midr 0x410fd821) + 5×A720(cpu2-6, 0x410fd811) + 2×A520(cpu0-1, 0x410fd801)；Android 15 / HyperOS 2.0.208.0.VNMCNXM；kernel 6.1.118-android14-11-ab13320413；BL 已解锁；governor=walt（可用 performance/powersave/schedutil）；cache size 属性高通内核不提供（manifest 记 None）；transport=adb 已接入（AdbExecutor + redmi-k70pro-01 平台配置 + 能力清单入库）。
-- **root 进行中（2026-09-27）**：官方 ROM（OS2.0.208 线刷包，bigota/cdnorg 小米 CDN）下载 → 提取 stock init_boot（回滚备份+补丁基底）→ KernelSU Manager 手机端"选择并修补"（LKM）→ fastboot 刷入 → 验证。信任链：官方 bits + 本机/本机 App 打补丁，不经第三方补丁镜像站。
-- **root 后回填**：PMU（perf_event_paranoid / event_source 设备）、锁频能力（walt→performance 可控性，走环境事务）、thermal 区、midr 已提前可读（意外收获：无需 root）。
+- **✅ root 完成（2026-09-27，MEASURED）**：KernelSU LKM 成功——`su -c id` = uid=0(context=u:r:ksu:s0)，SELinux Enforcing，slot _b，boot_completed=1；仅刷 init_boot_b，boot/vendor_boot/vbmeta 未动。完整操作手册（含 OTA 重修补与回滚）：`docs/runbooks/redmi-manet-kernelsu-root.md`。镜像归档（不入库）：`~/Downloads/manet-rom/.../images/`（stock/KSU-patched/SHA256SUMS/device-info，校验 OK）。
+- **✅ root 后能力实测（2026-09-27）**：PMU 完全开放——`perf_event_paranoid=-1`，`armv8_pmuv3` 节点在列，**另有 `cs_etm`（CoreSight ETM 指令追踪）与 `llcc-pmu`（末级缓存 PMU，SLC occupancy 可测——补 sysfs 不暴露 SLC 的盲区）**；锁频能力：walt→performance→walt sysfs 往返成功（Android root=完整能力，无需 sudoers 包装）；thermal 16+ 冷却设备可读；midr root 通道确认 X4。
+- **后续接线项（另行任务）**：runner 的 AdbExecutor 以 shell(uid 2000) 运行，锁频/PMU 类操作需经 `su -c` 包装——环境事务的 Android controller 需 su 前缀支持。
 
 ## OI-3 x86 服务器信息回填与探测脚本评审（2026-09-24 更新：信息已回填，仅剩脚本评审）
 
