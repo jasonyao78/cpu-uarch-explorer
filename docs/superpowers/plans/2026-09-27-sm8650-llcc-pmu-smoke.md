@@ -173,3 +173,17 @@ python3 -m unittest discover -s analysis/tests -t .
 git diff --check
 git status --short
 ```
+
+---
+
+## Post-smoke evidence refinement
+
+The first device run showed that adb shell cannot read either PMU's sysfs
+`type` file, but that fact alone does not identify the `perf_event_open`
+permission boundary. Follow-up commit `95ae11e` therefore added an explicit
+`--type` alternative (mutually exclusive with `--pmu`) and strict rejection
+tests. Direct comparison established that shell can count core type 8, while
+valid LLCC type 9/config 0x1000 is rejected with EACCES and succeeds as
+KernelSU root. The synchronized design must consequently keep core counters
+inside the unprivileged probe and isolate only LLCC opening in a privileged
+sidecar.

@@ -2,7 +2,14 @@
 
 跨 ISA、跨 OS 的 CPU 微架构探索平台：真实设备微架构探测 → 统一实验协议与数据模型 → gem5 O3 建模与实机校准 → 综合 Benchmark 验证 → ARM / x86 / RISC-V 对比。
 
-当前状态：需求基线 **v0.3**（tag `req-v0.3`）。**M4 Pro 最小骨架已闭环**（2026-09-25：probe → 统一 JSON 数据 → 自动报告三段打通，两份 P/E 双峰 sweep 实测入库，gem5 D9300 增量树修剪至 134 文件并在 Xeon 上重建+冒烟验证通过）。当前主线：探针域扩展（core/branch/TLB）与 Xeon 平台接入；gem5 微架构建模后置（校准闭环需探针套件与 D9300 实机就位，见 OI-1/OI-6）。
+当前状态：需求基线 **v0.3**（tag `req-v0.3`）。M4 Pro 最小闭环、Xeon
+平台接入和 gem5 D9300 增量树重建已完成；SM8650 的旧 cache 容量结论经
+证据重审后重新开放。2026-09-28 已完成 warmup/页 backing、Android 受控环境
+事务和 LLCC PMU `type=9/config=0x1000` 响应性 smoke。当前门禁是把 core/LLCC
+PMU 与同一次 `ptr_chase` case 同步记录，再做 X4 私有 L2 边界校准
+（512 KiB–3 MiB）；通过前
+不解释外层 L3/LLCC 容量（见 OI-11）。gem5 微架构建模继续后置到探针校准
+闭环和 D9300 实机就位之后（见 OI-1/OI-6）。
 
 ## 平台矩阵
 
@@ -10,7 +17,7 @@
 |---|---|---|---:|---:|
 | `macos-arm64` | ARM64 | macOS | 是 | 是 |
 | `linux-x86_64` | x86-64 | Linux | 是 | 是 |
-| `android-arm64` | ARM64 | Android（root 高通，型号待补） | 否 | 是 |
+| `android-arm64` | ARM64 | Android（Redmi K70 Pro / SM8650，KernelSU root） | 否 | 是 |
 | `android-arm64-d9300-phys` | ARM64 | Android（D9300 实机在手，型号/root 待补，校准后置启用） | 否 | 是 |
 | `gem5-arm64-d9300` | ARM64 | gem5 O3（v25.0.0.1 + 134 文件增量，Xeon 构建与 SE 冒烟已验证） | 由 Host 驱动 | 是 |
 | `linux-riscv64` | RISC-V64 | Linux | 未来可选 | 未来支持 |
