@@ -11,6 +11,23 @@ add_test(NAME ptr_chase_valid_small COMMAND ${PT} -b 64 -s 64 -n 8000)
 set_tests_properties(ptr_chase_valid_small PROPERTIES
     PASS_REGULAR_EXPRESSION "latency_ns=[0-9]+\\.[0-9]+")
 
+add_test(NAME ptr_chase_default_warmup_two_passes
+         COMMAND ${PT} -b 64 -s 64 -n 8000)
+set_tests_properties(ptr_chase_default_warmup_two_passes PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "warmup_loads=2048 warmup_passes_effective=2\\.000000 warmup_state=warm")
+
+add_test(NAME ptr_chase_explicit_warmup_loads
+         COMMAND ${PT} -b 64 -s 64 -n 8000 -w 1000)
+set_tests_properties(ptr_chase_explicit_warmup_loads PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "warmup_loads=1000 warmup_passes_effective=0\\.976562 warmup_state=warm")
+
+add_test(NAME ptr_chase_warmup_zero_is_not_cold
+         COMMAND ${PT} -b 64 -s 64 -n 8000 -w 0)
+set_tests_properties(ptr_chase_warmup_zero_is_not_cold PROPERTIES
+    PASS_REGULAR_EXPRESSION "warmup_state=cold-warm0")
+
 add_test(NAME ptr_chase_rejects_tiny_loads COMMAND ${PT} -n 1)
 set_tests_properties(ptr_chase_rejects_tiny_loads PROPERTIES WILL_FAIL TRUE)
 

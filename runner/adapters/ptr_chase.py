@@ -3,7 +3,8 @@
 
 Probe ABI（与源码头部注释一致）：
   argv:  -b buffer_kb -s stride_bytes -n loads -w warmup [-h|-H]
-  stdout: buffer_kb=.. .. latency_ns=.. page_policy=.. page_kb=..
+  stdout: buffer_kb=.. .. latency_ns=.. warmup_loads=..
+          warmup_passes_effective=.. warmup_state=.. page_policy=.. page_kb=..
   退出码: 0 成功 / 1 输入或环境错误 / 2 能力不支持（hugepage 无平台能力或
           strict 模式缺页池；fallback 非 strict 模式下成功但标注 fallback-4k）
 
@@ -22,7 +23,7 @@ from .base import parse_key_value_lines, require_finite_number
 
 class PtrChaseAdapter:
     probe_name = "ptr_chase"
-    protocol_version = "1.0"
+    protocol_version = "1.1"
     implementation_id = "portable"
 
     def build_argv(self, params: dict[str, Any]) -> list[str]:
@@ -51,6 +52,35 @@ class PtrChaseAdapter:
             raise ParseError(f"no key=value lines in probe output; stderr={stderr.strip()!r}")
         latency = require_finite_number(fields, "latency_ns")
         metric: dict[str, Any] = {"name": "latency_ns", "value": latency, "unit": "ns"}
+        warmup_keys = {"warmup_loads", "warmup_passes_effective", "warmup_state"}
+        present_warmup_keys = warmup_keys.intersection(fields)
+        if present_warmup_keys:
+            if present_warmup_keys != warmup_keys:
+                missing = sorted(warmup_keys - present_warmup_keys)
+                raise ParseError(f"incomplete warmup audit fields; missing {missing}")
+            raw_loads = fields["warmup_loads"]
+            if not raw_loads.isdigit():
+                raise ParseError(f"warmup_loads must be a non-negative integer: {raw_loads!r}")
+            warmup_loads = int(raw_loads)
+            warmup_passes = require_finite_number(fields, "warmup_passes_effective")
+            if warmup_passes < 0:
+                raise ParseError(
+                    f"warmup_passes_effective must be non-negative: {warmup_passes!r}"
+                )
+            warmup_state = fields["warmup_state"]
+            if warmup_state not in ("warm", "cold-warm0"):
+                raise ParseError(f"invalid warmup_state: {warmup_state!r}")
+            expected_state = "cold-warm0" if warmup_loads == 0 else "warm"
+            if warmup_state != expected_state:
+                raise ParseError(
+                    f"warmup_state {warmup_state!r} contradicts "
+                    f"warmup_loads={warmup_loads}"
+                )
+            metric.update({
+                "warmup_loads": warmup_loads,
+                "warmup_passes_effective": warmup_passes,
+                "warmup_state": warmup_state,
+            })
         if "page_policy" in fields:
             metric["page_policy"] = fields["page_policy"]
         return [metric]

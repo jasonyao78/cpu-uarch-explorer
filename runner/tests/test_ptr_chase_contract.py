@@ -33,6 +33,9 @@ class TestPtrChaseContract(unittest.TestCase):
         metrics = self.adapter.parse_output(proc.stdout, proc.stderr)
         self.assertEqual(metrics[0]["name"], "latency_ns")
         self.assertGreater(metrics[0]["value"], 0.0)
+        self.assertEqual(metrics[0]["warmup_loads"], 1000)
+        self.assertAlmostEqual(metrics[0]["warmup_passes_effective"], 1000 / 1024, places=6)
+        self.assertEqual(metrics[0]["warmup_state"], "warm")
 
     def test_probe_abi_invalid_input_nonzero_exit(self):
         # Probe ABI（ADR-0006 §3）：非法输入非零退出，绝不静默产出记录
@@ -44,6 +47,17 @@ class TestPtrChaseContract(unittest.TestCase):
         for bad in ("latency_ns=nan", "latency_ns=inf", "", "no fields here"):
             with self.assertRaises(ParseError, msg=f"{bad!r} must be refused"):
                 self.adapter.parse_output(bad, "")
+
+    def test_parser_refuses_invalid_warmup_audit_fields(self):
+        invalid = (
+            "latency_ns=1 warmup_loads=-1 warmup_passes_effective=1 warmup_state=warm",
+            "latency_ns=1 warmup_loads=1.5 warmup_passes_effective=1 warmup_state=warm",
+            "latency_ns=1 warmup_loads=1 warmup_passes_effective=nan warmup_state=warm",
+            "latency_ns=1 warmup_loads=1 warmup_passes_effective=1 warmup_state=cold",
+        )
+        for stdout in invalid:
+            with self.assertRaises(ParseError, msg=f"{stdout!r} must be refused"):
+                self.adapter.parse_output(stdout, "")
 
 
 if __name__ == "__main__":

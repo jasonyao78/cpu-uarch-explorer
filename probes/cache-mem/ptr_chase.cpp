@@ -52,7 +52,8 @@
 //    macOS 无 MAP_HUGETLB：请求 -h/-H 一律退出码 2，不假装支持。
 //
 // 输出：key=value 行（buffer_kb / stride / loads / elapsed_ns / latency_ns /
-// page_policy / page_kb），由 runner 层包装为 record.schema.json 记录。
+// warmup_loads / warmup_passes_effective / warmup_state / page_policy /
+// page_kb），由 runner 层包装为 record.schema.json 记录。
 
 #include <cstdint>
 #include <cstdio>
@@ -87,7 +88,7 @@ void usage(const char* prog) {
         "  -b  buffer size in KB            (default 8192)\n"
         "  -s  stride between chain slots, must be a multiple of %zu (default 64)\n"
         "  -n  total dependent loads, >= %d (default 268435456)\n"
-        "  -w  warmup loads                (default 200000)\n"
+        "  -w  exact warmup loads          (default: 2 complete ring passes)\n"
         "  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)\n"
         "  -H  2MB hugepage strict (exit 2 if pool unavailable)\n",
         prog, sizeof(char*), kUnroll);
@@ -141,7 +142,8 @@ int main(int argc, char** argv) {
     size_t buffer_kb = 8192;
     size_t stride = 64;
     long long loads = 268435456; // 2^28；按计时器分辨率反推的最小安全量级（原理 §4）
-    long long warmup = 200000;
+    long long warmup = 0;
+    bool warmup_set = false;
     bool want_hp = false, strict_hp = false;
 
     int opt;
@@ -150,7 +152,7 @@ int main(int argc, char** argv) {
         case 'b': buffer_kb = std::strtoull(optarg, nullptr, 10); break;
         case 's': stride = std::strtoull(optarg, nullptr, 10); break;
         case 'n': loads = std::strtoll(optarg, nullptr, 10); break;
-        case 'w': warmup = std::strtoll(optarg, nullptr, 10); break;
+        case 'w': warmup = std::strtoll(optarg, nullptr, 10); warmup_set = true; break;
         case 'h': want_hp = true; break;
         case 'H': want_hp = true; strict_hp = true; break;
         default: usage(argv[0]); return 1;
@@ -171,6 +173,11 @@ int main(int argc, char** argv) {
     const size_t slots = bytes / stride;
     if (slots < 2)
         die(argv[0], "buffer too small for this stride (need at least 2 slots)");
+    if (!warmup_set) {
+        if (slots > static_cast<size_t>(INT64_MAX / 2))
+            die(argv[0], "default warmup exceeds signed 64-bit load limit");
+        warmup = static_cast<long long>(slots) * 2;
+    }
     loads -= loads % kUnroll;
 
     // hugepage 分配（-h/-H）；nullptr 表示走默认 4K 路径
@@ -236,10 +243,15 @@ int main(int argc, char** argv) {
 
     const double elapsed = t1 - t0;
     const double latency = elapsed / static_cast<double>(loads);
+    const double warmup_passes =
+        static_cast<double>(warmup) / static_cast<double>(slots);
+    const char* warmup_state = warmup == 0 ? "cold-warm0" : "warm";
 
     std::printf("buffer_kb=%zu stride=%zu loads=%lld elapsed_ns=%.0f latency_ns=%.4f "
+                "warmup_loads=%lld warmup_passes_effective=%.6f warmup_state=%s "
                 "page_policy=%s page_kb=%u\n",
-                buffer_kb, stride, loads, elapsed, latency, page_policy, page_kb);
+                buffer_kb, stride, loads, elapsed, latency, warmup, warmup_passes,
+                warmup_state, page_policy, page_kb);
 
     free(perm);
     munmap(buf, map_bytes);

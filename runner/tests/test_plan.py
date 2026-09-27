@@ -1,10 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
 """Plan 契约：确定性展开、repetitions 真实消费、参数溯源。"""
 
+import json
 import unittest
+from pathlib import Path
 
 from runner.errors import RunnerError
 from runner.plan import build_plan
+
+ROOT = Path(__file__).resolve().parents[2]
 
 SPEC = {
     "schema_version": "1.0",
@@ -21,6 +25,21 @@ SPEC = {
         "probe": "ptr_chase",
         "sweep": {"buffer": ["64KiB", "64MiB"]},
         "fixed_params": ["stride", "warmup"],
+    },
+}
+
+PASS_SPEC = {
+    **SPEC,
+    "protocol_version": "1.1",
+    "parameters": [
+        {"name": "stride", "type": "size", "default": "64B"},
+        {"name": "warmup_passes", "type": "int", "default": 2},
+        {"name": "repetitions", "type": "int", "default": 3},
+    ],
+    "execution": {
+        **SPEC["execution"],
+        "sweep": {"buffer": ["4MiB", "12MiB", "32MiB"]},
+        "fixed_params": ["stride", "warmup_passes"],
     },
 }
 
@@ -80,6 +99,82 @@ class TestPlan(unittest.TestCase):
         # 64KiB/64B = 1024 slots × 8 = 8192 < min_loads 4194304 → 取 min_loads，8 对齐
         self.assertEqual(small.param_value("loads"), 4194304)
         self.assertEqual(small.param_value("loads") % 8, 0)
+
+    def test_warmup_passes_derive_complete_ring_traversals(self):
+        plan = build_plan(PASS_SPEC, {**PLATFORM, "controls": []})
+        by_buffer = {case.param_value("buffer_kb"): case for case in plan.cases}
+
+        self.assertEqual(by_buffer[4096].param_value("warmup"), 2 * 4096 * 1024 // 64)
+        self.assertEqual(by_buffer[12288].param_value("warmup"), 2 * 12288 * 1024 // 64)
+        self.assertEqual(by_buffer[32768].param_value("warmup"), 2 * 32768 * 1024 // 64)
+        self.assertEqual(by_buffer[4096].param_value("warmup_passes"), 2)
+        self.assertEqual(dict(by_buffer[4096].params)["warmup"].source, "derived")
+        self.assertEqual(
+            dict(by_buffer[4096].params)["warmup_passes"].source,
+            "spec-default",
+        )
+
+    def test_negative_warmup_passes_rejected(self):
+        with self.assertRaisesRegex(RunnerError, "warmup_passes must be >= 1"):
+            build_plan(PASS_SPEC, PLATFORM, cli_overrides={"warmup_passes": -1})
+
+    def test_new_and_legacy_warmup_conflict_rejected(self):
+        conflict = {
+            **PASS_SPEC,
+            "parameters": [
+                *PASS_SPEC["parameters"],
+                {"name": "warmup", "type": "int", "default": 1000},
+            ],
+            "execution": {
+                **PASS_SPEC["execution"],
+                "fixed_params": ["stride", "warmup", "warmup_passes"],
+            },
+        }
+        with self.assertRaisesRegex(RunnerError, "cannot declare both"):
+            build_plan(conflict, PLATFORM)
+
+    def test_derived_warmup_signed_64_bit_overflow_rejected(self):
+        overflow = {
+            **PASS_SPEC,
+            "execution": {
+                **PASS_SPEC["execution"],
+                "sweep": {"buffer": ["576460752303423488KiB"]},
+            },
+        }
+        with self.assertRaisesRegex(RunnerError, "warmup loads exceed"):
+            build_plan(overflow, PLATFORM)
+
+    def test_legacy_exact_warmup_is_preserved(self):
+        plan = build_plan(SPEC, {**PLATFORM, "controls": []})
+        case = plan.cases[0]
+        self.assertEqual(case.param_value("warmup"), 1000)
+        self.assertEqual(dict(case.params)["warmup"].source, "spec-default")
+        self.assertNotIn("warmup_passes", dict(case.params))
+
+    def test_current_ptr_chase_specs_use_pass_based_warmup_protocol(self):
+        paths = sorted((ROOT / "configs" / "experiments").glob("ptr-chase*.json"))
+        self.assertTrue(paths)
+        platform = {**PLATFORM, "controls": []}
+
+        for path in paths:
+            with self.subTest(path=path.name):
+                spec = json.loads(path.read_text(encoding="utf-8"))
+                self.assertEqual(spec["protocol_version"], "1.1")
+                parameter_names = {param["name"] for param in spec["parameters"]}
+                self.assertIn("warmup_passes", parameter_names)
+                self.assertNotIn("warmup", parameter_names)
+                self.assertIn("warmup_passes", spec["execution"]["fixed_params"])
+                self.assertNotIn("warmup", spec["execution"]["fixed_params"])
+
+                plan = build_plan(spec, platform)
+                for case in plan.cases:
+                    params = dict(case.params)
+                    slots = case.param_value("buffer_kb") * 1024 // case.param_value("stride")
+                    self.assertEqual(
+                        case.param_value("warmup"),
+                        case.param_value("warmup_passes") * slots,
+                    )
+                    self.assertEqual(params["warmup"].source, "derived")
 
 
 if __name__ == "__main__":

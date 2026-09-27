@@ -17,6 +17,8 @@ from typing import Any
 from .errors import RunnerError
 from .resolve import ResolvedValue, parse_size_bytes, parse_size_kb, resolve_param
 
+MAX_PROBE_LOADS = (1 << 63) - 1
+
 
 @dataclass(frozen=True)
 class Control:
@@ -112,6 +114,51 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
             loads = max(min_loads, loads_per_slot * slots)
             loads -= loads % 8  # 对齐展开因子（Probe ABI：loads >= 8 且为 8 的倍数）
 
+            # 新协议按完整 ring pass 表达预热；Probe ABI 仍接收精确 load 数。
+            # legacy warmup 仅用于历史配置重放。两种语义同时出现会使记录无法
+            # 判定操作者意图，因此在 plan 期硬拒绝。
+            warmup_rv = params.get("warmup")
+            passes_rv = params.get("warmup_passes")
+            if warmup_rv is not None and passes_rv is not None:
+                raise RunnerError(
+                    "plan-error",
+                    "ptr_chase cannot declare both warmup and warmup_passes",
+                )
+            if passes_rv is not None:
+                if type(passes_rv.value) is not int:  # bool 也不得冒充 int
+                    raise RunnerError(
+                        "plan-error",
+                        f"warmup_passes must be an integer, got {passes_rv.value!r}",
+                    )
+                warmup_passes = passes_rv.value
+                if warmup_passes < 1:
+                    raise RunnerError(
+                        "plan-error",
+                        f"warmup_passes must be >= 1, got {warmup_passes}",
+                    )
+                warmup = warmup_passes * slots
+                if warmup > MAX_PROBE_LOADS:
+                    raise RunnerError(
+                        "plan-error",
+                        f"derived warmup loads exceed signed 64-bit limit: {warmup}",
+                    )
+            elif warmup_rv is not None:
+                if type(warmup_rv.value) is not int:
+                    raise RunnerError(
+                        "plan-error",
+                        f"legacy warmup must be an integer, got {warmup_rv.value!r}",
+                    )
+                warmup = warmup_rv.value
+                if warmup < 0:
+                    raise RunnerError(
+                        "plan-error", f"legacy warmup must be >= 0, got {warmup}",
+                    )
+            else:
+                raise RunnerError(
+                    "plan-error",
+                    "ptr_chase requires warmup_passes (current) or warmup (legacy)",
+                )
+
             # hugepage：实验声明时才进入 case（测量语义参数，measurement-discipline
             # §2）；未声明的实验完全不出现该键——旧配置零影响。
             hp_rv = params.get("hugepage")
@@ -123,9 +170,14 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                 "buffer_kb": ResolvedValue(buffer_kb, params["buffer"].source),
                 "stride": ResolvedValue(stride_b, params["stride"].source),
                 "loads": ResolvedValue(loads, "derived"),
-                "warmup": ResolvedValue(int(params.get("warmup", ResolvedValue(200000, "spec-default")).value),
-                                        params.get("warmup", ResolvedValue(None, "spec-default")).source),
+                "warmup": ResolvedValue(
+                    warmup, "derived" if passes_rv is not None else warmup_rv.source,
+                ),
             }
+            if passes_rv is not None:
+                case_params["warmup_passes"] = ResolvedValue(
+                    warmup_passes, passes_rv.source,
+                )
             if hp_rv is not None:
                 case_params["hugepage"] = ResolvedValue(hugepage, hp_rv.source)
             case_id = (f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"

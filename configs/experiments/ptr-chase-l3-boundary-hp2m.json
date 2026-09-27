@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
   "id": "ptr-chase-l3-boundary-hp2m",
-  "title": "L3 容量边界细扫（64-128MiB，4MiB 步进；hugepage+锁频口径）",
-  "protocol_version": "1.0",
+  "title": "大容量 L3 边界历史细扫（64-128MiB，显式 hugetlb；非 SM8650 配置）",
+  "protocol_version": "1.1",
   "harness": "portable",
   "parameters": [
     { "name": "stride", "type": "size", "default": "64B" },
-    { "name": "warmup", "type": "int", "default": 200000 },
+    { "name": "warmup_passes", "type": "int", "default": 2 },
     { "name": "loads_per_slot", "type": "int", "default": 8 },
     { "name": "min_loads", "type": "int", "default": 4194304 },
     { "name": "repetitions", "type": "int", "default": 5 },
     { "name": "hugepage", "type": "int", "default": "1" }
   ],
   "preconditions": [
-    "锁频（performance）+ hugepage 池在位——参考基线口径（设计文档 §11 v3）",
-    "目的：把 L3 边界从 (64M,128M] 收敛到具体档位，与 sysfs 105M 核对"
+    "锁频（performance）+ 对应 hugetlb 页池在位；实际页策略必须随记录审计",
+    "历史用途：核对约 105MiB 的服务器 L3；不得用于 SM8650 层级或容量判断"
   ],
   "metrics": [ { "name": "latency_ns", "unit": "ns", "statistic": "median" } ],
   "execution": {
@@ -24,7 +24,7 @@
                  "92MiB", "96MiB", "100MiB", "104MiB", "108MiB", "112MiB",
                  "116MiB", "120MiB", "124MiB", "128MiB"]
     },
-    "fixed_params": ["stride", "warmup", "loads_per_slot", "min_loads", "hugepage"]
+    "fixed_params": ["stride", "warmup_passes", "loads_per_slot", "min_loads", "hugepage"]
   },
-  "notes": "边界判读：延迟离开 L3 平台（~36ns）并持续爬升的首档即有效容量拐点；与 sysfs 107520K 比较时考虑 15-way 随机链的有效容量折扣（关联度冲突）"
+  "notes": "历史服务器 profile：边界解释必须与目标 sysfs/PMU 联合，不把单一延迟拐点直接命名为容量。"
 }
