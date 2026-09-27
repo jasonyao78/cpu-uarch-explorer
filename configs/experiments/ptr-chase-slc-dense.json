@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-slc-dense",
+  "title": "SLC 容量膝点加密 sweep（仲裁 6/12/24MB 假设；灭屏降 DISP/GPU slice 占用）",
+  "protocol_version": "1.0",
+  "harness": "portable",
+  "parameters": [
+    { "name": "buffer", "type": "size", "range": "4MiB..32MiB，SLC 膝点密集采样" },
+    { "name": "stride", "type": "size", "default": "64B" },
+    { "name": "warmup", "type": "int", "default": 200000 },
+    { "name": "loads_per_slot", "type": "int", "default": 8 },
+    { "name": "min_loads", "type": "int", "default": 4194304,
+      "notes": "计时分辨率 41.67ns 反推的安全量级（measurement-discipline；ptr_chase 原理 §4）" },
+    { "name": "repetitions", "type": "int", "default": 5 }
+  ],
+  "preconditions": [
+    "probe 已构建（cmake --build build）",
+    "测量期间灭屏（svc power stayon usb 保 CPU 唤醒），压低 DISP/GPU 等常驻 slice 占用",
+    "温度口径 warm（measurement-discipline §1）"
+  ],
+  "metrics": [
+    { "name": "latency_ns", "unit": "ns", "statistic": "median" }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "sweep": {
+      "buffer": ["4MiB", "6MiB", "8MiB", "10MiB", "12MiB", "14MiB", "16MiB", "20MiB", "24MiB", "32MiB"]
+    },
+    "fixed_params": ["stride", "warmup", "loads_per_slot", "min_loads"]
+  },
+  "notes": "Fisher-Yates 随机单链防 stride 预取；同链 8 次展开摊薄循环开销（probes/cache-mem/ptr_chase.cpp 原理 §1-3）。倍频程 sweep 采样间隙跨不过 6/12MB 候选膝点，本实验加密档位钉真边界"
+}
