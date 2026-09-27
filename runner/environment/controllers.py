@@ -88,4 +88,56 @@ def make_controller(spec: str) -> tuple[Controller, str]:
     key, _, value = spec.partition("=")
     if key == "governor":
         return CpufreqGovernorController(), value
-    raise RunnerError("env-unknown-controller", f"unsupported env spec: {spec!r} (supported: governor=<name>)")
+    if key == "thermal":
+        return SvcThermalDaemonController(), value
+    raise RunnerError("env-unknown-controller", f"unsupported env spec: {spec!r} (supported: governor=<name>, thermal=stopped|running)")
+
+
+class SvcThermalDaemonController:
+    """Android 温控守护抑制（2026-09-27 热管理层系统分析裁定）：测量窗口内
+    stop mi_thermald（restore 时 start），防止其动态下调 scaling_max 污染
+    锁频测量——governor 只锁到 scaling_max，锁不住守护对 cap 本身的调节。
+
+    实测依据：stop 后重启 mi_thermald 把 policy7 scaling_max 2745600→3110400
+    （实锤其为 scaling_max 活动控制者）；3302400 为 boost 频率（miperf perf
+    lock 管辖），stop 守护 + performance 负载下 cur_freq 仍封顶 2745600。
+
+    安全窗口：仅分钟级微基准且 Tj<95°C（当前实测负载 Tj 78-84°C）；
+    长跑 benchmark（GB6/SPEC）禁止抑制——必须留热保护。"""
+    key = "svc.thermal"
+    requires_privilege = True
+    _SVC = "mi_thermald"
+
+    def _require_adb(self, executor):
+        from ..executor.adb import AdbExecutor  # 延迟导入：避免 controllers→executor 环
+        if not isinstance(executor, AdbExecutor):
+            raise RunnerError("env-unsupported-platform",
+                              "svc.thermal only supported on Android (adb executor)")
+        return executor
+
+    def inspect(self, executor) -> str:
+        res = self._require_adb(executor).execute(["su", "-c", f"getprop init.svc.{self._SVC}"])
+        if res.returncode != 0:
+            raise RunnerError("env-inspect-failed",
+                              f"cannot read {self._SVC} state: {res.stderr.strip()[:120]}")
+        return res.stdout.strip()
+
+    def validate(self, requested: str) -> None:
+        if requested not in ("stopped", "running"):
+            raise RunnerError("env-invalid-request",
+                              f"unsupported thermal daemon state: {requested!r} (stopped|running)")
+
+    def apply(self, executor, requested: str) -> str:
+        self.validate(requested)
+        action = "stop" if requested == "stopped" else "start"
+        res = self._require_adb(executor).execute(["su", "-c", f"{action} {self._SVC}"])
+        if res.returncode != 0:
+            raise RunnerError("env-apply-failed",
+                              f"thermal daemon {action} failed: {res.stderr.strip()[:160]}")
+        return ""
+
+    def verify(self, executor, expected: str) -> bool:
+        try:
+            return self.inspect(executor) == expected
+        except RunnerError:
+            return False

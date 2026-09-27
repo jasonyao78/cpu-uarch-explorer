@@ -197,6 +197,93 @@ class TestAndroidGovernorTx(unittest.TestCase):
         self.assertEqual(cm.exception.code, "env-invalid-request")
 
 
+class FakeAdbThermalExecutor(AdbExecutor):
+    """mi_thermald 假执行器：su -c stop/start 语义 + getprop 查询。"""
+
+    def __init__(self, state="running"):
+        self.svc_state = state
+
+    def execute(self, argv, command_prefix=()):
+        cmd = " ".join(str(a) for a in argv)
+        if "getprop init.svc.mi_thermald" in cmd:
+            return ExecutionResult(0, self.svc_state + "\n", "", "fake")
+        if cmd == "su -c stop mi_thermald":
+            self.svc_state = "stopped"
+            return ExecutionResult(0, "", "", "fake")
+        if cmd == "su -c start mi_thermald":
+            self.svc_state = "running"
+            return ExecutionResult(0, "", "", "fake")
+        return ExecutionResult(1, "", "unscripted: " + cmd, "fake")
+
+
+class TestThermalDaemonTx(unittest.TestCase):
+    """thermal 抑制事务（2026-09-27 裁定）：测量窗口 stop mi_thermald，
+    restore 回 before 值；非法值与非 adb 执行器结构化拒绝。"""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.store = JournalStore(Path(self._tmp.name))
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _tx(self, executor, work=lambda: {"ok": 1}, specs=("thermal=stopped",)):
+        return execute_environment_tx(PLATFORM, list(specs), work,
+                                      allow_mutation=True, store=self.store,
+                                      executor=executor, lock=FakeLock())
+
+    def test_stop_restore_roundtrip(self):
+        ex = FakeAdbThermalExecutor(state="running")
+        self.assertEqual(self._tx(ex), {"ok": 1})
+        self.assertEqual(ex.svc_state, "running")  # restore 回 before 值
+        journal = self.store.load(next(iter(self.store.root.glob("*.json"))).stem)
+        self.assertEqual(journal.state, "restored")
+        self.assertEqual(journal.mutations[0].controller, "svc.thermal")
+
+    def test_idempotent_when_already_stopped(self):
+        ex = FakeAdbThermalExecutor(state="stopped")  # before=stopped → restore 也 stop
+        self._tx(ex)
+        self.assertEqual(ex.svc_state, "stopped")
+
+    def test_invalid_state_rejected(self):
+        ex = FakeAdbThermalExecutor()
+        with self.assertRaises(EnvironmentError_) as cm:
+            self._tx(ex, specs=("thermal=off",))
+        self.assertEqual(cm.exception.code, "env-invalid-request")
+
+    def test_linux_executor_structured_reject(self):
+        ex = FakeEnvExecutor()
+        # inspect 在事务 try 之外，不适用平台的拒绝以原始 RunnerError 上抛
+        # （exit 1 家族，与 env-unknown-controller 同语义）
+        with self.assertRaises(RunnerError) as cm:
+            self._tx(ex)
+        self.assertEqual(cm.exception.code, "env-unsupported-platform")
+        self.assertIn("Android", str(cm.exception))
+
+    def test_combined_with_governor(self):
+        """锁频 + thermal 抑制同事务（平台 host_requirements 声明路径）。"""
+        ex = FakeAdbExecutor(governor="walt")
+
+        class Combined(FakeAdbExecutor, FakeAdbThermalExecutor):
+            pass
+
+        combined = Combined.__new__(Combined)
+        FakeAdbExecutor.__init__(combined, governor="walt")
+        combined.svc_state = "running"
+        original_execute = combined.execute
+
+        def dispatch(argv, command_prefix=()):
+            cmd = " ".join(str(a) for a in argv)
+            if "mi_thermald" in cmd:
+                return FakeAdbThermalExecutor.execute(combined, argv, command_prefix)
+            return original_execute(argv, command_prefix)
+
+        combined.execute = dispatch
+        self._tx(combined, specs=("governor=performance", "thermal=stopped"))
+        self.assertEqual(combined.governor, "walt")       # governor 已 restore
+        self.assertEqual(combined.svc_state, "running")   # thermal 已 restore
+
+
 class TestReconcileAndSpecs(unittest.TestCase):
     """中断恢复实证（任务书 §2.1/§5.2）：kill -INT 留下的未完成事务在下次
     运行前被检测并完成 restore；host_requirements 声明式换算。"""

@@ -20,6 +20,15 @@
   "defaults": {
     "repetitions": 5
   },
+  "host_requirements": {
+    "svc.thermal": "stopped"
+  },
+  "aux_snapshots": [
+    {
+      "name": "thermal_status",
+      "command": ["su", "-c", "dumpsys thermalservice | grep -E 'Thermal Status|mName=battery' | head -4"]
+    }
+  ],
   "freq_domains": [
     { "policy": 0, "cpus": [0, 1], "core_type": "a520", "cpuinfo_max_khz": 2265600, "capacity": 379 },
     { "policy": 2, "cpus": [2, 3, 4], "core_type": "a720", "cpuinfo_max_khz": 3148800, "capacity": 923 },
