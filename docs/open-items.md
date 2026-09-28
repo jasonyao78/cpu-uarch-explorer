@@ -106,15 +106,21 @@
 > 本机无 hugetlb pool 但支持 THP，不能把 4 KiB/TLB 混杂写成永久状态。
 > 新门禁为：测量协议修复 → X4 2 MiB 私有 L2 校准 → core/LLCC PMU →
 > L3/LLCC 与干扰实验。在私有 L2 可识别前停止外层 cache 容量定案。
+>
+> **2026-09-28 复审**："校准 + 正向控制 + 细扫"链路中的容量裁定被外部
+> 评审驳回（预注册门禁事后改写、排他性机制表述、L2 几何论证错误），
+> 两份评审文档顶部已加更正块。**X4 私有 L2 门禁重新打开，外层
+> L3/LLCC 维持封锁**；数据与工程链路保留为实验档案。
 
 | 项 | 内容 | 归属/触发条件 | 状态 |
 |---|---|---|---|
 | P0 warmup/页策略正确性 | `warmup_passes` 完整遍历；THP 请求与 smaps 实际 backing 分开记录 | 所有新 SM8650 容量实验的前置门禁 | ✅ 完成（`a8a6ac6`、`1532274`） |
 | P0 受控安静态 v2 | 显式 profile；逐 policy 精确恢复；Android 状态 before/after；前后门禁 fail-closed | 新 SM8650 校准实验前置；临时 control-path smoke 只验控制链，不产容量数据 | ✅ 完成（`a1f52b6`–`0895270`、`d405460`；验收见 runbook §7） |
-| P0 X4 私有 L2 校准 | 512 KiB–3 MiB 细扫，4 KiB/实际 THP 对照，≥10 次新分配，联合 L2 refill/DTLB | 协议修复后第一项实机实验；失败则停止外层解读 | ✅ 已执行（`9f7441b`，run `20260927T175218Z/175405Z`）：初裁 OPEN/INCONCLUSIVE，经 P0'/P1 闭环——512→640 KiB = L1 置换共振假象；l2ref 有效起始沿区间 [768, 1216) KiB；名义 2 MiB 被实测否决、1 MiB 为最一致解释（评审 `docs/reviews/2026-09-28-sm8650-x4-l2-fine-sweep.md`） |
-| P0' PMU 事件语义正向控制 | L1D/L2D access/refill + L3 refill + DTLB walk 的地板/规模双向验证 | 校准裁定遗留（事件语义未证不可排因）；细扫前置门禁 | ✅ 完成（`219bcbb`，评审 `docs/reviews/2026-09-28-sm8650-pmu-positive-control.md`）：L1 系与 dtlb_walk SEMANTICS-VERIFIED；l2d/l3d_refill COUNTS-COHERENT（起始沿有效、幅度禁换算）；512→640 确认为 L1 置换假象 |
-| P1 PMU 采样通道 | armv8 PMU 与 chase 同步；LLCC `type=9/config=0x1000` 响应性与权限边界已独立验证 | X4 L2 用 shell core PMU 同窗采样；外层 cache 再接最小 root LLCC sidecar；root userspace 路径已通，不触发 LKM | ✅ core 同窗已验证（`04f99b4`；两轮校准 + 正向控制共 35 case 全部 running==enabled）；LLCC sidecar 后置外层阶段 |
-| P1 细粒度私有 L2 扫描 | 448–800 KiB @ 32/64 KiB + 896–1408 KiB @ 64 KiB；6 cache 事件同窗（计数器预算内） | 正向控制通过（已满足）；目标：L1 崩塌成像 + l2ref 起始沿定位 | ✅ 完成（`687d09e`，run `20260927T184203Z`）：L1 崩塌致密成像确认假象；起始沿 [768, 1216) KiB（768–1152 着色双态、≥1216 持续高位）；**私有 L2 门禁关闭，外层 cache 阶段解锁**（进入前待用户确认）；平台画像名义 `x4_l2_kib_per_core: 2048` 与实测矛盾，是否改写基线留待用户决定 |
+| P0 X4 私有 L2 校准 | 512 KiB–3 MiB 细扫，4 KiB/实际 THP 对照，≥10 次新分配，联合 L2 refill/DTLB | 协议修复后第一项实机实验；失败则停止外层解读 | ✅ 已执行（`9f7441b`，run `20260927T175218Z/175405Z`）；裁定 **OPEN/INCONCLUSIVE**（后续闭环尝试被评审驳回，维持开放） |
+| P0' PMU 事件语义正向控制 | L1D/L2D access/refill + L3 refill + DTLB walk 的地板/规模双向验证 | 校准裁定遗留（事件语义未证不可排因）；细扫前置门禁 | ⚠️ 数据保留（`219bcbb`）：计数相干性成立；**容量推断门禁 FAILED 维持**（预注册 8 MiB 预期未达，事后改写已撤销，见评审更正块） |
+| P0″ demand/prefetch 专用事件复测 | `L1D/L2D_CACHE_MISS/HWPRF` + `MEM_ACCESS_RD` 同窗；≥4 seed × 短/长训练 × base/THP 正交；探针加可记录 seed；分析器入库 | P0' 门禁失败后唯一认可的容量推断路径；512→640 机制（预取崩塌 vs 置换共振）判别 | 🚧 下一项（本任务链，LLCC 仍封锁） |
+| P1 PMU 采样通道 | armv8 PMU 与 chase 同步；LLCC `type=9/config=0x1000` 响应性与权限边界已独立验证 | X4 L2 用 shell core PMU 同窗采样；外层 cache 再接最小 root LLCC sidecar；root userspace 路径已通，不触发 LKM | ✅ core 同窗已验证（`04f99b4`；两轮校准 + 正向控制共 35 case 全部 running==enabled）；LLCC sidecar 后置外层阶段（**评审后维持封锁**） |
+| P1 细粒度私有 L2 扫描 | 448–800 KiB @ 32/64 KiB + 896–1408 KiB @ 64 KiB；6 cache 事件同窗（计数器预算内） | 正向控制通过（已满足）；目标：L1 崩塌成像 + l2ref 起始沿定位 | ⚠️ 数据保留（`687d09e`，run `20260927T184203Z`）；**裁定驳回**（排他性机制表述、起始沿与逐样本矛盾、几何论证错误——见评审更正块）：512→640 改为"预取覆盖率崩塌强证据（待 P0″ 正式裁定）"；起始沿未成立；2 MiB 未否决、1 MiB 待检 |
 | P1 多链带宽模式 | ptr_chase `--chains N`：吞吐 cliff 作为独立物理量（Probe ABI 变更） | latency + PMU 仍不能区分外层结构时单独立项 | ⬜ 待办 |
 | P2 逐 rep 双峰检测 | statistics.py 分位数/双峰标记（median-of-5 掩盖双峰，Xeon 有前科） | 触发：P1 多链模式立项时并入 | ⬜ 待办 |
 | P2 干扰编排进 spec | cross-core/相机/GPU 条件采用配对或随机交错；相机前后验证 active client | L2/L3/PMU 基线通过后；禁止一次性手跑归因 | ⬜ 待办 |
