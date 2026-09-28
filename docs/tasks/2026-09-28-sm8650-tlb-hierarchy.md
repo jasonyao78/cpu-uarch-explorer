@@ -1,20 +1,29 @@
 # 任务书：SM8650 Cortex-X4 TLB 层级探测（2026-09-28）
 
-> **版本**：v4（取代 v3）。**v3→v4 修订映射**（对应"Software
-> Optimization Guide 并列为原厂资料"输入）：
+> **版本**：v4.1（Specification Closure；取代 v4）。**v4→v4.1 修订映射**
+> （对应第四轮评审 6 项 P0 + 7 项 P1）：
 >
-> | 输入项 | v4 修订位置 |
+> | 评审项 | v4.1 修订位置 |
 > |---|---|
-> | *Cortex-X4 Core Software Optimization Guide*（PJDOC-1505342170-538636，Issue 3.0，r0p1）与 TRM 并列原厂资料，职责不同 | §2.2、§3.1、§6.6 |
-> | **原厂资料核查门禁**（已控制/未控制/不适用清单） | §6.6（新增） |
-> | Arm PDF 版权处置：全文 PDF 与提取文本**不入库**（封面明示"may not be reproduced…without written permission"），移至仓外 `cpu-uarch-ref/arm-docs/`；仓内只留引用元数据与短摘 | §3.1 出处注、§11 |
-> | TRM/Guide 修订元数据落档（PDF 封面/修订记录为准，不凭 URL 推断） | §3.1 |
+> | P0-1 Phase B 上限与矩阵不相容 | §6.2.7（统计单位+裁剪优先级+分项额度） |
+> | P0-2 Q2a 无独立致密路径 | §6.2.4 拆为 4a（Q1 knee）/ 4b（Q2a onset） |
+> | P0-3 锚点身份/顺序/角色 | §6.2.5、§6.4 改为**独立锚点配置前后夹块**（弃用 buffer 识别） |
+> | P0-4 VMA base 无采集路径 | §6.1、§9.1、§9.3（最小探针字段端到端） |
+> | P0-5 cohort ≥3 违 ≥5 纪律 | §7 Phase D（比较级 ≥5、描述级 3–4、不足终态） |
+> | P0-6 512-pass 术语错误+停止规则 | §7 Phase B（timed 主导 + 热中止重试占额） |
+> | P1-1 analysis_rules 边界分支 | §6.2.8（新增边界解析） |
+> | P1-2 锚点参照系不匹配（含 3072 KiB 无 G0 历史数据） | §6.2.5（参照系改为可证字段+首块自校准） |
+> | P1-3 线性遍历不可由种子表达 | §6.5（删除该行，转方法学后置） |
+> | P1-4 MLP=1 限定 demand chain | §6.1、§6.6 |
+> | P1-5 注册表 CANDIDATE/QUALIFIED 分级 | §3.1、§5.1 |
+> | P1-6 Q3 默认关联+升级需独立模型规格 | §7 Phase C |
+> | P1-7 事件表按内容哈希冻结；TRM 引述基准明示 Issue 05 | §3.1 |
 >
-> **v2→v3 修订映射**（保留备查）：Arm TRM 升为首要语义源（§2.2、
-> §3.1）；**M6 更正 MMUTC ≠ L2 TLB**（TRM §6.1：MMU = L1 TLB + L2
-> TLB + MMUTC + translation table prefetcher；MMUTC 为 2048 项 8 路
-> walk 缓存）；AArch64-Explore 方法学对照（§6.5）；版本冻结；
-> `0x05`/`0x34` 事件文本经 TRM Issue 05 逐字核对。
+> **v3→v4 修订映射**（保留备查）：Software Optimization Guide
+>（PJDOC-1505342170-538636，Issue 3.0，r0p1）与 TRM 并列原厂资料，
+> 职责不同（§2.2、§3.1、§6.6）；原厂资料核查门禁（§6.6）；Arm PDF
+> 版权处置（全文不入库，移至仓外 `cpu-uarch-ref/arm-docs/`）。
+>> **v2→v3 修订映射**（保留备查）：Arm TRM 升为首要语义源；**M6 更正 MMUTC ≠ L2 TLB**；AArch64-Explore 方法学对照；版本冻结；`0x05`/`0x34` 事件文本经 TRM Issue 05 逐字核对。
 >
 > **前置阅读**：仓库根 `AGENTS.md`（铁律 0–7）、
 > `docs/methodology/measurement-discipline.md`、
@@ -149,7 +158,10 @@
    （文档号/修订/章节）与必要的短摘。
 2. **ARM-software/data `pmu/cortex-x4.json`**：TRM 衍生的事件表可检
    索副本（其 refs 即引 TRM），counters=6；用作配置编码的固定索引
-   （钉访问日期）。
+   ——按**内容哈希**冻结：抓取内容 JSON 部分 SHA-256 前缀
+   `c11c4ee0f6ad6b61`（raw `master` 抓取时点快照，保存于本地会话档；
+   访问日期 2026-09-28）。若上游更新，以新哈希重新评审而非静默跟
+   进。
 3. **本机正控（本仓 runs + `configs/pmu-event-registry.json`）**：行
    为资格（S4）。三者不一致 → `SEMANTICS_UNVERIFIED`，不得择一方
    便解释。
@@ -204,8 +216,13 @@ L2 TLB"——同一份 TRM 内两种措辞；**照录不裁定**（不影响 `0x
 **事件资格注册（S4）**：`configs/pmu-event-registry.json`（随本任务
 TDD 建立）。每条注册：`{type, config, name, midr, source_doc,
 source_revision, positive_control_run, outcome, review_ref,
-validity_scope}`。分析器对未注册或作用域不匹配（MIDR/run 不符）的
-事件自动降级 `SEMANTICS_UNVERIFIED`。
+validity_scope}`。**资格分两级（P1-5）**：`CANDIDATE`（编码已知、
+允许作为正控候选**采集**）与 `QUALIFIED`（正控通过、允许参与正式
+结构**结论**）。`SEMANTICS_UNVERIFIED` 只阻断结论晋升，**不阻断**
+正控原始数据采集与审计——否则 Gate 1 自身无法完成。
+**引述基准**：本表"TRM 文本"列的实际依据为 **Issue 05**
+（`102484_0002_05_en`）；在线 r0p3 修订尚未逐字核对（§11 待办），
+本任务书不声称其与 Issue 05 相同。
 
 ### 3.2 统一分母与密度定义
 
@@ -271,9 +288,10 @@ read-before-disable 被破坏 → 停止正式结构推断，转入计数链调�
 base/mixed/thp 实际 backing 对照（`0x8138/0x813a` 必须）；10 个新
 进程重复 + 短块；编码与 `running == enabled` 校验；**通过判据**：
 方向与预期一致、跨进程稳定、无恒零 → 写入
-`configs/pmu-event-registry.json`（含 run ID 与作用域）。**失败处
-置**：`SEMANTICS_UNVERIFIED`，结论降级，原始数据不改写。**有限终
-点**：不为找到期望曲线连续尝试新 raw event。
+`configs/pmu-event-registry.json`（含 run ID 与作用域），资格升
+`QUALIFIED`。候选事件先以 `CANDIDATE` 资格采集（§3.1 分级）。**失
+败处置**：`SEMANTICS_UNVERIFIED`，结论降级，原始数据不改写。**有
+限终点**：不为找到期望曲线连续尝试新 raw event。
 
 ### 5.2 事件组（候选；最终以 running==enabled 为准；跨组不相减）
 
@@ -317,11 +335,18 @@ t0 前/t1 后少量探针代码；read-before-disable 是下游驱动约束，**
   用）与 `loads_per_slot`（timed 训练量：短=8、长=512 ring
   passes）是不同参数；Phase A/B 的短/长训练指 `loads_per_slot`，
   warmup 保持 2 环不变。
+- **MLP 限定（P1-4）**：本探针的"无并行性"严格含义为 **demand
+  pointer-chain MLP=1**（被计时的依赖指针链无多条独立需求链）；硬
+  件预取、页表预取、指令侧活动与推测行为并不因此停止，**不声称系
+  统内全部内存请求 MLP=1**。
 - 布局变量：现有 `-S` 只控制访问顺序（**order_seed**）。本任务采
-  用**路线 A**：4 个 order_seed + 10 个新进程布局观测（记录每进程
-  VMA base），**不声称正交 layout_seed 实验**；若 Q1 对进程布局显
-  著敏感，记 `LAYOUT_OBSERVATION_LIMITED` 并转 OI（路线 B 后置立
-  项）。
+  用**路线 A**：4 个 order_seed + 10 个新进程布局观测——**VMA
+  base 采集纳入本任务最小实现（P0-4）**：探针新增输出字段
+  `vma_base=0x…`（建链缓冲区起始 VA；ASLR 下每进程不同、不含主机
+  身份信息），端到端经 adapter 入 records 并在 schema README 登记
+  （§9.1/§9.3 契约测试）；**不声称正交 layout_seed 实验**。若 Q1
+  对进程布局显著敏感，记 `LAYOUT_OBSERVATION_LIMITED` 并转 OI
+  （路线 B 后置立项）。
 
 ### 6.2 analysis_rules v1（预注册冻结规则）
 
@@ -359,23 +384,48 @@ t0 前/t1 后少量探针代码；read-before-disable 是下游驱动约束，**
 
 8192 页仍未满足 → `RIGHT_CENSORED`（onset 下界报告）。
 
-**6.2.4 Phase B 致密点生成器（确定性）**
+**6.2.4a Phase B 致密点生成器（Q1 knee 路径，确定性）**
 
-对每个候选区间 [p_i, p_{i+1}]：插入四分位点
-`p_i + k·(p_{i+1} − p_i)/4`（k=1,2,3）；若 `p_i/2 ≥ 32` 再插入
-`p_i/2`。去重、升序。输入 = 通过质量门槛的 Phase A 数据；记录输入
-run SHA-256、本规则块 SHA-256、输出配置 SHA-256。候选区间 >3 个
-时按 `R_0x05` 相对增量取前 3。
+对每个 Q1 候选区间 [p_i, p_{i+1}]（§6.2.2）：插入四分位点
+`p_i + k·(p_{i+1} − p_i)/4`（k=1,2,3，**非整数页向下取整**）；若
+`p_i/2 ≥ 32` 再插入 `p_i/2`。去重、升序。输入 = 通过质量门槛的
+Phase A 数据；记录输入 run SHA-256、规则块 SHA-256、输出配置
+SHA-256。候选区间 >3 个时按 `R_0x05` 相对增量取前 3（**并列按
+p_i 升序**，见 §6.2.8）。
 
-**6.2.5 锚点判据（质量门槛）**
+**6.2.4b Phase B 致密点生成器（Q2a onset 路径，确定性，独立）**
 
-- 每个 Phase 配置的首尾各嵌一个锚点 case：**512 KiB base** 与
-  **3072 KiB base**（G0 事件组、短训练、order_seed=42、10 进程）；
-- 锚点有效：两锚点 median latency 与同制度历史组（short-base
-  20260928T024022Z 的 512/3072 KiB 组）中位数偏差 ≤3%，且
-  R_0x05/R_0x34 落在历史组 [p25, p75] 内；
-- 锚点失真 → **当前块（= 该 run 目录）fail-closed**：块内数据不
-  进入判定，查明原因后重跑该块。
+Q2a 的 onset 候选 = 首次满足 §6.2.3 的相邻点对 (p_i, p_{i+1})（onset
+位于其间）。对该区间独立应用与 4a 相同的插入规则（四分位 + 可选
+`p_i/2`）。**与 Q1 候选解耦**：Q1 无候选而 Q2a 有 onset 时，Phase B
+仍按本路径生成（Q1 按对应终态结案）；两者都有点时按各自区间分
+别生成，点位按页数升序、跨区间去重后合入同一 Phase B 配置，**逐
+点标注来源路径（knee/onset）**。
+
+**6.2.5 锚点判据（质量门槛；独立锚点配置前后夹块，P0-3/P1-2）**
+
+- **锚点 = 专用配置** `ptr-chase-sm8650-x4-tlb-anchor.json`（固定
+  512 KiB 与 3072 KiB 两个 base case、G0 事件组、短训练、
+  order_seed=42、10 进程）：**每个块的主体 run 前、后各执行一
+  次**（块 = anchor-before + 主体 run + anchor-after，由
+  experiment_id 与 run manifest 时序关联）。**锚点身份由配置决
+  定，不由 buffer 大小推断**——512/3072 KiB 与粗扫点撞名也无歧
+  义；plan 展开契约测试断言锚点配置的 case 数、参数与执行顺序
+  （§9.3）。
+- **锚点有效判据**（参照系修正，P1-2）：
+  - latency 与 cycles/load：对照 short-base `20260928T024022Z` 同
+    buffer 组（该 run 含 cycles+latency，制度匹配已核），median 偏
+    差 ≤3%；
+  - `R_0x05/R_0x34`：512 KiB 对照 TLB 正控 run
+    `20260927T182613Z` 的 512 KiB 组（288.08 [287.7, 289.6] /
+    0.0129 [0.0098, 0.0141]，须落入 [p25, p75]）；**3072 KiB 无
+    G0 历史数据**——**首个块自校准**：以首块 anchor-before 的
+    3072 KiB 分布为基线，后续块与之比较（同一规则，跨块一致性
+    判定）；首块自身的 3072 KiB 只记录不判失；
+  - 前后两次锚点 run 之间：同指标互判（同一规则）；
+  - 任一锚点 run 的环境门禁失败 → 等同锚点失真。
+- 锚点失真 → **当前块 fail-closed**：块内数据不进入判定，查明原
+  因后重跑该块（重试占用 §6.2.7 预算）。
 
 **6.2.6 稳定条件（knee 成立）**
 
@@ -383,12 +433,45 @@ run SHA-256、本规则块 SHA-256、输出配置 SHA-256。候选区间 >3 个
 （8/512 ring passes）同制度（区间位置一致，幅度可变）；无块
 fail。否则按 `ORDER_SENSITIVE` / `TRAINING_SENSITIVE` 结案。
 
-**6.2.7 阶段 case 上限**
+**6.2.7 预算单位与裁剪优先级（P0-1）**
 
-Phase A ≤ 28（13 点 × 2 seed + 2 锚点）；Phase B ≤ 48（≤3 区间 ×
-≤4 插入点 × 4 seed × 1 训练量起步，含锚点）；Phase C ≤ 24；Phase
-D ≤ 240 进程次（见 §7 Phase D 的 40/point·policy 上限）。**达到上
-限即停，按已获数据结案。**
+- **case 计数单位** = (buffer × order_seed × 训练量 × 事件组 ×
+  policy) 的一个 runner case（10 进程）；锚点 run 的 case 计入各
+  自锚点额度，不挤占主体额度。
+- **确定性裁剪优先级**（超支时从前向后裁）：①区间数（保留相对
+  增量大的）；②插入点（四分位 k=3,2,1 依次裁）；③seed 数（保
+  留 42, 7, 1337 顺序）；④训练量（长训练对照先裁）；⑤事件组
+  （G1/G4 增强组先于 G0 主组裁）。**长训练若为 Q1 成立条件，其
+  额度在裁剪前先行预留**（见 Phase B）。
+- **分项额度**：
+  - Phase A ≤ 26 case 主体（13 点 × 2 seed）+ 锚点 2 run；
+  - Phase B ≤ 50 case 主体（≤3 区间 × ≤4 插入点 × 4 seed × 短训
+    练 ≤ 48，预留 2 余量）+ 锚点 2 run；**长训练对照独立额度 ≤
+    12 case**（前 3 致密点 × 4 seed，512 ring passes）+ 锚点 2
+    run；G1（Q2b）独立额度 ≤ 12 case；
+  - Phase C ≤ 24 case + 锚点 2 run；
+  - Phase D ≤ 240 进程次（§7 Phase D 的 40/point·policy 上限）+
+    锚点 2 run。
+- **达到上限即停，按已获数据结案**；热中止重试规则见 §7 Phase
+  B。
+
+**6.2.8 analysis_rules 边界解析（P1-1，可执行测试向量）**
+
+1. 左删失判定**先于** knee 检测：R_0x05(32 页) ≥ 100/1k 即
+   `LEFT_CENSORED`，不再执行 §6.2.2；
+2. 四分位点非整数页一律**向下取整**；取整后与现有页点重合则丢
+   弃该插入点（不计入额度）；
+3. 跨候选区间的插入点重合：按页数去重，**重合点仍各占其来源区
+   间的额度计数**（防止合并后隐性超支）；
+4. "相对增量前 3"并列：按候选区间左端点 p_i 升序取前 3；
+5. §6.2.3 的 ≥8/10 门槛按**每个 order_seed 各自**的 10 进程判定
+   （不跨 seed 合并 20 进程）；
+6. 质量拒绝后的有效进程 <10：在**同 case 的既有额度内**补跑新
+   进程至 10（补跑计入该 case 的进程计数）；额度耗尽则 case 记
+   failed（结构化），不无限补；
+7. Q1 无候选 + Q2a 有 onset：Phase B 只按 4b 生成；Q1 有候选 +
+   Q2a 无 onset：Phase B 按 4a 生成，Q2a 按 `RIGHT_CENSORED`；
+   皆无 → 不生成，各自终态。
 
 ### 6.3 统计与数据分层
 
@@ -402,13 +485,17 @@ D ≤ 240 进程次（见 §7 Phase D 的 40/point·policy 上限）。**达到�
 - 失败记录空 metrics + 结构化 failure；锚点失真 → 块 fail-closed
   （§6.2.5）。
 
-### 6.4 块与锚点的机读证据（S3）
+### 6.4 块与锚点的机读证据（S3；独立配置版）
 
-块 = 一个 run 目录（短块执行即一次 runner run）；锚点 case 作为
-sweep 首尾条目**嵌入实验配置**（§6.2.5），与块内 case 共用同一
-records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录自证，
-不依赖时间邻近推测。分析器以 `params.buffer_kb` 识别锚点 case 并
-先做 §6.2.5 判定，再处理其余 case。
+**块 = anchor-before run + 主体 run + anchor-after run**（三个
+run 目录，共享同一 experiment 语境；锚点 run 的 experiment_id 即
+`ptr-chase-sm8650-x4-tlb-anchor`）。关联证据链：①三个 run 的
+`run-manifest.json` 时序与 target/probe SHA-256 一致；②主体 run
+与锚点 run 的环境事务记录（quiet-state 前后门禁）相邻且无未完成
+journal；③锚点配置的 case 集合与参数由 plan 展开契约测试固定
+（§9.3）。分析器按 experiment_id 归组三个 run，先判 §6.2.5 再处
+理主体 case——**不以 buffer 大小、case 顺序或时间邻近推断角色与
+关联**。
 
 ### 6.5 探针设计对照：AArch64-Explore 方法学（commit `9e3d464`）
 
@@ -421,7 +508,7 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
 | 维度 | AArch64-Explore 的做法 | 本仓 `ptr_chase` 协议 | 对本任务的启示 |
 |---|---|---|---|
 | **TLB↔cache 解耦** | `kRandomTLBOffset` 族（:719/:738/:762）：页内加随机/线对齐/置换 offset——"test linear access of TLBs **without stressing cache associativity**"，遍历大面积（TLB 压力）而避免全部 load 落入同一 L1D set | 默认 `stride=64 B`，**每 4 KiB 页 64 slots 全遍历**——TLB 压力与数据 footprint 随页数**同增**（A4 混杂） | 我们的 X4 L1 dTLB 是 **fully associative**（TRM 明示），set 冲突在 L1 TLB 上不存在；但数据 cache 混杂仍在。Explore 的 offset 模式是"每页少量 slot"的替代设计——若 Q1 判定受 footprint 混杂支配，将其列为路线 B 候选（§11），本任务不携带 |
-| **遍历变体** | `TLB Linear Increasing / Linear Decreasing / Full Random`（:1566-1583）：顺序/逆序/随机三向对照，区分预取与 replacement 效应 | 固定随机单环 × `order_seed`（只改顺序） | 逆序/顺序对照是廉价的机制排歧项：Phase A 可加 1 个 `kLinearIncreasing` 类对照点（经 runner 现有种子协议即可表达）——纳入 Phase A 可选增强，不扩 scope |
+| **遍历变体** | `TLB Linear Increasing / Linear Decreasing / Full Random`（:1566-1583）：顺序/逆序/随机三向对照，区分预取与 replacement 效应 | 固定随机单环 × `order_seed`（只改顺序） | 线性/逆序遍历**不可由 `-S` 种子表达**（Fisher–Yates 只重排随机环）——作为方法学后置项登记 §11（需探针新增建链模式时立项），本任务不携带 |
 | **页尺寸变体** | `Node<sizeofPage8K64/16K/16K64>`（:1561 起）：8K/16K 多页尺寸节点 | 4 KiB base 为主；`-T` THP 仅 Q4 | 粒度变体对 Q4 有参考价值（`0x8138/0x813a` 大/小页 walk 事件正是为此设计） |
 | **预取器检测** | box 模式（:371 注释）：页内集节点成"box"，同 box 相同随机 vs 不同随机，检测模式学习类预取器 | 用 PMU `L1D_CACHE_HWPRF (0x8154)` 直接测预取活动（P0″ 已测得 512→640 KiB 预取覆盖崩塌） | 两条路径互证：我们的事件法更直接，box 法可作为无事件时的后备；不必引入 |
 | **缓存层级标记** | 测试缓冲档位标注覆盖域（:130-137：`2_MiB //covered by L1 TLB`、`16_MiB //covered by L2 TLB`、`48_MiB+ //covered by L2C TLB`） | 粗扫点按 §6.2.1（32..8192 页） | **档位标注思想采用**（粗扫点按候选结构区间成组提名）；**其数值（Apple 的 TLB 覆盖域）不采用** |
@@ -447,7 +534,7 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
 |---|---|---|
 | §4.4 Load/Store alignment | 跨 64B cache-line 边界的 load 与非 4B 对齐 quad load、跨 32B 边界的 store 有性能惩罚 | **已控制**：chase 每次访问为 64B stride 的 8B 指针 load，恒不跨线 |
 | §4.5 Store to Load Forwarding | store→load 转发有对齐/数量限制 | **不适用**：计时窗内纯 load（建链 store 全在窗口外） |
-| §4.3 Optimizing memory routines | 循环展开（每迭代多个 load/store）摊薄循环开销；但示例为独立 LDP/STP（引入 MLP） | **已控制（有意分歧）**：本探针同链展开 ×8——摊薄循环控制且**严格 MLP=1**（原理 §3 已论证；指南的并行化建议对被测量有反向作用，不采用） |
+| §4.3 Optimizing memory routines | 循环展开（每迭代多个 load/store）摊薄循环开销；但示例为独立 LDP/STP（引入 MLP） | **已控制（有意分歧）**：本探针同链展开 ×8——摊薄循环控制且 **demand pointer-chain MLP=1**（原理 §3；仅指被计时的依赖指针链无多条独立需求链，不保证系统内全部内存请求 MLP=1；指南的并行化建议对被测量有反向作用，不采用） |
 | §4.3 非临时 load（LDNPQ）/ DC ZVA | 针对 non-cacheable 流式例程 | **不适用**：本工作负载为 cacheable 匿名映射 |
 | §4.13 Cache maintenance operations | cache 维护指令的性能注记 | **不适用**：本探针不使用 cache 维护指令 |
 | 全文检索 | 无 TLB 容量/walk 成本/依赖链延迟探测内容 | **不适用**：不能作为 TLB 规格证据（与输入方的边界声明一致）；translation 性能结论一律以 TRM + 本机 run 为准 |
@@ -466,11 +553,15 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
 - §6.2.4 生成的致密点 × 4 个 order_seed（42, 7, 1337, 20260928）
   × 短训练起步；若候选成立，加跑长训练（512 ring passes）对照；
 - G0/G1（G1 需 `0x2d/0x2f` 已注册）；
-- **长训练热预算单列（M4）**：512 ring passes 下 warmup 量 =
-  slots×512 loads/进程——8192 页（524,288 slots）单进程 warmup ≈
-  2.68 亿 loads，为同点 timed 的 64 倍；长训练 case 成本由 warmup
-  主导，**禁止**用 4.5 s/case 估计；按 `slots × 512 × 10 进程` 逐
-  点核算，长/短训练分块并块间冷却，锚点漂移达 §6.2.5 阈值即停。
+- **长训练热预算单列（M4/P0-6）**：512 ring passes 指 **timed
+  loads = slots×512**（warmup 恒为 slots×2）——8192 页（524,288
+  slots）单进程 timed ≈ 2.68 亿 loads（**timed 主导**，非
+  warmup）；长训练 case 成本 ≈ 短训练的 64 倍，**禁止**用 4.5
+  s/case 估计；按 `slots × 512 × 10 进程` 逐点核算执行量。长/短
+  训练分块并块间冷却；**热中止处理（停止规则闭合）**：thermal
+  中止线触发或锚点失真 → 当前块暂停，冷却静置后**整块重试一
+  次**（重试占用 §6.2.7 相应额度）；再失败 → 块内受影响 case 记
+  failed（结构化），按已获数据结案，不追加第三次。
 
 ### Phase C：Q3 关联与条件升级
 
@@ -479,11 +570,18 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
 - G2 先行；**G3（含 `0x8144`）为"检验 data-miss 混杂"的必备对
   照**——G3 未执行或跨组锚点不可比时，只发布关联曲线（默认层），
   终态 `MODEL_UNIDENTIFIABLE`，不输出任何成本值；
+- **默认产出 = 关联型报告 + `MODEL_UNIDENTIFIABLE` 判定**（P1-
+  6）：当前协议下页数同时改变 cache footprint、translation
+  footprint 与可能的 MMUTC 命中状态，G3 只解决"没测 data miss"，不
+  自动解决因果识别；
 - 可识别性检查：walk density 与 `0x8144` density 的共线程度、事
   件口径配对性（`0x8136` vs `0x34`）、跨长度斜率一致性（§5.3）；
   **MMUTC 混杂声明**：walk 服务时间受 MMUTC（2048 项 walk 缓存）
-  命中状态影响，成本型估计必须声明该混杂未分离；
-- 全部通过才升级报告"暴露成本估计"（标 DERIVED + 竞争解释）。
+  命中状态影响，任何成本型估计必须声明该混杂未分离；
+- **成本型升级的前置条件**：仅当实施计划另行给出**具体的独立变
+  化源、配对规则、模型式、参数稳定性与拒绝条件**并经冻结（同
+  §6.2 纪律）才实施"暴露成本估计"输出；未给出冻结模型规格 → 一
+  律不输出，不允许执行者自行选择回归模型。
 
 ### Phase D：Q4 THP cohort 对照（含停止预算，M5/S5）
 
@@ -500,9 +598,15 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
 
 - 每（buffer × policy）：**最多 40 个进程次**（4 seed × 10）；失
   败/被拒样本计入该额度；
-- cohort 有效下限：每（buffer × backing cohort）≥ 3 个有效样本才
-  成立该 cohort；
-- 未达下限 → 该 cohort 终态 `INSUFFICIENT_COHORT`（只影响该
+- cohort 分级（P0-5）：**比较级** = 每（buffer × backing cohort）
+  ≥5 个有效样本——满足测量纪律（§6.3 的 ≥5 取 median），可做正
+  式 cohort 性能比较（median [p25, p75]）；**描述级** = 3–4 个有
+  效样本——只报转化计数与描述性原始观测，**不输出** cohort
+  median 结论；<3 → `INSUFFICIENT_COHORT`；
+- 跨 seed 汇总合法性：同一（buffer × cohort）的 4 个 seed 仅当各
+  seed 分布同制度（中位数偏差 ≤10% 且 [p25,p75] 两两相交）才合并
+  计样本数，否则按 seed 分列报告；
+- 未达比较级 → 该 cohort 终态 `INSUFFICIENT_COHORT`（只影响该
   cohort，不影响其他 cohort 结案）；
 - 必报转化表：请求次数 → 实际 backing 构成 → 端点 drift 失败数
   → 进入分析样本数（选择偏差披露）；
@@ -540,13 +644,19 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
 
 ### 9.1 配置（`configs/experiments/`，阶段化多文件，防叉积膨胀）
 
+- `ptr-chase-sm8650-x4-tlb-anchor.json`（锚点专用，§6.2.5/§6.4：
+  512/3072 KiB × base × G0 × 短训练 × order_seed=42）；
 - `ptr-chase-sm8650-x4-tlb-ctrl.json`（Gate 1 正控）；
-- `ptr-chase-sm8650-x4-tlb-coarse.json`（Phase A，含首尾锚点 case）；
-- `ptr-chase-sm8650-x4-tlb-dense.json`（Phase B，由 §6.2.4 生成器
-  产出，随附输入/规则/输出三 SHA-256）；
+- `ptr-chase-sm8650-x4-tlb-coarse.json`（Phase A）；
+- `ptr-chase-sm8650-x4-tlb-dense.json`（Phase B，由 §6.2.4a/4b 生成
+  器产出，随附输入/规则/输出三 SHA-256）；
 - `ptr-chase-sm8650-x4-tlb-thp.json`（Phase D）；
 - 全部 protocol 1.2、`execution.controls: ["x4-prime"]`、
   `runner/tests/test_plan.py` protocol/case-count 守卫同步登记。
+- **探针最小 ABI 增量（本任务唯一一处，P0-4）**：输出新增
+  `vma_base=0x…` 字段（建链缓冲区起始 VA），adapter 解析入 metric
+  元数据（仿 `seed` 路径），`runner/schema/README.md` 登记；C++
+  契约测试 + runner 契约测试断言字段存在/格式/一致性。
 
 ### 9.2 分析器与注册表
 
@@ -564,13 +674,18 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
 ### 9.3 测试（`analysis/tests/test_sm8650_tlb.py` 等）
 
 至少覆盖：①正控点不被误报为 knee；②`0x05`>1000/1k 不截断不改成
-概率；③未注册事件不得进入 Q2c/Q3/Q4 结论；④mixed 不并入 thp；
-⑤端点变化样本无数值 metrics；⑥running≠enabled 拒绝；⑦锚点失败
-整块失效；⑧无膝点/双膝点/边界点（含左删失）；⑨order 敏感与训练
-敏感；⑩模型不可识别时不输出成本值；⑪全失败 run 仍出 rejected；
-⑫改判据/改历史数据必须留 revision history；⑬G3 缺失时不得声称
-"已检验 data-miss 共线性"；⑭cohort 不足时输出
-`INSUFFICIENT_COHORT` 且不追加尝试。
+概率；③未注册（CANDIDATE 且未升 QUALIFIED）事件不得进入
+Q2c/Q3/Q4 结论，但不得阻断其正控采集；④mixed 不并入 thp；⑤端点
+变化样本无数值 metrics；⑥running≠enabled 拒绝；⑦锚点失真整块
+fail-closed；⑧无膝点/双膝点/边界点（含左删失优先于 knee）；⑨
+order 敏感与训练敏感；⑩未冻结模型规格时不输出成本值；⑪全失败
+run 仍出 rejected；⑫改判据/改历史数据必须留 revision history；
+⑬G3 缺失时不得声称"已检验 data-miss 共线性"；⑭cohort 不足比较
+级时输出 `INSUFFICIENT_COHORT` 且不追加尝试；
+**⑮plan 展开契约测试（Specification Closure 首个验收）**：锚点配
+置的 case 数/参数/顺序、块（anchor-before + 主体 + anchor-after）
+归组逻辑、case 计数单位与裁剪优先级、事件资格两级、失败样本计
+额、cohort 样本下限与跨 seed 汇总规则、vma_base 字段端到端。
 
 ## 10. 报告纪律、终态与分支退役
 
@@ -624,7 +739,10 @@ MODEL_UNIDENTIFIABLE / OPEN
 4. **路线 B（可控 VA 布局 / 页内 offset 变体）**：仅当 Q1 为
    `LAYOUT_OBSERVATION_LIMITED` 或受 footprint 混杂支配时立项
    （Explore 的 `kRandomTLBOffset` 族为参考实现）。
-5. **perf/simpleperf 同窗差分**：外部交叉验证（CLI 窗 ≠ 探针内
+5. **线性/逆序遍历建链模式**（P1-3）：如需 `kLinearIncreasing` 类
+   对照，须探针新增非洗牌建链模式（probe ABI 变更 + 测试 + 部署）
+   ——方法学后置，仅当随机环结果存在顺序依赖嫌疑时立项。
+6. **perf/simpleperf 同窗差分**：外部交叉验证（CLI 窗 ≠ 探针内
    窗，需专门同窗机制），可选，不阻断。
-6. **perf 二进制谱系**：设备上手工部署的静态 `perf` 未入 artifact
+7. **perf 二进制谱系**：设备上手工部署的静态 `perf` 未入 artifact
    manifest；使用前先 `sha256sum` 登记。
