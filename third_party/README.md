@@ -8,6 +8,7 @@
 |---|---|---|---|
 | gem5 | `third_party/gem5`（submodule） | BSD-3-Clause（上游） | 官方上游 submodule，钉 `ddd4ae35ad`（v25.0.0.1，增量树原生基线，ADR-0004 修订）；工作树经 apply_patchset.sh 同步增量后构建（带基线断言） |
 | gem5-d9300-patch | `third_party/gem5-d9300-patch/gem5` | 待逐文件 SPDX（开源前检查点，OI-1） | D9300/CoralNPU/NDP/Gemmini 增量树（本地 gem5 修改的唯一事实源，见其 README 与 AGENTS.md） |
+| AArch64-Explore | `third_party/AArch64-Explore`（submodule） | **无 LICENSE（保留所有权利）** | Apple Silicon 微架构探测权威参考资料；钉 `9e3d464`（引入时上游最新 tip）；只读引用、禁止复制内容入本仓；移除预案与钉版纪律见 `LICENSES.md` 专项说明 |
 
 ## 登记要求
 
