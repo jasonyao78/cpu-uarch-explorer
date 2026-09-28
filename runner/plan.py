@@ -252,6 +252,16 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                 )
             pmu_events_rv = params.get("pmu_events")
             pmu_events = _normalize_pmu_events(pmu_events_rv)
+            seed_rv = params.get("seed")
+            seed = None
+            if seed_rv is not None:
+                if type(seed_rv.value) is not int \
+                        or not 0 <= seed_rv.value <= (1 << 64) - 1:
+                    raise RunnerError(
+                        "plan-error",
+                        f"seed must be a uint64 integer, got {seed_rv.value!r}",
+                    )
+                seed = seed_rv.value
 
             case_params = {
                 "buffer_kb": ResolvedValue(buffer_kb, params["buffer"].source),
@@ -277,7 +287,10 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                 case_params["pmu_events"] = ResolvedValue(
                     pmu_events, pmu_events_rv.source,
                 )
+            if seed_rv is not None:
+                case_params["seed"] = ResolvedValue(seed, seed_rv.source)
             case_id = (f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"
+                       + (f"-seed{seed}" if seed_rv is not None else "")
                        + ("-hp2m" if hugepage else "")
                        + ("-thp" if thp else "")
                        + ("-base" if base_pages else ""))

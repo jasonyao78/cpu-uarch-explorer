@@ -132,3 +132,14 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     --type 4294967296 --config 1 --scope thread
     --workload idle --duration-ms 1 --buffer-mib 1)
 endif()
+
+add_test(NAME ptr_chase_seed_is_recorded COMMAND ${PT} -b 64 -s 64 -n 8000 -S 7)
+set_tests_properties(ptr_chase_seed_is_recorded PROPERTIES
+    PASS_REGULAR_EXPRESSION "seed=7")
+
+add_test(NAME ptr_chase_seed_default_42 COMMAND ${PT} -b 64 -s 64 -n 8000)
+set_tests_properties(ptr_chase_seed_default_42 PROPERTIES
+    PASS_REGULAR_EXPRESSION "seed=42")
+
+add_test(NAME ptr_chase_rejects_seed_garbage COMMAND ${PT} -b 64 -s 64 -n 8000 -S abc)
+set_tests_properties(ptr_chase_rejects_seed_garbage PROPERTIES WILL_FAIL TRUE)

@@ -11,10 +11,12 @@
 //    依赖链强制访存级并行度（MLP）= 1——测得的是"单次依赖 load 的
 //    真实延迟"，而不是带宽或并发能力。
 //
-// 2. 为什么链要随机化（Fisher–Yates 洗牌 + 固定种子）
+// 2. 为什么链要随机化（Fisher–Yates 洗牌 + 可记录种子）
 //    顺序或固定步长的访问模式会被硬件 stride prefetcher 预测并预取，
 //    预取掩盖真实延迟，测量结果系统性偏低。随机排列让预取器无从预测，
-//    迫使每次访问都真实走完存储层次。固定种子（42）保证链结构可复现。
+//    迫使每次访问都真实走完存储层次。种子默认 42（与历史记录一致），
+//    可用 -S 覆盖；无论取值如何都经 `seed=` 输出入档——访问序列本身是
+//    实验变量（地址相关预取/索引共振判别），必须可溯源。
 //    使用 std::uniform_int_distribution 保证置换无偏（裸取模会引入
 //    模偏差，量级虽小但注释与实现必须一致）。
 //
@@ -40,7 +42,7 @@
 //    非法输入一律 stderr 说明 + 退出码 1，**绝不静默产出无效记录**
 //    （nan/inf 会污染实验数据库）。退出码语义：0=成功，1=输入/环境错误，
 //    2=能力不支持（保留）。校验项：stride 为指针宽度的整数倍、
-//    loads ≥ 展开因子、槽位数 ≥ 2。
+//    loads ≥ 展开因子、槽位数 ≥ 2、seed 为可解析的非负整数。
 //
 // 附加：页策略（-B / -h / -H / -T；measurement-discipline §2 落地）
 //    `-h/-H` 请求显式 hugetlb（fallback/strict）；`-T` 请求 Linux THP
@@ -55,8 +57,8 @@
 //
 // 输出：key=value 行（buffer_kb / stride / loads / elapsed_ns / latency_ns /
 // warmup_loads / warmup_passes_effective / warmup_state / page_policy /
-// page_policy_requested / page_policy_actual / anon_huge_kb / page_kb），由
-// runner 层包装为 record.schema.json 记录。
+// page_policy_requested / page_policy_actual / anon_huge_kb / page_kb /
+// seed），由 runner 层包装为 record.schema.json 记录。
 
 #include <algorithm>
 #include <cerrno>
@@ -166,11 +168,12 @@ double now_ns() {
 void usage(const char* prog) {
     std::fprintf(stderr,
         "usage: %s -b KB -s stride_bytes [-n loads] [-w warmup_loads] "
-        "[-B|-h|-H|-T] [--pmu-event label:type:config]...\n"
+        "[-S seed] [-B|-h|-H|-T] [--pmu-event label:type:config]...\n"
         "  -b  buffer size in KB            (default 8192)\n"
         "  -s  stride between chain slots, must be a multiple of %zu (default 64)\n"
         "  -n  total dependent loads, >= %d (default 268435456)\n"
         "  -w  exact warmup loads          (default: 2 complete ring passes)\n"
+        "  -S  ring shuffle seed           (default 42; recorded as seed=N)\n"
         "  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)\n"
         "  -H  2MB hugepage strict (exit 2 if pool unavailable)\n"
         "  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps\n"
@@ -278,6 +281,7 @@ int main(int argc, char** argv) {
     long long warmup = 0;
     bool warmup_set = false;
     bool want_hp = false, strict_hp = false, want_thp = false, want_base = false;
+    uint64_t seed = 42; // 历史默认；访问序列是实验变量，随输出入档（原理 §2）
     std::vector<PmuEventRequest> pmu_requests;
 
     enum : int { kPmuEvent = 1000 };
@@ -286,7 +290,7 @@ int main(int argc, char** argv) {
         {nullptr, 0, nullptr, 0},
     };
     int opt;
-    while ((opt = getopt_long(argc, argv, "b:s:n:w:hHTB",
+    while ((opt = getopt_long(argc, argv, "b:s:n:w:hHTBS:",
                               long_options, nullptr)) != -1) {
         switch (opt) {
         case 'b': buffer_kb = std::strtoull(optarg, nullptr, 10); break;
@@ -297,6 +301,10 @@ int main(int argc, char** argv) {
         case 'H': want_hp = true; strict_hp = true; break;
         case 'T': want_thp = true; break;
         case 'B': want_base = true; break;
+        case 'S':
+            if (!parse_u64_base0(optarg, &seed))
+                die(argv[0], "seed must be a non-negative integer (base 0)");
+            break;
         case kPmuEvent: {
             PmuEventRequest request;
             if (!parse_pmu_event(optarg, &request))
@@ -429,7 +437,7 @@ int main(int argc, char** argv) {
     }
 #endif
 
-    // Fisher–Yates 洗牌：uniform_int_distribution 保证无偏，固定种子保证可复现（原理 §2）
+    // Fisher–Yates 洗牌：uniform_int_distribution 保证无偏，种子入档保证可复现（原理 §2）
     size_t* perm = static_cast<size_t*>(malloc(slots * sizeof(size_t)));
     if (!perm) {
         std::perror("malloc");
@@ -437,7 +445,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     for (size_t i = 0; i < slots; ++i) perm[i] = i;
-    std::mt19937_64 rng(42);
+    std::mt19937_64 rng(seed);
     for (size_t i = slots - 1; i > 0; --i) {
         std::uniform_int_distribution<size_t> dist(0, i);
         const size_t j = dist(rng);
@@ -561,10 +569,11 @@ int main(int argc, char** argv) {
     std::printf("buffer_kb=%zu stride=%zu loads=%lld elapsed_ns=%.0f latency_ns=%.4f "
                 "warmup_loads=%lld warmup_passes_effective=%.6f warmup_state=%s "
                 "page_policy=%s page_kb=%u page_policy_requested=%s "
-                "page_policy_actual=%s anon_huge_kb=%zu",
+                "page_policy_actual=%s anon_huge_kb=%zu seed=%llu",
                 buffer_kb, stride, loads, elapsed, latency, warmup, warmup_passes,
                 warmup_state, page_policy.c_str(), page_kb, page_policy_requested,
-                page_policy_actual, anon_huge_kb);
+                page_policy_actual, anon_huge_kb,
+                static_cast<unsigned long long>(seed));
 #if defined(CPU_UARCH_HAVE_LINUX_PERF)
     for (const auto& observation : perf_observations) {
         std::printf(

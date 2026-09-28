@@ -230,6 +230,43 @@ class TestPtrChaseContract(unittest.TestCase):
             with self.subTest(stdout=stdout), self.assertRaises(ParseError):
                 self.adapter.parse_output(stdout, "")
 
+    def test_seed_param_builds_dash_s_and_output_records_seed(self):
+        argv = self.adapter.build_argv(
+            {"buffer_kb": 64, "stride": 64, "loads": 8000, "warmup": 1000, "seed": 7})
+        self.assertIn("-S", argv)
+        self.assertEqual(argv[argv.index("-S") + 1], "7")
+        proc = self._run(argv)
+        self.assertEqual(proc.returncode, 0, f"probe rejected -S: {proc.stderr}")
+        metrics = self.adapter.parse_output(proc.stdout, proc.stderr)
+        self.assertEqual(metrics[0]["seed"], 7)
+
+    def test_seed_default_preserves_historical_chain(self):
+        argv = self.adapter.build_argv(
+            {"buffer_kb": 64, "stride": 64, "loads": 8000, "warmup": 1000})
+        self.assertNotIn("-S", argv)
+        proc = self._run(argv)
+        self.assertEqual(proc.returncode, 0, f"probe rejected default run: {proc.stderr}")
+        metrics = self.adapter.parse_output(proc.stdout, proc.stderr)
+        self.assertEqual(metrics[0]["seed"], 42)
+
+    def test_seed_garbage_is_input_error(self):
+        proc = self._run(["-b", "64", "-s", "64", "-n", "8000", "-S", "abc"])
+        self.assertEqual(proc.returncode, 1)
+        self.assertNotIn("latency_ns", proc.stdout)
+        with self.assertRaises(ParseError):
+            self.adapter.build_argv(
+                {"buffer_kb": 64, "stride": 64, "loads": 8000,
+                 "warmup": 1000, "seed": "abc"})
+
+    def test_seed_is_recorded_per_metric(self):
+        stdout = (
+            "latency_ns=1.25 seed=1337 "
+            "pmu_cycles_type=8 pmu_cycles_config=17 pmu_cycles_count=100 "
+            "pmu_cycles_time_enabled_ns=1000 pmu_cycles_time_running_ns=1000"
+        )
+        metrics = self.adapter.parse_output(stdout, "")
+        self.assertEqual([metric["seed"] for metric in metrics], [1337, 1337])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -2,9 +2,11 @@
 """ptr_chase adapter：指针追逐内存延迟探针（probes/cache-mem/ptr_chase.cpp）。
 
 Probe ABI（与源码头部注释一致）：
-  argv:  -b buffer_kb -s stride_bytes -n loads -w warmup [-B|-h|-H|-T]
+  argv:  -b buffer_kb -s stride_bytes -n loads -w warmup [-S seed]
+         [-B|-h|-H|-T] [--pmu-event label:type:config]...
   stdout: buffer_kb=.. .. latency_ns=.. warmup_loads=..
           warmup_passes_effective=.. warmup_state=.. page_policy=.. page_kb=..
+          seed=N（链洗牌种子，默认 42；访问序列是实验变量，必须入档）
   退出码: 0 成功 / 1 输入或环境错误 / 2 能力不支持（hugepage 无平台能力或
           strict 模式缺页池；fallback 非 strict 模式下成功但标注 fallback-4k）
 
@@ -94,6 +96,12 @@ class PtrChaseAdapter:
             raise ParseError("ptr_chase page policies are mutually exclusive")
         argv = ["-b", str(buffer_kb), "-s", str(stride),
                 "-n", str(loads), "-w", str(warmup)]
+        if "seed" in params:
+            raw_seed = params["seed"]
+            if type(raw_seed) is not int or raw_seed < 0 \
+                    or raw_seed > (1 << 64) - 1:
+                raise ParseError(f"seed must be a uint64 integer: {raw_seed!r}")
+            argv.extend(["-S", str(raw_seed)])
         if hugepage:
             argv.append("-h")
         if thp:
@@ -222,4 +230,10 @@ class PtrChaseAdapter:
                 "time_enabled_ns": enabled,
                 "time_running_ns": running,
             })
+        if "seed" in fields:
+            # 链洗牌种子随每条 metric 入档（样本级溯源：地址相关预取/索引
+            # 共振判别依赖逐样本 seed）。
+            seed = _require_uint(fields, "seed", (1 << 64) - 1)
+            for item in metrics:
+                item["seed"] = seed
         return metrics

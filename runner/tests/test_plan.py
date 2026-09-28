@@ -170,6 +170,28 @@ class TestPlan(unittest.TestCase):
         self.assertEqual(dict(case.params)["warmup"].source, "spec-default")
         self.assertNotIn("warmup_passes", dict(case.params))
 
+    def test_seed_sweep_expands_as_cross_product(self):
+        spec = {
+            **PASS_SPEC,
+            "parameters": [
+                *PASS_SPEC["parameters"],
+                {"name": "seed", "type": "int", "default": 42},
+            ],
+            "execution": {
+                **PASS_SPEC["execution"],
+                "sweep": {
+                    "buffer": ["4MiB", "12MiB", "32MiB"],
+                    "seed": [42, 7, 1337, 20260928],
+                },
+            },
+        }
+        plan = build_plan(spec, {**PLATFORM, "controls": []})
+        self.assertEqual(len(plan.cases), 12)
+        self.assertEqual(
+            {case.param_value("seed") for case in plan.cases},
+            {42, 7, 1337, 20260928},
+        )
+
     def test_current_ptr_chase_specs_use_pass_based_warmup_protocol(self):
         paths = sorted((ROOT / "configs" / "experiments").glob("ptr-chase*.json"))
         self.assertTrue(paths)
