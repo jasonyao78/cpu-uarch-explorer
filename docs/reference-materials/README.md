@@ -8,19 +8,22 @@
 
 | 文件 | 作者/来源 | 日期 | 与本仓的关系 |
 |---|---|---|---|
-| `Android灭屏最高频锁定实验与证据链.md` | 用户团队 / 并行调查会话（仓外 `cpu-uarch-ref/` 原件） | 2026-09-28（v1.1，进行中） | `docs/runbooks/redmi-manet-freq-control-chain.md` 的案例 B 与 §3 部分证据来源 |
+| `Android灭屏最高频锁定实验与证据链.md` | 仓库所有者主导，含用户团队/并行代理协作（仓外 `cpu-uarch-ref/` 原件） | 2026-09-28（v1.1，进行中） | `docs/runbooks/redmi-manet-freq-control-chain.md` 的案例 B 与 §3 部分证据来源 |
 | `Qualcomm Perf2 Resource Apply Failure - Root Cause Investigation.md` | 同上 | 2026-09-28（进行中） | 同上（Perf2 仲裁、syscall 证据、P0–P3 实验计划） |
 | `Qualcomm Perf2 HAL 资源不生效根因分析与手工调试完整手册.md` | 同上 | 2026-09-28（Final Consolidated Edition，进行中） | runbook §5 调试手段章节的命令来源（strace/ftrace/状态迁移/能力普查/UID 差分配方） |
 
 ## 使用纪律
 
-1. 许可证：三份文档均为作者本人（= 仓库所有者）原创作品，经作者
-   决策（2026-09-28）按原文归档入本仓，**随本仓 Apache-2.0 许可证
-   发布**（见仓库根 `LICENSE`）。
+1. 来源与许可证：三份文档由仓库所有者主导并提供，可能包含用户团队与
+   AI/并行代理协作内容；不声称均由单一自然人独立完成。按已登记的仓库
+   所有者决定（2026-09-28），其有权纳入本仓的内容以 **Apache-2.0**
+   发布（见仓库根 `LICENSE`）。
 2. 引用时区分"参考资料观点"与"本仓已评审结论"——本仓结论以
    `docs/reviews/` 与 `docs/runbooks/` 为准。
 3. 三份文档均为"进行中"状态，含未证假设与待办实验；其"未证"标
    注不得被引用为事实。本仓 runbook 已将其证据按
    【实证】/【实证-阴性】/【静态】/【推断】/【未证】 重新分级。
 4. 原件位于仓外 `cpu-uarch-ref/`（只读约束）；此处为逐字节一致的
-   归档副本（MD5 已核对）。如原件更新，以作者同步为准。
+   归档副本（SHA-256 已核对）。如原件更新，以所有者同步为准。为保留
+   原文 Markdown hard-break，两个明确文件在 `.gitattributes` 中仅豁免
+   `blank-at-eol`；普通源码和文档仍由 `git diff --check` 严格检查。
