@@ -35,6 +35,7 @@ ssh 平台的 `target.ssh_host` 用 **ssh config 别名**（如 `xeon-8481c-01`�
 4. **schema 演进**：`runner/schema/` 扩展字段必须登记到 `runner/schema/README.md`；`additionalProperties=true`，不许破坏旧读者。
 5. **git**：monorepo + trunk-based（ADR-0001），小步提交；commit message 格式 `type(scope): summary`；本仓未来转公开，**历史全量可见**——secret/序列号/NDA 内容从第一个 commit 起就不许进来。
 6. **提交卫生（2026-09-25 起）**：只提交本任务自己修改/产出的文件；他人或并行会话产出的文件（代码/文档/任务书）一律不代提交、不混入本任务提交——发现混入时撤出单独提交。
+7. **分支终点（2026-09-28 起）**：功能分支以"预注册任务完成或正式判定不可完成"为终点——科学问题未解不等于分支不能结束；未竟问题一律转 `docs/open-items.md` 跟踪（铁律 0），不得靠永续分支兜底。**worktree 回收与分支删除分两步**：worktree 回收看使命完成/工作树干净/无进程依赖/数据分层处置；分支删除须 main 集成 + 完整测试 + 推送之后。本地功能分支及时推 origin 备份，避免单点丢失。
 
 ## gem5 overlay（third_party/）
 
