@@ -1,8 +1,17 @@
 # 外部参考材料索引（reference materials index）
 
 > 本文件**受 git 跟踪**，是个人参考材料的登记簿。材料本体位于**仓库外** `../cpu-uarch-ref/`（workspace 级，已加只读约束 `chmod -R a-w`），永不入库；开源发布前删除该目录即可，git 历史与产物中均不存在其内容。
+>
+> **例外（用户决策 2026-09-28）**：本人/本团队原创的调查文档可按原文归档入仓，存放于 `docs/reference-materials/`（目录 README 明确标注"非本仓产出"）；下表"入库归档"区登记此类副本。第三方材料维持仓外只读、永不入库。
 
-## 登记清单
+## 入库归档（docs/reference-materials/）
+
+| 材料 | 原件位置 | 内容摘要 | 许可证状态 | 处置 |
+|---|---|---|---|---|
+| Android灭屏最高频锁定实验与证据链（v1.1） | `../cpu-uarch-ref/Android灭屏最高频锁定实验与证据链.md` | SM8650 频率三层状态、唤醒 boost ftrace、已证无效路径、Perf 资源静态模型、0x1091 实验设计 | 本人/本团队作品 | ✅ 已归档（2026-09-28，逐字节一致）；本仓 runbook `redmi-manet-freq-control-chain.md` 的证据来源之一 |
+| Qualcomm Perf2 Resource Apply Failure - Root Cause Investigation | `../cpu-uarch-ref/Qualcomm Perf2 Resource Apply Failure - Root Cause Investigation.md` | Perf2 正 handle≠生效的 syscall 实证、根因候选与 P0–P3 实验计划 | 同上 | ✅ 已归档（2026-09-28，逐字节一致）；同上 |
+
+## 仓外登记清单（永不入库）
 
 | 材料 | 位置（相对仓库根） | 内容摘要 | 许可证状态 | 允许使用范围 | 处置 |
 |---|---|---|---|---|---|
@@ -25,5 +34,5 @@
 ## 纪律
 
 - 不修改参考目录内任何文件（只读约束已施加；如需解锁，`chmod -R u+w <目录>`）。
-- 不把参考目录内容复制进仓库（本人作品走正式评估后迁移路径，见 OI-7）。
+- 不把**第三方**参考目录内容复制进仓库；本人/本团队原创文档的入库例外见顶部说明（`docs/reference-materials/` 归档区）。
 - 新增个人参考材料时先登记本表，再放至 `../cpu-uarch-ref/`。
