@@ -20,9 +20,12 @@
   不是“消除 TLB 噪声”，也不是所有平台的强制前提。页大小与能力按平台
   记录；请求策略（hugetlb/THP/default）和实际 backing（base/hugetlb/THP/
   mixed）必须分字段保存。`madvise(MADV_HUGEPAGE)` 成功不等于获得 THP，
-  必须由 `/proc/self/smaps` 等观测确认；本仓 `ptr_chase -T` 已按此输出
-  `page_policy_requested/page_policy_actual/anon_huge_kb`。4 KiB 页数据可以作为对照，但须标注
-  预期 TLB 开销与物理映射不确定度。
+  必须由 `/proc/self/smaps` 等观测确认；本仓 `ptr_chase -T` 在 warmup
+  后/测量前和 timed/PMU 窗后记录 backing 端点，端点类别或
+  `AnonHugePages` 不同即 fail-closed，并输出
+  `page_policy_requested/page_policy_actual/anon_huge_kb` 及 before/after
+  审计字段。端点一致只是离散观测，不证明窗内绝无瞬态 promotion/demotion。
+  4 KiB 页数据可以作为对照，但须标注预期 TLB 开销与物理映射不确定度。
 - **macOS**：无 hugepage/clflush 对应能力——capability manifest 标注 `unsupported`，证据等级按 ADR-0005/0006 降级路径处理，不得硬测硬报。
 - **物理映射**：Fisher–Yates 等随机链只控制逻辑访问顺序，不等同于 cache
   set/bank 均匀。PIPT cache 在 4 KiB 页下仍受 PFN/color 影响；容量校准需

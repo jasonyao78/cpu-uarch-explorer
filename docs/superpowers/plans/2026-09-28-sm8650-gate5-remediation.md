@@ -38,7 +38,7 @@
 - [ ] **Step 6:** Run analysis tests and a script that independently recounts the six runs; expect exact agreement.
 - [ ] **Step 7:** Commit this evidence-only scope as `docs(sm8650): correct P0-prime evidence ledger`.
 
-### Task 3: Add measurement-window page-backing stability
+### Task 3: Add measurement-window page-backing endpoint audit
 
 **Files:**
 - Modify: `runner/tests/test_ptr_chase_contract.py`
@@ -48,10 +48,10 @@
 - Modify: `docs/methodology/measurement-discipline.md`
 - Modify: `runner/schema/README.md`
 
-- [ ] **Step 1 (RED):** Add parser tests requiring the five new fields to be all-or-none, validating `page_backing_stable == 1`, and rejecting inconsistent before/after values. Run the targeted unittest and confirm failure because the parser ignores the new audit group.
+- [ ] **Step 1 (RED):** Add parser tests requiring the five new fields to be all-or-none, validating `page_backing_endpoints_equal == 1`, and rejecting inconsistent before/after values. Run the targeted unittest and confirm failure because the parser ignores the new audit group.
 - [ ] **Step 2 (GREEN):** Parse and preserve the new fields while continuing to accept legacy captured output without them. Run the targeted unittest and confirm pass.
 - [ ] **Step 3 (RED):** Extend the real-binary contract test to require the paired fields on successful output. Rebuild nothing and confirm the test fails against the old binary.
-- [ ] **Step 4 (GREEN):** Move the Linux first observation to after warmup, add the after-window observation, fail with exit 1 before stdout metrics if either observation fails or differs, and emit the stable audit group on success. Keep the snapshots outside the timed/PMU interval.
+- [ ] **Step 4 (GREEN):** Move the Linux first observation to after warmup, add the after-window observation, fail with exit 1 before stdout metrics if either observation fails or differs, and emit the equal-endpoint audit group on success. Keep the snapshots outside the timed/PMU interval.
 - [ ] **Step 5:** Rebuild Release and run the contract test; expect the new real-binary assertion to pass.
 - [ ] **Step 6:** Update source/module comments, probe README, measurement discipline, and schema registry with the exact observation semantics.
 - [ ] **Step 7:** Run Release CTest, UBSan CTest, and all runner tests.
@@ -74,6 +74,6 @@
 **Files:** none expected beyond test artifacts ignored by Git.
 
 - [ ] **Step 1:** Sync the branch checkout to an isolated Xeon directory with `rsync -a --delete --exclude build/ --exclude .DS_Store`.
-- [ ] **Step 2:** Configure/build Linux x86-64 Release, run CTest and runner/analysis unit tests, and execute a real `ptr_chase -B` sample; require stable paired backing fields.
+- [ ] **Step 2:** Configure/build Linux x86-64 Release, run CTest and runner/analysis unit tests, and execute a real `ptr_chase -B` sample; require equal paired backing fields.
 - [ ] **Step 3:** On macOS rerun Release CTest, UBSan CTest, runner tests, analysis tests, all-branch schema/hash/reference integrity, `git diff --check main...HEAD`, and clean-tree checks.
 - [ ] **Step 4:** Push the current feature branch. Do not merge or modify `main`; submit the fresh evidence for formal review.

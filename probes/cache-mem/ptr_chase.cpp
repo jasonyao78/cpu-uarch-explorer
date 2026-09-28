@@ -52,9 +52,11 @@
 // 附加：页策略（-B / -h / -H / -T；measurement-discipline §2 落地）
 //    `-h/-H` 请求显式 hugetlb（fallback/strict）；`-T` 请求 Linux THP
 //    (`MADV_HUGEPAGE`)；`-B` 用 `MADV_NOHUGEPAGE` 显式请求 base pages。
-//    请求成功不等于实际 backing：普通匿名映射在首次写入后解析
-//    /proc/self/smaps，分别输出 requested policy、actual backing 和
-//    AnonHugePages。非 Linux 平台请求这些 Linux 能力时退出码 2。
+//    请求成功不等于实际 backing：普通匿名映射在 warmup 后、测量窗前
+//    与 timed/PMU 窗结束后各解析一次 /proc/self/smaps；两端实际类别或
+//    AnonHugePages 不同则退出 1，不产出有效 metrics。端点相同只证明两次
+//    观测一致，不声称排除窗内瞬态 promotion/demotion。非 Linux 平台请求
+//    这些 Linux 能力时退出码 2。
 //
 // 可选 core PMU：Linux `--pmu-event label:type:config` 可重复；每个 event
 // 在同一 timed loop 前 reset/enable/baseline，t1 后先 read 再 disable，输出
@@ -63,7 +65,9 @@
 // 输出：key=value 行（buffer_kb / stride / loads / elapsed_ns / latency_ns /
 // warmup_loads / warmup_passes_effective / warmup_state / page_policy /
 // page_policy_requested / page_policy_actual / anon_huge_kb / page_kb /
-// seed），由 runner 层包装为 record.schema.json 记录。
+// page_policy_actual_before/after / anon_huge_kb_before/after /
+// page_backing_endpoints_equal / seed），由 runner 层包装为
+// record.schema.json 记录。
 
 #include <algorithm>
 #include <cerrno>
@@ -277,6 +281,21 @@ unsigned base_page_kb() {
     return true;
 }
 
+struct PageBackingClass {
+    const char* actual;
+    unsigned page_kb;
+};
+
+[[maybe_unused]] PageBackingClass classify_page_backing(
+        size_t anon_huge_kb, size_t mapping_bytes) {
+    if (anon_huge_kb == 0)
+        return {"base", base_page_kb()};
+    const size_t fully_backed_kb = (mapping_bytes + 1023) / 1024;
+    if (anon_huge_kb >= fully_backed_kb)
+        return {"thp", 2048};
+    return {"mixed", 0};
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -465,47 +484,41 @@ int main(int argc, char** argv) {
     const char* page_policy_requested = want_base ? "base-madvise"
         : (want_thp ? "thp-madvise"
         : (want_hp ? (strict_hp ? "hugetlb-strict" : "hugetlb-fallback") : "default"));
-    const char* page_policy_actual = "platform-default";
+    std::string page_policy_actual_before = "platform-default";
+    std::string page_policy_actual_after = "platform-default";
     std::string page_policy = "platform-default";
-    size_t anon_huge_kb = 0;
+    size_t anon_huge_kb_before = 0;
+    size_t anon_huge_kb_after = 0;
     unsigned page_kb = base_page_kb();
     if (hp_buf != nullptr) {
-        page_policy_actual = "hugetlb-2m";
+        page_policy_actual_before = "hugetlb-2m";
+        page_policy_actual_after = "hugetlb-2m";
         page_policy = "hugepage-2m";
         page_kb = 2048;
-    } else {
-#if defined(__linux__)
-        if (!read_anon_huge_kb(buf, normal_map_bytes, &anon_huge_kb)) {
-            std::fprintf(stderr, "error: cannot inspect target mapping in /proc/self/smaps\n");
-            free(perm);
-            munmap(mapping_base, mapping_bytes);
-            return 1;
-        }
-        if (anon_huge_kb == 0) {
-            page_policy_actual = "base";
-            page_kb = base_page_kb();
-        } else if (anon_huge_kb * 1024 >= normal_map_bytes) {
-            page_policy_actual = "thp";
-            page_kb = 2048;
-        } else {
-            page_policy_actual = "mixed";
-            page_kb = 0;
-        }
-        const char* prefix = want_base ? "base-madvise"
-            : (want_thp ? "thp" : (want_hp ? "fallback" : "default"));
-        if (std::strcmp(page_policy_actual, "base") == 0)
-            page_policy = std::string(prefix) + "-4k";
-        else if (std::strcmp(page_policy_actual, "thp") == 0)
-            page_policy = std::string(prefix) + "-thp";
-        else
-            page_policy = std::string(prefix) + "-mixed";
-#endif
     }
 
     // 预热：让页错误、TLB、缓存都进入稳态，不计入测量
     char* p = buf + perm[0] * stride;
     for (long long i = 0; i < warmup; ++i)
         p = *reinterpret_cast<char**>(p);
+
+#if defined(__linux__)
+    if (hp_buf == nullptr) {
+        // 第一次 smaps 观测必须在 warmup 后：初始化写入和 warmup 都可能
+        // 触发 khugepaged；只有这里才是 timed/PMU 窗入口的 backing。
+        if (!read_anon_huge_kb(buf, normal_map_bytes, &anon_huge_kb_before)) {
+            std::fprintf(stderr,
+                         "error: cannot inspect target mapping before measurement\n");
+            free(perm);
+            munmap(mapping_base, mapping_bytes);
+            return 1;
+        }
+        const PageBackingClass before =
+            classify_page_backing(anon_huge_kb_before, normal_map_bytes);
+        page_policy_actual_before = before.actual;
+        page_kb = before.page_kb;
+    }
+#endif
 
 #if defined(CPU_UARCH_HAVE_LINUX_PERF)
     std::vector<cpu_uarch::PerfEventSpec> perf_specs;
@@ -565,6 +578,47 @@ int main(int argc, char** argv) {
     volatile uintptr_t sink = reinterpret_cast<uintptr_t>(p);
     (void)sink;
 
+#if defined(__linux__)
+    if (hp_buf == nullptr) {
+        // PMU 已停止、计时已结束；smaps I/O 不进入任何测量窗口。
+        if (!read_anon_huge_kb(buf, normal_map_bytes, &anon_huge_kb_after)) {
+            std::fprintf(stderr,
+                         "error: cannot inspect target mapping after measurement\n");
+            free(perm);
+            munmap(mapping_base, mapping_bytes);
+            return 1;
+        }
+        const PageBackingClass after =
+            classify_page_backing(anon_huge_kb_after, normal_map_bytes);
+        page_policy_actual_after = after.actual;
+    }
+#endif
+
+    if (page_policy_actual_before != page_policy_actual_after
+            || anon_huge_kb_before != anon_huge_kb_after) {
+        std::fprintf(
+            stderr,
+            "error: page-backing endpoint drift: before=%s/%zuKiB after=%s/%zuKiB\n",
+            page_policy_actual_before.c_str(), anon_huge_kb_before,
+            page_policy_actual_after.c_str(), anon_huge_kb_after);
+        free(perm);
+        munmap(mapping_base, mapping_bytes);
+        return 1;
+    }
+
+#if defined(__linux__)
+    if (hp_buf == nullptr) {
+        const char* prefix = want_base ? "base-madvise"
+            : (want_thp ? "thp" : (want_hp ? "fallback" : "default"));
+        if (page_policy_actual_before == "base")
+            page_policy = std::string(prefix) + "-4k";
+        else if (page_policy_actual_before == "thp")
+            page_policy = std::string(prefix) + "-thp";
+        else
+            page_policy = std::string(prefix) + "-mixed";
+    }
+#endif
+
     const double elapsed = t1 - t0;
     const double latency = elapsed / static_cast<double>(loads);
     const double warmup_passes =
@@ -574,10 +628,15 @@ int main(int argc, char** argv) {
     std::printf("buffer_kb=%zu stride=%zu loads=%lld elapsed_ns=%.0f latency_ns=%.4f "
                 "warmup_loads=%lld warmup_passes_effective=%.6f warmup_state=%s "
                 "page_policy=%s page_kb=%u page_policy_requested=%s "
-                "page_policy_actual=%s anon_huge_kb=%zu seed=%llu",
+                "page_policy_actual=%s anon_huge_kb=%zu "
+                "page_policy_actual_before=%s page_policy_actual_after=%s "
+                "anon_huge_kb_before=%zu anon_huge_kb_after=%zu "
+                "page_backing_endpoints_equal=1 seed=%llu",
                 buffer_kb, stride, loads, elapsed, latency, warmup, warmup_passes,
                 warmup_state, page_policy.c_str(), page_kb, page_policy_requested,
-                page_policy_actual, anon_huge_kb,
+                page_policy_actual_before.c_str(), anon_huge_kb_before,
+                page_policy_actual_before.c_str(), page_policy_actual_after.c_str(),
+                anon_huge_kb_before, anon_huge_kb_after,
                 static_cast<unsigned long long>(seed));
 #if defined(CPU_UARCH_HAVE_LINUX_PERF)
     for (const auto& observation : perf_observations) {

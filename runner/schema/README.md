@@ -54,6 +54,9 @@
 | `page_policy_requested` | string | `default` / `base-madvise` / `hugetlb-fallback` / `hugetlb-strict` / `thp-madvise` 请求语义 | 2026-09-27（2026-09-28 增补 base） |
 | `page_policy_actual` | string | `platform-default` / `base` / `thp` / `mixed` / `hugetlb-2m` 实际 backing | 2026-09-27 |
 | `anon_huge_kb` | non-negative integer | Linux `/proc/self/smaps` 对目标 VMA 观测到的 `AnonHugePages` 总量 | 2026-09-27 |
+| `page_policy_actual_before`, `page_policy_actual_after` | string | warmup 后/测量前与 timed/PMU 窗后的实际 backing 端点；取值同 `page_policy_actual` | 2026-09-28 |
+| `anon_huge_kb_before`, `anon_huge_kb_after` | non-negative integer | 两个端点对目标 VMA 观测到的 `AnonHugePages`；不一致时 probe fail-closed | 2026-09-28 |
+| `page_backing_endpoints_equal` | integer `1` | 成功输出的两个 backing 端点相同；离散端点相等不声称排除窗内瞬态变化 | 2026-09-28 |
 | `page_policy`, `page_kb` | string, non-negative integer | 兼容既有 reader 的摘要；新判断必须优先使用 requested/actual 字段 | 2026-09-27 |
 | `pmu_type`, `pmu_config` | non-negative integer | `pmu.<label>.count` 的 Linux perf PMU type/config；来自 ExperimentSpec 的显式事件描述 | 2026-09-28 |
 | `time_enabled_ns`, `time_running_ns` | non-negative integer | 每个 PMU observation 的 perf enabled/running delta；零 running 拒绝，multiplex 判定由二者比值审计 | 2026-09-28 |

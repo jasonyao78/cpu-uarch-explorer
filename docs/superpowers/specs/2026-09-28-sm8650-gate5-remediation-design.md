@@ -18,7 +18,7 @@
 保留既有 `page_policy_actual`/`anon_huge_kb` 兼容字段；在 warmup 完成后、
 计数器启动前记录 before 快照，在计时和 PMU 窗结束后记录 after 快照。
 两端观测失败或 backing/AnonHugePages 变化时退出 1，不输出有效 metrics；
-稳定样本追加 before/after/stable 审计字段。旧捕获仍可解析，新字段采用
+端点一致的样本追加 before/after/equal 审计字段。旧捕获仍可解析，新字段采用
 schema v2 的可扩展字段机制登记。
 
 L2 容量保持 `OPEN/INCONCLUSIVE`，但只阻塞依赖该容量解释的实验，不阻塞
@@ -44,12 +44,12 @@ Linux 普通匿名映射的实际 backing 是测量窗属性，不是 `madvise` 
 
 - `page_policy_actual_before/after`
 - `anon_huge_kb_before/after`
-- `page_backing_stable=1`
+- `page_backing_endpoints_equal=1`
 
-不稳定时只在 stderr 报告两端值并以退出码 1 结束，Runner 按既有 Probe ABI
-生成空 metrics 的结构化失败记录。快照在 timed/PMU 窗之外，不污染时延或
-事件计数。显式 hugetlb 和非 Linux `platform-default` 由映射机制保证本次
-执行内不发生 THP promotion/demotion，仍输出成对字段。
+两端不一致时只在 stderr 报告两端值并以退出码 1 结束，Runner 按既有
+Probe ABI 生成空 metrics 的结构化失败记录。快照在 timed/PMU 窗之外，
+不污染时延或事件计数。端点相同是离散观测，不声称排除窗内瞬态
+promotion/demotion。显式 hugetlb 和非 Linux `platform-default` 仍输出成对字段。
 
 这是一项对 protocol 1.2 既有“逐样本实际 backing”承诺的符合性修复，不
 重解释历史记录、不批量改旧 ExperimentSpec；新读者兼容旧输出。

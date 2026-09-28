@@ -6,12 +6,15 @@ Probe ABI（与源码头部注释一致）：
          [-B|-h|-H|-T] [--pmu-event label:type:config]...
   stdout: buffer_kb=.. .. latency_ns=.. warmup_loads=..
           warmup_passes_effective=.. warmup_state=.. page_policy=.. page_kb=..
+          page_policy_actual_before/after=.. anon_huge_kb_before/after=..
+          page_backing_endpoints_equal=1（两端观测一致，不代表连续观测）
           seed=N（链洗牌种子，默认 42；访问序列是实验变量，必须入档）
   退出码: 0 成功 / 1 输入或环境错误 / 2 能力不支持（hugepage 无平台能力或
           strict 模式缺页池；fallback 非 strict 模式下成功但标注 fallback-4k）
 
 measurement-discipline §2：请求页策略与实际 backing 必须分字段保存；
-page_policy 随 metric 入档（requested/actual 双记录原则）。
+page_policy 随 metric 入档（requested/actual 双记录原则）。新输出还在
+warmup 后/测量前与 timed/PMU 窗后做端点审计；parser 继续接受旧捕获。
 """
 
 from __future__ import annotations
@@ -27,6 +30,7 @@ _PMU_LABEL_RE = re.compile(r"^[a-z0-9_]+$")
 _PMU_SUFFIXES = (
     "_time_enabled_ns", "_time_running_ns", "_config", "_count", "_type",
 )
+_PAGE_BACKINGS = ("platform-default", "base", "thp", "mixed", "hugetlb-2m")
 
 
 def _binary_flag(params: dict[str, Any], name: str) -> int:
@@ -170,7 +174,7 @@ class PtrChaseAdapter:
             ):
                 raise ParseError(f"invalid page_policy_requested: {requested!r}")
             actual = fields["page_policy_actual"]
-            if actual not in ("platform-default", "base", "thp", "mixed", "hugetlb-2m"):
+            if actual not in _PAGE_BACKINGS:
                 raise ParseError(f"invalid page_policy_actual: {actual!r}")
             raw_anon_huge_kb = fields["anon_huge_kb"]
             if not raw_anon_huge_kb.isdigit():
@@ -181,6 +185,58 @@ class PtrChaseAdapter:
                 "page_policy_requested": requested,
                 "page_policy_actual": actual,
                 "anon_huge_kb": int(raw_anon_huge_kb),
+            })
+        window_audit_keys = {
+            "page_policy_actual_before", "page_policy_actual_after",
+            "anon_huge_kb_before", "anon_huge_kb_after",
+            "page_backing_endpoints_equal",
+        }
+        present_window_audit_keys = window_audit_keys.intersection(fields)
+        if present_window_audit_keys:
+            if present_window_audit_keys != window_audit_keys:
+                missing = sorted(window_audit_keys - present_window_audit_keys)
+                raise ParseError(
+                    f"incomplete measurement-window page backing fields; missing {missing}"
+                )
+            if present_page_audit_keys != page_audit_keys:
+                raise ParseError(
+                    "measurement-window page backing fields require the legacy "
+                    "requested/actual/anon_huge_kb fields"
+                )
+            before = fields["page_policy_actual_before"]
+            after = fields["page_policy_actual_after"]
+            if before not in _PAGE_BACKINGS or after not in _PAGE_BACKINGS:
+                raise ParseError(
+                    f"invalid measurement-window page backing: {before!r}/{after!r}"
+                )
+            raw_before_kb = fields["anon_huge_kb_before"]
+            raw_after_kb = fields["anon_huge_kb_after"]
+            if not raw_before_kb.isdigit() or not raw_after_kb.isdigit():
+                raise ParseError(
+                    "measurement-window anon_huge_kb values must be non-negative "
+                    f"integers: {raw_before_kb!r}/{raw_after_kb!r}"
+                )
+            before_kb = int(raw_before_kb)
+            after_kb = int(raw_after_kb)
+            endpoints_equal = _require_uint(
+                fields, "page_backing_endpoints_equal", 1,
+            )
+            if endpoints_equal != 1 or before != after or before_kb != after_kb:
+                raise ParseError(
+                    "successful ptr_chase output requires equal page-backing "
+                    "observations at both measurement-window endpoints"
+                )
+            if before != metric["page_policy_actual"] \
+                    or before_kb != metric["anon_huge_kb"]:
+                raise ParseError(
+                    "measurement-window page backing contradicts legacy summary fields"
+                )
+            metric.update({
+                "page_policy_actual_before": before,
+                "page_policy_actual_after": after,
+                "anon_huge_kb_before": before_kb,
+                "anon_huge_kb_after": after_kb,
+                "page_backing_endpoints_equal": endpoints_equal,
             })
         if "page_kb" in fields:
             raw_page_kb = fields["page_kb"]

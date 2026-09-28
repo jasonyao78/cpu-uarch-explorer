@@ -39,6 +39,11 @@ class TestPtrChaseContract(unittest.TestCase):
         self.assertEqual(metrics[0]["page_policy_requested"], "default")
         self.assertEqual(metrics[0]["page_policy_actual"], "platform-default")
         self.assertEqual(metrics[0]["anon_huge_kb"], 0)
+        self.assertEqual(metrics[0]["page_policy_actual_before"], "platform-default")
+        self.assertEqual(metrics[0]["page_policy_actual_after"], "platform-default")
+        self.assertEqual(metrics[0]["anon_huge_kb_before"], 0)
+        self.assertEqual(metrics[0]["anon_huge_kb_after"], 0)
+        self.assertEqual(metrics[0]["page_backing_endpoints_equal"], 1)
 
     def test_probe_abi_invalid_input_nonzero_exit(self):
         # Probe ABI（ADR-0006 §3）：非法输入非零退出，绝不静默产出记录
@@ -180,6 +185,47 @@ class TestPtrChaseContract(unittest.TestCase):
         )[0]
         self.assertEqual(base["page_policy_requested"], "base-madvise")
         self.assertEqual(base["page_policy_actual"], "base")
+
+    def test_parser_preserves_equal_measurement_window_backing_endpoints(self):
+        stdout = (
+            "latency_ns=1.25 page_policy=thp-mixed page_kb=0 "
+            "page_policy_requested=thp-madvise page_policy_actual=mixed "
+            "anon_huge_kb=2048 "
+            "page_policy_actual_before=mixed page_policy_actual_after=mixed "
+            "anon_huge_kb_before=2048 anon_huge_kb_after=2048 "
+            "page_backing_endpoints_equal=1"
+        )
+        metric = self.adapter.parse_output(stdout, "")[0]
+        self.assertEqual(metric["page_policy_actual_before"], "mixed")
+        self.assertEqual(metric["page_policy_actual_after"], "mixed")
+        self.assertEqual(metric["anon_huge_kb_before"], 2048)
+        self.assertEqual(metric["anon_huge_kb_after"], 2048)
+        self.assertEqual(metric["page_backing_endpoints_equal"], 1)
+
+    def test_parser_refuses_incomplete_or_inconsistent_window_backing_audit(self):
+        prefix = (
+            "latency_ns=1.25 page_policy=thp-mixed page_kb=0 "
+            "page_policy_requested=thp-madvise page_policy_actual=mixed "
+            "anon_huge_kb=2048 "
+        )
+        invalid = (
+            prefix + "page_policy_actual_before=mixed",
+            prefix
+            + "page_policy_actual_before=base page_policy_actual_after=mixed "
+            + "anon_huge_kb_before=0 anon_huge_kb_after=2048 "
+            + "page_backing_endpoints_equal=1",
+            prefix
+            + "page_policy_actual_before=mixed page_policy_actual_after=mixed "
+            + "anon_huge_kb_before=1024 anon_huge_kb_after=2048 "
+            + "page_backing_endpoints_equal=1",
+            prefix
+            + "page_policy_actual_before=mixed page_policy_actual_after=mixed "
+            + "anon_huge_kb_before=2048 anon_huge_kb_after=2048 "
+            + "page_backing_endpoints_equal=0",
+        )
+        for stdout in invalid:
+            with self.subTest(stdout=stdout), self.assertRaises(ParseError):
+                self.adapter.parse_output(stdout, "")
 
     def test_parser_refuses_invalid_page_backing_fields(self):
         invalid = (
