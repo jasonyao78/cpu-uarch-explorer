@@ -1,15 +1,20 @@
 # 任务书：SM8650 Cortex-X4 TLB 层级探测（2026-09-28）
 
-> **版本**：v3（取代 v2）。**v2→v3 修订映射**（对应"TRM 一手源 +
-> AArch64-Explore 方法学"输入）：
+> **版本**：v4（取代 v3）。**v3→v4 修订映射**（对应"Software
+> Optimization Guide 并列为原厂资料"输入）：
 >
-> | 输入项 | v3 修订位置 |
+> | 输入项 | v4 修订位置 |
 > |---|---|
-> | Arm Cortex-X4 TRM（doc 102484）升为首要语义源 | §2.2、§3.1（来源层级） |
-> | **M6 更正：MMUTC ≠ L2 TLB**（TRM §6.1 实锤：MMU = L1 TLB + L2 TLB + MMUTC + translation table prefetcher；MMUTC 是 2048 项 8 路 walk 缓存） | §3.1、§1.2 Q2、§5、§7 Phase C |
-> | AArch64-Explore 探针方法学对照（`ProbeLatency.cpp`/`ProbeCache.cpp`，commit `9e3d464`） | §6.5 |
-> | 版本冻结（TRM 固定修订链接 + Explore commit permalink） | §2.2、§3.1、§6.5 |
-> | `0x05`/`0x34` 事件文本经 TRM 原文逐字核对（Issue 05） | §3.1、§3.2 |
+> | *Cortex-X4 Core Software Optimization Guide*（PJDOC-1505342170-538636，Issue 3.0，r0p1）与 TRM 并列原厂资料，职责不同 | §2.2、§3.1、§6.6 |
+> | **原厂资料核查门禁**（已控制/未控制/不适用清单） | §6.6（新增） |
+> | Arm PDF 版权处置：全文 PDF 与提取文本**不入库**（封面明示"may not be reproduced…without written permission"），移至仓外 `cpu-uarch-ref/arm-docs/`；仓内只留引用元数据与短摘 | §3.1 出处注、§11 |
+> | TRM/Guide 修订元数据落档（PDF 封面/修订记录为准，不凭 URL 推断） | §3.1 |
+>
+> **v2→v3 修订映射**（保留备查）：Arm TRM 升为首要语义源（§2.2、
+> §3.1）；**M6 更正 MMUTC ≠ L2 TLB**（TRM §6.1：MMU = L1 TLB + L2
+> TLB + MMUTC + translation table prefetcher；MMUTC 为 2048 项 8 路
+> walk 缓存）；AArch64-Explore 方法学对照（§6.5）；版本冻结；
+> `0x05`/`0x34` 事件文本经 TRM Issue 05 逐字核对。
 >
 > **前置阅读**：仓库根 `AGENTS.md`（铁律 0–7）、
 > `docs/methodology/measurement-discipline.md`、
@@ -115,6 +120,7 @@
 | 来源 | 它回答什么 | 它不能回答什么 |
 |---|---|---|
 | **Arm Cortex-X4 TRM**（doc 102484；当前在线修订 `/102484/0003/` r0p3；本文逐字核对自 Issue 05 = `102484_0002_05_en` PDF，见 §3.1 出处注） | **目标核文档声称什么**：MMU 组件结构（L1 TLB / L2 TLB / MMUTC / translation table prefetcher）、miss→walk 路径、PMU event 文本 | 设备上的实际计数行为、THP backing、有效触达区间（须本机验证） |
+| **Arm Cortex-X4 Core Software Optimization Guide**（PJDOC-1505342170-538636，Issue 3.0，r0p1，2023-05-26；全文 PDF 经 pdftotext 核对，见 §3.1 出处注） | **Arm 对软件访问模式与性能优化的指导**：用于审视随机依赖链、工作集扫描与结果解释是否遗漏微架构干扰（§6.6 核查清单）；其指令 latency/throughput 表是未来 core/pipeline 探针的资料 | **不是** TLB 容量/walk 成本数据源（全文无此类规格）；其建议**不成为**本机实测参数，也不据此事后改动已冻结矩阵 |
 | **AArch64-Explore**（submodule，钉 `9e3d464`；README 自述对象为 **Apple M1 及后续 CPU**） | **哪些实验混淆值得排除、探针怎么设计**：访问模式、页内 offset 解耦、box 模式预取器检测、遍历变体、页尺寸变体（§6.5） | Apple 平台测得的 TLB 容量/延迟/计数编码**不能移植**为 X4 结论；其 README 定位是 toolbox 而非规格书 |
 | **本机 run（本仓 records）** | **SM8650 CPU7 实际观测到什么** | 无——这是唯一的行为事实来源 |
 
@@ -124,13 +130,23 @@
 
 **来源层级（首要 → 辅助 → 本机）**：
 
-1. **Arm Cortex-X4 TRM（doc 102484）**：首要语义核对源。固定修订：
-   在线入口当前为 `/102484/0003/`（r0p3）的 *Memory management* 与
-   *Performance monitors events* 两节。**出处注**：Arm 文档站为 JS
-   渲染无法直接抓取，本文逐字核对自 **Issue 05
-   （`102484_0002_05_en`）PDF**（documentation-service 静态链接下
-   载 + pdftotext 提取）；§6.1 结构描述与 §事件文本在该修订中与
-   r0p3 预期一致，**r0p3 与 Issue 05 的逐字差异核对列入 §11 待办**。
+1. **Arm 原厂文档两份（并列首要，职责不同）**：
+   - **Cortex-X4 Core TRM**（doc 102484）：事件与结构术语的**定义
+     源**。*Memory management* 与 *Performance monitors events* 两
+     节。修订元数据：本文逐字核对自 **Issue 05
+     （`102484_0002_05_en`）PDF**；在线入口当前为 `/102484/0003/`
+     （r0p3），**r0p3 与 Issue 05 的逐字差异核对列入 §11 待办**。
+   - **Cortex-X4 Core Software Optimization Guide**
+     （PJDOC-1505342170-538636，**Issue 3.0**，r0p1，2023-05-26，
+     Non-Confidential；修订记录以 PDF 封面为准，非 URL 推断）：访
+     问模式/性能优化指导的**混淆审查源**（§6.6）；其指令
+     latency/throughput 表留作未来 core/pipeline 探针资料。
+   **出处注（版权处置）**：Arm 文档站为 JS 渲染；两份 PDF 均经
+   documentation-service/官方页面下载 + pdftotext 提取核对。两份
+   PDF 封面均明示"may not be reproduced…without written
+   permission"——**全文 PDF 与提取文本一律不入 git**，已移至仓
+   外 `cpu-uarch-ref/arm-docs/`（只读）；仓内只保留引用元数据
+   （文档号/修订/章节）与必要的短摘。
 2. **ARM-software/data `pmu/cortex-x4.json`**：TRM 衍生的事件表可检
    索副本（其 refs 即引 TRM），counters=6；用作配置编码的固定索引
    （钉访问日期）。
@@ -418,6 +434,24 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
 书项目名；其 `Probes.h` 的 TestTraversal 模板与 warmup 处理**尚未
 阅读**（§11 待办），本节结论以 `ProbeLatency.cpp` 已读段落为准。
 
+### 6.6 原厂资料核查门禁（Optimization Guide 混淆清单）
+
+> 门禁要求（预注册）：冻结 §3 事件语义与 §6 探针协议**之前**，已
+> 核对两份原厂文档相关原文并记录文档号/PDF 实际修订/章节/页码
+> （§3.1 出处注）。下表为 Optimization Guide 对本探针协议
+> （`stride=64 B`、每 4 KiB 页 64 slots、同链展开 ×8、计时窗内纯
+> load）的逐项判定；**不因指南建议事后改动已冻结矩阵**——需要的
+> 新探针一律转 §11 open item。
+
+| Guide 指导（章节） | 内容 | 对本协议的判定 |
+|---|---|---|
+| §4.4 Load/Store alignment | 跨 64B cache-line 边界的 load 与非 4B 对齐 quad load、跨 32B 边界的 store 有性能惩罚 | **已控制**：chase 每次访问为 64B stride 的 8B 指针 load，恒不跨线 |
+| §4.5 Store to Load Forwarding | store→load 转发有对齐/数量限制 | **不适用**：计时窗内纯 load（建链 store 全在窗口外） |
+| §4.3 Optimizing memory routines | 循环展开（每迭代多个 load/store）摊薄循环开销；但示例为独立 LDP/STP（引入 MLP） | **已控制（有意分歧）**：本探针同链展开 ×8——摊薄循环控制且**严格 MLP=1**（原理 §3 已论证；指南的并行化建议对被测量有反向作用，不采用） |
+| §4.3 非临时 load（LDNPQ）/ DC ZVA | 针对 non-cacheable 流式例程 | **不适用**：本工作负载为 cacheable 匿名映射 |
+| §4.13 Cache maintenance operations | cache 维护指令的性能注记 | **不适用**：本探针不使用 cache 维护指令 |
+| 全文检索 | 无 TLB 容量/walk 成本/依赖链延迟探测内容 | **不适用**：不能作为 TLB 规格证据（与输入方的边界声明一致）；translation 性能结论一律以 TRM + 本机 run 为准 |
+
 ## 7. 分阶段矩阵与执行预算
 
 ### Phase A：base 粗扫（提名候选区）
@@ -579,6 +613,11 @@ MODEL_UNIDENTIFIABLE / OPEN
 2. **`Probes.h` TestTraversal 模板与 warmup 处理**（AArch64-
    Explore）：§6.5 结论以 `ProbeLatency.cpp` 已读段落为准；其遍历
    模板/warmup/计时细节未读，需引用时先读源码。
+3. **Arm 文档物理位置登记**：两份原厂 PDF 与其 pdftotext 提取文
+   本位于仓外 `cpu-uarch-ref/arm-docs/`（`x4trm.pdf` =
+   `102484_0002_05_en`、`Arm_Cortex_X4_Core_Software_Optimization_Guide.pdf`
+   = PJDOC-1505342170-538636 Issue 3.0、各自 `.txt`）——Arm 版权
+   禁止复制，永不入库（§3.1 出处注）。
 3. **运行时 CPU 证据**（M1）：当前探针无 `sched_getcpu()`/运行时
    CPU 字段；如需"测量窗两端执行位置"字段（probe ABI 小改 + 契约
    测试 + 重新部署），另立小项评估，本任务不携带。
