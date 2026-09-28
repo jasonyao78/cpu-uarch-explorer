@@ -110,7 +110,10 @@
 > **2026-09-28 复审**："校准 + 正向控制 + 细扫"链路中的容量裁定被外部
 > 评审驳回（预注册门禁事后改写、排他性机制表述、L2 几何论证错误），
 > 两份评审文档顶部已加更正块。**X4 私有 L2 门禁重新打开，外层
-> L3/LLCC 维持封锁**；数据与工程链路保留为实验档案。
+> L3/LLCC 容量定案维持封锁**；数据与工程链路保留为实验档案。该门禁
+> 不扩散到正交主题：分支预测、TLB、前端、执行端口、MLP、跨核迁移等
+> 不依赖精确 L2 容量的探测可继续。cache 相关实验若把 L2 容量仅作为
+> 区间/潜变量，也可在明确依赖和禁止唯一命名容量 knee 的前提下继续。
 
 | 项 | 内容 | 归属/触发条件 | 状态 |
 |---|---|---|---|
@@ -118,8 +121,8 @@
 | P0 受控安静态 v2 | 显式 profile；逐 policy 精确恢复；Android 状态 before/after；前后门禁 fail-closed | 新 SM8650 校准实验前置；临时 control-path smoke 只验控制链，不产容量数据 | ✅ 完成（`a1f52b6`–`0895270`、`d405460`；验收见 runbook §7） |
 | P0 X4 私有 L2 校准 | 512 KiB–3 MiB 细扫，4 KiB/实际 THP 对照，≥10 次新分配，联合 L2 refill/DTLB | 协议修复后第一项实机实验；失败则停止外层解读 | ✅ 已执行（`9f7441b`，run `20260927T175218Z/175405Z`）；裁定 **OPEN/INCONCLUSIVE**（后续闭环尝试被评审驳回，维持开放） |
 | P0' PMU 事件语义正向控制 | L1D/L2D access/refill + L3 refill + DTLB walk 的地板/规模双向验证 | 校准裁定遗留（事件语义未证不可排因）；细扫前置门禁 | ⚠️ 数据保留（`219bcbb`）：计数相干性成立；**容量推断门禁 FAILED 维持**（预注册 8 MiB 预期未达，事后改写已撤销，见评审更正块） |
-| P0″ demand/prefetch 专用事件复测 | `L1D/L2D_CACHE_MISS/HWPRF` + `MEM_ACCESS_RD` 同窗；≥4 seed × 短/长训练 × base/THP 正交；探针加可记录 seed；分析器入库 | P0' 门禁失败后唯一认可的容量推断路径；512→640 机制（预取崩塌 vs 置换共振）判别 | ✅ base 矩阵完成（`7c00d6d`/`32207d2`/`867d9b1`/`5c15287`/`6ac1da5`，评审 `docs/reviews/2026-09-28-sm8650-x4-p0prime.md`）：**512→640 = L1 预取覆盖率崩塌（高置信，4 seed × 双训练一致）**；**容量信号不容许（跨 seed/训练不稳）→ 维持 OPEN/INCONCLUSIVE**；2 MiB（DTS 平台描述）未证实未否决 |
-| 动态 cpufreq ceiling drift 与恢复门禁（P0″-THP 收尾，规则 4c） | 2304/3072 KiB 短/长 × 4 seed，THP 请求按实际 backing 分组；短块执行、short/long 分开、条件交错，块前后各放 base 锚点，同步采集 Current HAL 温度与 cooling-device 状态 | 触发条件：四 policy 回画像值且稳定 ≥5 分钟（2026-09-28 三次 drift；**根因 OPEN**——不得写成已定案 NSP/thermal，`dumpsys` cached 温度不可当实时值，cdev state 与有效限额非时刻同步，以 `scaling_max_freq` 为唯一有效门禁）；drift 复发则当前块 fail-closed，此前数据由块前后锚点决定去留；只完善 >2MiB 页策略叙述，不改变容量 OPEN 状态 | ⬜ **升级待决策**（20:27 drift #3 后满足升级条件，run `20260928T122738Z` 归档）：(a) 另建"较低但稳定"画像（接受钳制档，须新建 profile+锚点）；(b) OEM 策略根因专项调查（频率控制链 runbook 取证链）；(c) 无限期推迟（不影响容量 OPEN）；LLCC 仍封锁 |
+| P0″ demand/prefetch 专用事件复测 | `L1D/L2D_CACHE_MISS/HWPRF` + `MEM_ACCESS_RD` 同窗；≥4 seed × 短/长训练 × base/THP 正交；探针加可记录 seed；分析器入库 | P0' 门禁失败后唯一认可的容量推断路径；512→640 机制（预取崩塌 vs 置换共振）判别 | ✅ base 矩阵完成（`7c00d6d`/`32207d2`/`867d9b1`/`5c15287`/`6ac1da5`，评审 `docs/reviews/2026-09-28-sm8650-x4-p0prime.md`）：**512→640 跳变与 L1 预取活动/覆盖代理崩塌稳定伴生**（高置信，4 seed × 双训练一致；上游原因未鉴定）；**容量信号不容许（跨 seed/训练不稳）→ 维持 OPEN/INCONCLUSIVE**；2 MiB（DTS 平台描述）未证实未否决 |
+| 动态 cpufreq ceiling drift 与恢复门禁（P0″-THP 收尾，规则 4c） | 2304/3072 KiB 短/长 × 4 seed，THP 请求按实际 backing 分组；短块执行、short/long 分开、条件交错，块前后各放 base 锚点，同步采集 Current HAL 温度与 cooling-device 状态 | 触发条件：后续实验必须依赖 >2 MiB backing 对照，且四 policy 回画像值并稳定 ≥5 分钟（2026-09-28 三次 drift；**根因 OPEN**——不得写成已定案 NSP/thermal，`dumpsys` cached 温度不可当实时值，cdev state 与有效限额非时刻同步，以 `scaling_max_freq` 为唯一有效门禁）；drift 复发则当前块 fail-closed，此前数据由块前后锚点决定去留；只完善 >2MiB 页策略叙述，不改变容量 OPEN 状态 | ⏸ **无限期推迟**（本轮选择 c；run `20260928T122738Z` 归档）：不阻塞正交微架构主题；若触发条件成立，可改选 (a) 新建较低稳定画像或 (b) OEM 策略根因专项调查；LLCC/外层 cache 容量定案仍封锁 |
 | P1 PMU 采样通道 | armv8 PMU 与 chase 同步；LLCC `type=9/config=0x1000` 响应性与权限边界已独立验证 | X4 L2 用 shell core PMU 同窗采样；外层 cache 再接最小 root LLCC sidecar；root userspace 路径已通，不触发 LKM | ✅ core 同窗已验证（`04f99b4`；两轮校准 + 正向控制共 35 case 全部 running==enabled）；LLCC sidecar 后置外层阶段（**评审后维持封锁**） |
 | P1 细粒度私有 L2 扫描 | 448–800 KiB @ 32/64 KiB + 896–1408 KiB @ 64 KiB；6 cache 事件同窗（计数器预算内） | 正向控制通过（已满足）；目标：L1 崩塌成像 + l2ref 起始沿定位 | ⚠️ 数据保留（`687d09e`，run `20260927T184203Z`）；**裁定驳回**（排他性机制表述、起始沿与逐样本矛盾、几何论证错误——见评审更正块）：512→640 改为"预取覆盖率崩塌强证据（待 P0″ 正式裁定）"；起始沿未成立；2 MiB 未否决、1 MiB 待检 |
 | P1 多链带宽模式 | ptr_chase `--chains N`：吞吐 cliff 作为独立物理量（Probe ABI 变更） | latency + PMU 仍不能区分外层结构时单独立项 | ⬜ 待办 |

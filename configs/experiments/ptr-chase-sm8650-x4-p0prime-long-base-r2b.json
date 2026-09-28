@@ -154,5 +154,5 @@
       "pmu_events"
     ]
   },
-  "notes": "长训练矩阵补全段（热钳位事件后拆分，见计划 P0″ Task 5 与评审）；case 空间与 20260928T024353Z 部分 run 互补，不重复其已成功 case。P0″ 正式复测（计划 docs/superpowers/plans/2026-09-28-sm8650-x4-p0prime-demand-prefetch.md）：demand/prefetch 分离事件判别 512→640KiB 机制；定圈训练（loads_per_slot=512 圈，min_loads 地板不生效）；4 seed 叉积检验地址模式依赖。不使用 l2d_cache_refill 通用 refill 事件。"
+  "notes": "长训练矩阵补全段（动态 cpufreq ceiling drift 事件后拆分，根因 OPEN；见计划 P0″ Task 5 与评审）；case 空间与 20260928T024353Z 部分 run 互补，不重复其已成功 case。P0″ 正式复测（计划 docs/superpowers/plans/2026-09-28-sm8650-x4-p0prime-demand-prefetch.md）：demand/prefetch 分离事件判别 512→640KiB 机制；定圈训练（loads_per_slot=512 圈，min_loads 地板不生效）；4 seed 叉积检验地址模式依赖。不使用 l2d_cache_refill 通用 refill 事件。"
 }

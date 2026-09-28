@@ -1,11 +1,13 @@
 <!-- 本文件由入库分析器生成（analysis/sm8650_x4_p0prime.py，含全失败 run 报告修复），命令：
-     .venv/bin/python -m analysis.sm8650_x4_p0prime --samples \
+     ../../.venv/bin/python -m analysis.sm8650_x4_p0prime --samples \
        --run data/public/runs/20260928T024022Z-ptr-chase-sm8650-x4-p0prime-short-base \
        --run data/public/runs/20260928T024353Z-ptr-chase-sm8650-x4-p0prime-long-base \
        --run data/public/runs/20260928T024957Z-ptr-chase-sm8650-x4-p0prime-long-base-r2a \
        --run data/public/runs/20260928T025119Z-ptr-chase-sm8650-x4-p0prime-long-base-r2b \
-       --run data/public/runs/20260928T025226Z-ptr-chase-sm8650-x4-p0prime-short-thp
-     裁定见 2026-09-28-sm8650-x4-p0prime.md。THP 段（short-thp 8 条全失败记录）已纳入 rejected 清单；long-THP 未执行。 -->
+       --run data/public/runs/20260928T025226Z-ptr-chase-sm8650-x4-p0prime-short-thp \
+       --run data/public/runs/20260928T122738Z-ptr-chase-sm8650-x4-p0prime-short-thp
+     裁定见 2026-09-28-sm8650-x4-p0prime.md。两个 short-THP run 共
+     16 条全失败记录均纳入 rejected 清单；long-THP 未执行。 -->
 
 # P0″ demand/prefetch per-sample analysis
 
@@ -1315,3 +1317,11 @@ PMU rows are accepted only when time_running_ns == time_enabled_ns for every eve
 - 20260928T025226Z-ptr-chase-sm8650-x4-p0prime-short-thp/buffer=3072KiB: record status=failed [environment-precondition-failed]
 - 20260928T025226Z-ptr-chase-sm8650-x4-p0prime-short-thp/buffer=3072KiB: record status=failed [environment-precondition-failed]
 - 20260928T025226Z-ptr-chase-sm8650-x4-p0prime-short-thp/buffer=3072KiB: record status=failed [environment-precondition-failed]
+- 20260928T122738Z-ptr-chase-sm8650-x4-p0prime-short-thp/buffer=2304KiB: record status=failed [environment-precondition-failed]
+- 20260928T122738Z-ptr-chase-sm8650-x4-p0prime-short-thp/buffer=2304KiB: record status=failed [environment-precondition-failed]
+- 20260928T122738Z-ptr-chase-sm8650-x4-p0prime-short-thp/buffer=2304KiB: record status=failed [environment-precondition-failed]
+- 20260928T122738Z-ptr-chase-sm8650-x4-p0prime-short-thp/buffer=2304KiB: record status=failed [environment-precondition-failed]
+- 20260928T122738Z-ptr-chase-sm8650-x4-p0prime-short-thp/buffer=3072KiB: record status=failed [environment-precondition-failed]
+- 20260928T122738Z-ptr-chase-sm8650-x4-p0prime-short-thp/buffer=3072KiB: record status=failed [environment-precondition-failed]
+- 20260928T122738Z-ptr-chase-sm8650-x4-p0prime-short-thp/buffer=3072KiB: record status=failed [environment-precondition-failed]
+- 20260928T122738Z-ptr-chase-sm8650-x4-p0prime-short-thp/buffer=3072KiB: record status=failed [environment-precondition-failed]

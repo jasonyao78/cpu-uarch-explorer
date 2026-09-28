@@ -395,7 +395,7 @@ for z in /sys/class/thermal/thermal_zone*; do echo \"\$(cat \$z/temp) \$(cat \$z
 
 ### Step 3：分支处置
 
-**动态 ceiling drift（疑似 L3 热票，根因 OPEN）**
+**动态 ceiling drift（驱动层未识别，根因 OPEN）**
 
 - 做：等（时段不可控）；分段矩阵 + 段间限额检查；**拔充电线**
   （PMIC/充电域是常见驱动源；adb-over-USB 会先断，插回即重
@@ -415,8 +415,8 @@ ApplyOpt 条件 → 最后才受控释锁。任何一步都不从"正 handle"宣
 
 这是 fail-closed **正常工作**：环境被外部（thermal/vendor/其他
 实验）改变时拒绝测量。处置 = 找漂移源（回 Step 2）+ 冷却/等
-待/分段；**不要放宽门禁**——它在 2026-09-28 拦下过两次真实热
-钳位（§6.1）。
+待/分段；**不要放宽门禁**——它在 2026-09-28 拦下过三次真实的
+cpufreq ceiling drift（§6.1）；现有证据不能把三次都归因为 thermal。
 
 ---
 
