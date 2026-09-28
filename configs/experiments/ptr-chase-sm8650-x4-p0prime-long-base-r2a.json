@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-sm8650-x4-p0prime-long-base-r2a",
+  "title": "SM8650 X4 P0″ demand/prefetch 复测（长训练 512 圈，base pages，补全段 A）",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    {
+      "name": "buffer",
+      "type": "size",
+      "range": "448KiB..3MiB，两个未决特征区 + >2MiB 对照"
+    },
+    {
+      "name": "stride",
+      "type": "size",
+      "default": "64B"
+    },
+    {
+      "name": "warmup_passes",
+      "type": "int",
+      "default": 2
+    },
+    {
+      "name": "loads_per_slot",
+      "type": "int",
+      "default": 512
+    },
+    {
+      "name": "min_loads",
+      "type": "int",
+      "default": 4096
+    },
+    {
+      "name": "repetitions",
+      "type": "int",
+      "default": 10
+    },
+    {
+      "name": "base_pages",
+      "type": "int",
+      "default": 1
+    },
+    {
+      "name": "seed",
+      "type": "int",
+      "default": 42
+    },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        {
+          "name": "cycles",
+          "type": 8,
+          "config": "0x11"
+        },
+        {
+          "name": "mem_access_rd",
+          "type": 8,
+          "config": "0x66"
+        },
+        {
+          "name": "l1d_cache_miss",
+          "type": 8,
+          "config": "0x8144"
+        },
+        {
+          "name": "l1d_cache_hwprf",
+          "type": 8,
+          "config": "0x8154"
+        },
+        {
+          "name": "l2d_cache_miss",
+          "type": 8,
+          "config": "0x814c"
+        },
+        {
+          "name": "l2d_cache_hwprf",
+          "type": 8,
+          "config": "0x8155"
+        }
+      ]
+    }
+  ],
+  "preconditions": [
+    "redmi-k70pro-01 controlled-baseline profile 前后门禁通过",
+    "CPU7 Cortex-X4；六个 core PMU event 同窗且 time_running == time_enabled（拒绝复用）",
+    "每个 repetition 为新进程/新匿名映射；actual backing 必须为 base；逐样本 seed 入档"
+  ],
+  "metrics": [
+    {
+      "name": "latency_ns",
+      "unit": "ns",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.cycles.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.mem_access_rd.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l1d_cache_miss.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l1d_cache_hwprf.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l2d_cache_miss.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l2d_cache_hwprf.count",
+      "unit": "events",
+      "statistic": "median"
+    }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "controls": [
+      "x4-prime"
+    ],
+    "params": {
+      "repetitions": 10
+    },
+    "sweep": {
+      "buffer": [
+        "1024KiB",
+        "1216KiB",
+        "1408KiB",
+        "1792KiB"
+      ],
+      "seed": [
+        42,
+        7,
+        1337,
+        20260928
+      ]
+    },
+    "fixed_params": [
+      "stride",
+      "warmup_passes",
+      "loads_per_slot",
+      "min_loads",
+      "base_pages",
+      "pmu_events"
+    ]
+  },
+  "notes": "长训练矩阵补全段（热钳位事件后拆分，见计划 P0″ Task 5 与评审）；case 空间与 20260928T024353Z 部分 run 互补，不重复其已成功 case。P0″ 正式复测（计划 docs/superpowers/plans/2026-09-28-sm8650-x4-p0prime-demand-prefetch.md）：demand/prefetch 分离事件判别 512→640KiB 机制；定圈训练（loads_per_slot=512 圈，min_loads 地板不生效）；4 seed 叉积检验地址模式依赖。不使用 l2d_cache_refill 通用 refill 事件。"
+}

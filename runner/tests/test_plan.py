@@ -241,6 +241,8 @@ class TestPlan(unittest.TestCase):
                     "ptr-chase-sm8650-x4-pmu-ctrl-tlb.json": 2,
                     "ptr-chase-sm8650-x4-p0prime-short-base.json": 56,
                     "ptr-chase-sm8650-x4-p0prime-long-base.json": 56,
+                    "ptr-chase-sm8650-x4-p0prime-long-base-r2a.json": 16,
+                    "ptr-chase-sm8650-x4-p0prime-long-base-r2b.json": 12,
                     "ptr-chase-sm8650-x4-p0prime-short-thp.json": 8,
                     "ptr-chase-sm8650-x4-p0prime-long-thp.json": 8,
                 }
