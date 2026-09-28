@@ -1,25 +1,15 @@
 # 任务书：SM8650 Cortex-X4 TLB 层级探测（2026-09-28）
 
-> **版本**：v2（取代 v1）。**v1→v2 修订映射**（对应第三轮评审）：
+> **版本**：v3（取代 v2）。**v2→v3 修订映射**（对应"TRM 一手源 +
+> AArch64-Explore 方法学"输入）：
 >
-> | 评审项 | v2 修订位置 |
+> | 输入项 | v3 修订位置 |
 > |---|---|
-> | A1 左删失终态 | §1.2 Q1、§10.2 终态表 |
-> | A2 `0x05`>1000/1k 解释收紧 | §3.2 |
-> | A3 Q2 拆 Q2a/Q2b/Q2c | §1.2 Q2、§5、§10.2 |
-> | A4 Q3 默认关联型 | §1.2 Q3、§7 Phase C、§3.3 |
-> | A5 Q4 效应措辞 | §7 Phase D |
-> | M1 CPU 证据 vs affinity 请求 | §4、§11 OI 登记 |
-> | M2 固定开销逐事件判定 | §5.3 |
-> | M3 data-miss 排歧组 G3 | §5.2、§7 Phase C |
-> | M4 长训练热预算 | §7 Phase B、§7 执行预算 |
-> | M5 THP 选点 | §7 Phase D |
-> | M6 MMUTC 命名限定 | §3.1 |
-> | S1/S2 冻结 analysis_rules + 确定性致密生成 | §6.2 全节 |
-> | S3 块证据可机读 | §6.4（锚点入配置） |
-> | S4 事件资格注册 | §3.1、§9.2 |
-> | S5 THP 停止预算 | §7 Phase D |
-> | S6 单次值 vs raw 歧义 | §6.3 |
+> | Arm Cortex-X4 TRM（doc 102484）升为首要语义源 | §2.2、§3.1（来源层级） |
+> | **M6 更正：MMUTC ≠ L2 TLB**（TRM §6.1 实锤：MMU = L1 TLB + L2 TLB + MMUTC + translation table prefetcher；MMUTC 是 2048 项 8 路 walk 缓存） | §3.1、§1.2 Q2、§5、§7 Phase C |
+> | AArch64-Explore 探针方法学对照（`ProbeLatency.cpp`/`ProbeCache.cpp`，commit `9e3d464`） | §6.5 |
+> | 版本冻结（TRM 固定修订链接 + Explore commit permalink） | §2.2、§3.1、§6.5 |
+> | `0x05`/`0x34` 事件文本经 TRM 原文逐字核对（Issue 05） | §3.1、§3.2 |
 >
 > **前置阅读**：仓库根 `AGENTS.md`（铁律 0–7）、
 > `docs/methodology/measurement-discipline.md`、
@@ -53,35 +43,41 @@
   别。**不预设转折存在。**
 - **Q2（三级授权）**：
   - **Q2a（必做）**：`0x34`（触发 walk 的访问事件密度）的
-    **walk-onset 区间**（从近零地板进入稳定上升的位置，判定见
-    §6.2）；
-  - **Q2b（有条件）**：L2 TLB（MMUTC）相关事件（`0x2d/0x2f` 正控通
-    过后）的联合曲线；`0x2d` 为 unified refill（含指令侧贡献），其
-    数据链主导性须另行论证，否则只称"unified 曲线"；
-  - **Q2c（进一步有条件）**：协议限定的第二级 effective reach——仅
+    **walk-onset 区间**（判定见 §6.2）；按 TRM 语义，`0x34` = 导致
+    **L2 TLB refill（L2 miss → 发起 walk）的 data TLB 访问**；
+  - **Q2b（有条件）**：**L2 TLB 层级**联合曲线（`0x2d/0x2f` 正控通
+    过后）；`0x2d` 为 unified refill（含指令侧贡献），数据链主导性
+    须另行论证，否则只称"unified 曲线"；
+  - **Q2c（进一步有条件）**：协议限定的 L2 TLB effective reach——仅
     当 Q2b 成立、第二转折跨重复与训练稳定、且指令侧基线与其他路径
     不能充分解释时；否则终态 `WALK_ONSET_ONLY`。
+  - **MMUTC（2048 项 8 路 walk 缓存）是 L2 TLB 之后的独立组件**：本
+    任务无直接计数事件，**不对其做 reach/容量声明**；它作为 walk
+    成本的混杂因素进入 Q3 的解释边界（§7 Phase C）。
 - **Q3（默认关联型）**：translation/walk activity 与 cycles/load 的
-  **关联曲线**（walk event density 增加伴随多少 cycles/load 变化，
-  附不确定度）；**成本型**"translation 暴露成本估计"仅当满足 §7
+  **关联曲线**；**成本型**"translation 暴露成本估计"仅当满足 §7
   Phase C 的排歧条件（含 data-miss 对照组 G3 与可识别性检查）时才
   升级报告，否则 `MODEL_UNIDENTIFIABLE`。
 - **Q4**：mixed-THP 降延迟观察是否具有**一致的 translation 事件证
   据链**——进程级实际 backing cohort 对照；latency、`0x05`、`0x34`
-  三指标各自预注册方向与最小可检测效应，报告方向一致性与各自不确
-  定度；**不要求、不暗示数值比例对应**，不估算 TLB 收益占比。
+  三指标各自预注册方向与最小可检测效应；**不要求、不暗示数值比例
+  对应**，不估算 TLB 收益占比。
 
 ### 1.3 非目标
 
 - 不反推 cache/LLCC 容量（X4 私有 L2 保持 OPEN/INCONCLUSIVE，
   OI-11；本任务不触碰）。
-- 不反推 TLB 物理 entry 数、sets/ways、replacement 策略。
+- 不反推 TLB 物理 entry 数、sets/ways（L1 dTLB 的 fully-associative
+  属性与 MMUTC 的 2048 项/8 路除外——它们是 TRM 明示的结构参数，
+  见 §3.1，可引用不可外推）、replacement 策略。
 - 不把 `cycles/walk` 命名为实测 page-walk 硬件延迟。
 - 不把 `0x05/loads`、`0x34/loads` 改写为"miss 概率"（见 §3.2）。
 - 不做 mixed cohort 内逐槽位 THP 归属推断。
 - 不把 `l1d_tlb_refill` 与 `dtlb_walk` 逐项相减当作 L2 TLB hit
   rate。
 - 不把 mixed-THP 同步变化按比例分摊为 TLB 收益占比。
+- 不把 AArch64-Explore 在 Apple CPU 上测得的 TLB 容量/延迟/编码移
+  植为 X4 结论（§2.2 证据隔离）。
 - 不扩展 v0.4、LLCC、PFN 着色、多链、RISC-V、路线 B（可控布局）
   等工作（各有归属，见 §11）。
 
@@ -100,35 +96,82 @@
 
 ## 2. 证据基线与待决清单
 
+### 2.1 仓内证据
+
 | 证据 | 状态 | 用途 | 不允许推导 |
 |---|---|---|---|
 | 128/4096 页 `0x05/0x34` 正控（run `20260927T182613Z`） | VERIFIED | 事件方向性锚点 | knee 位置、L1 容量 <128 |
 | P0″ 6300 条 PMU 观测 0 复用违约、0 编码异常 | VERIFIED | 复用探针内计数链 | 新事件必然有效 |
 | `0x05` 128 页 288.08/1k、4096 页 1029.95/1k | VERIFIED | Q1 先导观察 | L1 entry 数；miss 概率 |
 | `0x34` 128 页 0.0129/1k、4096 页 39.90/1k | VERIFIED | Q2 先导观察 | walk 次数/步数 |
-| perf/simpleperf 与探针内计数同窗差分 | 未执行（OPEN） | 可选外部交叉验证 | 阻断本任务（CLI 计数窗 ≠ 探针内计数窗，非同窗） |
-| `0x2d/0x2f/0x8136/0x8128/0x8138/0x813a/0x813c/0x813e/0x8167` | 未实操 | Q2/Q3/Q4 候选 | 未正控先用于结论 |
+| perf/simpleperf 与探针内计数同窗差分 | 未执行（OPEN） | 可选外部交叉验证 | 阻断本任务 |
+| `0x2d/0x2f/0x8136/0x8128/0x8138/0x813a/0x813c/0x813e/0x8167` | 未实操 | Q2b/Q3/Q4 候选 | 未正控先用于结论 |
 | THP backing 双端点审计 + 实际 backing 分组 | VERIFIED | Q4 进程级 cohort | 窗内逐时刻状态恒定、逐槽位归属 |
-| 跨三日 512/1280 KiB 锚点复现 ≤1.2% | VERIFIED（经验观测） | 锚点判据参考（§6.2 规则内使用） | 所有事件统一硬阈值 |
+| 跨三日 512/1280 KiB 锚点复现 ≤1.2% | VERIFIED（经验观测） | 锚点判据参考 | 所有事件统一硬阈值 |
 | ceiling drift 三次复发均 fail-closed | VERIFIED-NEGATIVE | 执行纪律 | 根因已知（OPEN） |
+
+### 2.2 外部证据边界（三类来源，各管一段，互不越位）
+
+| 来源 | 它回答什么 | 它不能回答什么 |
+|---|---|---|
+| **Arm Cortex-X4 TRM**（doc 102484；当前在线修订 `/102484/0003/` r0p3；本文逐字核对自 Issue 05 = `102484_0002_05_en` PDF，见 §3.1 出处注） | **目标核文档声称什么**：MMU 组件结构（L1 TLB / L2 TLB / MMUTC / translation table prefetcher）、miss→walk 路径、PMU event 文本 | 设备上的实际计数行为、THP backing、有效触达区间（须本机验证） |
+| **AArch64-Explore**（submodule，钉 `9e3d464`；README 自述对象为 **Apple M1 及后续 CPU**） | **哪些实验混淆值得排除、探针怎么设计**：访问模式、页内 offset 解耦、box 模式预取器检测、遍历变体、页尺寸变体（§6.5） | Apple 平台测得的 TLB 容量/延迟/计数编码**不能移植**为 X4 结论；其 README 定位是 toolbox 而非规格书 |
+| **本机 run（本仓 records）** | **SM8650 CPU7 实际观测到什么** | 无——这是唯一的行为事实来源 |
 
 ## 3. 术语、事件表与结论权限
 
-### 3.1 事件定义表
+### 3.1 来源层级与事件定义表
 
-出处：ARM-software/data `pmu/cortex-x4.json`（Cortex-X4 TRM 衍生，
-armv9.2-a，PMUv3，counters=6；定稿前钉住源 URL 与访问日期）；通用
-架构编码与 Arm 官方 PMU 博客、windowsperf 别名表三方一致。设备内
-核 PMU = `armv8_pmuv3`（type 8）。
+**来源层级（首要 → 辅助 → 本机）**：
 
-| code | 事件 | 语义（官方描述摘要） | 资格状态（§3.1 注册表） | 可支持的最强结论 |
+1. **Arm Cortex-X4 TRM（doc 102484）**：首要语义核对源。固定修订：
+   在线入口当前为 `/102484/0003/`（r0p3）的 *Memory management* 与
+   *Performance monitors events* 两节。**出处注**：Arm 文档站为 JS
+   渲染无法直接抓取，本文逐字核对自 **Issue 05
+   （`102484_0002_05_en`）PDF**（documentation-service 静态链接下
+   载 + pdftotext 提取）；§6.1 结构描述与 §事件文本在该修订中与
+   r0p3 预期一致，**r0p3 与 Issue 05 的逐字差异核对列入 §11 待办**。
+2. **ARM-software/data `pmu/cortex-x4.json`**：TRM 衍生的事件表可检
+   索副本（其 refs 即引 TRM），counters=6；用作配置编码的固定索引
+   （钉访问日期）。
+3. **本机正控（本仓 runs + `configs/pmu-event-registry.json`）**：行
+   为资格（S4）。三者不一致 → `SEMANTICS_UNVERIFIED`，不得择一方
+   便解释。
+
+**MMU 结构（TRM §6.1 + Table 6-1，Issue 05 逐字核对）——M6 更正
+要点**：
+
+```text
+Cortex-X4 MMU 组件 = L1 instruction TLB + L1 data TLB（+ L1 TRBE TLB）
+                   + L2 TLB（两级 TLB 结构的第二级）
+                   + MMUTC（MMU Translation Cache，独立组件）
+                   + translation table prefetcher
+```
+
+- **L1 data TLB**：**fully associative**，原生支持 4KB/16KB/64KB 页
+  与 2MB/512MB block（TRM 原文）。
+- **L2 TLB**：两级 TLB 结构的第二级；存全部页尺寸并按需为 L1 拆分
+  （"stores all page sizes…breaking these down into smaller pages"）；
+  miss 路径（TRM 原文）：**L1 miss → L2 TLB lookup → L2 miss →
+  hardware translation table walk**。
+- **MMUTC**：缓存 **translation table walk 中获得的中间 descriptor
+  PA**（walk 缓存，不是 VA→PA TLB）；**8-way set associative，
+  2048 entries**（TRM Table 6-1 明示参数）。**M6 更正：MMUTC ≠ L2
+  TLB——二者是不同组件**（v2 的"同物两名"系错误，本版废止；外部
+  评审此前的谨慎提醒（"偏强"）按 TRM 原文升级为确定性更正）。
+- **translation table prefetcher**：检测连续页表访问并预取下一段，
+  ECTLR 可禁。
+
+**事件定义表**（TRM 文本列 = Issue 05 逐字核对状态）：
+
+| code | 事件 | TRM 文本（出处行） | 本机资格（注册表） | 可支持的最强结论 |
 |---|---|---|---|---|
-| `0x05` | `L1D_TLB_REFILL` | L1 data TLB 自 L2 TLB（MMUTC）的 refill，含翻译错误路径 | VERIFIED（run `20260927T182613Z`） | refill-like event density |
-| `0x34` | `DTLB_WALK` | 导致 ≥1 次页表 walk 的 data TLB 访问（= 导致 `L2D_TLB_REFILL` 的访问） | VERIFIED（同上） | walk-like event density |
-| `0x25` | `L1D_TLB` | 每次 load/store 的 L1 dTLB 查找 | 未注册 | （备选分母） |
-| `0x2d` | `L2D_TLB_REFILL` | L2（统一）TLB refill（含指令侧贡献） | 未注册 | unified refill-like（须正控） |
+| `0x05` | `L1D_TLB_REFILL` | ✅ 逐字一致："counts any refill of the data L1 TLB **from the L2 TLB**"，含翻译错误路径 | VERIFIED（run `20260927T182613Z`） | refill-like event density |
+| `0x34` | `DTLB_WALK` | ✅ 逐字一致："data TLB access with at least one translation table walk；counts on any data access which **causes L2D_TLB_REFILL**" | VERIFIED（同上） | walk-like event density（= L2 TLB miss 触发） |
+| `0x25` | `L1D_TLB` | L1 dTLB 查找（同拍 load+store 计 2 次） | 未注册 | （备选分母） |
+| `0x2d` | `L2D_TLB_REFILL` | L2（统一）TLB refill（含指令侧） | 未注册 | unified refill-like（须正控） |
 | `0x2f` | `L2D_TLB` | L2 TLB 访问（由 L1 refill 引起） | 未注册 | L2 access-like（须正控） |
-| `0x8136` | `DTLB_STEP` | 数据页表 walk 的 step（步数） | 未注册 | 步数比（须与 `0x34` 口径配对验证） |
+| `0x8136` | `DTLB_STEP` | walk 的 step（步数） | 未注册 | 步数比（须与 `0x34` 口径配对验证） |
 | `0x8128` | `DTLB_WALK_PERCYC` | 每周期在途 data walk 数（积分语义，非"walk 花多少周期"） | 未注册 | walker 活动量（须正控方向性） |
 | `0x8138` | `DTLB_WALK_LARGE` | 大页 data walk | 未注册 | Q4 大页证据（须正控） |
 | `0x813a` | `DTLB_WALK_SMALL` | 小页 data walk | 未注册 | Q4 小页证据（须正控） |
@@ -137,26 +180,20 @@ armv9.2-a，PMUv3，counters=6；定稿前钉住源 URL 与访问日期）；通
 | `0x8144` | `L1D_CACHE_MISS` | L1 data cache demand access miss | VERIFIED（P0″ runs） | data-miss 排歧对照 |
 | `0x8167` | `STALL_BACKEND_TLB` | 后端 TLB stall 周期 | 未注册 | translation 受阻（升级候选） |
 
-**命名限定（M6）**：本任务沿用所引用 Cortex-X4 PMU 事件资料中的命
-名，将相关二级 translation 结构记作 **"L2 TLB（MMUTC）"**——`0x05`
-描述写 "from the L2 TLB"，`0x02` 描述写 "from the MMUTC"；**名称归
-并不意味着已证实其内部组织、容量或各事件计数集合完全等价**。
+**措辞差异照录**：`0x02 L1I_TLB_REFILL` 的 TRM 文本写 refill 来源为
+"from the MMU Translation Cache (MMUTC)"，而 `0x05` 写 "from the
+L2 TLB"——同一份 TRM 内两种措辞；**照录不裁定**（不影响 `0x05`
+的使用：其来源措辞为 L2 TLB，与 §6.1 的 miss 路径一致）。
 
-**事件资格注册（S4）**：资格不是分析器常量，而是数据记录
-`configs/pmu-event-registry.json`（随本任务创建，TDD）。每条注册：
-`{type, config, name, midr, source_doc, source_revision,
-positive_control_run, outcome, review_ref, validity_scope}`。分析器对
-未注册或作用域不匹配（MIDR/run 不符）的事件自动降级为
-`SEMANTICS_UNVERIFIED`，对应结论不产出。
+**事件资格注册（S4）**：`configs/pmu-event-registry.json`（随本任务
+TDD 建立）。每条注册：`{type, config, name, midr, source_doc,
+source_revision, positive_control_run, outcome, review_ref,
+validity_scope}`。分析器对未注册或作用域不匹配（MIDR/run 不符）的
+事件自动降级 `SEMANTICS_UNVERIFIED`。
 
 ### 3.2 统一分母与密度定义
 
-所有率默认：
-
-```
-R_e = 1000 × C_e / N_timed_dependent_loads
-```
-
+所有率默认：`R_e = 1000 × C_e / N_timed_dependent_loads`。
 `R_0x05` = refill-like event density；`R_0x34` = walk-like event
 density。
 
@@ -166,7 +203,9 @@ density。
 事件包含推测或重试路径（取决于目标核定义）、事件语义并非"每个完
 成依赖 load 至多一次"。**分析器保留原值：不截断、不改写为 miss
 概率**；原因待事件原文 + 窗口开销扫描 + 测量长度扫描共同核对
-（§5.3）。
+（§5.3）。TRM 对 `0x05` 的原文（"any refill of the data L1 TLB
+from the L2 TLB"）已逐字核对——该文本本身不约束每 load 至多一
+次，与观测不矛盾。
 
 ### 3.3 结论权限（逐级需证）
 
@@ -174,13 +213,13 @@ density。
 观测事件变化（单 case）
 → 跨重复/seed/块稳定（协议级事实）
 → 显示 translation-related 转折（Q1/Q2a/Q2b 范围）
-→ L2 TLB（MMUTC）有效触达（Q2c 上限，须 Q2b + 稳定性 + 排他性）
+→ L2 TLB effective reach（Q2c 上限，须 Q2b + 稳定性 + 排他性）
 → translation 暴露成本估计（Q3 成本型上限，须 G3 排歧 + 可识别性）
 ```
 
-默认层级：Q1/Q2a/Q2b 为**观测-协议级**；Q3 默认**关联型**（密度-
-周期关联）。物理 entry 数、sets/ways、`cycles/walk` 硬件延迟、成本
-型因果值不在默认授权范围。
+默认层级：Q1/Q2a/Q2b 为**观测-协议级**；Q3 默认**关联型**。物理
+entry 数、sets/ways（除 TRM 明示项）、`cycles/walk` 硬件延迟、
+MMUTC reach、成本型因果值不在默认授权范围。
 
 ## 4. Gate 0：现有计数与执行契约复验（非重做基础设施）
 
@@ -355,6 +394,30 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
 不依赖时间邻近推测。分析器以 `params.buffer_kb` 识别锚点 case 并
 先做 §6.2.5 判定，再处理其余 case。
 
+### 6.5 探针设计对照：AArch64-Explore 方法学（commit `9e3d464`）
+
+> 来源：`third_party/AArch64-Explore`（submodule，钉
+> `9e3d4646b296fc2948a3343c04bbc0a7835d4f79`）。以下结论均直接读
+> 自 `AArch64-Explore/ProbeLatency.cpp` 与 `Probes.h` 的具体源码段
+> 落（行号为该 commit 内容）；**其对象为 Apple M1+ CPU，此处只借
+> 设计思想，不取任何数值结论**（§2.2 证据隔离）。
+
+| 维度 | AArch64-Explore 的做法 | 本仓 `ptr_chase` 协议 | 对本任务的启示 |
+|---|---|---|---|
+| **TLB↔cache 解耦** | `kRandomTLBOffset` 族（:719/:738/:762）：页内加随机/线对齐/置换 offset——"test linear access of TLBs **without stressing cache associativity**"，遍历大面积（TLB 压力）而避免全部 load 落入同一 L1D set | 默认 `stride=64 B`，**每 4 KiB 页 64 slots 全遍历**——TLB 压力与数据 footprint 随页数**同增**（A4 混杂） | 我们的 X4 L1 dTLB 是 **fully associative**（TRM 明示），set 冲突在 L1 TLB 上不存在；但数据 cache 混杂仍在。Explore 的 offset 模式是"每页少量 slot"的替代设计——若 Q1 判定受 footprint 混杂支配，将其列为路线 B 候选（§11），本任务不携带 |
+| **遍历变体** | `TLB Linear Increasing / Linear Decreasing / Full Random`（:1566-1583）：顺序/逆序/随机三向对照，区分预取与 replacement 效应 | 固定随机单环 × `order_seed`（只改顺序） | 逆序/顺序对照是廉价的机制排歧项：Phase A 可加 1 个 `kLinearIncreasing` 类对照点（经 runner 现有种子协议即可表达）——纳入 Phase A 可选增强，不扩 scope |
+| **页尺寸变体** | `Node<sizeofPage8K64/16K/16K64>`（:1561 起）：8K/16K 多页尺寸节点 | 4 KiB base 为主；`-T` THP 仅 Q4 | 粒度变体对 Q4 有参考价值（`0x8138/0x813a` 大/小页 walk 事件正是为此设计） |
+| **预取器检测** | box 模式（:371 注释）：页内集节点成"box"，同 box 相同随机 vs 不同随机，检测模式学习类预取器 | 用 PMU `L1D_CACHE_HWPRF (0x8154)` 直接测预取活动（P0″ 已测得 512→640 KiB 预取覆盖崩塌） | 两条路径互证：我们的事件法更直接，box 法可作为无事件时的后备；不必引入 |
+| **缓存层级标记** | 测试缓冲档位标注覆盖域（:130-137：`2_MiB //covered by L1 TLB`、`16_MiB //covered by L2 TLB`、`48_MiB+ //covered by L2C TLB`） | 粗扫点按 §6.2.1（32..8192 页） | **档位标注思想采用**（粗扫点按候选结构区间成组提名）；**其数值（Apple 的 TLB 覆盖域）不采用** |
+| **队列模拟** | `SimulateQ.nb`：TLB/L1 的队列模型仿真 | 无 | 若 Q3 需模型化解释，先读其模型假设再决定是否借鉴（§11 待办） |
+| **TLB MLP** | `kTLB_NumSimultaneousLookups_Probe`（Probes.h:35） | 无（MLP=1 依赖链） | 本任务不涉及并发查找 |
+| **计数/计时** | `m1cycles`（Apple KPC 私有计数框架） | Linux `perf_event_open`（read-before-disable） | 接口不同，纪律相同（原始计数 + enabled/running 审计） |
+
+**引用方式**：正式报告中写"与 AArch64-Explore 的方法对照"时，必
+须指到具体源码位置（commit permalink + 文件 + 行号），不得笼统背
+书项目名；其 `Probes.h` 的 TestTraversal 模板与 warmup 处理**尚未
+阅读**（§11 待办），本节结论以 `ProbeLatency.cpp` 已读段落为准。
+
 ## 7. 分阶段矩阵与执行预算
 
 ### Phase A：base 粗扫（提名候选区）
@@ -384,7 +447,9 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
   终态 `MODEL_UNIDENTIFIABLE`，不输出任何成本值；
 - 可识别性检查：walk density 与 `0x8144` density 的共线程度、事
   件口径配对性（`0x8136` vs `0x34`）、跨长度斜率一致性（§5.3）；
-  全部通过才升级报告"暴露成本估计"（标 DERIVED + 竞争解释）。
+  **MMUTC 混杂声明**：walk 服务时间受 MMUTC（2048 项 walk 缓存）
+  命中状态影响，成本型估计必须声明该混杂未分离；
+- 全部通过才升级报告"暴露成本估计"（标 DERIVED + 竞争解释）。
 
 ### Phase D：Q4 THP cohort 对照（含停止预算，M5/S5）
 
@@ -459,7 +524,7 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
   - §6.2.2/6.2.3 检测、§6.2.5 锚点判定、§6.2.6 稳定条件；
   - 事件资格状态（读注册表，未注册/作用域不符 →
     `SEMANTICS_UNVERIFIED`）；
-  - Q3 可识别性检查输出；
+  - Q3 可识别性检查输出（含 MMUTC 混杂声明检查）；
   - THP cohort 转化表与 `INSUFFICIENT_COHORT` 终态。
 
 ### 9.3 测试（`analysis/tests/test_sm8650_tlb.py` 等）
@@ -481,7 +546,8 @@ records.jsonl、同一环境事务与门禁快照——块-锚点关联由记录
   loads）；
 - **派生量**（标 DERIVED）：差值、比例、模型系数、暴露成本估计
   （若升级）；
-- **微架构解释**：支持什么、哪些竞争解释未排除。
+- **微架构解释**：支持什么、哪些竞争解释未排除；**来源标注**——
+  TRM 声称 / Explore 方法 / 本机观测，三段分标（§2.2）。
 
 ### 10.2 终态（每 Q 独立，不要求全有数值答案）
 
@@ -505,12 +571,21 @@ MODEL_UNIDENTIFIABLE / OPEN
 
 ## 11. 后置项登记（铁律 0；任务结束时落 `docs/open-items.md`）
 
-1. **运行时 CPU 证据**（M1）：当前探针无 `sched_getcpu()`/运行时
+1. **TRM r0p3 vs Issue 05 逐字差异核对**：本任务书的事件文本与
+   MMU 结构描述逐字核自 `102484_0002_05_en`（Issue 05）PDF；Arm
+   文档站（`/102484/0003/`，JS 渲染）当时无法抓取，r0p3 与 Issue
+   05 的 §6.1 与 PMU events 两节差异未核对——下次可访问时补核，
+   如有差异以 r0p3 为准并出修订。
+2. **`Probes.h` TestTraversal 模板与 warmup 处理**（AArch64-
+   Explore）：§6.5 结论以 `ProbeLatency.cpp` 已读段落为准；其遍历
+   模板/warmup/计时细节未读，需引用时先读源码。
+3. **运行时 CPU 证据**（M1）：当前探针无 `sched_getcpu()`/运行时
    CPU 字段；如需"测量窗两端执行位置"字段（probe ABI 小改 + 契约
    测试 + 重新部署），另立小项评估，本任务不携带。
-2. **路线 B（可控 VA 布局实验）**：仅当 Q1 为
-   `LAYOUT_OBSERVATION_LIMITED` 且该敏感性阻断核心问题时立项。
-3. **perf/simpleperf 同窗差分**：外部交叉验证（CLI 窗 ≠ 探针内
+4. **路线 B（可控 VA 布局 / 页内 offset 变体）**：仅当 Q1 为
+   `LAYOUT_OBSERVATION_LIMITED` 或受 footprint 混杂支配时立项
+   （Explore 的 `kRandomTLBOffset` 族为参考实现）。
+5. **perf/simpleperf 同窗差分**：外部交叉验证（CLI 窗 ≠ 探针内
    窗，需专门同窗机制），可选，不阻断。
-4. **perf 二进制谱系**：设备上手工部署的静态 `perf` 未入 artifact
+6. **perf 二进制谱系**：设备上手工部署的静态 `perf` 未入 artifact
    manifest；使用前先 `sha256sum` 登记。
