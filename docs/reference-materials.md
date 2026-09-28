@@ -10,6 +10,7 @@
 |---|---|---|---|---|
 | Android灭屏最高频锁定实验与证据链（v1.1） | `../cpu-uarch-ref/Android灭屏最高频锁定实验与证据链.md` | SM8650 频率三层状态、唤醒 boost ftrace、已证无效路径、Perf 资源静态模型、0x1091 实验设计 | 本人/本团队作品 | ✅ 已归档（2026-09-28，逐字节一致）；本仓 runbook `redmi-manet-freq-control-chain.md` 的证据来源之一 |
 | Qualcomm Perf2 Resource Apply Failure - Root Cause Investigation | `../cpu-uarch-ref/Qualcomm Perf2 Resource Apply Failure - Root Cause Investigation.md` | Perf2 正 handle≠生效的 syscall 实证、根因候选与 P0–P3 实验计划 | 同上 | ✅ 已归档（2026-09-28，逐字节一致）；同上 |
+| Qualcomm Perf2 HAL 资源不生效根因分析与手工调试完整手册 | `../cpu-uarch-ref/Qualcomm Perf2 HAL 资源不生效根因分析与手工调试完整手册.md` | Perf2 调查完整操作手册：取证命令库、状态标记体系（VERIFIED/TODO 等）、受控状态迁移（亮灭屏/WiFi/飞行模式）、UID 差分、strace/ftrace/simpleperf/uprobe 配方 | 同上 | ✅ 已归档（2026-09-28，逐字节一致）；本仓 runbook §5 调试手段章节的命令来源 |
 
 ## 仓外登记清单（永不入库）
 

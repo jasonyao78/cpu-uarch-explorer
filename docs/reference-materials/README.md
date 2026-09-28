@@ -10,6 +10,7 @@
 |---|---|---|---|
 | `Android灭屏最高频锁定实验与证据链.md` | 用户团队 / 并行调查会话（仓外 `cpu-uarch-ref/` 原件） | 2026-09-28（v1.1，进行中） | `docs/runbooks/redmi-manet-freq-control-chain.md` 的案例 B 与 §3 部分证据来源 |
 | `Qualcomm Perf2 Resource Apply Failure - Root Cause Investigation.md` | 同上 | 2026-09-28（进行中） | 同上（Perf2 仲裁、syscall 证据、P0–P3 实验计划） |
+| `Qualcomm Perf2 HAL 资源不生效根因分析与手工调试完整手册.md` | 同上 | 2026-09-28（Final Consolidated Edition，进行中） | runbook §5 调试手段章节的命令来源（strace/ftrace/状态迁移/能力普查/UID 差分配方） |
 
 ## 使用纪律
 
