@@ -1,0 +1,1 @@
+buffer_kb=14336 stride=64 loads=4194304 elapsed_ns=295174635 latency_ns=70.3751 page_policy=default-4k page_kb=4
