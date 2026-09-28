@@ -4,8 +4,9 @@
 > root）上"频率不符合预期"时的权威参考。**自包含**：原始调查文档
 > （仓外 `cpu-uarch-ref/`，OI-7，可能散佚）的全部关键证据已内联，
 > 不依赖外部材料即可诊断与动手。
-> **证据等级**：【实证】= 本机运行时直接验证；【静态】= 配置/ELF/
-> 文档证据；【推断】= 单一来源推论；【未证】= 开放问题。
+> **证据等级**：【实证】= 本机运行时直接验证；【实证-阴性】= 实验
+> 有效执行但无变化，"不生效"本身是证据；【静态】= 配置/ELF/文档
+> 证据；【推断】= 单一来源推论；【未证】= 开放问题。
 > **总边界**：永不停止/抑制 thermal 保护；测量实验的 cpufreq limits
 > 只观测、不写入；正 handle、write_ok、单次回读值，三者都不等于
 > "生效"。
@@ -291,6 +292,11 @@ ENOENT/EROFS——即请求根本没进入 Apply 路径。由此排除：节点�
 失败、写入被快速恢复、采样错过首写、内核 parser 拒绝、ABI 错
 误、XML 缺失、节点不存在、KSU 无写权限。残余风险：第一轮
 trace 未覆盖 `openat2/writev/ioctl`（建议补齐一轮干净 trace）。
+旁证【实证】：Perf HAL 的 FD 全景显示其持有
+`/proc/perflock_records`、`/proc/perflock_exception`、
+`/sys/kernel/tracing/trace_marker`、`/dev/binderfs/(vnd)binder`
+等，但**没有任何** WALT/cpufreq 目标节点 FD——与"没看到 open"
+互证（排除"早就开着"）。
 
 正 handle 的真实含义 = request 通过基本校验 + 生命周期对象建立
 + acquire/release 可记账；**不保证**进入 effective queue、赢得
@@ -307,6 +313,12 @@ trace 未覆盖 `openat2/writev/ioctl`（建议补齐一轮干净 trace）。
 | SELinux 阻止目标节点写入 | 低–中 | 本次连 open 都没发生，不在写入点 |
 
 ### 3.7 Perf 资源地图（【静态】自 OEM XML）
+
+编码关系（【静态】）：`Major base = 0x40000000 + (Major << 22)`，
+`Opcode = Major base + (Minor << 14)`；WALT Major = `0xF` → base
+`0x43C00000`（如 Minor `0x7` → `0x43C1C000` = `sched_fmax_cap`）。
+已测资源（`0x43C00000`、`0x43C20000`、`0x40800000` 及 fmax_cap 族）
+均通过 QIndex 校验——"opcode 位域构造错误"已降为极低概率。
 
 | 资源 | opcode | 节点/语义 |
 |---|---|---|
@@ -414,14 +426,32 @@ ApplyOpt 条件 → 最后才受控释锁。任何一步都不从"正 handle"宣
 怎么读"组织；取证层次从无侵入观察到动态探针递进。**没有日志与
 快照的归因都是猜测——先取证，再下结论。**
 
+工具选择（原文实战总结）：**strace** 看路径与 write buffer（决
+定性）；**ftrace** 低侵入、长窗口交叉验证；**simpleperf** 采样
+粗筛（微秒级关键路径会漏，须 ≥1 kHz + 重复请求）；**uprobe**
+做函数命中终验；**logcat/dmesg** 做归因旁证；**sysfs 采样** 与
+**dumpsys** 做环境基线。任何单一工具的"没看到"都不构成结论。
+
 ### 5.1 ftrace / tracepoint：内核事件的硬时间线
 
 - **证明什么**：频率帽变化的确切时刻与持续时长（唤醒 boost 窗
   口）、与 PERFD 活动的时间相关性。
-- **怎么做**：先确认 tracefs 位置（`/sys/kernel/tracing` 或
-  `/sys/kernel/debug/tracing`）→ 清空 `trace` → enable
-  `cpu_frequency` / `cpu_frequency_limits`（需要唤醒相关事件时
-  一并开启）→ 触发行为 → 读 `trace` → 用完关闭。
+- **怎么做**（配方源自操作手册 §32–35）：先查能力——
+  `available_tracers`、按 `syscalls:` / `binder:` / `power:` /
+  `thermal:` grep `available_events`；然后按需二选一：
+  - *系统事件*（`power/cpu_frequency`、`power/cpu_idle`、
+    `thermal/thermal_temperature`）：清 trace → 逐项
+    `echo 1 > events/<E>/enable` → 触发 → 停 → 读 trace → 逐项
+    关回；
+  - *指定进程 syscall*（如 Perf HAL 全线程）：把
+    `/proc/<pid>/task/*` 的 TID 逐个写进 `set_event_pid`，
+    enable `syscalls/sys_enter|exit_(openat|openat2|write|writev|
+    pwrite64)` 后 `tracing_on=1`，事后清空 `set_event_pid`。
+  限制：新建 TID 不在初始 `set_event_pid` 列表；syscall
+  tracepoint 通常看不到 write buffer（buffer 取证靠 §5.2）；
+  **不要全局开 `sched_switch`**（数据量爆炸，需要时短窗口 +
+  filter）。§3.3 的唤醒 boost 证据来自灭屏专题会话的
+  `cpu_frequency_limits` 捕获。
 - **怎么读**：同类事件时间戳相减得窗口时长；与 perfd 线程活动
   行的时间差只给出"相关"，不等于"唯一上游"（上游还可能是
   Power/Display、MiPerf、PowerKeeper、SystemUI、Camera 等）。
@@ -431,11 +461,27 @@ ApplyOpt 条件 → 最后才受控释锁。任何一步都不从"正 handle"宣
 
 - **证明什么**：区分"请求被拒绝执行"与"执行了但无效"——案例
   B 的决定性证据。
-- **怎么做**：`strace -ff -o <prefix> -p <hal_pid>`（`-ff` 覆
-  盖全线程），按 syscall 类过滤（`open/openat/openat2/close/
-  write/writev/pwrite64`；`ioctl` Binder 噪声大，单独过滤）；
-  **先 `rm -f` 旧输出**防残留误读；同步记录 client 侧
-  pid/opcode/duration/handle。
+- **怎么做**（逐字配方；基础版本机已实证 attach 48 线程）：
+
+```bash
+adb shell 'su -c "
+PID=\$(pidof vendor.qti.hardware.perf2-hal-service)
+OUT=/data/local/tmp/perf_hal_strace.txt
+rm -f \${OUT}*      # -ff 产生 OUT.<TID> 系列，必须通配删除
+strace -ff -p \$PID -s 256 -tt -T -yy \
+  -e trace=openat,open,close,write,pwrite64 -o \$OUT
+"'
+```
+
+  增强版追加 `openat2,writev`（`-s 512`，本机待跑）。提取顺
+  序：先 grep 目标节点名（应**零命中**），再 grep
+  `EACCES|EPERM|EINVAL|ENOENT|EROFS`（应零命中），最后 grep
+  `write(|pwrite64(|writev(` 并去掉 trace_marker——只剩
+  perflock_records 记账写 = 未进 Apply。判读表：只有 records →
+  未进文件 Apply；EACCES/EPERM → 节点权限；EINVAL →
+  formatter/parser 不匹配；写后被还原 → 被 restore/更高 vote
+  覆盖；无目标 syscall 但 uprobe 命中 ApplyOpt → alternate
+  backend 或提前返回。
 - **怎么读**：服务端只有 `/proc/perflock_records` 的记账写、
   没有目标节点 open/write → 请求未进 Apply 路径；同时确认无
   EACCES/EPERM/EINVAL/ENOENT/EROFS，才能说"不是写失败"。
@@ -450,6 +496,8 @@ ApplyOpt 条件 → 最后才受控释锁。任何一步都不从"正 handle"宣
 - `/proc/perflock_records`：perf 锁 acquire/release 生命周期；
   未配对 acquire = 有持锁方，按 pid 追 owner（注意 PowerOpt
   INT_MAX 锁是系统常态，见 §3.6）。
+- `/proc/perflock_exception`：perf 锁异常记录（与 records 互
+  补；异常为空本身也是证据）。
 - `/proc/sys/walt/*`：WALT 层节点基线与变化（§3.5）。
 - `su <uid> -c id`：验证差分身份构造（如 uid=1000(system) +
   gid=0 + context=ksu）。
@@ -486,15 +534,23 @@ ApplyOpt 条件 → 最后才受控释锁。任何一步都不从"正 handle"宣
 
 - **证明什么**：把根因从"高概率推断"升级为"代码条件实锤"——
   对函数入口/出口计数并按 caller 分类。
-- **怎么做**（计划级，本机【未实操】）：符号或反汇编定位候选
-  库函数偏移 → uprobe 挂 `Request::Process` entry/exit、
-  `ResourceQueue::Add/Pend`、`ApplyOpt`、`ResetOpt` → 三类
-  caller（KSU-UID0 / KSU-UID1000 / 可信 caller）对照计数。
+- **怎么做**（配方就绪，本机【未实操】）：
+  - *支持检查*：`ls \$TR/uprobe_events \$TR/events/uprobes`、
+    `grep -i uprobe /proc/kallsyms`、`zcat /proc/config.gz |
+    grep -i uprobe`（若有 config.gz）、能力普查见 §5.12；
+  - *函数偏移*：非 stripped 库 `readelf -Ws <lib>` 取符号地
+    址；stripped 退化为反汇编定位；
+  - *挂点*：`Request::Process` entry/exit、
+    `ResourceQueue::Add/Pend`、`ApplyOpt`、`ResetOpt`、
+    node-write wrapper；三类 caller（KSU-UID0 / KSU-UID1000 /
+    可信 caller）对照计数；
+  - *采样粗筛*（simpleperf）：`simpleperf record -p \$PID -g
+    --duration 10 -f 1000 -o <out>` 后 `simpleperf report --sort
+    comm,pid,tid,dso,symbol`——微秒级关键路径纯采样会漏，须
+    ≥1 kHz + 重复请求，**命中确认仍用 uprobe**。
 - **怎么读**：请求在 entry 出现而 ApplyOpt 不触发 → 抑制点在
-  两者之间；与 §5.2 的 syscall 证据互相闭环。
-- **缺口**：本机 uprobe 内核支持（`CONFIG_UPROBE_EVENTS`）与
-  simpleperf 可用性未验证——动手前先 `zcat /proc/config.gz |
-  grep -i uprobe` 或试挂一个无害符号确认链路。
+  两者之间；与 §5.2 的 syscall 证据互相闭环（无目标 write 但
+  ApplyOpt 命中 = alternate backend 或提前返回）。
 
 ### 5.7 差分实验设计（一次只改一个身份字段）
 
@@ -513,8 +569,24 @@ ApplyOpt 条件 → 最后才受控释锁。任何一步都不从"正 handle"宣
 
 ### 5.8 节点直写验证（证明"路是通的"）
 
-- **四步证明链**：读基线 → 写测试值 → 回读确认 → 写回基线
-  （例：`1190400 → 1000000 → 1190400`）。
+- **trap-restore 直写 idiom**（原文 §13 配方，partial-halt 已
+  【实证】）：
+
+```bash
+adb shell 'su -c "
+NODE=/proc/sys/walt/sched_max_freq_partial_halt
+OLD=\$(cat \$NODE)
+restore(){ echo \$OLD >\$NODE; }
+trap restore EXIT INT TERM HUP
+echo 1000000 >\$NODE; cat \$NODE; sleep 0.3; restore; cat \$NODE
+trap - EXIT INT TERM HUP
+"'
+```
+
+  证明：节点存在 + parser 接受 raw kHz + 权限够 + 无后台秒级覆
+  盖；**trap 保证中断也必恢复**。**不证明** daemon 域也能写
+  （§3.6）。多字段向量节点（`sched_fmax_cap`）在确认
+  formatter/映射前**禁止**直写。
 - **证明的是**：节点存在 + parser 接受 + 权限够 + 无后台秒级
   覆盖。**不证明** daemon 域（vendor_hal_perf_default）也能
   写——那是另一条证据链。
@@ -525,10 +597,16 @@ ApplyOpt 条件 → 最后才受控释锁。任何一步都不从"正 handle"宣
 
 - **触发**：dlopen/Binder/hint 调用失败的归因；thermal/perf
   异常的背景排查。
-- **怎么做**：`adb logcat -b all -d`（全 buffer）+
-  `adb shell 'su -c "dmesg"'`；关键字：`linker` / `namespace`
-  / `CANNOT LINK EXECUTABLE` / `dlopen failed` / `avc: denied`
-  / `perf` / `mpctl` / `thermal` / `mitigat`。
+- **怎么做**：先 `adb logcat -b all -c` 清**全部** buffer
+  （只 `-c` 会漏其他 buffer，后续 `-b all` 读取时混入历史）；
+  `logcat -b all -v threadtime` **窄过滤**（`ANDR-PERF|PerfGlue|
+  PerfModule|perflock|Qindx|applyopt|hardening|whitelist|caller|
+  avc:|denied`）做 Perf 内部归因；宽过滤（`resource|request|
+  apply|write|uid`）只适合做系统时间线；dmesg 侧 grep
+  `avc:.*denied|vendor_hal_perf_default|ksu`。
+- **陷阱**：无 AVC **不能**完全排除 SELinux（`dontaudit` 可能
+  隐藏拒绝；初始化失败可能在服务启动阶段）；`AIBinder_
+  linkToDeath` 类警告在 Binder/handle/release 全成功时不是根因。
 - **归因顺序（不许跳步）**：linker namespace → 依赖库缺失 →
   SELinux → Perf HAL 权限 → ABI → hint id/type。
 - **案例**：§3.8 风险清单的配套手段。
@@ -543,6 +621,97 @@ ApplyOpt 条件 → 最后才受控释锁。任何一步都不从"正 handle"宣
 - **陷阱（本仓实战）**：dumpsys 只覆盖 Android 框架层冷却设
   备；**kernel cdev 激活状态以 sysfs 为准**——案例 A 中
   dumpsys 全闲而 `cpu-cluster3` cdev state=3/34（§6.1）。
+
+### 5.11 受控状态迁移杠杆（亮灭屏 / WiFi / 飞行模式）
+
+三层价值：测量卫生（三者都是已知扰动源）、可复现刺激源（验证
+控制链在动）、**仪器阳性对照**——先用"亮屏必现 ~3 s boost
+窗"证明 ftrace/采样链路是通的，再用它测未知（同 P0 正向控制
+思想）。命令源自操作手册 §28–30（原文标 TODO；键码/服务均为
+Android 标准接口，本机现场验证后再升【实证】）。
+
+**亮灭屏**（用确定性键码，**不用**状态翻转的 `input keyevent
+26`）：
+
+```bash
+adb shell 'su -c "
+input keyevent 223   # KEYCODE_SLEEP 灭屏（确定性）
+sleep 2
+dumpsys power | grep -iE \"Wakefulness|mWakefulness|mInteractive\"
+input keyevent 224   # KEYCODE_WAKEUP 亮屏
+sleep 2
+dumpsys power | grep -iE \"Wakefulness|mWakefulness|mInteractive\"
+"'
+```
+
+判读：亮屏后 ~0.17 s 内 `cpu_frequency_limits` 应出现 boost 上
+限、~3.0 s 后回落（§3.3）——看不到这个已知响应，先怀疑仪器
+而不是怀疑设备。锁屏界面可用 `wm dismiss-keyguard`；**不要自
+动输入设备密码**。
+
+**WiFi**（异步过程，先存状态、三处确认、按快照恢复）：
+
+```bash
+WIFI_OLD=$(adb shell settings get global wifi_on | tr -d '\r')
+adb shell 'su -c "
+svc wifi disable; sleep 4
+settings get global wifi_on
+dumpsys wifi | grep -iE \"Wi-Fi is|WifiState|mWifiEnabled\" | head -5
+svc wifi enable; sleep 6
+settings get global wifi_on
+"'
+# 结束按 WIFI_OLD 恢复
+```
+
+`settings`、`dumpsys wifi`、驱动稳定状态三处对齐才算迁移完
+成——单次读取不算数。
+
+**飞行模式**（首选 `cmd connectivity`，回退 settings +
+broadcast；**只能 USB adb**——WiFi adb 必死）：
+
+```bash
+AIR_OLD=$(adb shell settings get global airplane_mode_on | tr -d '\r')
+adb shell 'su -c "
+cmd connectivity airplane-mode enable; sleep 5
+settings get global airplane_mode_on
+cmd connectivity airplane-mode disable; sleep 5
+settings get global airplane_mode_on
+"'
+# cmd 不可用时回退：
+# settings put global airplane_mode_on 1|0
+# am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true|false
+```
+
+与本仓 quiet-state 流程的关系：这三项就是安静态 profile 管理
+的对象（screen_on=false、airplane 观测、唤醒瞬态等待）——实
+验前确认迁移完成 + 瞬态结束，实验后按快照恢复。
+
+### 5.12 调试能力普查（动手前的清单）
+
+新设备/新会话先跑一轮能力普查，不假设工具存在（原文 §10 配
+方）：
+
+```bash
+adb shell 'su -c "
+for T in strace simpleperf perf atrace perfetto trace-cmd bpftool \
+         gdbserver lsof toybox strings readelf objdump nm; do
+  printf \"%-12s: \" \$T; command -v \$T 2>/dev/null || echo MISSING
+done
+for D in /sys/kernel/tracing /sys/kernel/debug/tracing; do
+  [ -d \$D ] && echo \"tracefs: \$D\"
+done
+for F in /proc/sys/kernel/perf_event_paranoid \
+         /proc/sys/kernel/kptr_restrict \
+         /proc/sys/kernel/yama/ptrace_scope; do
+  [ -e \$F ] && { printf \"%s=\" \$F; cat \$F; }
+done
+ls /proc/kallsyms /sys/kernel/btf/vmlinux 2>/dev/null
+"'
+```
+
+本机已知【实证】：`/system/bin/strace`、`su`、`run-as` 存在；
+`setpriv` 不存在；core PMU `type=8` 可 shell 计数、LLCC
+`type=9` 需 root（本仓平台画像）。其余按普查结果登记。
 
 ---
 
@@ -655,10 +824,15 @@ handler → 修复后节点按预期变化）。
 ## 7. 未决问题登记（触发条件 → 下一步）
 
 1. `0x1091` 对现存低 cap 的仲裁效果 → 案例 B 阶段三有限时实
-   验（外部项目，本仓不依赖）。
-2. PowerOpt INT_MAX 锁的 resource array → §6.2 P1。
-3. Perf2 仲裁模型（值比较 vs 优先级分层）→ §6.2 P1/P2。
-4. `sched_fmax_cap` 四字段 ↔ policy 映射 → 单资源刺激实验。
+   验（外部项目；调用链与取证配方已就绪，尚未执行）。
+2. PowerOpt INT_MAX 锁的 resource array → §6.2 P1（按 pid 过滤
+   records 的取证命令已就绪；锁内容确认未做）。
+3. Perf2 仲裁模型（值比较 vs 优先级分层）→ §6.2 P1/P2（双向
+   value 夹逼已排除单纯 comparator 方向【实证-阴性】；strace
+   增强版 `openat2/writev` 与 UID-1000 完整实验均待跑——UID
+   1000 身份构造已【实证】可行）。
+4. `sched_fmax_cap` 四字段 ↔ policy 映射 → 单资源刺激实验
+   （该节点为多字段向量，确认 formatter/映射前**禁止**直写）。
 5. PMIC/充电域热票的精确阈值与 hysteresis → 本仓 THP 补跑前
    后，以 `pm8550b_lite_tz` 与限额联动采样补齐（运维观察）。
 6. NSP 传感器冻结读数（54–61 °C 40 分钟不变）来源 → 与 5 同
@@ -687,11 +861,16 @@ handler → 修复后节点按预期变化）。
 
 ## 9. 出处
 
-- 原始调查文档（仓外只读参考，OI-7，可能散佚；全部关键证据已
-  内联于本文）：`cpu-uarch-ref/Android灭屏最高频锁定实验与证据
-  链.md`（v1.1，2026-09-28）、`cpu-uarch-ref/Qualcomm Perf2
-  Resource Apply Failure - Root Cause Investigation.md`
-  （2026-09-28）。
+- 原始调查文档（已按原文归档入本仓 `docs/reference-materials/`，
+  仓外 `cpu-uarch-ref/` 为原件；全部关键证据已内联于本文）：
+  `Android灭屏最高频锁定实验与证据链.md`（v1.1）、`Qualcomm
+  Perf2 Resource Apply Failure - Root Cause Investigation.md`、
+  `Qualcomm Perf2 HAL 资源不生效根因分析与手工调试完整手册.md`
+  （Final Consolidated Edition）——均 2026-09-28、进行中状态；
+  其状态标记（VERIFIED / VERIFIED-NEGATIVE / TODO /
+  RECONSTRUCTED）与本文证据等级的对应：VERIFIED→【实证】、
+  VERIFIED-NEGATIVE→【实证-阴性】、TODO→【未证】、
+  RECONSTRUCTED→【静态/推断】。
 - 本仓：`docs/reviews/2026-09-28-sm8650-x4-p0prime.md`（§5 热
   钳位事件）、`configs/platforms/redmi-k70pro-01.json`
   （`freq_domains`/`environment_control_note`）、
