@@ -203,6 +203,7 @@ class TestPlan(unittest.TestCase):
                 protocol_12_prefixes = (
                     "ptr-chase-sm8650-x4-l2-",
                     "ptr-chase-sm8650-x4-pmu-ctrl-",
+                    "ptr-chase-sm8650-x4-p0prime-",
                 )
                 expected_protocol = (
                     "1.2" if path.name.startswith(protocol_12_prefixes) else "1.1"
@@ -238,6 +239,10 @@ class TestPlan(unittest.TestCase):
                     "ptr-chase-sm8650-x4-l2-fine.json": 21,
                     "ptr-chase-sm8650-x4-pmu-ctrl-cache.json": 5,
                     "ptr-chase-sm8650-x4-pmu-ctrl-tlb.json": 2,
+                    "ptr-chase-sm8650-x4-p0prime-short-base.json": 56,
+                    "ptr-chase-sm8650-x4-p0prime-long-base.json": 56,
+                    "ptr-chase-sm8650-x4-p0prime-short-thp.json": 8,
+                    "ptr-chase-sm8650-x4-p0prime-long-thp.json": 8,
                 }
                 if path.name in expected_case_counts:
                     self.assertEqual(len(plan.cases), expected_case_counts[path.name])
