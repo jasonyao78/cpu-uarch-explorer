@@ -18,7 +18,7 @@
 - §3 分层控制模型与已证事实
 - §4 排障手册（决策树与处置）
 - §5 调试与取证手段（工具箱）
-- §6 案例档案（A：热钳位；B：解锁调查）
+- §6 案例档案（A：动态 ceiling drift；B：解锁调查）
 - §7 未决问题登记
 - §8 红线
 - §9 出处
@@ -122,8 +122,8 @@ thermal_zone（温度传感器）+ trip points（阈值）
   可触发它绑定的 cdev。
 - **为什么 PMIC/充电域能钳 CPU**：整机功耗包络是共享的——充电电
   路与 SoC 共处一个狭小机身，PMIC 过热时压 CPU 频率是减少整机
-  发热的合法手段。这就是"CPU 已凉、限额仍不放"最常见的来源
-  （本仓 §6.1 事件：最热 zone 是 PMIC 域而非 CPU）。
+  发热的合法手段。这是"CPU 已凉、限额仍不放"的一个常见候选机
+  制（本仓 §6.1 事件中 PMIC 域为候选驱动源【推断】，根因 OPEN）。
 
 ### P5. 请求与生效分离：为什么 write_ok / 正 handle 不等于生效
 
@@ -395,7 +395,7 @@ for z in /sys/class/thermal/thermal_zone*; do echo \"\$(cat \$z/temp) \$(cat \$z
 
 ### Step 3：分支处置
 
-**L3 热票（测量实验被钳）**
+**动态 ceiling drift（疑似 L3 热票，根因 OPEN）**
 
 - 做：等（时段不可控）；分段矩阵 + 段间限额检查；**拔充电线**
   （PMIC/充电域是常见驱动源；adb-over-USB 会先断，插回即重
@@ -621,6 +621,11 @@ trap - EXIT INT TERM HUP
 - **陷阱（本仓实战）**：dumpsys 只覆盖 Android 框架层冷却设
   备；**kernel cdev 激活状态以 sysfs 为准**——案例 A 中
   dumpsys 全闲而 `cpu-cluster3` cdev state=3/34（§6.1）。
+- **cached 温度陷阱**：`dumpsys thermalservice` 输出里的
+  cached 温度字段**不是实时值**（实测：cached 显示 CPU7
+  89.9 °C / NSP ~55 °C 时，Current HAL 温度只有 CPU7 31.9 °C
+  / NSP ~31 °C）——判读温度必须区分 cached 与 Current HAL，
+  详见 §6.1 第 5 条。
 
 ### 5.11 受控状态迁移杠杆（亮灭屏 / WiFi / 飞行模式）
 
@@ -717,38 +722,46 @@ ls /proc/kallsyms /sys/kernel/btf/vmlinux 2>/dev/null
 
 ## 6. 案例档案
 
-### 6.1 案例 A：测量实验被热票钳制（本仓，2026-09-28）
+### 6.1 案例 A：测量实验遭遇动态 cpufreq ceiling drift（本仓，2026-09-28；根因 OPEN）
 
 背景：P0″ demand/prefetch 复测，长训练矩阵（512 圈 × 56 case，
 controlled-baseline，governor=performance）。
 
 时间线：
 
-1. **钳制 #1（02:44–02:46Z）**：long-base 在 b1024K-seed20260928
+1. **drift #1（02:44–02:46Z）**：long-base 在 b1024K-seed20260928
    后置门禁失败：`policy2/5 max 2707200→2630400、policy7
    2745600→2688000`，CPU 峰值 52.6 °C。runner fail-closed 中止
-   后续 29 case 并恢复 governor（结构化失败记录在
-   `20260928T024353Z` run）；数分钟后限额自行恢复。前置 27
-   case 门禁在各自测量时刻有效，数据保留。
+   后续 25 case 并恢复 governor（结构化失败记录在
+   `20260928T024353Z` run）；数分钟后限额自行恢复。前置 31
+   case 门禁在各自测量时刻有效，数据保留。**事发时未采集
+   cooling-device 状态（取证缺口）**。
 2. **应对**：长训练矩阵拆为 r2a（16 case）+ r2b（12 case）两
    段，段间冷却检查；两段 100% ok 完成。
-3. **钳制 #2（02:52Z）**：short-thp 前置门禁失败
+3. **drift #2（02:52Z）**：short-thp 前置门禁失败
    （`policy2/5=2572800、policy7=2630400`，CPU 46.9 °C），8
    case 未产生测量；governor 恢复成功。
-4. **持续钳制（≥40 分钟空载）**：`scaling_max_freq` 未回画像
+4. **持续 drift（≥40 分钟空载）**：`scaling_max_freq` 未回画像
    值。thermal status=0、冷却设备（Android 层）空闲、电池
    28.9–32.2 °C；但 kernel 侧 `cpu-cluster3` cdev 激活
    （state 3/34），GPU cdev 激活（4/11）；最热 zone =
    `pm8550b_lite_tz`（PMIC/充电域，54.4 °C），CPU 已凉
-   （32–38 °C）；一组 NSP 传感器读数 40 分钟冻结在 54–61 °C
-   （【推断】陈旧读数；同名另一组读 ~31 °C，来源未确定）。
+   （32–38 °C）。
+5. **cached 温度陷阱（复审更正）**：本文原记"一组 NSP 传感器
+   40 分钟冻结在 54–61 °C"——那是 `dumpsys thermalservice` 的
+   **cached 字段**（复审实测：cached 显示 CPU7 89.9 °C / NSP
+   ~55 °C 时，Current HAL 温度只有 CPU7 31.9 °C / NSP ~31
+   °C）。cached 不可当实时值；**NSP 因果关系不定案**。
 
 判别与处置（§4 流程的实战）：
 
-- `sched_fmax_cap` = 基线（PRIME=INT_MAX）→ **L2 干净**；
-  cpufreq max 被钳 → 卡点是 **L3 热票**，不是 L2/L4。【实证】
-- 驱动源不是 CPU 温度而是 PMIC/充电域——插着充电时被动降温极
-  慢，释放时间不可预测。【实证】
+- `sched_fmax_cap` = 基线（PRIME=INT_MAX）→ **L2 干净**【实证】；
+  cpufreq max 被动态下调 + 事后 ~40 min 观察到 cpu-cluster3
+  cdev state=3/34 与 PMIC 域 54.4 °C → **疑似 L3 热票**【推断】；
+  但事发时未采集 cooling-device 状态，且 NSP/cached 读数不可
+  靠——**根因保持 OPEN【未证】**。
+- 插着充电时被动降温慢、释放时间不可预测（运维观察，与驱动
+  源无关的实操结论）。【实证】
 - 正确处置：分段矩阵、冷却检查点、等/拔充、门禁保持
   fail-closed、THP 段登记触发条件推迟（限额回画像值且稳定
   ≥5 分钟）。
@@ -810,7 +823,7 @@ handler → 修复后节点按预期变化）。
 | 维度 | A（恢复稳态） | B（解锁 OPP） |
 |---|---|---|
 | 目标 | 回到已知的 L1 稳态 | 越过 L1 到 L0 |
-| 机制方向 | 等 L3 热票撤掉（被动） | 往 L4 注入更高票（主动） |
+| 机制方向 | 等 ceiling drift 释放（被动） | 往 L4 注入更高票（主动） |
 | 正确解法 | 等/拔充/分段实验/门禁不动 | 严格顺序的单变量实验（§6.2 P0–P3） |
 | 错误解法 | 写 sysfs、压 thermal、注高票 | 叠加高 request、停全部 perf 服务、禁 thermal |
 | 对测量的影响 | 恢复即恢复基线 | 会改变被测工况（须另立 profile 与锚点） |
@@ -833,10 +846,13 @@ handler → 修复后节点按预期变化）。
    1000 身份构造已【实证】可行）。
 4. `sched_fmax_cap` 四字段 ↔ policy 映射 → 单资源刺激实验
    （该节点为多字段向量，确认 formatter/映射前**禁止**直写）。
-5. PMIC/充电域热票的精确阈值与 hysteresis → 本仓 THP 补跑前
-   后，以 `pm8550b_lite_tz` 与限额联动采样补齐（运维观察）。
-6. NSP 传感器冻结读数（54–61 °C 40 分钟不变）来源 → 与 5 同
-   期观察；若确认为陈旧读数，登记为平台画像注意事项。
+5. ceiling drift 的驱动域（PMIC/充电域为候选【推断】）精确阈
+   值与 hysteresis → 本仓 THP 补跑前后，以 Current HAL 温度 +
+   cooling-device 状态 + 限额联动采样补齐（运维观察；cached
+   字段禁用）。
+6. ~~NSP 传感器读数来源~~ → 已由 cached 温度陷阱解释（§6.1
+   第 5 条）：`dumpsys thermalservice` 的 cached 字段不可当实
+   时值，NSP 因果不定案【实证-阴性】。
 7. adb-over-WiFi 作为"拔充实验"的传输 → 需要时立项（改传输
    须用户批准 + 更新 `data/private/hosts.md`）。
 8. 灭屏长时锁频稳定性（partial wakelock + Perf 资源 + 无
