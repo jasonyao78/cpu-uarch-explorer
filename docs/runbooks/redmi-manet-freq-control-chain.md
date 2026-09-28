@@ -16,10 +16,11 @@
 - §2 技术原理（P1–P9）
 - §3 分层控制模型与已证事实
 - §4 排障手册（决策树与处置）
-- §5 案例档案（A：热钳位；B：解锁调查）
-- §6 未决问题登记
-- §7 红线
-- §8 出处
+- §5 调试与取证手段（工具箱）
+- §6 案例档案（A：热钳位；B：解锁调查）
+- §7 未决问题登记
+- §8 红线
+- §9 出处
 
 ---
 
@@ -29,9 +30,9 @@
 
 1. **频率低于画像值**——实验门禁报 `cpufreq-max-mismatch`，
    `scaling_max_freq` 被压到稳态 cap 之下（本仓 2026-09-28 事件，
-   §5.1）。
+   §6.1）。
 2. **频率到不了硬件 OPP**——`cpuinfo_max_freq` 是 3302400，
-   `scaling_max_freq` 却稳在 2745600（案例 B 的主问题，§5.2）。
+   `scaling_max_freq` 却稳在 2745600（案例 B 的主问题，§6.2）。
 3. **写了/调用了但没变化**——sysfs 写返回成功、Perf2 返回正
    handle，目标节点纹丝不动。
 
@@ -89,7 +90,7 @@ F_effective,min = max(所有 min 约束)   ← 最饥渴者胜，保证响应
 2. **Qualcomm 调度层（WALT）**：任务调度与频率联动；
    `sched_fmax_cap` 是**调度器侧**的频率帽，与 cpufreq 层的帽彼
    此独立又互相取小——所以 WALT 层干净不代表 cpufreq 层干净（本
-   仓事件的关键判别，§5.1）。
+   仓事件的关键判别，§6.1）。
 3. **厂商用户态层（Perf2/MPCTL）**：Android PowerHAL hint 的现代
    形态。系统各处（app 启动、触摸、相机、游戏、电源模式）的性能
    请求统一由 perfd 仲裁。它以用户态服务存在，是因为策略要跨
@@ -121,7 +122,7 @@ thermal_zone（温度传感器）+ trip points（阈值）
 - **为什么 PMIC/充电域能钳 CPU**：整机功耗包络是共享的——充电电
   路与 SoC 共处一个狭小机身，PMIC 过热时压 CPU 频率是减少整机
   发热的合法手段。这就是"CPU 已凉、限额仍不放"最常见的来源
-  （本仓 §5.1 事件：最热 zone 是 PMIC 域而非 CPU）。
+  （本仓 §6.1 事件：最热 zone 是 PMIC 域而非 CPU）。
 
 ### P5. 请求与生效分离：为什么 write_ok / 正 handle 不等于生效
 
@@ -295,7 +296,7 @@ trace 未覆盖 `openat2/writev/ioctl`（建议补齐一轮干净 trace）。
 + acquire/release 可记账；**不保证**进入 effective queue、赢得
 仲裁、handler 有效、目标节点被写入。
 
-根因候选与置信度（详见 §5.2 案例档案）：
+根因候选与置信度（详见 §6.2 案例档案）：
 
 | 候选 | 置信度 | 要点 |
 |---|---|---|
@@ -388,11 +389,11 @@ for z in /sys/class/thermal/thermal_zone*; do echo \"\$(cat \$z/temp) \$(cat \$z
   （PMIC/充电域是常见驱动源；adb-over-USB 会先断，插回即重
   连）；钳制值与最热 zone 入档。
 - 不做：写 `scaling_max_freq`（§3.4 已证无效）；停/抑制
-  thermal（红线）；用 Perf2 注高票对冲（污染测量基线，§5.3）。
+  thermal（红线）；用 Perf2 注高票对冲（污染测量基线，§6.3）。
 
 **L4 Perf2 失效（handle 有了，节点没变）**
 
-按 §5.2 的决策树执行，不要跳步：UID 1000/SID 差分 → 补齐
+按 §6.2 的决策树执行，不要跳步：UID 1000/SID 差分 → 补齐
 `openat2/writev` 的干净 strace → 可信 caller 正对照 → 确认
 PowerOpt 锁 resource array → 二进制 strings/XREF 或 uprobe 定位
 ApplyOpt 条件 → 最后才受控释锁。任何一步都不从"正 handle"宣称
@@ -403,13 +404,151 @@ ApplyOpt 条件 → 最后才受控释锁。任何一步都不从"正 handle"宣
 这是 fail-closed **正常工作**：环境被外部（thermal/vendor/其他
 实验）改变时拒绝测量。处置 = 找漂移源（回 Step 2）+ 冷却/等
 待/分段；**不要放宽门禁**——它在 2026-09-28 拦下过两次真实热
-钳位（§5.1）。
+钳位（§6.1）。
 
 ---
 
-## 5. 案例档案
+## 5. 调试与取证手段（工具箱）
 
-### 5.1 案例 A：测量实验被热票钳制（本仓，2026-09-28）
+以下手段在案例 A/B 中全部实战使用过。按"证明什么 → 怎么做 →
+怎么读"组织；取证层次从无侵入观察到动态探针递进。**没有日志与
+快照的归因都是猜测——先取证，再下结论。**
+
+### 5.1 ftrace / tracepoint：内核事件的硬时间线
+
+- **证明什么**：频率帽变化的确切时刻与持续时长（唤醒 boost 窗
+  口）、与 PERFD 活动的时间相关性。
+- **怎么做**：先确认 tracefs 位置（`/sys/kernel/tracing` 或
+  `/sys/kernel/debug/tracing`）→ 清空 `trace` → enable
+  `cpu_frequency` / `cpu_frequency_limits`（需要唤醒相关事件时
+  一并开启）→ 触发行为 → 读 `trace` → 用完关闭。
+- **怎么读**：同类事件时间戳相减得窗口时长；与 perfd 线程活动
+  行的时间差只给出"相关"，不等于"唯一上游"（上游还可能是
+  Power/Display、MiPerf、PowerKeeper、SystemUI、Camera 等）。
+- **案例**：§3.3 的两个 ~3 s 窗口与 1.1 ms PERFD 相关。
+
+### 5.2 strace 服务端取证：把"没生效"证明成"没执行"
+
+- **证明什么**：区分"请求被拒绝执行"与"执行了但无效"——案例
+  B 的决定性证据。
+- **怎么做**：`strace -ff -o <prefix> -p <hal_pid>`（`-ff` 覆
+  盖全线程），按 syscall 类过滤（`open/openat/openat2/close/
+  write/writev/pwrite64`；`ioctl` Binder 噪声大，单独过滤）；
+  **先 `rm -f` 旧输出**防残留误读；同步记录 client 侧
+  pid/opcode/duration/handle。
+- **怎么读**：服务端只有 `/proc/perflock_records` 的记账写、
+  没有目标节点 open/write → 请求未进 Apply 路径；同时确认无
+  EACCES/EPERM/EINVAL/ENOENT/EROFS，才能说"不是写失败"。
+- **配套**：`/proc/<pid>/fd` 快照——确认 daemon 没有长期持有
+  目标节点 FD（否则"没看到 open"可能只是早就开着）。
+- **案例**：§3.6 handle 1535 的 records-only 证据。
+
+### 5.3 /proc 文件系统取证
+
+- `/proc/<pid>/maps`：取 daemon 加载的 vendor 库清单 → 反汇
+  编对象列表（§6.2 P2）。
+- `/proc/perflock_records`：perf 锁 acquire/release 生命周期；
+  未配对 acquire = 有持锁方，按 pid 追 owner（注意 PowerOpt
+  INT_MAX 锁是系统常态，见 §3.6）。
+- `/proc/sys/walt/*`：WALT 层节点基线与变化（§3.5）。
+- `su <uid> -c id`：验证差分身份构造（如 uid=1000(system) +
+  gid=0 + context=ksu）。
+
+### 5.4 ELF / 二进制静态分析
+
+- **证明什么**：二进制的实现结构（类/函数/字符串）→ 定位仲裁
+  与 Apply 条件的候选位置。
+- **怎么做**：`nm -D` / `readelf -sW` 看导出符号（如 perf
+  client 的 `perf_lock_acq` 等）；`strings -a` 检索
+  `Request::Process` / `ResourceQueue` / `ApplyOpt` / `pending`
+  / `priority` / `caller` / `hardening` / `whitelist` /
+  `no optimizations` / `invalid request`；`objdump -d` 或
+  Ghidra/IDA 做 XREF。
+- **怎么读**：符号表只证明"符号存在"，**不证明参数原型**——
+  ABI 候选必须经真实调用方反汇编或有限时调用验证；stripped
+  库退化为字符串 + 导入表分析。
+- **案例**：§3.8 client 库导出表；§6.2 P2 检索词表。
+
+### 5.5 OEM XML 考古
+
+- **证明什么**：厂商资源的静态地图（hint id、opcode、target
+  匹配、资源值）。
+- **怎么做**：`grep -rn` 检索 `/vendor/etc/` 下的
+  `perfboostsconfig.xml` / `commonresourceconfigs.xml` 等；按
+  `Id="0x00001091"` / `Target="pineapple"` / `sched_fmax_cap`
+  等关键字定位。
+- **怎么读**：XML 存在 ≠ 运行态启用（可能有 feature gate 或
+  初始化失败）；注意单位陷阱（cluster 资源 MHz vs fmax_cap
+  kHz）与尾部相似的 opcode（§3.7）。
+- **案例**：§3.7 资源全图。
+
+### 5.6 动态函数级探针（uprobe / simpleperf / 断点）
+
+- **证明什么**：把根因从"高概率推断"升级为"代码条件实锤"——
+  对函数入口/出口计数并按 caller 分类。
+- **怎么做**（计划级，本机【未实操】）：符号或反汇编定位候选
+  库函数偏移 → uprobe 挂 `Request::Process` entry/exit、
+  `ResourceQueue::Add/Pend`、`ApplyOpt`、`ResetOpt` → 三类
+  caller（KSU-UID0 / KSU-UID1000 / 可信 caller）对照计数。
+- **怎么读**：请求在 entry 出现而 ApplyOpt 不触发 → 抑制点在
+  两者之间；与 §5.2 的 syscall 证据互相闭环。
+- **缺口**：本机 uprobe 内核支持（`CONFIG_UPROBE_EVENTS`）与
+  simpleperf 可用性未验证——动手前先 `zcat /proc/config.gz |
+  grep -i uprobe` 或试挂一个无害符号确认链路。
+
+### 5.7 差分实验设计（一次只改一个身份字段）
+
+- **UID 差分**：`su 1000 -c <binary>`（已验证可造
+  uid=1000(system) + gid=0 + context=ksu）。判读矩阵：节点生
+  效 → 强烈支持 UID 准入；handle 变失败 → UID 影响入口准入；
+  正 handle 但不生效 → 排除简单 UID-only gate。
+- **可信 caller 正对照**：选**可恢复**的系统行为（电源模式/
+  省电模式/刷新率切换），同步 strace Perf HAL——可信 caller
+  触发目标写 = caller 身份问题；只触发其他资源写 = 该资源运
+  行态/仲裁问题；全部无写 = Perf HAL 可能只记账、另有 apply
+  后端。
+- **纪律**：一次只改一个变量；不向 PowerOpt 进程注入；受控释
+  锁只在拿到锁明细 + 确认自动重建 + 备好超时回滚之后（§6.2
+  P3）。
+
+### 5.8 节点直写验证（证明"路是通的"）
+
+- **四步证明链**：读基线 → 写测试值 → 回读确认 → 写回基线
+  （例：`1190400 → 1000000 → 1190400`）。
+- **证明的是**：节点存在 + parser 接受 + 权限够 + 无后台秒级
+  覆盖。**不证明** daemon 域（vendor_hal_perf_default）也能
+  写——那是另一条证据链。
+- **用途**：把"节点不可写"从嫌疑列表划掉，火力集中到服务路
+  径（§3.5、§3.6）。
+
+### 5.9 日志取证（logcat + dmesg）
+
+- **触发**：dlopen/Binder/hint 调用失败的归因；thermal/perf
+  异常的背景排查。
+- **怎么做**：`adb logcat -b all -d`（全 buffer）+
+  `adb shell 'su -c "dmesg"'`；关键字：`linker` / `namespace`
+  / `CANNOT LINK EXECUTABLE` / `dlopen failed` / `avc: denied`
+  / `perf` / `mpctl` / `thermal` / `mitigat`。
+- **归因顺序（不许跳步）**：linker namespace → 依赖库缺失 →
+  SELinux → Perf HAL 权限 → ABI → hint id/type。
+- **案例**：§3.8 风险清单的配套手段。
+
+### 5.10 sysfs 周期采样与 dumpsys（环境状态）
+
+- **频率基线**：周期读 `scaling_max/min/cur_freq` 建立稳态/
+  瞬态图景——单次读取不足为证（§P8）。
+- **dumpsys**：`thermalservice`（thermal status、传感器）、
+  `battery`（充电状态）、`deviceidle`（Doze）、`power`
+  （wakefulness）。
+- **陷阱（本仓实战）**：dumpsys 只覆盖 Android 框架层冷却设
+  备；**kernel cdev 激活状态以 sysfs 为准**——案例 A 中
+  dumpsys 全闲而 `cpu-cluster3` cdev state=3/34（§6.1）。
+
+---
+
+## 6. 案例档案
+
+### 6.1 案例 A：测量实验被热票钳制（本仓，2026-09-28）
 
 背景：P0″ demand/prefetch 复测，长训练矩阵（512 圈 × 56 case，
 controlled-baseline，governor=performance）。
@@ -445,9 +584,9 @@ controlled-baseline，governor=performance）。
   fail-closed、THP 段登记触发条件推迟（限额回画像值且稳定
   ≥5 分钟）。
 - 未做的事及原因：写 sysfs（§3.4 已证无效）、抑制 thermal
-  （红线）、Perf2 注高票（§5.3）。
+  （红线）、Perf2 注高票（§6.3）。
 
-### 5.2 案例 B：向上解锁硬件 OPP（外部调查，2026-09-28，进行中）
+### 6.2 案例 B：向上解锁硬件 OPP（外部调查，2026-09-28，进行中）
 
 目标：解除 L1 稳态 cap 达到 L0 OPP。当前进度（原文照录）：
 Binder/ABI/参数 95%、opcode/映射 95%、节点可写性 90%、
@@ -497,13 +636,13 @@ vote → 原请求进入 Apply）；resource inactive（定位并修复
 feature gate → write 出现）；实现缺陷（定位代码条件/空
 handler → 修复后节点按预期变化）。
 
-### 5.3 A/B 对照（为什么不能合并解决）
+### 6.3 A/B 对照（为什么不能合并解决）
 
 | 维度 | A（恢复稳态） | B（解锁 OPP） |
 |---|---|---|
 | 目标 | 回到已知的 L1 稳态 | 越过 L1 到 L0 |
 | 机制方向 | 等 L3 热票撤掉（被动） | 往 L4 注入更高票（主动） |
-| 正确解法 | 等/拔充/分段实验/门禁不动 | 严格顺序的单变量实验（§5.2 P0–P3） |
+| 正确解法 | 等/拔充/分段实验/门禁不动 | 严格顺序的单变量实验（§6.2 P0–P3） |
 | 错误解法 | 写 sysfs、压 thermal、注高票 | 叠加高 request、停全部 perf 服务、禁 thermal |
 | 对测量的影响 | 恢复即恢复基线 | 会改变被测工况（须另立 profile 与锚点） |
 
@@ -513,12 +652,12 @@ handler → 修复后节点按预期变化）。
 
 ---
 
-## 6. 未决问题登记（触发条件 → 下一步）
+## 7. 未决问题登记（触发条件 → 下一步）
 
 1. `0x1091` 对现存低 cap 的仲裁效果 → 案例 B 阶段三有限时实
    验（外部项目，本仓不依赖）。
-2. PowerOpt INT_MAX 锁的 resource array → §5.2 P1。
-3. Perf2 仲裁模型（值比较 vs 优先级分层）→ §5.2 P1/P2。
+2. PowerOpt INT_MAX 锁的 resource array → §6.2 P1。
+3. Perf2 仲裁模型（值比较 vs 优先级分层）→ §6.2 P1/P2。
 4. `sched_fmax_cap` 四字段 ↔ policy 映射 → 单资源刺激实验。
 5. PMIC/充电域热票的精确阈值与 hysteresis → 本仓 THP 补跑前
    后，以 `pm8550b_lite_tz` 与限额联动采样补齐（运维观察）。
@@ -531,7 +670,7 @@ handler → 修复后节点按预期变化）。
 
 ---
 
-## 7. 红线（两边合并）
+## 8. 红线（两边合并）
 
 - 永不停止/抑制 thermal HAL、thermal-engine、PMIC/电池/充电器
   保护、emergency shutdown。
@@ -546,7 +685,7 @@ handler → 修复后节点按预期变化）。
 
 ---
 
-## 8. 出处
+## 9. 出处
 
 - 原始调查文档（仓外只读参考，OI-7，可能散佚；全部关键证据已
   内联于本文）：`cpu-uarch-ref/Android灭屏最高频锁定实验与证据
