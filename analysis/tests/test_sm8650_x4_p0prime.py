@@ -8,12 +8,18 @@ demand 与 prefetch 计数分离、multiplex 样本拒绝（保留其余样本�
 
 from __future__ import annotations
 
+import contextlib
+import io
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from analysis.sm8650_x4_p0prime import (
     P0PrimeError,
     analyze_records,
     build_markdown,
+    main,
 )
 
 _PMU = {
@@ -162,6 +168,34 @@ class TestSamples(unittest.TestCase):
         self.assertIn("seed=42", markdown)
         self.assertIn("seed=7", markdown)
         self.assertIn("run-a", markdown)
+
+
+class TestAllFailedRun(unittest.TestCase):
+    def test_cli_reports_all_failed_run_without_raising(self):
+        """全失败 run（如被环境门禁 fail-closed 的 THP 段）必须进统一报
+        告：不得抛 P0PrimeError，失败记录进 rejected 清单并可检索。"""
+        record = _record()
+        record["status"] = "failed"
+        record["metrics"] = []
+        record["failure"] = {
+            "reason": "environment-precondition-failed",
+            "detail": "cpufreq-max-mismatch:policy7",
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            run_dir = (
+                Path(tmp)
+                / "20260928T025226Z-ptr-chase-sm8650-x4-p0prime-short-thp"
+            )
+            run_dir.mkdir()
+            (run_dir / "records.jsonl").write_text(
+                json.dumps(record) + "\n", encoding="utf-8"
+            )
+            with contextlib.redirect_stdout(io.StringIO()) as buf:
+                rc = main(["--run", str(run_dir)])
+        self.assertEqual(rc, 0)
+        output = buf.getvalue()
+        self.assertIn("short-thp", output)
+        self.assertIn("environment-precondition-failed", output)
 
 
 if __name__ == "__main__":

@@ -289,11 +289,18 @@ def main(argv: list[str] | None = None) -> int:
     for run_dir in args.run:
         data = load_run(Path(run_dir))
         label = Path(run_dir).name
-        result = analyze_records(data.ok_records, label)
+        if data.ok_records:
+            result = analyze_records(data.ok_records, label)
+        else:
+            # 全失败 run（如被环境门禁 fail-closed 的段）：不产生分组，
+            # 但失败记录必须全部进入 rejected——统一报告不得缺段。
+            result = AnalysisResult(run_label=label)
         for record in data.failed_records:
+            failure_reason = (record.get("failure") or {}).get("reason", "")
             result.rejected.append(
                 f"{label}/buffer={record.get('params', {}).get('buffer_kb')}KiB"
                 f": record status={record.get('status')}"
+                + (f" [{failure_reason}]" if failure_reason else "")
             )
         results.append(result)
     sys.stdout.write(build_markdown(results, show_samples=args.samples))
