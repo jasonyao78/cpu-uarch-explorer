@@ -364,6 +364,7 @@ class TestPlan(unittest.TestCase):
                     "ptr-chase-sm8650-x4-tlb-ctrl-g2.json": 2,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g4.json": 4,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g4-thp.json": 2,
+                    "ptr-chase-sm8650-x4-tlb-ctrl-g4-thp-walk.json": 1,
                     "ptr-chase-sm8650-x4-tlb-overhead.json": 24,
                     "ptr-chase-sm8650-x4-tlb-thp-base.json": 12,
                     "ptr-chase-sm8650-x4-tlb-thp-madvise.json": 12,
@@ -418,6 +419,16 @@ class TestPlan(unittest.TestCase):
                     },
                     "ptr-chase-sm8650-x4-tlb-ctrl-g4-thp.json": {
                         "buffers": [2304, 3072],
+                        "seeds": {42},
+                        "events": {("cycles", 8, 0x11), ("l1d_tlb_refill", 8, 0x05),
+                                   ("dtlb_walk", 8, 0x34),
+                                   ("dtlb_walk_large", 8, 0x8138),
+                                   ("dtlb_walk_small", 8, 0x813a)},
+                        "page_policy": "thp",
+                    },
+                    # 0x8138 辨识性补点（Gate 1 ③：walk-active × THP 压力）
+                    "ptr-chase-sm8650-x4-tlb-ctrl-g4-thp-walk.json": {
+                        "buffers": [16384],
                         "seeds": {42},
                         "events": {("cycles", 8, 0x11), ("l1d_tlb_refill", 8, 0x05),
                                    ("dtlb_walk", 8, 0x34),

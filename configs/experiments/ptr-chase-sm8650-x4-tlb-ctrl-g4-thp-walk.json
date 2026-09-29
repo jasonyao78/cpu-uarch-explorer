@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-sm8650-x4-tlb-ctrl-g4-thp-walk",
+  "title": "SM8650 X4 TLB 正控 G4 大/小页 walk 辨识点（16MiB -T）",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    { "name": "buffer", "type": "size", "range": "16MiB，walk-active × THP 机会点" },
+    { "name": "stride", "type": "size", "default": "64B" },
+    { "name": "warmup_passes", "type": "int", "default": 2 },
+    { "name": "loads_per_slot", "type": "int", "default": 8 },
+    { "name": "min_loads", "type": "int", "default": 4096 },
+    { "name": "repetitions", "type": "int", "default": 10 },
+    { "name": "thp", "type": "int", "default": 1 },
+    { "name": "seed", "type": "int", "default": 42 },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        { "name": "cycles", "type": 8, "config": "0x11" },
+        { "name": "l1d_tlb_refill", "type": 8, "config": "0x05" },
+        { "name": "dtlb_walk", "type": 8, "config": "0x34" },
+        { "name": "dtlb_walk_large", "type": 8, "config": "0x8138" },
+        { "name": "dtlb_walk_small", "type": 8, "config": "0x813a" }
+      ]
+    }
+  ],
+  "preconditions": [
+    "redmi-k70pro-01 controlled-baseline profile 前后门禁通过",
+    "CPU7 Cortex-X4；五个 core PMU event 同窗且 time_running == time_enabled（拒绝复用）",
+    "每个 repetition 为新进程/新匿名映射；逐样本 actual backing 入档（base/mixed/thp 分组，不混并）"
+  ],
+  "metrics": [
+    { "name": "latency_ns", "unit": "ns", "statistic": "median" },
+    { "name": "pmu.cycles.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l1d_tlb_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.dtlb_walk.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.dtlb_walk_large.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.dtlb_walk_small.count", "unit": "events", "statistic": "median" }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "controls": ["x4-prime"],
+    "params": { "repetitions": 10 },
+    "sweep": {
+      "buffer": ["16MiB"]
+    },
+    "fixed_params": [
+      "stride", "warmup_passes", "loads_per_slot", "min_loads",
+      "thp", "seed", "pmu_events"
+    ]
+  },
+  "notes": "Gate 1 步骤③的 0x8138 辨识性补点（任务书 §5.1：0x8138/0x813a 须 base/mixed/thp backing 对照）：2304/3072 KiB -T 点 walk 率在地板（0.14–0.22/1k），large walks≈0 存在'事件失效'与'条件无信号'两种竞争解释——大页抑制自身 walk。16 MiB -T 提供 walk-active × THP 压力：若 actual 含 mixed/thp 且 small walks 高企而 large walks 仍≈0，则'事件失效'成立（注册 SEMANTICS_UNVERIFIED、Q4 大页腿降级）；若 large walks 非零响应，则 0x8138 通过。不引入新事件，不触碰有限终点。"
+}
