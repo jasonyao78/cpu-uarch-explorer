@@ -2,9 +2,10 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: 按 superpowers:executing-plans
 > 或 subagent-driven-development 逐任务执行；步骤用 checkbox（`- [ ]`）
-> 跟踪。规范基线 = 任务书 v4.1（commit `55c3a73`，
-> `docs/tasks/2026-09-28-sm8650-tlb-hierarchy.md`）——本计划不得与之冲
-> 突；冲突一律以任务书为准并回写计划。
+> 跟踪。规范基线 = 任务书 **v4.2**（Gate 0 实证修订：§6.2.5 的
+> 512 KiB R 值参照换为制度匹配的 Gate 0 run `20260929T143631Z`，
+> `docs/tasks/2026-09-28-sm8650-tlb-hierarchy.md`）——本计划不得与
+> 之冲突；冲突一律以任务书为准并回写计划。
 
 **Goal:** 按任务书 v4.1 完成 SM8650 CPU7 的 TLB 层级探测：Q1（`0x05`
 第一转折）/ Q2a（`0x34` walk-onset）/ Q3（关联曲线，默认
