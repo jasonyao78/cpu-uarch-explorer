@@ -82,7 +82,7 @@ JSON 配置、Arm TRM（Issue 05）+ `cortex-x4.json`（事件语义，已冻结
 - Create: `configs/experiments/ptr-chase-sm8650-x4-tlb-coarse.json`
 - Modify: `runner/tests/test_plan.py`（protocol/case-count 守卫）
 
-- [ ] **Step 1: 守卫加行（失败测试）**——`expected_case_counts` 增：`ptr-chase-sm8650-x4-tlb-anchor.json: 2`、`ptr-chase-sm8650-x4-tlb-ctrl.json: 2`、`ptr-chase-sm8650-x4-tlb-coarse.json: 26`；protocol_12_prefixes 增 `ptr-chase-sm8650-x4-tlb-`。运行确认失败（配置不存在）。
+- [ ] **Step 1: 守卫加行（失败测试）**——`expected_case_counts` 增：`ptr-chase-sm8650-x4-tlb-anchor.json: 2`、`ptr-chase-sm8650-x4-tlb-ctrl.json: 2`、`ptr-chase-sm8650-x4-tlb-coarse.json: 26`；protocol_12_prefixes 增 `ptr-chase-sm8650-x4-tlb-`。**另加存在性断言**（注册项必须真实存在，防悬空）与**参数钉**（锚点/粗扫的 buffer/seed/事件组断言）——评审实证只有 case 数兜不住 buffer 列表错改。运行确认失败（配置不存在）。
 
 - [ ] **Step 2: anchor 配置**——clone P0″ 结构：G0 事件组（cycles `0x11`、mem_access_rd `0x66`、l1d_tlb_refill `0x05`、dtlb_walk `0x34`）、sweep buffer `["512KiB","3072KiB"]`、`base_pages=1`、`loads_per_slot=8`、`min_loads=4096`、`warmup_passes=2`、`repetitions=10`、seed 固定参数 `seed=42`（declared default，不 sweep）、controls `["x4-prime"]`。
 
