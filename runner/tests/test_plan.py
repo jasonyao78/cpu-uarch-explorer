@@ -253,6 +253,9 @@ class TestPlan(unittest.TestCase):
                     "ptr-chase-sm8650-x4-tlb-ctrl-g2.json": 2,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g4.json": 4,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g4-thp.json": 2,
+                    "ptr-chase-sm8650-x4-tlb-overhead.json": 24,
+                    "ptr-chase-sm8650-x4-tlb-thp-base.json": 12,
+                    "ptr-chase-sm8650-x4-tlb-thp-madvise.json": 12,
                 }
                 if path.name in expected_case_counts:
                     self.assertEqual(len(plan.cases), expected_case_counts[path.name])
@@ -300,6 +303,23 @@ class TestPlan(unittest.TestCase):
                                    "dtlb_walk_large", "dtlb_walk_small"},
                         "page_policy": "thp",
                     },
+                    # §5.3 固定开销扫描：两点 × 三长度 × 4 order_seed 全叉积
+                    "ptr-chase-sm8650-x4-tlb-overhead.json": {
+                        "buffers": [512] * 12 + [16384] * 12,
+                        "buffer_set": {512, 16384},
+                        "seeds": {42, 7, 1337, 20260928},
+                        "loads_per_slot_sweep": [8, 64, 256],
+                    },
+                    # §7 Phase D THP cohort：-B/-T 同选点同 seed，G0 事件组
+                    "ptr-chase-sm8650-x4-tlb-thp-base.json": {
+                        "buffers": [512] * 4 + [2304] * 4 + [3072] * 4,
+                        "seeds": {42, 7, 1337, 20260928},
+                    },
+                    "ptr-chase-sm8650-x4-tlb-thp-madvise.json": {
+                        "buffers": [512] * 4 + [2304] * 4 + [3072] * 4,
+                        "seeds": {42, 7, 1337, 20260928},
+                        "page_policy": "thp",
+                    },
                 }
                 if path.name in tlb_expectations:
                     expected = tlb_expectations[path.name]
@@ -326,10 +346,20 @@ class TestPlan(unittest.TestCase):
                     # 对方旗标缺席（-T 记录 params 只有 thp=1，见 §9.3 ⑮）
                     page_policy = expected.get("page_policy", "base")
                     # loads_per_slot 是派生中间量、不进 case.params：声明默认值与
-                    # 派生 loads 两头钉（min_loads=4096 在最小 128KiB 档也不生效）
-                    defaults = {p["name"]: p.get("default") for p in spec["parameters"]}
-                    self.assertEqual(defaults["loads_per_slot"], 8)
-                    self.assertIn("loads_per_slot", spec["execution"]["fixed_params"])
+                    # 派生 loads 两头钉（min_loads=4096 在最小 128KiB 档也不生效）；
+                    # §5.3 开销扫描把它移进 sweep——改钉 sweep 声明与逐 case 反推
+                    swept_lps = expected.get("loads_per_slot_sweep")
+                    if swept_lps is None:
+                        defaults = {p["name"]: p.get("default") for p in spec["parameters"]}
+                        self.assertEqual(defaults["loads_per_slot"], 8)
+                        self.assertIn("loads_per_slot", spec["execution"]["fixed_params"])
+                    else:
+                        self.assertEqual(spec["execution"]["sweep"]["loads_per_slot"],
+                                         swept_lps)
+                        self.assertNotIn("loads_per_slot",
+                                         spec["execution"]["fixed_params"])
+                        self.assertIn("min_loads", spec["execution"]["fixed_params"])
+                    combos = set()
                     for case in plan.cases:
                         slots = (case.param_value("buffer_kb") * 1024
                                  // case.param_value("stride"))
@@ -339,11 +369,27 @@ class TestPlan(unittest.TestCase):
                         else:
                             self.assertEqual(case.param_value("thp"), 1)
                             self.assertNotIn("base_pages", dict(case.params))
-                        self.assertEqual(case.param_value("loads"), 8 * slots)
+                        if swept_lps is None:
+                            self.assertEqual(case.param_value("loads"), 8 * slots)
+                        else:
+                            # 逐 case 反推：loads == loads_per_slot × slots（min_loads 不生效）
+                            self.assertEqual(case.param_value("loads") % slots, 0)
+                            combos.add((case.param_value("buffer_kb"),
+                                        case.param_value("loads") // slots,
+                                        case.param_value("seed")))
                         self.assertEqual(
                             {event["name"]
                              for event in case.param_value("pmu_events")},
                             expected_events,
+                        )
+                    if swept_lps is not None:
+                        # buffer × 长度 × seed 全叉积覆盖（缺档说明 sweep 笛卡尔积退化）
+                        self.assertEqual(
+                            combos,
+                            {(buffer, lps, seed)
+                             for buffer in expected["buffer_set"]
+                             for lps in swept_lps
+                             for seed in expected["seeds"]},
                         )
                 for case in plan.cases:
                     params = dict(case.params)
