@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "events": [
+    {
+      "type": 8,
+      "config": "0x05",
+      "name": "l1d_tlb_refill",
+      "midr": "0x410fd821",
+      "source_doc": ["102484_0002_05_en", "cortex-x4.json"],
+      "source_revision": ["Issue 05", "sha256:c11c4ee0f6ad6b61 (accessed 2026-09-28)"],
+      "positive_control_run": "20260927T182613Z",
+      "outcome": "正控通过：512 KiB（128 页）→ 16 MiB（4096 页）floor/scale 双向成立，288→1030/1k 单调跨档；10 个新进程重复稳定、无恒零；全样本 time_running==time_enabled。复审更正后限 refill-like density 结论，不做朴素幅度换算。",
+      "review_ref": "docs/reviews/2026-09-28-sm8650-pmu-positive-control.md",
+      "validity_scope": "redmi-k70pro-01 CPU7 Cortex-X4（armv8_pmuv3）；ptr_chase 依赖链、4KiB base pages；density 型结论（锚点方向/跨档比较），不支持容量定案",
+      "qualification": "qualified"
+    },
+    {
+      "type": 8,
+      "config": "0x34",
+      "name": "dtlb_walk",
+      "midr": "0x410fd821",
+      "source_doc": ["102484_0002_05_en", "cortex-x4.json"],
+      "source_revision": ["Issue 05", "sha256:c11c4ee0f6ad6b61 (accessed 2026-09-28)"],
+      "positive_control_run": "20260927T182613Z",
+      "outcome": "正控通过：128 页 0.013/1k → 4096 页 39.9/1k（约 3100×），地板与规模双向验证；10 个新进程重复稳定、无恒零；全样本 time_running==time_enabled。复审更正后限 walk-like density 结论（= L2 TLB miss 触发）。",
+      "review_ref": "docs/reviews/2026-09-28-sm8650-pmu-positive-control.md",
+      "validity_scope": "redmi-k70pro-01 CPU7 Cortex-X4（armv8_pmuv3）；ptr_chase 依赖链、4KiB base pages；density 型结论，不支持容量定案",
+      "qualification": "qualified"
+    },
+    {
+      "type": 8,
+      "config": "0x8144",
+      "name": "l1d_cache_miss",
+      "midr": "0x410fd821",
+      "source_doc": ["102484_0002_05_en", "cortex-x4.json"],
+      "source_revision": ["Issue 05", "sha256:c11c4ee0f6ad6b61 (accessed 2026-09-28)"],
+      "positive_control_run": "20260928T024022Z",
+      "outcome": "正控通过（P0″ 复测）：demand miss 随工作集上升（短训练 185→982/1k、长训练 72→919/1k），与 l1d_cache_hwprf 崩塌互补伴生；4 seed × 2 训练量 × 10 进程同格局；无恒零；全样本 time_running==time_enabled。",
+      "review_ref": "docs/reviews/2026-09-28-sm8650-x4-p0prime.md",
+      "validity_scope": "redmi-k70pro-01 CPU7 Cortex-X4（armv8_pmuv3）；ptr_chase 依赖链、base pages（P0″ short/long 复测窗口）；demand-miss 排歧对照",
+      "qualification": "qualified"
+    }
+  ]
+}
