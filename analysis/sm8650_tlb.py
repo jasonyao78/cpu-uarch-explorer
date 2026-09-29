@@ -31,8 +31,9 @@ RIGHT_CENSORED、稳定条件不足（<3/4 order_seed 区间相互重叠 / 未�
 8/512 双训练量）→ ORDER_SENSITIVE / TRAINING_SENSITIVE、齐备 →
 INTERVAL_IDENTIFIED。walk-onset（§6.2.3/6.2.8-5）：detect_walk_onset
 按每个 order_seed 各自的逐样本地板（≥8/10 样本 >0.5/1k）+ 点中位数
-≥1.0/1k + 下一页数点持续三条件判 onset；跨 seed 区间一致才报
-INTERVAL_IDENTIFIED，8192 页仍未满足 → RIGHT_CENSORED。
+≥1.0/1k + 下一页数点持续三条件判 onset；≥2 个 seed 区间一致才报
+INTERVAL_IDENTIFIED（单 seed 真空不晋升，保守降级 ORDER_SENSITIVE），
+8192 页仍未满足 → RIGHT_CENSORED。
 
 双峰标记（任务书 §9.2 复用契约）：移植 sm8650_x4_p0prime 的预注册规
 则（排序后相邻比值 ≥4 且两侧各 ≥2 样本，零值按比值未定义跳过），目
@@ -355,17 +356,30 @@ def adjudicate_knee(rows_by_seed: dict[int, list[dict]], *,
       TRAINING_SENSITIVE（§6.2.6；两者皆不足时按 ORDER_SENSITIVE 结案，
       顺序同任务书列举）；齐备 → INTERVAL_IDENTIFIED。
 
-    seed_coverage / training_coverage 由调用方按致密（Phase B）覆盖情
-    况显式传入；缺省时 seed 覆盖按输入曲线候选区间的最大重叠计数、训
-    练覆盖按 1 计——Phase A 粗扫（2 seed × 短训练）进来自然落在敏感
-    终态，不会被误晋升。
+    seed_coverage：致密区间相互重叠的 order_seed 数，由调用方按 Phase B
+    覆盖情况显式传入；缺省按输入曲线候选区间的最大重叠计数。training_
+    coverage：已确认同制度的训练量数——**只允许在两种训练量（8/512
+    ring passes）均已测量且各自候选区间一致时传 2**（自然用法：逐训练
+    量分别 adjudicate、比对 intervals 一致后再传入）；否则本函数无法
+    察觉未传入维度的区间不一致，会误晋升 INTERVAL_IDENTIFIED。两参数
+    缺省（按输入曲线计 seed 覆盖、训练覆盖=1）时 Phase A 粗扫
+    （2 seed × 短训练）进来自然落在敏感终态，不会被误晋升。
+
+    {seed: []}（seed 在、数据空）按缺失 seed 处理：不计入覆盖数、不
+    进 per_seed（登记 evidence["empty_seeds"]）；全部 seed 数据空 →
+    OPEN。per_seed 各 seed 带 scan_max_pages（该曲线最大页数点），
+    RIGHT_CENSORED 的扫描上界可审计。
     """
     if unqualified_events:
         return {"status": "SEMANTICS_UNVERIFIED", "intervals": [],
                 "evidence": {"unqualified_events": sorted(str(event) for event in unqualified_events)}}
     per_seed: dict[int, dict] = {}
+    empty_seeds: list[int] = []
     for seed, rows in sorted(rows_by_seed.items()):
         ordered = sorted(rows, key=lambda row: row["pages"])
+        if not ordered:
+            empty_seeds.append(seed)  # 数据空的 seed 按缺失处理
+            continue
         floor = next(
             (row for row in ordered if row["pages"] == _LEFT_CENSOR_PAGES),
             None,
@@ -379,20 +393,22 @@ def adjudicate_knee(rows_by_seed: dict[int, list[dict]], *,
                 and floor["l1d_tlb_refill_per_1k"] >= _LEFT_CENSOR_REFILL_PER_1K
             ),
             "candidates": detect_knee_candidates(ordered),
+            "scan_max_pages": ordered[-1]["pages"],
         }
     if not per_seed:
         return {"status": "OPEN", "intervals": [],
-                "evidence": {"per_seed": per_seed}}
+                "evidence": {"per_seed": per_seed, "empty_seeds": empty_seeds}}
     censored = [seed for seed, entry in per_seed.items() if entry["left_censored"]]
     if censored:
         return {"status": "LEFT_CENSORED", "intervals": [],
-                "evidence": {"per_seed": per_seed, "censored_seeds": censored}}
+                "evidence": {"per_seed": per_seed, "empty_seeds": empty_seeds,
+                             "censored_seeds": censored}}
     intervals = sorted({
         candidate for entry in per_seed.values() for candidate in entry["candidates"]
     })
     if not intervals:
         return {"status": "RIGHT_CENSORED", "intervals": [],
-                "evidence": {"per_seed": per_seed}}
+                "evidence": {"per_seed": per_seed, "empty_seeds": empty_seeds}}
     if seed_coverage is None:
         seed_coverage = max(
             sum(
@@ -409,6 +425,7 @@ def adjudicate_knee(rows_by_seed: dict[int, list[dict]], *,
         training_coverage = 1
     evidence = {
         "per_seed": per_seed,
+        "empty_seeds": empty_seeds,
         "seed_coverage": seed_coverage,
         "training_coverage": training_coverage,
     }
@@ -449,18 +466,27 @@ def detect_walk_onset(rows_by_seed: dict[int, list[dict]], *,
     - 逐 seed 取首个"本点与下一页数点同满足前两项"的相邻点对
       （持续性条件）；末点（如 8192 页）无下一页数点，永不单独构成
       onset——8192 页仍未满足 → RIGHT_CENSORED（onset 下界报告）；
-    - 跨 seed：全部一致 → INTERVAL_IDENTIFIED（onset 位于区间内的相
-      邻点对）；全部无 → RIGHT_CENSORED；不一致或部分缺失 →
-      ORDER_SENSITIVE（任务书未定义跨 seed 聚合，取同 §6.2.6 一致
-      精神的保守分支，evidence 逐 seed 列 onset 供评审）。
+    - 跨 seed：**≥2 个** seed 的曲线均满足且 onset 区间一致 →
+      INTERVAL_IDENTIFIED（onset 位于区间内的相邻点对）；全部无 →
+      RIGHT_CENSORED；不一致、部分缺失或**单 seed 满足** →
+      ORDER_SENSITIVE。单 seed 护栏是有意取舍：顺序敏感是本任务核心
+      风险，冻结规则纪律下宁可保守降级，也不让单 seed 真空晋升；
+    - {seed: []}（seed 在、数据空）按缺失 seed 处理：不进一致性判定
+      与 per_seed（登记 evidence["empty_seeds"]）；全部 seed 数据空
+      → OPEN。
     """
     if unqualified_events:
         return {"status": "SEMANTICS_UNVERIFIED", "intervals": [],
                 "evidence": {"unqualified_events": sorted(str(event) for event in unqualified_events)}}
     per_seed: dict[int, dict] = {}
+    empty_seeds: list[int] = []
     for seed, rows in sorted(rows_by_seed.items()):
+        ordered = sorted(rows, key=lambda row: row["pages"])
+        if not ordered:
+            empty_seeds.append(seed)  # 数据空的 seed 按缺失处理
+            continue
         points = []
-        for row in sorted(rows, key=lambda row: row["pages"]):
+        for row in ordered:
             qualified, floor_samples = _walk_point_qualifies(row)
             points.append({
                 "pages": row["pages"],
@@ -475,23 +501,23 @@ def detect_walk_onset(rows_by_seed: dict[int, list[dict]], *,
                 break
         per_seed[seed] = {
             "onset": onset,
-            "scan_max_pages": points[-1]["pages"] if points else None,
+            "scan_max_pages": points[-1]["pages"],
             "points": points,
         }
     if not per_seed:
         return {"status": "OPEN", "intervals": [],
-                "evidence": {"per_seed": per_seed}}
+                "evidence": {"per_seed": per_seed, "empty_seeds": empty_seeds}}
     onsets = {entry["onset"] for entry in per_seed.values()}
     if onsets == {None}:
         return {"status": "RIGHT_CENSORED", "intervals": [],
-                "evidence": {"per_seed": per_seed}}
-    if len(onsets) == 1:
+                "evidence": {"per_seed": per_seed, "empty_seeds": empty_seeds}}
+    if len(per_seed) >= 2 and len(onsets) == 1:
         return {"status": "INTERVAL_IDENTIFIED",
                 "intervals": [next(iter(onsets))],
-                "evidence": {"per_seed": per_seed}}
+                "evidence": {"per_seed": per_seed, "empty_seeds": empty_seeds}}
     intervals = sorted(onset for onset in onsets if onset is not None)
     return {"status": "ORDER_SENSITIVE", "intervals": intervals,
-            "evidence": {"per_seed": per_seed}}
+            "evidence": {"per_seed": per_seed, "empty_seeds": empty_seeds}}
 
 
 def _is_bimodal(values: list[float]) -> bool:

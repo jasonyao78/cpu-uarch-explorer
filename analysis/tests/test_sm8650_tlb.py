@@ -159,7 +159,12 @@ def _knee_rows(refills, cycs):
 
 
 def _walk_rows(points):
-    """(pages, R_0x34 median /1k, 逐样本 R_0x34 列) → detect_walk_onset 行。"""
+    """(pages, R_0x34 median /1k, 逐样本 R_0x34 列) → detect_walk_onset 行。
+
+    注意 median 与 walk_samples 是两个独立输入字段（前者为调用方给的
+    页数点中位数统计，后者为逐进程值），不是派生关系——fixture 里两
+    者独立构造，与真实调用方（分别取组 median 与逐样本列）一致。
+    """
     return [
         {"pages": pages, "dtlb_walk_per_1k": median, "walk_samples": list(samples)}
         for pages, median, samples in points
@@ -399,6 +404,32 @@ class TestAdjudicateKnee(unittest.TestCase):
         self.assertEqual(verdict["status"], "OPEN")
         self.assertEqual(verdict["intervals"], [])
 
+    def test_empty_seed_rows_are_treated_as_missing(self):
+        # {seed: []}（seed 在、数据空）按缺失 seed 处理：不计入覆盖数、
+        # 不进 per_seed（登记 empty_seeds）；全部 seed 空 → OPEN。
+        rows = _knee_rows(_SINGLE_KNEE_REFILLS, _SINGLE_KNEE_CYCS)
+        verdict = adjudicate_knee({42: [], 7: []})
+        self.assertEqual(verdict["status"], "OPEN")
+        self.assertEqual(verdict["intervals"], [])
+        mixed = adjudicate_knee({42: rows, 7: []})
+        self.assertEqual(mixed["status"], "ORDER_SENSITIVE")  # 只算 seed 42
+        self.assertEqual(mixed["evidence"]["seed_coverage"], 1)
+        self.assertNotIn(7, mixed["evidence"]["per_seed"])
+        self.assertEqual(mixed["evidence"]["empty_seeds"], [7])
+
+    def test_knee_evidence_reports_scan_max_pages(self):
+        # RIGHT_CENSORED 的扫描上界须可审计（per_seed 带 scan_max_pages，
+        # 与 walk evidence 对齐）。
+        rows = _knee_rows(
+            [10, 12, 15, 19, 24, 30, 38, 48, 60, 75, 95, 120, 150],
+            [2.0 + 0.1 * k for k in range(13)],
+        )
+        verdict = adjudicate_knee({42: rows}, seed_coverage=4,
+                                  training_coverage=2)
+        self.assertEqual(verdict["status"], "RIGHT_CENSORED")
+        per_seed = verdict["evidence"]["per_seed"][42]
+        self.assertEqual(per_seed["scan_max_pages"], 8192)
+
 
 class TestWalkOnset(unittest.TestCase):
     """§6.2.3 walk-onset 三条件 + §6.2.8-5 逐 seed 地板判定。"""
@@ -418,6 +449,38 @@ class TestWalkOnset(unittest.TestCase):
         self.assertEqual(verdict["intervals"], [(2048, 4096)])
         self.assertEqual(verdict["evidence"]["per_seed"][42]["onset"],
                          (2048, 4096))
+
+    def test_single_seed_onset_is_order_sensitive(self):
+        # 单 seed 输入即使三条件全满足也不晋升 INTERVAL_IDENTIFIED——
+        # 晋升需 ≥2 个 seed 的曲线都满足且一致（有意取舍：顺序敏感是
+        # 本任务核心风险，冻结规则纪律下宁可保守降级）。
+        rows = _walk_rows([
+            (1024, 0.4, [0.4] * 10),
+            (2048, 1.2, [0.6] * 9 + [0.4]),
+            (4096, 1.5, [0.8] * 10),
+            (8192, 2.0, [1.0] * 10),
+        ])
+        verdict = detect_walk_onset({42: rows})
+        self.assertEqual(verdict["status"], "ORDER_SENSITIVE")
+        self.assertEqual(verdict["intervals"], [(2048, 4096)])
+        self.assertEqual(verdict["evidence"]["per_seed"][42]["onset"],
+                         (2048, 4096))
+
+    def test_empty_seed_rows_are_treated_as_missing(self):
+        # {seed: []}（seed 在、数据空）按缺失 seed 处理：不进一致性判
+        # 定与 per_seed（登记 empty_seeds）；全部 seed 空 → OPEN。混合
+        # 时只余一个有效 seed → 同单 seed 护栏，不晋升。
+        rows = _walk_rows([
+            (2048, 1.2, [0.6] * 9 + [0.4]),
+            (4096, 1.5, [0.8] * 10),
+        ])
+        verdict = detect_walk_onset({42: [], 7: []})
+        self.assertEqual(verdict["status"], "OPEN")
+        self.assertEqual(verdict["intervals"], [])
+        mixed = detect_walk_onset({42: rows, 7: []})
+        self.assertEqual(mixed["status"], "ORDER_SENSITIVE")
+        self.assertNotIn(7, mixed["evidence"]["per_seed"])
+        self.assertEqual(mixed["evidence"]["empty_seeds"], [7])
 
     def test_single_point_without_persistence_is_not_onset(self):
         # ⑥仅单点满足、下一页数点回落 → 不报 onset；8192 单点满足也
