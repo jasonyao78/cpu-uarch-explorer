@@ -65,6 +65,84 @@
       "review_ref": "docs/reviews/2026-09-28-sm8650-x4-p0prime.md",
       "validity_scope": "redmi-k70pro-01 CPU7 Cortex-X4（armv8_pmuv3）；ptr_chase 依赖链、base pages（P0″ short/long 复测窗口）；demand-miss 排歧对照",
       "qualification": "qualified"
+    },
+    {
+      "type": 8,
+      "config": "0x2d",
+      "name": "l2d_tlb_refill",
+      "midr": "0x410fd821",
+      "source_doc": ["102484_0002_05_en", "cortex-x4.json"],
+      "source_revision": ["Issue 05", "sha256:c11c4ee0f6ad6b61 (accessed 2026-09-28)"],
+      "positive_control_run": "20260929T144937Z",
+      "outcome": "正控通过（Gate 1 ①）：512 KiB 0.153/1k → 16 MiB 32.115/1k（210×）；跨进程稳定、无恒零；与 0x34 的 TRM 语义互证（0x2d 略高 = 微小指令侧贡献，恰为统一 vs 数据侧 refill 的预期关系）。全样本 time_running==time_enabled。",
+      "review_ref": "docs/reviews/2026-09-29-sm8650-tlb-gate1.md",
+      "validity_scope": "redmi-k70pro-01 CPU7 Cortex-X4（armv8_pmuv3）；ptr_chase 依赖链、4KiB base pages；unified refill-like density（含指令侧，须注明）；Q2b 层级辨识",
+      "qualification": "qualified"
+    },
+    {
+      "type": 8,
+      "config": "0x2f",
+      "name": "l2d_tlb",
+      "midr": "0x410fd821",
+      "source_doc": ["102484_0002_05_en", "cortex-x4.json"],
+      "source_revision": ["Issue 05", "sha256:c11c4ee0f6ad6b61 (accessed 2026-09-28)"],
+      "positive_control_run": "20260929T144937Z",
+      "outcome": "SEMANTICS_UNVERIFIED（Gate 1 ①）：L1 refill floor→scale 升 3.6×（285.6→1023.7/1k）而本事件反降（123.1→94.6/1k），方向与 gloss（由 L1 refill 引起的 L2 TLB 访问）不一致；scale 点跨进程分布 [67.3,171.5] 与 floor [114.6,125.3] 重叠，稳定性不成立。原始数据不改写；Q2b 降级为仅 0x2d+G0；不续试新事件。",
+      "review_ref": "docs/reviews/2026-09-29-sm8650-tlb-gate1.md",
+      "validity_scope": "（未通过正控，不授权任何结构结论；candidate 保留采集位）",
+      "qualification": "candidate"
+    },
+    {
+      "type": 8,
+      "config": "0x8136",
+      "name": "dtlb_step",
+      "midr": "0x410fd821",
+      "source_doc": ["102484_0002_05_en", "cortex-x4.json"],
+      "source_revision": ["Issue 05", "sha256:c11c4ee0f6ad6b61 (accessed 2026-09-28)"],
+      "positive_control_run": "20260929T145255Z",
+      "outcome": "正控通过（Gate 1 ②）：512 KiB 0.259/1k → 16 MiB 36.714/1k（142×）；跨进程稳定、无恒零；steps/walk=2.42（floor）→1.06（scale）与 MMUTC 机制方向一致（派生观察仅登记）。全样本 time_running==time_enabled。",
+      "review_ref": "docs/reviews/2026-09-29-sm8650-tlb-gate1.md",
+      "validity_scope": "redmi-k70pro-01 CPU7 Cortex-X4（armv8_pmuv3）；ptr_chase 依赖链、4KiB base pages；walk 步数密度；步数比须与 0x34 口径配对使用",
+      "qualification": "qualified"
+    },
+    {
+      "type": 8,
+      "config": "0x8128",
+      "name": "dtlb_walk_percyc",
+      "midr": "0x410fd821",
+      "source_doc": ["102484_0002_05_en", "cortex-x4.json"],
+      "source_revision": ["Issue 05", "sha256:c11c4ee0f6ad6b61 (accessed 2026-09-28)"],
+      "positive_control_run": "20260929T145255Z",
+      "outcome": "正控通过（Gate 1 ②）：512 KiB 7.568/1k → 16 MiB 958.672/1k（127×）；跨进程稳定、无恒零。全样本 time_running==time_enabled。",
+      "review_ref": "docs/reviews/2026-09-29-sm8650-tlb-gate1.md",
+      "validity_scope": "redmi-k70pro-01 CPU7 Cortex-X4（armv8_pmuv3）；ptr_chase 依赖链、4KiB base pages；在途 walk 积分语义（walker 活动量），不作'walk 花多少周期'解读",
+      "qualification": "qualified"
+    },
+    {
+      "type": 8,
+      "config": "0x8138",
+      "name": "dtlb_walk_large",
+      "midr": "0x410fd821",
+      "source_doc": ["102484_0002_05_en", "cortex-x4.json"],
+      "source_revision": ["Issue 05", "sha256:c11c4ee0f6ad6b61 (accessed 2026-09-28)"],
+      "positive_control_run": "20260929T145432Z,20260929T145551Z,20260929T150212Z",
+      "outcome": "SEMANTICS_UNVERIFIED（Gate 1 ③）：base/-T 各点 large walks 均 ≈0；16 MiB -T 辨识点 actual=mixed 10/10、87.5% 大页覆盖，总 walk 从 36.4/1k 崩至 0.013/1k（余量全 small）——大页抑制自身 walk，'恒零'无法归因于事件失效，判为无信号条件而非故障证据。原始数据不改写；Q4 大页腿降级（由 0x34 总量+0x813a 构成承担）；不续试新事件。",
+      "review_ref": "docs/reviews/2026-09-29-sm8650-tlb-gate1.md",
+      "validity_scope": "（未通过正控，不授权任何结构结论；candidate 保留采集位）",
+      "qualification": "candidate"
+    },
+    {
+      "type": 8,
+      "config": "0x813a",
+      "name": "dtlb_walk_small",
+      "midr": "0x410fd821",
+      "source_doc": ["102484_0002_05_en", "cortex-x4.json"],
+      "source_revision": ["Issue 05", "sha256:c11c4ee0f6ad6b61 (accessed 2026-09-28)"],
+      "positive_control_run": "20260929T145432Z,20260929T145551Z,20260929T150212Z",
+      "outcome": "正控通过（Gate 1 ③）：base 四点 small≈total（0.130/0.161/0.153/36.35 vs 0x34 同值，4KiB 下 walk 全 small 成立）；floor→scale 280×；-T 16MiB small 0.013≈total。跨进程稳定、无恒零；全样本 time_running==time_enabled。",
+      "review_ref": "docs/reviews/2026-09-29-sm8650-tlb-gate1.md",
+      "validity_scope": "redmi-k70pro-01 CPU7 Cortex-X4（armv8_pmuv3）；ptr_chase 依赖链；小页 walk 密度；Q4 页尺寸证据（small 侧）",
+      "qualification": "qualified"
     }
   ]
 }
