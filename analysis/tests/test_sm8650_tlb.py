@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""SM8650 X4 TLB 层级探测分析器测试（任务书 v4.1 §9.3）。
+"""SM8650 X4 TLB 层级探测分析器测试（任务书 v4.2 §9.3）。
 
 合成记录仿 `test_sm8650_x4_p0prime` 的 `_record` 模式（G0 事件组 + 逐
 样本 seed/vma_base/backing 入档）。覆盖骨架契约：正控点对不被误报为
@@ -12,7 +12,8 @@ knee（§6.2.2 三条件不全满足时无候选）、`0x05` density >1000/1k �
 以及块机制：§6.4 三块归组（group_block，experiment_id 定角色 +
 probe SHA-256/target/时序关联证据）与 §6.2.5 锚点判据
 （validate_anchors：环境门禁、latency/cyc 对照 short-base 参照 ≤3%、
-512 KiB R 值落正控 [p25,p75]、3072 KiB 首块自校准、前后锚点互判）；
+512 KiB R 值落 Gate 0 制度匹配参照 [p25,p75]（v4.2）、3072 KiB 首块
+自校准、前后锚点互判）；
 以及 §7 Phase D THP cohort（分级：比较级 ≥5 有效样本出 median / 描述级
 3–4 只报原始观测 / <3 与未达比较级终态 INSUFFICIENT_COHORT；跨 seed
 同制度合并、异制度分列；mixed 不并入 thp；40 进程次/(buffer×policy)
@@ -712,7 +713,11 @@ class TestAllFailedRun(unittest.TestCase):
 # ---------------------------------------------------------------------------
 
 _SHORT_BASE_RUN = "20260928T024022Z-ptr-chase-sm8650-x4-p0prime-short-base"
-_CTRL_RUN = "20260927T182613Z-ptr-chase-sm8650-x4-pmu-ctrl-tlb"
+# 512 KiB R 值参照（任务书 v4.2）：Gate 0 tlb-ctrl run——制度匹配
+# （loads_per_slot=8、warmup 2、G0、base、seed 42，Gate 0 八项契约全
+# 过）；v4.1 的旧正控 run 20260927T182613Z 其 512 KiB 组实为 2048
+# ring passes，制度不匹配，仅保留 floor/scale 方向性正控角色。
+_GATE0_CTRL_RUN = "20260929T143631Z-ptr-chase-sm8650-x4-tlb-ctrl"
 
 
 def _evidence_group_stats(run_label, buffer_kb, metric, per_loads_scale):
@@ -738,7 +743,7 @@ def _evidence_group_stats(run_label, buffer_kb, metric, per_loads_scale):
 
 def _reference_expectations():
     """§6.2.5 参照期望值：short-base 512/3072 KiB 组 median（latency 与
-    cyc/load）+ 正控 512 KiB 组 R 值 [p25, p75] 与 median。"""
+    cyc/load）+ Gate 0 参照 512 KiB 组 R 值 [p25, p75] 与 median。"""
     expectations = {"medians": {}, "r512_p25_p75": {}, "r512_median": {}}
     for buffer_kb in (512, 3072):
         expectations["medians"][buffer_kb] = {
@@ -751,7 +756,7 @@ def _reference_expectations():
         ("pmu.l1d_tlb_refill.count", "l1d_tlb_refill_per_1k"),
         ("pmu.dtlb_walk.count", "dtlb_walk_per_1k"),
     ):
-        stats = _evidence_group_stats(_CTRL_RUN, 512, metric, 1000.0)
+        stats = _evidence_group_stats(_GATE0_CTRL_RUN, 512, metric, 1000.0)
         expectations["r512_p25_p75"][field] = (stats["p25"], stats["p75"])
         expectations["r512_median"][field] = stats["median"]
     return expectations
@@ -871,8 +876,8 @@ def _anchor_run(label, timestamp, *, lat_512=None, cyc_512=None,
                 lat_3072=None, cyc_3072=None, r05_3072=500.0, r34_3072=0.02,
                 sha=_PROBE_SHA, failed_records=(), summary_failed=None):
     """锚点 run：固定 512/3072 KiB 两个 base case（§6.2.5），缺省值 =
-    现场重算的参照中位（偏差 0、落在正控区间内）。3072 KiB R 值无历
-    史参照，fixture 任取恒定值。"""
+    现场重算的参照中位（偏差 0、落在 Gate 0 参照区间内）。3072 KiB
+    R 值无历史参照，fixture 任取恒定值。"""
     records = [
         _case_record(
             buffer_kb=512,
@@ -1054,8 +1059,10 @@ class TestValidateAnchors(unittest.TestCase):
         ))
 
     def test_512_r_values_outside_positive_control_interval_fail(self):
-        # ③512 KiB R_0x05/R_0x34 median 落在正控 [p25, p75] 外 → 失败
-        # （缺省 fixture 取正控 median，在区间内——①即反向对照）。
+        # ③512 KiB R_0x05/R_0x34 median 落在 Gate 0 参照 [p25, p75] 外
+        # → 失败（缺省 fixture 取参照 median，在区间内——①即反向对
+        # 照）。check 名里的 positive_control 是 §6.2.5 判据 3 的历史
+        # 标识符，参照本身自 v4.2 起为制度匹配的 Gate 0 run。
         r05_p25, r05_p75 = _REF["r512_p25_p75"]["l1d_tlb_refill_per_1k"]
         r34_p25, _ = _REF["r512_p25_p75"]["dtlb_walk_per_1k"]
         with self.subTest(metric="R_0x05 above p75"):
@@ -1151,9 +1158,9 @@ class TestValidateAnchors(unittest.TestCase):
                 for failure in verdict.evidence["failures"]
             ))
         with self.subTest(mode="R value drift"):
-            # 两者各自落在正控 [p25, p75] 内（取 p25/p75 与 median 的中
-            # 点，严格在区间内），但 median 互不落对方 [p25, p75]（恒定
-            # 分布区间退化）→ 互判失败。
+            # 两者各自落在 Gate 0 参照 [p25, p75] 内（取 p25/p75 与
+            # median 的中点，严格在区间内），但 median 互不落对方
+            # [p25, p75]（恒定分布区间退化）→ 互判失败。
             r05_p25, r05_p75 = _REF["r512_p25_p75"]["l1d_tlb_refill_per_1k"]
             r05_median = _REF["r512_median"]["l1d_tlb_refill_per_1k"]
             low, high = (r05_p25 + r05_median) / 2, (r05_p75 + r05_median) / 2
@@ -1224,7 +1231,26 @@ class TestValidateAnchors(unittest.TestCase):
 
 class TestAnchorReferences(unittest.TestCase):
     """§6.2.5 参照分布的运行时现读现算（冻结规则：不写死数字——仓内
-    数据修正走 revision history，参照系自动跟踪修正）。"""
+    数据修正走 revision history，参照系自动跟踪修正）。512 KiB R 值
+    参照自任务书 v4.2 起为制度匹配的 Gate 0 run 20260929T143631Z。"""
+
+    def test_r_reference_run_is_regime_matched(self):
+        # 制度匹配硬钉（v4.2 回归）：512 KiB R 参照来源 run 的 512 KiB
+        # 组必须是 8 环协议（loads == 8 × slots）——防止未来再次锚定
+        # 2048 环参照（旧正控 run 20260927T182613Z 的失配教训，Gate 0
+        # 实证 10/10 样本系统性越界）。
+        path = (_REPO_ROOT / "data" / "public" / "runs"
+                / sm8650_tlb._ANCHOR_REF_CTRL_RUN / "records.jsonl")
+        seen = False
+        for line in path.read_text(encoding="utf-8").splitlines():
+            record = json.loads(line)
+            params = record.get("params", {})
+            if record.get("status") != "ok" or params.get("buffer_kb") != 512:
+                continue
+            seen = True
+            slots = params["buffer_kb"] * 1024 // params.get("stride", 64)
+            self.assertEqual(params["loads"], 8 * slots)
+        self.assertTrue(seen, "参照 run 缺少 512 KiB ok 组")
 
     def test_references_match_independent_recomputation(self):
         # 模块参照（经 validate_anchors 判定证据暴露）与本测试独立重算

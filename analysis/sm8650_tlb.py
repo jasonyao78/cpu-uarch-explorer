@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""SM8650 X4 TLB 层级探测逐样本分析器（任务书 v4.1）。
+"""SM8650 X4 TLB 层级探测逐样本分析器（任务书 v4.2）。
 
 与 `analysis.sm8650_x4_p0prime` 并列的独立模块（两任务的冻结规则各自
 演化，刻意复制契约链而非共享实现）。证据契约与 P0″ 同构：schema
@@ -8,9 +8,14 @@ PMU 编码与 seed 逐样本一致、time_running==time_enabled（multiplex
 样本拒绝并登记，同记录其余样本保留）、全失败 run 进 rejected 不抛
 错——契约缺项一律硬错误，本探测不接受"大概齐全"的记录。
 
-只消费 G0 事件组记录：G0 确立前的三事件历史 run（如
+只消费 G0 事件组记录：G0 确立前的三事件历史 run（如旧正控
 20260927T182613Z，无 `pmu.mem_access_rd.count`）不满足 metric 集合
 契约，会被硬错误拒绝——by-design fail-closed，不为旧数据放宽契约。
+该旧 run 在 v4.1 曾兼任 512 KiB R 值参照来源（其 512 KiB 组实为
+2048 ring passes，与锚点协议 8 环制度不匹配）；v4.2 起参照改锚制度
+匹配的 Gate 0 G0 run 20260929T143631Z（见下文"块归组与锚点判定"
+段），旧 run 只保留 128 vs 4096 页 floor/scale 方向性正控角色
+（方向性验证与训练量无关，不经本分析器消费）。
 
 分组键：(run_label, buffer_kb, seed, page_policy_actual, ring_passes)。
 ring passes 由记录参数直接推出（loads / (buffer_kb×1024/stride)），
@@ -77,15 +82,16 @@ probe SHA-256 与 target 一致、逐记录 timestamp 时序与角色一致（�
 BLOCK_INCOMPLETE。validate_anchors 执行 §6.2.5 质量门槛：环境门禁
 （锚点 run summary failed>0 或记录带 environment-precondition-
 failed → 锚点失真）、latency/cyc 对照 short-base 参照 median 偏差
-≤3%、512 KiB R 值落入正控 [p25,p75]、3072 KiB 首块自校准
-（prior_3072_baseline 缺省时只记录建基线，后续块按同一规则比较）、
-前后锚点同指标互判。参照分布不写死：_anchor_references() 运行时从
-data/public/runs/ 的两个 evidence run 现读现算并缓存（仓内数据修正
-走 revision history，参照系自动跟踪；硬编码会静默过期），参照 run
-缺失/不全 → TlbError fail-closed。任一不过 → BLOCK_FAILED 且块
-fail-closed：main_result 不产出，主体 case 不进入判定。
-ANCHORS_OK / BLOCK_FAILED / BLOCK_INCOMPLETE 是块级终态，与 §10.2
-的 Q 级终态不同层。
+≤3%、512 KiB R 值落入 Gate 0 制度匹配参照 [p25,p75]（v4.2；参照选
+择原则 = 制度匹配，旧正控 run 仅保留方向性正控角色）、3072 KiB 首
+块自校准（prior_3072_baseline 缺省时只记录建基线，后续块按同一规
+则比较）、前后锚点同指标互判。参照分布不写死：_anchor_references()
+运行时从 data/public/runs/ 的两个 evidence run 现读现算并缓存（仓
+内数据修正走 revision history，参照系自动跟踪；硬编码会静默过
+期），参照 run 缺失/不全 → TlbError fail-closed。任一不过 →
+BLOCK_FAILED 且块 fail-closed：main_result 不产出，主体 case 不进
+入判定。ANCHORS_OK / BLOCK_FAILED / BLOCK_INCOMPLETE 是块级终态，
+与 §10.2 的 Q 级终态不同层。
 """
 
 from __future__ import annotations
@@ -158,7 +164,15 @@ _ANCHOR_RATE_FIELDS = ("l1d_tlb_refill_per_1k", "dtlb_walk_per_1k")
 # §6.2.5 参照 evidence run（来源 run 由任务书钉死）：
 # - latency/cyc 参照 = short-base run 同 buffer 组（该 run 含
 #   cycles+latency，制度匹配已核；4 seed × 10 进程 = 40 样本/组）；
-# - R 值参照（仅 512 KiB）= TLB 正控 run 512 KiB 组（10 进程）。
+# - R 值参照（仅 512 KiB）= Gate 0 tlb-ctrl run 512 KiB 组（10 进程，
+#   loads_per_slot=8、warmup 2、G0、base、seed 42，Gate 0 八项契约全
+#   过）。v4.2 修订：参照选择原则 = 制度匹配——v4.1 锚定的旧正控
+#   run 20260927T182613Z 其 512 KiB 组实为 2048 ring passes，与锚点
+#   协议 8 环差 256×，Gate 0 实证系统性越界（出处：任务书 v4.1→v4.2
+#   修订映射 + Gate 0/1 评审
+#   docs/reviews/2026-09-29-sm8650-tlb-gate1.md §2）；旧 run 保留
+#   128 vs 4096 页 floor/scale 方向性正控角色（方向性验证与训练量无
+#   关，§3.1 注册表资格照旧）。
 # 冻结规则要求参照分布**运行时从这些 run 现读现算，不写死数字**——
 # 仓内数据修正走 revision history，参照系必须自动跟踪修正（硬编码会
 # 静默过期）。现读现算见 _compute_anchor_references/_anchor_references。
@@ -167,7 +181,7 @@ _ANCHOR_RATE_FIELDS = ("l1d_tlb_refill_per_1k", "dtlb_walk_per_1k")
 _ANCHOR_REF_SHORT_BASE_RUN = (
     "20260928T024022Z-ptr-chase-sm8650-x4-p0prime-short-base"
 )
-_ANCHOR_REF_CTRL_RUN = "20260927T182613Z-ptr-chase-sm8650-x4-pmu-ctrl-tlb"
+_ANCHOR_REF_CTRL_RUN = "20260929T143631Z-ptr-chase-sm8650-x4-tlb-ctrl"
 _ANCHOR_REF_RUNS_ROOT = (
     Path(__file__).resolve().parents[1] / "data" / "public" / "runs"
 )
@@ -1424,7 +1438,9 @@ def _compute_anchor_references(runs_root: Path) -> dict:
     冻结规则要求参照常量不写死（仓内数据修正走 revision history，参
     照系自动跟踪修正；硬编码会静默过期）。返回 {"medians": {buffer:
     {"latency_ns", "cyc_per_load"}}（short-base 同 buffer 组 median）、
-    "r512_p25_p75": {field: (p25, p75)}（正控 512 KiB 组）}。
+    "r512_p25_p75": {field: (p25, p75)}（Gate 0 tlb-ctrl 512 KiB 组，
+    v4.2 起的制度匹配 R 值参照——选择原则与旧 run 角色见
+    _ANCHOR_REF_CTRL_RUN 处注释）}。
     """
     short_base = _load_reference_run(runs_root / _ANCHOR_REF_SHORT_BASE_RUN)
     medians = {
@@ -1526,8 +1542,10 @@ def validate_anchors(block: BlockResult,
     2. latency 与 cycles/load：前/后锚点各自同 buffer 组 median 对照
        short-base 参照（_anchor_references() 运行时现读现算，来源 run
        与纪律理由见其 docstring）偏差 ≤3%；
-    3. R_0x05/R_0x34（512 KiB）：前/后锚点组 median 落入正控
-       [p25, p75]（同前，运行时现读现算）；
+    3. R_0x05/R_0x34（512 KiB）：前/后锚点组 median 落入 Gate 0 制度
+       匹配参照 [p25, p75]（v4.2；同前，运行时现读现算。check 名里的
+       positive_control 是判据 3 的历史标识符——v4.1 参照确为正控
+       run——保留不改，免断 evidence 消费者）；
     4. R_0x05/R_0x34（3072 KiB）：无 G0 历史数据——prior_3072_baseline
        缺省（首块）时只记录不判失，以 anchor-before 的 3072 组分布建
        基线随 verdict 输出；有基线时前/后锚点 median 均须落入基线
