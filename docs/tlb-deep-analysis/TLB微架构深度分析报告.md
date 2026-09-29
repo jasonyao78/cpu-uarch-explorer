@@ -638,14 +638,16 @@ xychart-beta
 
 ## 附：待办与开放问题（v1.5）
 
-1. ~~获取 Cortex-X4 TRM 原文~~ **已完成**（102484_0003_06_en 已入库 cpu-uarch-ref/docs/，iTLB 48 vs 128 矛盾已裁决：48 条）。
-2. SM8650（Android）上的 simpleperf 可用事件集与 `perf_event_paranoid` 状态需在 Phase 0 实测确认（X4 TRM 事件全集 vs 内核导出集可能有裁剪）。
-3. 16K/64K 粒度与 2M/512M 大页映射的用户态获取方式（内核配置 / `hugetlbfs` / 内核模块）待按 SM8650 内核确定；4K 基线先行。
-4. ~~EL3 可达性评估~~（v1.3 预判）：SM8650 生产设备的 EL3 为高通签名固件，RAMINDEX 路径**默认不可达**——§5.5 默认走 H1~H4 假设检验；若后续获得签名实验固件再启用直读路线。
-5. ECTLR 中 translation table prefetcher 的关闭方式与默认状态待目标平台确认（涉及 EL1/EL2 权限）。
-6. （v1.4 重构）in-flight 翻译并行度（walk 队列深度）：用 K 独立链协议（§3.3 行）测量，弃用 v1.3 的快速/慢速重访方案（串行链单 outstanding miss，协议无效——评审 R2）。
-7. （v1.4 新增，评审 A1）X4 L1 "VIPT behaving as PIPT" 的实现机制：16 KB/way > 4K 页的理论别名如何消除，TRM 未公开；如需确证，查后续版本 TRM / Arm 技术博客 / 微架构逆向资料。
-8. （v1.4 新增，评审 A5）MMUTC 的条目内容、容量与功能定位：PMU 仅确认其为 iTLB 回填源；可结合 0x8137 ITLB_STEP 对照实验与（若有）EL3 观察推进。
+| # | 状态 | 事项 | 归属 / 触发条件 |
+|---|---|---|---|
+| 1 | ✅ 已完成 | 获取 Cortex-X4 TRM 原文（102484_0003_06_en 已入库 cpu-uarch-ref/docs/，iTLB 48 vs 128 矛盾已裁决：48 条） | — |
+| 2 | ⬜ 待办 | SM8650（Android）simpleperf 可用事件集与 `perf_event_paranoid` 状态实测确认（X4 TRM 事件全集 vs 内核导出集可能裁剪） | Phase 0 首件事 |
+| 3 | ⬜ 待办 | 16K/64K 粒度与 2M/512M 大页映射的用户态获取方式（内核配置 / `hugetlbfs` / 内核模块） | 按 SM8650 内核确定；4K 基线先行 |
+| 4 | ✅ 已裁决 | EL3 可达性：SM8650 生产设备为高通签名固件，RAMINDEX 路径默认不可达——§5.5 默认走 H1~H4 假设检验；获得签名实验固件后再启用直读 | 签名固件可得时 |
+| 5 | ⬜ 待办 | ECTLR 中 translation table prefetcher 的关闭方式与默认状态确认 | 涉及 EL1/EL2 权限，Phase 0 记录 |
+| 6 | ⬜ 待办 | in-flight 翻译并行度（walk 队列深度）：K 独立链协议测量（§3.3 行）；v1.3 快速/慢速方案已弃用（评审 R2） | §5.3 M4 实验阶段 |
+| 7 | 🔍 开放问题 | X4 L1 "VIPT behaving as PIPT" 的实现机制：16 KB/way > 4K 页的理论别名如何消除，TRM 未公开 | 查后续 TRM / Arm 技术博客 / 微架构逆向（评审 A1） |
+| 8 | 🔍 开放问题 | MMUTC 的条目内容、容量与功能定位：PMU 仅确认其为 iTLB 回填源 | 0x8137 ITLB_STEP 对照实验 +（若有）EL3 观察（评审 A5） |
 
 ## 附：专家审阅记录（v1.2 首轮 13 项 + v1.3 追加 5 项 + v1.4 外部评审1 九项 + v1.5 外部评审2 七项）
 
