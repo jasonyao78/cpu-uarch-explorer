@@ -18,13 +18,13 @@
 
 ## 0. 材料清单与可信度分级
 
-| 材料 | 角色 | 可信度处理 |
-|---|---|---|
-| Arm Cortex-X4 Core Software Optimization Guide（Issue 3.0, r0p1） | 必读 1 | 官方一手，但**全文无 TLB 章节**（详见 §4.1），仅提供 MMU/地址宽度/MMU TC 等旁证 |
-| **Arm Cortex-X4 Core TRM（102484_0003_06_en，r0p3）** | **权威依据（v1.1 起）** | 官方一手，第 5 章 Memory management 给出全部 TLB 结构参数；第 9 章给出 TLB RAM 直接读编码；第 17 章给出全部 TLB PMU 事件 |
-| Agredo et al., *Inferring TLB Configuration with Performance Tools*, J. Cybersecur. Priv. 2024 | 必读 2 | 同行评审论文，方法可借鉴，结论绑定 Intel x86，迁移性作者自己都说有限 |
-| lmbench `src/tlb.c` + `src/lib_mem.c` | 必读 3 | 经典基准源码，只测"性能拐点"，不能单独给出结构 |
-| 《lmbench 与论文 TLB 探测方法源码分析报告（格式修订版）》 | 参考（需审视） | 主体判断基本正确，个别地方过度谨慎或表述有可改进处（详见 §4.4） |
+| 材料                                                                                             | 角色               | 可信度处理                                                                                  |
+| ---------------------------------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------- |
+| Arm Cortex-X4 Core Software Optimization Guide（Issue 3.0, r0p1）                                | 必读 1             | 官方一手，但**全文无 TLB 章节**（详见 §4.1），仅提供 MMU/地址宽度/MMU TC 等旁证                                  |
+| **Arm Cortex-X4 Core TRM（102484_0003_06_en，r0p3）**                                             | **权威依据（v1.1 起）** | 官方一手，第 5 章 Memory management 给出全部 TLB 结构参数；第 9 章给出 TLB RAM 直接读编码；第 17 章给出全部 TLB PMU 事件 |
+| Agredo et al., *Inferring TLB Configuration with Performance Tools*, J. Cybersecur. Priv. 2024 | 必读 2             | 同行评审论文，方法可借鉴，结论绑定 Intel x86，迁移性作者自己都说有限                                                |
+| lmbench `src/tlb.c` + `src/lib_mem.c`                                                          | 必读 3             | 经典基准源码，只测"性能拐点"，不能单独给出结构                                                               |
+| 《lmbench 与论文 TLB 探测方法源码分析报告（格式修订版）》                                                            | 参考（需审视）          | 主体判断基本正确，个别地方过度谨慎或表述有可改进处（详见 §4.4）                                                     |
 
 ---
 
@@ -683,7 +683,7 @@ xychart-beta
 
 ### 外部评审（v1.4）
 
-第三方静态评审（仅资料核对与代码走查，未在 SM8650 上实测）提出 4 条阻断性问题与 5 条体系结构判断修正。**经逐条独立复核：4 条阻断性问题全部属实（含探针代码 2 个真 bug），5 条判断修正全部采纳**；评审原文归档于 `review-外部评审意见.txt`。
+第三方静态评审（仅资料核对与代码走查，未在 SM8650 上实测）提出 4 条阻断性问题与 5 条体系结构判断修正。**经逐条独立复核：4 条阻断性问题全部属实（含探针代码 2 个真 bug），5 条判断修正全部采纳**；评审原文归档于本目录 `review-外部评审意见1-2026-09-29.md`。
 
 | # | 类型 | 意见 | 复核与处理 |
 |---|---|---|---|
@@ -758,39 +758,39 @@ xychart-beta
 
 ### 微架构与硬件
 
-| 术语 | 全称 | 本报告中的含义 |
-|---|---|---|
-| TLB | Translation Lookaside Buffer | 翻译缓存；本文核心对象 |
-| L1 I/D-TLB | Level-1 Instruction/Data TLB | X4：48/96 条，全相联（TRM Table 5-1） |
-| L2 TLB | Level-2 TLB | X4：2048 条，8-way×256 sets，I/D 共享，兼存遍历中间级 |
-| micro-TLB | — | 紧贴请求源的极小翻译缓存级（X4 未列出，通用模型概念，§3.1） |
-| MMU / 遍历器 | Memory Management Unit / walker | 翻译单元与硬件页表遍历引擎 |
-| walk | Translation table walk | L2 TLB miss 后的逐级页表读取过程 |
-| page-walk cache / MMUTC | — | 缓存遍历中间级描述符的结构。X4 已确认 L2 TLB 存中间级条目；MMUTC 仅确认其为 iTLB 回填源，条目内容/是否独立 walk cache **未公开**（§2.7） |
-| translation table prefetcher | — | 预取连续下一张页表的硬件优化（ECTLR 可关） |
-| set / way | — | 组相联结构的组号/路数；全相联 = 单 set |
-| 索引哈希 | index hash | VPN→set 的映射函数（X4 未公开，§5.5 探测目标） |
-| pseudo-LRU / RRIP | — | 常见替换策略近似（X4 L1I pseudo-LRU、L1D RRIP，TRM §6/§7） |
-| refill / access | — | PMU 两类口径：fill 次数 vs lookup 次数（§2.6-4） |
-| µOP / MOP | Micro/Macro-OP | 处理器内部微操作/宏操作 |
-| AGU | Address Generation Unit | 地址生成单元 |
-| SA / SD | Store Address / Store Data µOP | store 拆分的地址/数据微操作（§2.1） |
-| store buffer | — | store 提交前的缓冲，吸收 store 的 miss 时延 |
-| replay | — | miss µOP 挂起后由硬件重放执行 |
-| OoO | Out-of-Order | 乱序执行 |
-| in-flight / translation queue | — | 进行中的翻译/miss 挂起队列（深度文档未公开，M4 实验对象） |
-| RAS / ECC / SECDED / parity | — | 可靠性扩展与纠错编码；X4 L1D/L2 用 SECDED，L1I/MMU RAM 用 parity |
-| MTE | Memory Tagging Extension | 内存标记扩展（store/load tag µOP 的来源之一） |
-| TRBE / SPE / ETE | Trace Buffer / Statistical Profiling / Embedded Trace Extension | 调试追踪与采样剖析扩展 |
-| PMU / AMU | Performance / Activity Monitoring Unit | 性能计数器 / 活动计数器 |
-| GIC | Generic Interrupt Controller | 中断控制器 CPU 接口 |
-| DSU-120 / CHI | DynamIQ Shared Unit / Coherent Hub Interface | 簇共享单元（L3）与一致性互连协议 |
-| SMMU/IOMMU | System MMU / IO MMU | DMA 侧翻译器（§2.5） |
-| ATS / PRI | Address Translation Services / Page Request Interface | PCIe 设备直查翻译/请求缺页的接口 |
-| RAMINDEX | — | EL3 直接读 TLB/cache RAM 的索引寄存器（TRM 第 9 章） |
-| EL0–EL3 | Exception Level 0–3 | 异常级；EL3 最高（固件），QHEE 为高通 EL3 实现 |
-| SM8650 / prime 核 | — | Snapdragon 8 Gen 3；X4 所在的大核（通常 CPU7） |
-| 铁律/地面真值 | ground truth | 已由 TRM 原文确认的参数值（探测的校准基准） |
+| 术语                            | 全称                                                              | 本报告中的含义                                                                                    |
+| ----------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| TLB                           | Translation Lookaside Buffer                                    | 翻译缓存；本文核心对象                                                                                |
+| L1 I/D-TLB                    | Level-1 Instruction/Data TLB                                    | X4：48/96 条，全相联（TRM Table 5-1）                                                              |
+| L2 TLB                        | Level-2 TLB                                                     | X4：2048 条，8-way×256 sets，I/D 共享，兼存遍历中间级                                                    |
+| micro-TLB                     | —                                                               | 紧贴请求源的极小翻译缓存级（X4 未列出，通用模型概念，§3.1）                                                          |
+| MMU / 遍历器                     | Memory Management Unit / walker                                 | 翻译单元与硬件页表遍历引擎                                                                              |
+| walk                          | Translation table walk                                          | L2 TLB miss 后的逐级页表读取过程                                                                     |
+| page-walk cache / MMUTC       | —                                                               | 缓存遍历中间级描述符的结构。X4 已确认 L2 TLB 存中间级条目；MMUTC 仅确认其为 iTLB 回填源，条目内容/是否独立 walk cache **未公开**（§2.7） |
+| translation table prefetcher  | —                                                               | 预取连续下一张页表的硬件优化（ECTLR 可关）                                                                   |
+| set / way                     | —                                                               | 组相联结构的组号/路数；全相联 = 单 set                                                                    |
+| 索引哈希                          | index hash                                                      | VPN→set 的映射函数（X4 未公开，§5.5 探测目标）                                                            |
+| pseudo-LRU / RRIP             | —                                                               | 常见替换策略近似（X4 L1I pseudo-LRU、L1D RRIP，TRM §6/§7）                                             |
+| refill / access               | —                                                               | PMU 两类口径：fill 次数 vs lookup 次数（§2.6-4）                                                      |
+| µOP / MOP                     | Micro/Macro-OP                                                  | 处理器内部微操作/宏操作                                                                               |
+| AGU                           | Address Generation Unit                                         | 地址生成单元                                                                                     |
+| SA / SD                       | Store Address / Store Data µOP                                  | store 拆分的地址/数据微操作（§2.1）                                                                    |
+| store buffer                  | —                                                               | store 提交前的缓冲，吸收 store 的 miss 时延                                                            |
+| replay                        | —                                                               | miss µOP 挂起后由硬件重放执行                                                                        |
+| OoO                           | Out-of-Order                                                    | 乱序执行                                                                                       |
+| in-flight / translation queue | —                                                               | 进行中的翻译/miss 挂起队列（深度文档未公开，M4 实验对象）                                                          |
+| RAS / ECC / SECDED / parity   | —                                                               | 可靠性扩展与纠错编码；X4 L1D/L2 用 SECDED，L1I/MMU RAM 用 parity                                         |
+| MTE                           | Memory Tagging Extension                                        | 内存标记扩展（store/load tag µOP 的来源之一）                                                           |
+| TRBE / SPE / ETE              | Trace Buffer / Statistical Profiling / Embedded Trace Extension | 调试追踪与采样剖析扩展                                                                                |
+| PMU / AMU                     | Performance / Activity Monitoring Unit                          | 性能计数器 / 活动计数器                                                                              |
+| GIC                           | Generic Interrupt Controller                                    | 中断控制器 CPU 接口                                                                               |
+| DSU-120 / CHI                 | DynamIQ Shared Unit / Coherent Hub Interface                    | 簇共享单元（L3）与一致性互连协议                                                                          |
+| SMMU/IOMMU                    | System MMU / IO MMU                                             | DMA 侧翻译器（§2.5）                                                                             |
+| ATS / PRI                     | Address Translation Services / Page Request Interface           | PCIe 设备直查翻译/请求缺页的接口                                                                        |
+| RAMINDEX                      | —                                                               | EL3 直接读 TLB/cache RAM 的索引寄存器（TRM 第 9 章）                                                    |
+| EL0–EL3                       | Exception Level 0–3                                             | 异常级；EL3 最高（固件），QHEE 为高通 EL3 实现                                                             |
+| SM8650 / prime 核              | —                                                               | Snapdragon 8 Gen 3；X4 所在的大核（通常 CPU7）                                                       |
+| 铁律/地面真值                       | ground truth                                                    | 已由 TRM 原文确认的参数值（探测的校准基准）                                                                   |
 
 ### 探测方法与平台工具
 
