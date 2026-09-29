@@ -41,6 +41,15 @@ INTERVAL_IDENTIFIED（单 seed 真空不晋升，保守降级 ORDER_SENSITIVE）
 /着色方差的主要暴露面。该标记只服务于"中位数不得掩盖双态"的报告纪
 律，不构成任何容量推断。
 
+固定开销判定（§5.3，M2）：adjudicate_fixed_overhead 消费两点扫描
+（512 KiB floor 区 / 16 MiB walk-active 区 × 8/64/256 ring passes 三
+长度 × 4 order_seed）的逐 case median 计数，按 (buffer, event, seed)
+分组对三长度档最小二乘拟合 C_e(N)=a_e+b_e·N（N=timed loads，闭式解）；
+正式窗口长度下 |a_e|/C_e(N) ≤5% 判该事件边界开销可忽略（C_e(N) 取拟
+合值；C_e(N)≤0 时比值视为无穷——floor 近零计数不出"可忽略"），超过
+标注"含固定开销"（该事件转折判定改用跨长度一致的斜率 b_e）；跨 seed
+斜率离散度只报告不设阈值（§5.3 未冻结数值门槛）。
+
 Q3 默认终态（§7 Phase C，P1-6）：adjudicate_q3 输出关联数据占位 +
 MODEL_UNIDENTIFIABLE——当前协议下页数同时改变 cache footprint、
 translation footprint 与 MMUTC 命中状态，G3 只解决"没测 data miss"；
@@ -83,6 +92,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import sys
 from collections import defaultdict
@@ -183,6 +193,11 @@ _COHORT_METRIC_FIELDS = ("latency_ns", "l1d_tlb_refill_per_1k",
 # §10.2 的 Q 级终态（Q3/Q4 用）
 _INSUFFICIENT_COHORT = "INSUFFICIENT_COHORT"
 _MODEL_UNIDENTIFIABLE = "MODEL_UNIDENTIFIABLE"
+
+# §5.3 固定开销判定的冻结常量（改阈值 = 改冻结规则，走任务书变更）
+_OVERHEAD_RATIO_THRESHOLD = 0.05    # |a_e|/C_e(N) ≤5% → 边界开销可忽略
+_OVERHEAD_LENGTH_TIERS = 3          # 8/64/256 ring passes 三档测量长度
+_OVERHEAD_FIXED_NOTE = "含固定开销"  # 非 negligible 事件的报告标注（§5.3）
 
 # ptr_chase params 策略旗标 → 请求 policy（同 adapter build_argv 的互斥语
 # 义）；观测侧取值集合同 adapter parse_output 的白名单。
@@ -1047,6 +1062,167 @@ def adjudicate_q3(*, g3_executed: bool = False,
             "model_spec_frozen": False,
         },
     }
+
+
+def _fit_line(points: list[tuple[float, float]]) -> tuple[float, float]:
+    """最小二乘拟合 C = a + b·N（闭式解，不引第三方库）。
+
+    points 为 (N, C) 对（≥2 个不同 N，调用方保证）；返回 (a, b)。求和
+    顺序固定（按 N 升序的输入顺序），结果确定性。
+    """
+    count = len(points)
+    mean_n = sum(point[0] for point in points) / count
+    mean_c = sum(point[1] for point in points) / count
+    denom = sum((point[0] - mean_n) ** 2 for point in points)
+    if denom == 0:
+        # N 全同则斜率不可识别；调用方已校验组内 3 个不同 loads，到此即
+        # 契约破坏，fail-closed 而非静默除零。
+        raise TlbError("fit_line: points share a single N (slope unidentified)")
+    slope = sum(
+        (point[0] - mean_n) * (point[1] - mean_c) for point in points
+    ) / denom
+    return mean_c - slope * mean_n, slope
+
+
+def adjudicate_fixed_overhead(rows: Iterable[dict], *,
+                              formal_loads_per_slot: int = 8) -> dict:
+    """§5.3 PMU 窗固定开销的逐事件判定（M2；任务书 309–323 行冻结规则）。
+
+    rows 逐行一个 (buffer × 长度 × seed × 事件) 的中位计数点：
+    {"buffer_kb", "slots", "loads", "seed", "event", "count"}——count 为
+    该 case 10 进程的中位 PMU 计数；slots 由调用方派生
+    （buffer_kb×1024/stride），本函数不做尺寸换算；loads 为实际 timed
+    loads（拟合自变量 N）。只拟合 PMU 事件：event 为 latency_ns（墙钟
+    量）即 TlbError——§5.3 的本判定不含墙钟窗拟合，防止误消费。
+
+    计算（确定性，不读时钟/随机源/环境）：
+
+    1. 按 (buffer_kb, event, seed) 分组；组内必须恰好 3 个不同 loads 值
+       （协议 8/64/256 ring passes 三档；按预注册口径直接校验"3 个不同
+       loads"，不回推 tier 取值、不校验 loads 与 slots 的倍数关系）——
+       缺失/重复/多出 → TlbError（fail-closed，协议偏离不静默）。同一
+       buffer_kb 的全部行 slots 必须单一，否则 TlbError（slots 是
+       buffer 的纯函数，不一致即混入异协议数据）；
+    2. 每组对 3 个 (loads, count) 点最小二乘拟合 C_e(N) = a_e + b_e·N
+       （3 点 2 参数闭式解）；
+    3. N_formal = slots × formal_loads_per_slot；C_formal = a_e +
+       b_e·N_formal——取**拟合值**，与 §5.3 记号 C_e(N) 一致（正式窗口
+       计数读拟合曲线在该 N 处的取值，不是任一实测点）；C_formal ≤ 0
+       时 ratio 视为 inf——floor 事件的近零计数不产生"可忽略"判定；
+    4. ratio = |a_e| / C_formal；negligible ⇔ ratio ≤ 5%（§5.3 预注册
+       阈值，≤ 取边界）；
+    5. 斜率稳定性：每 (buffer, event) 跨 seed 的 b_e 离散度
+       slope_spread_rel = (max b − min b) / max|b|（max|b| == 0 →
+       0.0）——只报告不设阈值：§5.3 未冻结数值门槛，不发明；
+    6. 输出 {"judgments": [...]}，judgments 按 (buffer_kb, event) 排
+       序、per_seed 按 seed 排序：每条 {buffer_kb, event, n_formal,
+       per_seed: [{seed, a, b, ratio_at_formal}], slope_spread_rel,
+       worst_abs_ratio, negligible}；worst_abs_ratio = 各 seed ratio
+       最大值（保守聚合方向），negligible 按 worst_abs_ratio 判；非
+       negligible 时附 note="含固定开销"（§5.3：该事件绝对密度只报告
+       为含固定开销，转折判定改用跨长度一致的斜率 b_e）。
+
+    校验（fail-closed）：行必须为 dict 且六字段齐备；buffer_kb/slots/
+    loads 为正整数、seed 为非负整数（bool 不算整数）；event 为非空字
+    符串；count 为有限数值且 ≥0（NaN/inf 不是中位计数）；(buffer,
+    event, seed, loads) 重复 → TlbError。formal_loads_per_slot 须为正
+    整数（协议值：正式窗口 8 ring passes）。空输入 →
+    {"judgments": []}（同 grade_thp_cohorts 空表先例）；seed 个数不门
+    控（协议 4 个 order_seed 由配置侧保证，离散度按实到 seed 计算）。
+    """
+    context = "adjudicate_fixed_overhead"
+    if (isinstance(formal_loads_per_slot, bool)
+            or not isinstance(formal_loads_per_slot, int)
+            or formal_loads_per_slot <= 0):
+        raise TlbError(
+            f"{context}: positive integer formal_loads_per_slot required "
+            f"({formal_loads_per_slot!r})"
+        )
+    groups: dict[tuple[int, str, int], dict[int, float]] = {}
+    slots_by_buffer: dict[int, int] = {}
+    for index, row in enumerate(rows):
+        row_context = (f"{context}/row={index}"
+                       f"/buffer={row.get('buffer_kb') if isinstance(row, dict) else None}KiB")
+        if not isinstance(row, dict):
+            raise TlbError(f"{row_context}: object row required")
+        fields = {}
+        for name in ("buffer_kb", "slots", "loads", "seed"):
+            value = row.get(name)
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TlbError(f"{row_context}: integer {name} required ({value!r})")
+            fields[name] = value
+        if fields["buffer_kb"] <= 0 or fields["slots"] <= 0 or fields["loads"] <= 0:
+            raise TlbError(
+                f"{row_context}: positive buffer_kb/slots/loads required "
+                f"({fields['buffer_kb']}, {fields['slots']}, {fields['loads']})"
+            )
+        if fields["seed"] < 0:
+            raise TlbError(f"{row_context}: non-negative seed required ({fields['seed']})")
+        event = row.get("event")
+        if not isinstance(event, str) or not event:
+            raise TlbError(f"{row_context}: non-empty string event required ({event!r})")
+        if event == _LATENCY:
+            raise TlbError(
+                f"{row_context}: {_LATENCY} is a wall-clock metric, out of "
+                f"§5.3 fixed-overhead fitting scope"
+            )
+        count = row.get("count")
+        if (isinstance(count, bool) or not isinstance(count, (int, float))
+                or not math.isfinite(count) or count < 0):
+            raise TlbError(
+                f"{row_context}: finite non-negative numeric count required "
+                f"({count!r})"
+            )
+        buffer_kb, slots, loads, seed = (fields["buffer_kb"], fields["slots"],
+                                         fields["loads"], fields["seed"])
+        prior_slots = slots_by_buffer.setdefault(buffer_kb, slots)
+        if prior_slots != slots:
+            raise TlbError(
+                f"{row_context}: slots disagree within buffer {buffer_kb}KiB "
+                f"({prior_slots} vs {slots})"
+            )
+        group = groups.setdefault((buffer_kb, event, seed), {})
+        if loads in group:
+            raise TlbError(
+                f"{row_context}: duplicate (buffer, event, seed, loads={loads}) point"
+            )
+        group[loads] = float(count)
+    fitted: dict[tuple[int, str], list[dict]] = defaultdict(list)
+    for (buffer_kb, event, seed), group in sorted(groups.items()):
+        if len(group) != _OVERHEAD_LENGTH_TIERS:
+            raise TlbError(
+                f"{context}/buffer={buffer_kb}KiB: (event={event}, seed={seed}) "
+                f"group must have exactly {_OVERHEAD_LENGTH_TIERS} distinct "
+                f"loads values, got {len(group)} (协议偏离 fail-closed)"
+            )
+        a, b = _fit_line(sorted(group.items()))
+        n_formal = slots_by_buffer[buffer_kb] * formal_loads_per_slot
+        c_formal = a + b * n_formal
+        ratio = abs(a) / c_formal if c_formal > 0 else float("inf")
+        fitted[(buffer_kb, event)].append({
+            "seed": seed, "a": a, "b": b, "ratio_at_formal": ratio,
+        })
+    judgments = []
+    for (buffer_kb, event), per_seed in sorted(fitted.items()):
+        slopes = [entry["b"] for entry in per_seed]
+        max_abs_slope = max(abs(slope) for slope in slopes)
+        spread = ((max(slopes) - min(slopes)) / max_abs_slope
+                  if max_abs_slope > 0 else 0.0)
+        worst = max(entry["ratio_at_formal"] for entry in per_seed)
+        negligible = worst <= _OVERHEAD_RATIO_THRESHOLD
+        judgment = {
+            "buffer_kb": buffer_kb,
+            "event": event,
+            "n_formal": slots_by_buffer[buffer_kb] * formal_loads_per_slot,
+            "per_seed": per_seed,
+            "slope_spread_rel": spread,
+            "worst_abs_ratio": worst,
+            "negligible": negligible,
+        }
+        if not negligible:
+            judgment["note"] = _OVERHEAD_FIXED_NOTE
+        judgments.append(judgment)
+    return {"judgments": judgments}
 
 
 def _record_time_span(run: RunData, context: str) -> tuple[datetime, datetime]:

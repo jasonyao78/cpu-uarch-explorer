@@ -17,7 +17,10 @@ probe SHA-256/target/时序关联证据）与 §6.2.5 锚点判据
 3–4 只报原始观测 / <3 与未达比较级终态 INSUFFICIENT_COHORT；跨 seed
 同制度合并、异制度分列；mixed 不并入 thp；40 进程次/(buffer×policy)
 停止预算含失败计额；转化表）与 §7 Phase C Q3 默认终态（G3 缺失 →
-MODEL_UNIDENTIFIABLE 且绝无成本值）。
+MODEL_UNIDENTIFIABLE 且绝无成本值）；以及 §5.3 固定开销拟合判定
+（adjudicate_fixed_overhead：三点最小二乘回收 a/b、|a|/C(N) ≤5%
+边界语义、协议偏离 fail-closed、跨 seed 斜率离散度只报告不设阈值、
+floor 近零计数 ratio=inf、乱序输入确定性排序输出）。
 """
 
 from __future__ import annotations
@@ -31,6 +34,7 @@ from pathlib import Path
 
 from analysis.sm8650_tlb import (
     TlbError,
+    adjudicate_fixed_overhead,
     adjudicate_knee,
     adjudicate_q3,
     analyze_records,
@@ -1689,6 +1693,217 @@ class TestRequestedPolicyAttribution(unittest.TestCase):
                 del observation["page_policy_requested"]
         entry = audit_thp_budget([record])["entries"][0]
         self.assertEqual(entry["policy"], "default")
+
+
+# ---------------------------------------------------------------------------
+# §5.3 固定开销拟合判定（adjudicate_fixed_overhead）
+#
+# fixture 为精确线性 C = a + b·N 的合成中位计数点。需要逐位精确的测试
+# （阈值边界/离散度/确定性）用 tiers (8,16,24)：Σloads = slots×48 可被 3
+# 整除 → n̄ 在 double 下精确表示，整数 a/b 经闭式最小二乘逐位回收——边界
+# 断言不依赖浮点运气。协议档 (8,64,256) 的测试用容差断言（浮点回收误差
+# 源自大数抵消，量级 ≪ 断言 delta）。
+# ---------------------------------------------------------------------------
+
+_OVERHEAD_EVENT = "pmu.cycles.count"
+_OVERHEAD_SEEDS = (42, 7, 1337, 20260928)
+
+
+def _overhead_row(buffer_kb, slots, loads, seed, event, count):
+    """§5.3 判定的单行输入：(buffer × 长度 × seed × 事件) 的中位计数点。"""
+    return {"buffer_kb": buffer_kb, "slots": slots, "loads": loads,
+            "seed": seed, "event": event, "count": float(count)}
+
+
+def _overhead_rows(*, a, b, buffers=(512, 16384), seeds=_OVERHEAD_SEEDS,
+                   tiers=(8, 64, 256), event=_OVERHEAD_EVENT):
+    """精确线性 C = a + b·N 的逐 case median 计数点（两点 × 长度 × seed）。"""
+    rows = []
+    for buffer_kb in buffers:
+        slots = buffer_kb * 1024 // 64
+        for seed in seeds:
+            for tier in tiers:
+                loads = slots * tier
+                rows.append(_overhead_row(buffer_kb, slots, loads, seed, event,
+                                          a + b * loads))
+    return rows
+
+
+class TestFixedOverheadAdjudication(unittest.TestCase):
+    """§5.3（任务书 309–323 行冻结规则）：逐事件拟合 C_e(N)=a_e+b_e·N，
+    正式窗口长度下 |a_e|/C_e(N) ≤5% 判边界开销可忽略，超过标注"含固定
+    开销"；跨 seed 斜率离散度只报告不设阈值。"""
+
+    def test_exact_linear_points_recover_intercept_and_slope(self):
+        # ① 精确线性 C = 100 + 2N（协议档 8/64/256，2 buffer × 4 seed ×
+        # 3 长度）：每组拟合在浮点容差内回收 a=100、b=2。
+        rows = _overhead_rows(a=100, b=2)
+        self.assertEqual(len(rows), 2 * 4 * 3)
+        result = adjudicate_fixed_overhead(rows)
+        judgments = result["judgments"]
+        self.assertEqual([j["buffer_kb"] for j in judgments], [512, 16384])
+        for judgment in judgments:
+            self.assertEqual(judgment["event"], _OVERHEAD_EVENT)
+            self.assertEqual([entry["seed"] for entry in judgment["per_seed"]],
+                             [7, 42, 1337, 20260928])
+            self.assertEqual(judgment["n_formal"],
+                             judgment["buffer_kb"] * 1024 // 64 * 8)
+            for entry in judgment["per_seed"]:
+                self.assertAlmostEqual(entry["a"], 100.0, delta=1e-5)
+                self.assertAlmostEqual(entry["b"], 2.0, delta=1e-9)
+                self.assertLessEqual(entry["ratio_at_formal"], 0.05)
+            self.assertTrue(judgment["negligible"])
+            self.assertNotIn("note", judgment)
+
+    def test_ratio_above_threshold_is_not_negligible_and_noted(self):
+        # ② a 占正式窗口 6%（>5%）→ negligible=False + "含固定开销"。
+        # tiers (8,16,24) + 整数参数：a=196608、b=47、N_formal=65536 →
+        # C_formal=3276800，196608/3276800=3/50，IEEE 除法正确舍入结果与
+        # 字面量 0.06 是同一 double。
+        rows = _overhead_rows(a=196608, b=47, buffers=(512,), seeds=(42,),
+                              tiers=(8, 16, 24))
+        judgment = adjudicate_fixed_overhead(rows)["judgments"][0]
+        self.assertEqual(judgment["worst_abs_ratio"], 0.06)
+        self.assertFalse(judgment["negligible"])
+        self.assertEqual(judgment["note"], "含固定开销")
+
+    def test_ratio_at_five_percent_boundary_is_negligible(self):
+        # ③ ratio 恰为 5%（≤ 取边界）→ negligible=True。65536/1310720
+        # = 1/20，除法正确舍入结果与字面量 0.05 是同一 double。
+        rows = _overhead_rows(a=65536, b=19, buffers=(512,), seeds=(42,),
+                              tiers=(8, 16, 24))
+        judgment = adjudicate_fixed_overhead(rows)["judgments"][0]
+        self.assertEqual(judgment["worst_abs_ratio"], 0.05)
+        self.assertTrue(judgment["negligible"])
+        self.assertNotIn("note", judgment)
+
+    def test_missing_length_tier_is_hard_error(self):
+        # ④ 组内长度档缺失（只剩 2 档）→ TlbError（协议偏离 fail-closed）；
+        # 多出第 4 档同样拒绝。
+        rows = _overhead_rows(a=100, b=2, buffers=(512,), seeds=(42,),
+                              tiers=(8, 64))
+        with self.assertRaises(TlbError):
+            adjudicate_fixed_overhead(rows)
+        with self.subTest(case="extra tier"):
+            rows = _overhead_rows(a=100, b=2, buffers=(512,), seeds=(42,),
+                                  tiers=(8, 16, 64, 256))
+            with self.assertRaises(TlbError):
+                adjudicate_fixed_overhead(rows)
+
+    def test_duplicate_point_is_hard_error(self):
+        # ⑤ (buffer, event, seed, 长度) 重复 → TlbError（即使去重后恰好
+        # 3 档，重复本身是协议偏离，不许静默）。
+        rows = _overhead_rows(a=100, b=2, buffers=(512,), seeds=(42,),
+                              tiers=(8, 16, 24))
+        rows.append(dict(rows[0]))
+        with self.assertRaises(TlbError):
+            adjudicate_fixed_overhead(rows)
+
+    def test_bad_counts_are_hard_errors(self):
+        # ⑥ count 为负 / 非数值 / 非有限（NaN、inf 不是中位计数）→ TlbError。
+        base = _overhead_rows(a=100, b=2, buffers=(512,), seeds=(42,),
+                              tiers=(8, 16, 24))
+        for label, bad in (("negative", -1.0), ("string", "100"),
+                           ("nan", float("nan")), ("inf", float("inf"))):
+            with self.subTest(label=label):
+                rows = [dict(row) for row in base]
+                rows[0]["count"] = bad
+                with self.assertRaises(TlbError):
+                    adjudicate_fixed_overhead(rows)
+
+    def test_slope_spread_reports_across_seeds_without_threshold(self):
+        # ⑦ 跨 seed 斜率离散度：b 不同 → >0（(4−2)/4=0.5）；全同 → 0.0。
+        # 只报告不设阈值（§5.3 未冻结数值门槛，不发明）。
+        divergent = _overhead_rows(a=100, b=2, buffers=(512,), seeds=(42,),
+                                   tiers=(8, 16, 24))
+        divergent += _overhead_rows(a=100, b=4, buffers=(512,), seeds=(7,),
+                                    tiers=(8, 16, 24))
+        judgment = adjudicate_fixed_overhead(divergent)["judgments"][0]
+        self.assertEqual(judgment["slope_spread_rel"], 0.5)
+        same = _overhead_rows(a=100, b=2, buffers=(512,), seeds=(42, 7),
+                              tiers=(8, 16, 24))
+        judgment = adjudicate_fixed_overhead(same)["judgments"][0]
+        self.assertEqual(judgment["slope_spread_rel"], 0.0)
+
+    def test_output_is_deterministic_and_sorted(self):
+        # ⑧ 乱序输入 → 输出排序稳定（judgments 按 (buffer_kb, event)、
+        # per_seed 按 seed）；两次调用逐等。
+        rows = (_overhead_rows(a=100, b=2, buffers=(512, 16384), seeds=(42, 7),
+                               tiers=(8, 16, 24), event="pmu.dtlb_walk.count")
+                + _overhead_rows(a=100, b=2, buffers=(512, 16384), seeds=(42, 7),
+                                 tiers=(8, 16, 24), event="pmu.cycles.count"))
+        first = adjudicate_fixed_overhead(rows)
+        self.assertEqual(first, adjudicate_fixed_overhead(rows))
+        self.assertEqual(first, adjudicate_fixed_overhead(list(reversed(rows))))
+        keys = [(j["buffer_kb"], j["event"]) for j in first["judgments"]]
+        self.assertEqual(keys, sorted(keys))
+        for judgment in first["judgments"]:
+            self.assertEqual([entry["seed"] for entry in judgment["per_seed"]],
+                             [7, 42])
+
+    def test_floor_event_zero_formal_count_is_not_negligible(self):
+        # ⑨ floor 事件全零计数（a=b=0 → C_formal=0）→ ratio=inf →
+        # negligible=False：近零计数不产生"可忽略"判定（C_e(N)≤0 时比值
+        # 视为无穷）；max|b|=0 时 slope_spread_rel 定义为 0.0。
+        rows = _overhead_rows(a=0, b=0, buffers=(512,), seeds=(42,),
+                              tiers=(8, 16, 24))
+        judgment = adjudicate_fixed_overhead(rows)["judgments"][0]
+        self.assertEqual(judgment["per_seed"][0]["ratio_at_formal"],
+                         float("inf"))
+        self.assertEqual(judgment["worst_abs_ratio"], float("inf"))
+        self.assertEqual(judgment["slope_spread_rel"], 0.0)
+        self.assertFalse(judgment["negligible"])
+        self.assertEqual(judgment["note"], "含固定开销")
+
+    def test_latency_rows_are_rejected(self):
+        # ⑩ latency_ns 是墙钟量，不在 §5.3 拟合范围 → TlbError（防误消费）。
+        rows = _overhead_rows(a=100, b=2, buffers=(512,), seeds=(42,),
+                              tiers=(8, 16, 24), event="latency_ns")
+        with self.assertRaises(TlbError):
+            adjudicate_fixed_overhead(rows)
+
+    def test_row_contract_errors(self):
+        # 字段缺失/类型错/取值越界 → TlbError；空输入 → 空判定表（同
+        # grade_thp_cohorts 空表先例）。
+        self.assertEqual(adjudicate_fixed_overhead([]), {"judgments": []})
+        base = _overhead_rows(a=100, b=2, buffers=(512,), seeds=(42,),
+                              tiers=(8, 16, 24))
+        for key in ("buffer_kb", "slots", "loads", "seed", "event", "count"):
+            with self.subTest(missing=key):
+                rows = [dict(row) for row in base]
+                del rows[0][key]
+                with self.assertRaises(TlbError):
+                    adjudicate_fixed_overhead(rows)
+        bad_values = [
+            ("buffer_kb", "512"), ("buffer_kb", 0),
+            ("slots", 8192.0), ("slots", 0),
+            ("loads", True), ("loads", 0),
+            ("seed", -1), ("seed", "42"),
+            ("event", ""), ("event", 123),
+            ("count", True),
+        ]
+        for key, bad in bad_values:
+            with self.subTest(**{key: bad}):
+                rows = [dict(row) for row in base]
+                rows[0][key] = bad
+                with self.assertRaises(TlbError):
+                    adjudicate_fixed_overhead(rows)
+        with self.subTest(case="slots disagree within buffer"):
+            # slots 是 buffer 的纯函数（调用方派生 buffer_kb×1024/stride），
+            # 同 buffer 不一致即混入异协议数据 → TlbError。
+            rows = [dict(row) for row in base]
+            rows[0]["slots"] = 4096
+            with self.assertRaises(TlbError):
+                adjudicate_fixed_overhead(rows)
+        with self.subTest(case="row is not an object"):
+            with self.assertRaises(TlbError):
+                adjudicate_fixed_overhead([None])
+        for bad_param in (0, -8, 2.5, "8"):
+            with self.subTest(formal_loads_per_slot=bad_param):
+                with self.assertRaises(TlbError):
+                    adjudicate_fixed_overhead(
+                        base, formal_loads_per_slot=bad_param
+                    )
 
 
 if __name__ == "__main__":
