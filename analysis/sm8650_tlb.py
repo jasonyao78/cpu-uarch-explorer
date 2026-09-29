@@ -8,6 +8,10 @@ PMU 编码与 seed 逐样本一致、time_running==time_enabled（multiplex
 样本拒绝并登记，同记录其余样本保留）、全失败 run 进 rejected 不抛
 错——契约缺项一律硬错误，本探测不接受"大概齐全"的记录。
 
+只消费 G0 事件组记录：G0 确立前的三事件历史 run（如
+20260927T182613Z，无 `pmu.mem_access_rd.count`）不满足 metric 集合
+契约，会被硬错误拒绝——by-design fail-closed，不为旧数据放宽契约。
+
 分组键：(run_label, buffer_kb, seed, page_policy_actual, ring_passes)。
 ring passes 由记录参数直接推出（loads / (buffer_kb×1024/stride)），
 不依赖配置名约定。派生密度按任务书 §3.2 统一分母：R_e = 1000×C_e /
@@ -29,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -55,6 +60,8 @@ _PMU_EVENTS = {
 _REQUIRED_METRICS = {_LATENCY, *_PMU_EVENTS}
 _BACKING_ORDER = {"base": 0, "mixed": 1, "thp": 2, "hugetlb-2m": 3,
                   "platform-default": 4}
+# 与 runner/adapters/ptr_chase.py 同款：vma_base 只认小写 hex 地址形态。
+_VMA_BASE_RE = re.compile(r"^0x[0-9a-f]+$")
 
 # §6.2.2 knee 候选三条件的冻结阈值（改阈值 = 改冻结规则，走任务书变更）
 _KNEE_REFILL_RATIO = 2.0
@@ -178,6 +185,8 @@ def _samples_from_record(record: dict, run_label: str,
         raise TlbError(f"{context}: positive integer buffer_kb required")
     if not isinstance(loads, int) or loads <= 0:
         raise TlbError(f"{context}: positive integer loads required")
+    if not isinstance(stride, int) or stride <= 0:
+        raise TlbError(f"{context}: positive integer stride required")
     slots = (buffer_kb * 1024) // stride
     if slots < 2:
         raise TlbError(f"{context}: buffer too small for stride")
@@ -210,9 +219,12 @@ def _samples_from_record(record: dict, run_label: str,
         if not isinstance(seed, int) or seed < 0:
             raise TlbError(f"{sample_context}: seed missing or invalid ({seed!r})")
         vma_base = latency.get("vma_base")
-        if vma_base is not None and not isinstance(vma_base, str):
+        if vma_base is not None and not (
+            isinstance(vma_base, str) and _VMA_BASE_RE.fullmatch(vma_base)
+        ):
             raise TlbError(
-                f"{sample_context}: vma_base must be a hex string ({vma_base!r})"
+                f"{sample_context}: vma_base must be a lowercase hex address "
+                f"({vma_base!r})"
             )
 
         sample = {
@@ -398,7 +410,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--run", action="append", required=True,
                         help="run 目录（可重复；label 取目录名）")
     parser.add_argument("--registry", default="configs/pmu-event-registry.json",
-                        help="PMU 事件资格注册表（默认 configs/pmu-event-registry.json）")
+                        help="PMU 事件资格注册表（默认 configs/pmu-event-registry.json；"
+                             "相对 CWD 解析，默认路径要求从仓库根运行）")
     parser.add_argument("--samples", action="store_true",
                         help="在汇总后附逐样本行（HTML 注释形式，便于归档）")
     args = parser.parse_args(argv)

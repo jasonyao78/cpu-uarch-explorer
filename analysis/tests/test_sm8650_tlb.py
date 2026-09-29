@@ -185,9 +185,13 @@ class TestSamples(unittest.TestCase):
 
 class TestKneeCandidates(unittest.TestCase):
     def test_positive_control_points_are_not_misreported_as_knee(self):
-        """正控点对（128/4096 页，run 20260927T182613Z 格局）：R_0x05 比
-        值与绝对增量满足 §6.2.2，但 cyc/load 比值 <1.15——三条件不全，
-        不得提名候选。"""
+        """三条件不全满足即否决（§6.2.2 合取语义）。fixture 的页数档与
+        refill 密度取正控量级（128/4096 页、≈288→1030/1k，对应 run
+        20260927T182613Z 格局），但 cycles 是构造值：cyc/load 比值
+        ≈1.05 <1.15，故无候选。注意真实正控点对的 cyc/load median 为
+        6.633→16.216（比值 ≈2.44 ≥1.15），三条件**全满足**，按冻结规则
+        会被提名——那是真阳性，不是误报；本测试钉的是门逻辑，不是对真
+        实数据的复演。"""
         with tempfile.TemporaryDirectory() as tmp:
             registry = _write_registry(
                 Path(tmp) / "registry.json", _QUALIFIED_ALL
@@ -286,8 +290,19 @@ class TestContractErrors(unittest.TestCase):
         record = _record()
         record["metrics"][0]["observations"][0]["page_policy_actual"] = "weird"
         cases["unknown backing"] = record
+        record = _record()
+        record["params"]["stride"] = 0
+        cases["zero stride"] = record
         for label, record in cases.items():
             with self.subTest(label=label), self.assertRaises(TlbError):
+                analyze_records([record], "run-a")
+
+    def test_vma_base_format_is_validated(self):
+        # 与 runner/adapters/ptr_chase.py 同款契约：^0x[0-9a-f]+$。
+        for bad in ("xyz", "0xAB12", "0X7f3a00000000"):
+            record = _record()
+            record["metrics"][0]["observations"][0]["vma_base"] = bad
+            with self.subTest(vma_base=bad), self.assertRaises(TlbError):
                 analyze_records([record], "run-a")
 
 
