@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""SM8650 X4 TLB 层级探测分析器测试（任务书 v4.2 §9.3）。
+"""SM8650 X4 TLB 层级探测分析器测试（任务书 v4.3 §9.3）。
 
 合成记录仿 `test_sm8650_x4_p0prime` 的 `_record` 模式（G0 事件组 + 逐
 样本 seed/vma_base/backing 入档）。覆盖骨架契约：正控点对不被误报为
@@ -12,8 +12,10 @@ knee（§6.2.2 三条件不全满足时无候选）、`0x05` density >1000/1k �
 以及块机制：§6.4 三块归组（group_block，experiment_id 定角色 +
 probe SHA-256/target/时序关联证据）与 §6.2.5 锚点判据
 （validate_anchors：环境门禁、latency/cyc 对照 short-base 参照 ≤3%、
-512 KiB R 值落 Gate 0 制度匹配参照 [p25,p75]（v4.2）、3072 KiB 首块
-自校准、前后锚点互判）；
+512 KiB R_0x05 落 Gate 0 制度匹配参照 [p25,p75]（v4.2）、512 KiB
+R_0x34 计数容差判据（v4.3：地板量化指标，|median−参照| ≤
+max(3, 0.5×参照) walks/窗，含前后互判）、3072 KiB 首块自校准、前后
+锚点互判）；
 以及 §7 Phase D THP cohort（分级：比较级 ≥5 有效样本出 median / 描述级
 3–4 只报原始观测 / <3 与未达比较级终态 INSUFFICIENT_COHORT；跨 seed
 同制度合并、异制度分列；mixed 不并入 thp；40 进程次/(buffer×policy)
@@ -743,7 +745,9 @@ def _evidence_group_stats(run_label, buffer_kb, metric, per_loads_scale):
 
 def _reference_expectations():
     """§6.2.5 参照期望值：short-base 512/3072 KiB 组 median（latency 与
-    cyc/load）+ Gate 0 参照 512 KiB 组 R 值 [p25, p75] 与 median。"""
+    cyc/load）+ Gate 0 参照 512 KiB 组 R 值 [p25, p75] 与 median +
+    512 KiB 组逐样本 walk 原始计数（walks/窗）median（v4.3 计数容差
+    判据的参照）。"""
     expectations = {"medians": {}, "r512_p25_p75": {}, "r512_median": {}}
     for buffer_kb in (512, 3072):
         expectations["medians"][buffer_kb] = {
@@ -759,6 +763,8 @@ def _reference_expectations():
         stats = _evidence_group_stats(_GATE0_CTRL_RUN, 512, metric, 1000.0)
         expectations["r512_p25_p75"][field] = (stats["p25"], stats["p75"])
         expectations["r512_median"][field] = stats["median"]
+    expectations["walk512_median_count"] = _evidence_group_stats(
+        _GATE0_CTRL_RUN, 512, "pmu.dtlb_walk.count", None)["median"]
     return expectations
 
 
@@ -773,16 +779,22 @@ _T2 = "2026-09-29T03:00:00+00:00"  # anchor-after
 
 
 def _case_record(*, buffer_kb, latency_ns, cyc_per_load, refill_per_1k,
-                 walk_per_1k, timestamp, sha=_PROBE_SHA, seed=42):
+                 walk_per_1k, timestamp, sha=_PROBE_SHA, seed=42,
+                 walk_count=None):
     """锚点/主体 case 记录：10 进程恒定逐样本值（median=p25=p75=给定值，
-    便于把判据偏差钉在阈值两侧）。"""
+    便于把判据偏差钉在阈值两侧）。walk_count 给定时每样本 dtlb_walk
+    原始计数取该值（walks/窗，v4.3 计数容差判据的消费面），派生 /1k
+    密度由分析器换算——512 KiB（loads=65536=2^16）下半整数计数往返
+    精确，可把边界钉在 double 精确值上。"""
     slots = buffer_kb * 1024 // 64
     loads = slots * 8  # 短训练（loads_per_slot=8），同锚点配置展开
     pmu_values = {
         "pmu.cycles.count": cyc_per_load * loads,
         "pmu.mem_access_rd.count": 1000.0,
         "pmu.l1d_tlb_refill.count": refill_per_1k * loads / 1000.0,
-        "pmu.dtlb_walk.count": walk_per_1k * loads / 1000.0,
+        "pmu.dtlb_walk.count": (
+            walk_per_1k * loads / 1000.0 if walk_count is None else walk_count
+        ),
     }
     observations = [{
         "sample_index": index,
@@ -872,12 +884,14 @@ def _loaded_run(label, experiment_id, ok_records, *, failed_records=(),
 
 
 def _anchor_run(label, timestamp, *, lat_512=None, cyc_512=None,
-                r05_512=None, r34_512=None,
+                r05_512=None, r34_512=None, walks_512=None,
                 lat_3072=None, cyc_3072=None, r05_3072=500.0, r34_3072=0.02,
                 sha=_PROBE_SHA, failed_records=(), summary_failed=None):
     """锚点 run：固定 512/3072 KiB 两个 base case（§6.2.5），缺省值 =
-    现场重算的参照中位（偏差 0、落在 Gate 0 参照区间内）。3072 KiB
-    R 值无历史参照，fixture 任取恒定值。"""
+    现场重算的参照中位（偏差 0、落在 Gate 0 参照区间内）。walks_512
+    以 walks/窗计数直接钉 512 KiB R_0x34（v4.3 计数容差判据），优先
+    于 r34_512 的密度指定。3072 KiB R 值无历史参照，fixture 任取恒定
+    值。"""
     records = [
         _case_record(
             buffer_kb=512,
@@ -889,6 +903,7 @@ def _anchor_run(label, timestamp, *, lat_512=None, cyc_512=None,
                            if r05_512 is None else r05_512),
             walk_per_1k=(_REF["r512_median"]["dtlb_walk_per_1k"]
                          if r34_512 is None else r34_512),
+            walk_count=walks_512,
             timestamp=timestamp, sha=sha,
         ),
         _case_record(
@@ -1058,13 +1073,12 @@ class TestValidateAnchors(unittest.TestCase):
             for failure in failures
         ))
 
-    def test_512_r_values_outside_positive_control_interval_fail(self):
-        # ③512 KiB R_0x05/R_0x34 median 落在 Gate 0 参照 [p25, p75] 外
-        # → 失败（缺省 fixture 取参照 median，在区间内——①即反向对
-        # 照）。check 名里的 positive_control 是 §6.2.5 判据 3 的历史
-        # 标识符，参照本身自 v4.2 起为制度匹配的 Gate 0 run。
+    def test_512_r05_outside_positive_control_interval_fails(self):
+        # ③512 KiB R_0x05 median 落在 Gate 0 参照 [p25, p75] 外 → 失败
+        # （v4.3 区间判据回归不变；缺省 fixture 取参照 median，在区间
+        # 内——①即反向对照）。512 KiB R_0x34 自 v4.3 起走计数容差判
+        # 据，见 test_512_walk_count_tolerance_boundaries。
         r05_p25, r05_p75 = _REF["r512_p25_p75"]["l1d_tlb_refill_per_1k"]
-        r34_p25, _ = _REF["r512_p25_p75"]["dtlb_walk_per_1k"]
         with self.subTest(metric="R_0x05 above p75"):
             block = _block(
                 before=_anchor_run("before", _T0, r05_512=r05_p75 + 1.0),
@@ -1073,17 +1087,94 @@ class TestValidateAnchors(unittest.TestCase):
             verdict = validate_anchors(block)
             self.assertEqual(verdict.status, "BLOCK_FAILED")
             self.assertIsNone(verdict.main_result)
-        with self.subTest(metric="R_0x34 below p25"):
+            self.assertTrue(any(
+                failure["check"]
+                == "l1d_tlb_refill_per_1k_within_positive_control_512"
+                for failure in verdict.evidence["failures"]
+            ))
+        with self.subTest(metric="R_0x05 below p25"):
             block = _block(
-                before=_anchor_run("before", _T0, r34_512=r34_p25 / 2),
-                after=_anchor_run("after", _T2, r34_512=r34_p25 / 2),
+                before=_anchor_run("before", _T0, r05_512=r05_p25 - 1.0),
+                after=_anchor_run("after", _T2, r05_512=r05_p25 - 1.0),
             )
             verdict = validate_anchors(block)
             self.assertEqual(verdict.status, "BLOCK_FAILED")
+            self.assertIsNone(verdict.main_result)
+
+    def test_512_walk_count_tolerance_boundaries(self):
+        # ③′512 KiB R_0x34 计数容差判据（v4.3）：|median − 参照 median|
+        # ≤ max(3, 0.5×参照 median)。参照 median 现算 = 11 walks/窗 →
+        # 容差 5.5 → 容差带 [5.5, 16.5]。边界值 5.5/16.5 为半整数，在
+        # loads=65536=2^16 下计数往返 double 精确（fixture 注释），可
+        # 钉恰在带边通过、带外 0.1 失败。
+        with self.subTest(edge="lower bound 5.5 passes"):
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, walks_512=5.5),
+                after=_anchor_run("after", _T2, walks_512=5.5),
+            ))
+            self.assertEqual(verdict.status, "ANCHORS_OK")
+        with self.subTest(edge="upper bound 16.5 passes"):
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, walks_512=16.5),
+                after=_anchor_run("after", _T2, walks_512=16.5),
+            ))
+            self.assertEqual(verdict.status, "ANCHORS_OK")
+        with self.subTest(edge="below band 5.4 fails"):
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, walks_512=5.4),
+                after=_anchor_run("after", _T2, walks_512=5.4),
+            ))
+            self.assertEqual(verdict.status, "BLOCK_FAILED")
+            self.assertIsNone(verdict.main_result)
+            walk_failures = [
+                failure for failure in verdict.evidence["failures"]
+                if failure["check"] == "dtlb_walk_count_tolerance_512"
+            ]
+            self.assertTrue(walk_failures)
+            failure = walk_failures[0]
+            self.assertEqual(failure["reference_median_count"], 11.0)
+            self.assertEqual(failure["tolerance_band"], [5.5, 16.5])
+            self.assertAlmostEqual(failure["median_count"], 5.4)
+            self.assertAlmostEqual(failure["deviation_count"], 5.6)
+        with self.subTest(edge="above band 16.6 fails"):
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, walks_512=16.6),
+                after=_anchor_run("after", _T2, walks_512=16.6),
+            ))
+            self.assertEqual(verdict.status, "BLOCK_FAILED")
             self.assertTrue(any(
-                "dtlb_walk_per_1k" in failure["check"]
+                failure["check"] == "dtlb_walk_count_tolerance_512"
                 for failure in verdict.evidence["failures"]
             ))
+
+    def test_512_walk_mutual_count_tolerance(self):
+        # v4.3：前后锚点 512 KiB R_0x34 互判同用计数容差——
+        # |before − after| ≤ max(3, 0.5×参照 median) = 5.5 walks/窗。
+        with self.subTest(edge="mutual deviation 5.5 passes"):
+            # before=5.5（带边，参照检查过）与 after=11.0 差恰 5.5。
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, walks_512=5.5),
+                after=_anchor_run("after", _T2, walks_512=11.0),
+            ))
+            self.assertEqual(verdict.status, "ANCHORS_OK")
+        with self.subTest(edge="mutual deviation 5.6 fails"):
+            # 两者各自在容差带内（参照检查过），互判差 5.6 >5.5 → 仅互
+            # 判失败（隔离验证互判独立生效）。
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, walks_512=5.5),
+                after=_anchor_run("after", _T2, walks_512=11.1),
+            ))
+            self.assertEqual(verdict.status, "BLOCK_FAILED")
+            failures = verdict.evidence["failures"]
+            self.assertEqual(
+                [failure["check"] for failure in failures],
+                ["dtlb_walk_count_before_after_mutual"],
+            )
+            mutual = failures[0]
+            self.assertAlmostEqual(mutual["median_count_before"], 5.5)
+            self.assertAlmostEqual(mutual["median_count_after"], 11.1)
+            self.assertAlmostEqual(mutual["deviation_count"], 5.6)
+            self.assertEqual(mutual["tolerance"], 5.5)
 
     def test_3072_first_block_self_calibrates_later_blocks_compare(self):
         # ④3072 KiB 无 G0 历史数据：首块只记录不判失，以 anchor-before
@@ -1273,18 +1364,33 @@ class TestAnchorReferences(unittest.TestCase):
                     tuple(check["interval"]), _REF["r512_p25_p75"][field]
                 )
                 seen.add(("r512", field))
-        # 防空心化：四类参照（2 buffer × 2 median 字段 + 2 个 R 区间）
-        # 都被证据覆盖。
+            elif check["check"] == "dtlb_walk_count_tolerance_512":
+                # v4.3：walk 计数参照同样独立重算核对。
+                self.assertEqual(check["reference_median_count"],
+                                 _REF["walk512_median_count"])
+                seen.add(("walk512",))
+        # 防空心化：参照面全覆盖（2 buffer × 2 median 字段 + R_0x05 区
+        # 间 + walk 计数参照）。
         self.assertEqual(
             seen,
             {("median", buffer, field)
              for buffer in (512, 3072)
              for field in ("latency_ns", "cyc_per_load")}
-            | {("r512", field)
-               for field in ("l1d_tlb_refill_per_1k", "dtlb_walk_per_1k")},
+            | {("r512", "l1d_tlb_refill_per_1k"), ("walk512",)},
         )
         self.assertIs(sm8650_tlb._anchor_references(),
                       sm8650_tlb._anchor_references())
+
+    def test_walk_reference_median_count_matches_evidence_run(self):
+        # v4.3 回归钉：512 KiB walk 计数参照 median 现算自 Gate 0 run
+        # = 11 walks/窗（容差带 [5.5, 16.5] 的锚点；任务书 §6.2.5"判据
+        # 形式（v4.3 修订）"段明示值），并与本测试独立重算一致。
+        references = sm8650_tlb._compute_anchor_references(
+            _REPO_ROOT / "data" / "public" / "runs"
+        )
+        self.assertEqual(references["walk512_median_count"], 11.0)
+        self.assertEqual(references["walk512_median_count"],
+                         _REF["walk512_median_count"])
 
     def test_missing_or_incomplete_reference_runs_are_hard_errors(self):
         # fail-closed：参照 run 缺失、带失败记录或 buffer 组不全 →

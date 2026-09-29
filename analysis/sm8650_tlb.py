@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""SM8650 X4 TLB 层级探测逐样本分析器（任务书 v4.2）。
+"""SM8650 X4 TLB 层级探测逐样本分析器（任务书 v4.3）。
 
 与 `analysis.sm8650_x4_p0prime` 并列的独立模块（两任务的冻结规则各自
 演化，刻意复制契约链而非共享实现）。证据契约与 P0″ 同构：schema
@@ -82,8 +82,10 @@ probe SHA-256 与 target 一致、逐记录 timestamp 时序与角色一致（�
 BLOCK_INCOMPLETE。validate_anchors 执行 §6.2.5 质量门槛：环境门禁
 （锚点 run summary failed>0 或记录带 environment-precondition-
 failed → 锚点失真）、latency/cyc 对照 short-base 参照 median 偏差
-≤3%、512 KiB R 值落入 Gate 0 制度匹配参照 [p25,p75]（v4.2；参照选
-择原则 = 制度匹配，旧正控 run 仅保留方向性正控角色）、3072 KiB 首
+≤3%、512 KiB R_0x05 落入 Gate 0 制度匹配参照 [p25,p75]（v4.2；参
+照选择原则 = 制度匹配，旧正控 run 仅保留方向性正控角色）、512 KiB
+R_0x34 计数容差判据（v4.3：地板量化指标，|median−参照 median| ≤
+max(3, 0.5×参照 median) walks/窗，前后互判同一结构）、3072 KiB 首
 块自校准（prior_3072_baseline 缺省时只记录建基线，后续块按同一规
 则比较）、前后锚点同指标互判。参照分布不写死：_anchor_references()
 运行时从 data/public/runs/ 的两个 evidence run 现读现算并缓存（仓
@@ -160,6 +162,19 @@ _ANCHOR_BUFFERS = (512, 3072)  # 锚点配置固定的两个 base case（KiB）
 _ANCHOR_MAX_DEVIATION = 0.03   # latency/cyc median 偏差上限（§6.2.5）
 _ANCHOR_MEDIAN_FIELDS = ("latency_ns", "cyc_per_load")
 _ANCHOR_RATE_FIELDS = ("l1d_tlb_refill_per_1k", "dtlb_walk_per_1k")
+
+# §6.2.5 判据形式（v4.3 修订）：512 KiB R_0x34 是地板量化指标
+# （1 walk = 0.0153/1k @ 65536 loads；§5.3 实测冷启动 ≈8 walks/窗为
+# 固定项主导），区间隶属判据对参照自身 ±3 walks 的实现差过敏（Phase A
+# 首块实证：Gate 0 地板 11 walks/窗，其后四次同制度测量 7.5–8.5——失
+# 真在参照实现而非数据）。故 512 KiB R_0x34（参照检查与前后互判，同
+# 一量化结构）改用计数容差：|median − 参照 median| ≤
+# max(_ANCHOR_WALK_TOLERANCE_FLOOR,
+#     _ANCHOR_WALK_TOLERANCE_FACTOR × 参照 median)，单位 walks/窗。
+# 出处：任务书 v4.2→v4.3 修订映射（§6.2.5"判据形式（v4.3 修订）"段）。
+# 改阈值 = 改冻结规则，走任务书变更。
+_ANCHOR_WALK_TOLERANCE_FLOOR = 3.0   # walks/窗绝对容差下限
+_ANCHOR_WALK_TOLERANCE_FACTOR = 0.5  # 参照 median 的相对容差系数
 
 # §6.2.5 参照 evidence run（来源 run 由任务书钉死）：
 # - latency/cyc 参照 = short-base run 同 buffer 组（该 run 含
@@ -1440,7 +1455,11 @@ def _compute_anchor_references(runs_root: Path) -> dict:
     {"latency_ns", "cyc_per_load"}}（short-base 同 buffer 组 median）、
     "r512_p25_p75": {field: (p25, p75)}（Gate 0 tlb-ctrl 512 KiB 组，
     v4.2 起的制度匹配 R 值参照——选择原则与旧 run 角色见
-    _ANCHOR_REF_CTRL_RUN 处注释）}。
+    _ANCHOR_REF_CTRL_RUN 处注释；v4.3 起仅 R_0x05 消费区间判据，
+    R_0x34 区间保留作审计快照）、
+    "walk512_median_count": float（同一 512 KiB 组逐样本
+    pmu.dtlb_walk.count **原始计数**的 median，单位 walks/窗，不做
+    /1k 换算——v4.3 计数容差判据的参照 median）}。
     """
     short_base = _load_reference_run(runs_root / _ANCHOR_REF_SHORT_BASE_RUN)
     medians = {
@@ -1460,7 +1479,12 @@ def _compute_anchor_references(runs_root: Path) -> dict:
     ):
         stats = summarize(_reference_values(ctrl, 512, metric, 1000.0))
         r512_p25_p75[field] = (stats["p25"], stats["p75"])
-    return {"medians": medians, "r512_p25_p75": r512_p25_p75}
+    return {
+        "medians": medians,
+        "r512_p25_p75": r512_p25_p75,
+        "walk512_median_count": summarize(_reference_values(
+            ctrl, 512, "pmu.dtlb_walk.count", None))["median"],
+    }
 
 
 _ANCHOR_REFERENCES: dict | None = None
@@ -1508,6 +1532,17 @@ def _relative_deviation(value: float, reference: float) -> float:
     return abs(value - reference) / reference
 
 
+def _walk_count_median(group: dict) -> float:
+    """512 KiB 锚点组的逐样本 walk 计数（walks/窗）中位数（v4.3 计数
+    容差判据的输入）：由派生 /1k 密度按每样本 record 的 params.loads
+    换算回计数——不硬编码 loads（512 KiB 锚点 case 恒 65536，但换算
+    取记录自证值）。"""
+    return summarize([
+        sample["dtlb_walk_per_1k"] * sample["loads"] / 1000.0
+        for sample in group["samples"]
+    ])["median"]
+
+
 def _anchor_stats_evidence(groups: dict[str, dict[int, dict]]) -> dict:
     """前/后锚点各 buffer 组的 median [p25, p75] 快照（审计用）。"""
     return {
@@ -1542,18 +1577,32 @@ def validate_anchors(block: BlockResult,
     2. latency 与 cycles/load：前/后锚点各自同 buffer 组 median 对照
        short-base 参照（_anchor_references() 运行时现读现算，来源 run
        与纪律理由见其 docstring）偏差 ≤3%；
-    3. R_0x05/R_0x34（512 KiB）：前/后锚点组 median 落入 Gate 0 制度
-       匹配参照 [p25, p75]（v4.2；同前，运行时现读现算。check 名里的
-       positive_control 是判据 3 的历史标识符——v4.1 参照确为正控
-       run——保留不改，免断 evidence 消费者）；
+    3. R_0x05/R_0x34（512 KiB）：R_0x05 前/后锚点组 median 落入 Gate
+       0 制度匹配参照 [p25, p75]（v4.2；同前，运行时现读现算。check
+       名里的 positive_control 是判据 3 的历史标识符——v4.1 参照确
+       为正控 run——保留不改，免断 evidence 消费者）；R_0x34 为地
+       板量化指标，v4.3 起改用计数容差判据：|median − 参照 median|
+       ≤ max(3, 0.5 × 参照 median)，单位 walks/窗，参照 median 现算
+       自同一 Gate 0 run（v4.3 出处：任务书修订映射 §6.2.5"判据形
+       式（v4.3 修订）"段，Phase A 首块实证——Gate 0 地板 11
+       walks/窗，其后四次同制度测量 7.5–8.5，失真在参照实现而非数
+       据）。计数由逐样本派生 /1k 密度按 record 的 params.loads 换
+       算（不硬编码 loads）。check 名自 v4.3 由
+       dtlb_walk_per_1k_within_positive_control_512 改为
+       dtlb_walk_count_tolerance_512（语义变化：区间隶属 → 计数容
+       差，改名防静默语义漂移；改名时无生产消费者）；
     4. R_0x05/R_0x34（3072 KiB）：无 G0 历史数据——prior_3072_baseline
        缺省（首块）时只记录不判失，以 anchor-before 的 3072 组分布建
        基线随 verdict 输出；有基线时前/后锚点 median 均须落入基线
        [p25, p75]（同一规则，跨块一致性）；
     5. 前后锚点互判（同一规则）：同 buffer latency/cyc median 相对偏
-       差 ≤3%（双向）；R 值 median 互落入对方 [p25, p75]（双向）。
-       3072 KiB 首块豁免只针对判据 4（无历史可比）——互判仍执行
-       （任务书沉默处取保守分支：块内漂移可独立于历史检出）。
+       差 ≤3%（双向）；R 值 median 互落入对方 [p25, p75]（双向）——
+       例外：512 KiB R_0x34 互判自 v4.3 起同用计数容差
+       |before − after| ≤ max(3, 0.5 × 参照 median) walks/窗（check
+       名同步改为 dtlb_walk_count_before_after_mutual）；3072 KiB 互
+       判及其余互判维持区间规则不变。3072 KiB 首块豁免只针对判据 4
+       （无历史可比）——互判仍执行（任务书沉默处取保守分支：块内漂
+       移可独立于历史检出）。
 
     baseline_3072 仅 ANCHORS_OK 时输出（失败块的分布不晋升为基线）。
     """
@@ -1580,6 +1629,13 @@ def validate_anchors(block: BlockResult,
     # 参照分布现读现算（模块级缓存）；参照 run 缺失/不全 → TlbError
     # （fail-closed，不静默降级为跳过判定）。
     references = _anchor_references()
+    # v4.3 计数容差（512 KiB R_0x34 参照检查与前后互判共用，同一量化
+    # 结构）：max(3 walks, 0.5 × 参照 median walks/窗)。
+    reference_walk_count = references["walk512_median_count"]
+    walk_tolerance = max(
+        _ANCHOR_WALK_TOLERANCE_FLOOR,
+        _ANCHOR_WALK_TOLERANCE_FACTOR * reference_walk_count,
+    )
     groups: dict[str, dict[int, dict]] = {}
     anchor_rejected: dict[str, int] = {}
     for role, key, run in (
@@ -1604,16 +1660,38 @@ def validate_anchors(block: BlockResult,
                     "ok": deviation <= _ANCHOR_MAX_DEVIATION,
                 })
         group_512 = groups[role][512]
-        for metric, interval in references["r512_p25_p75"].items():
-            median = group_512[metric]["median"]
-            checks.append({
-                "check": f"{metric}_within_positive_control_512",
-                "run": role,
-                "buffer_kb": 512,
-                "median": median,
-                "interval": list(interval),
-                "ok": interval[0] <= median <= interval[1],
-            })
+        # 判据 3（R_0x05，v4.3 维持区间隶属不变）：median 落入 Gate 0
+        # 参照 [p25, p75]。check 名里的 positive_control 是 v4.1 参照
+        # 角色（旧正控 run）的历史标识符，保留不改名（语义未变）。
+        metric = "l1d_tlb_refill_per_1k"
+        interval = references["r512_p25_p75"][metric]
+        median = group_512[metric]["median"]
+        checks.append({
+            "check": f"{metric}_within_positive_control_512",
+            "run": role,
+            "buffer_kb": 512,
+            "median": median,
+            "interval": list(interval),
+            "ok": interval[0] <= median <= interval[1],
+        })
+        # 判据 3（R_0x34，v4.3 修订）：地板量化指标改用计数容差——
+        # |median − 参照 median| ≤ max(3, 0.5×参照 median) walks/窗。
+        # check 名由 dtlb_walk_per_1k_within_positive_control_512 改为
+        # dtlb_walk_count_tolerance_512（语义变化：区间隶属 → 计数容
+        # 差，改名防静默语义漂移；改名时无生产消费者）。
+        walk_median_count = _walk_count_median(group_512)
+        deviation_count = abs(walk_median_count - reference_walk_count)
+        checks.append({
+            "check": "dtlb_walk_count_tolerance_512",
+            "run": role,
+            "buffer_kb": 512,
+            "median_count": walk_median_count,
+            "reference_median_count": reference_walk_count,
+            "tolerance_band": [reference_walk_count - walk_tolerance,
+                               reference_walk_count + walk_tolerance],
+            "deviation_count": deviation_count,
+            "ok": deviation_count <= walk_tolerance,
+        })
         if prior_3072_baseline is not None:
             group_3072 = groups[role][3072]
             for metric in _ANCHOR_RATE_FIELDS:
@@ -1646,6 +1724,27 @@ def validate_anchors(block: BlockResult,
                 "ok": deviation <= _ANCHOR_MAX_DEVIATION,
             })
         for metric in _ANCHOR_RATE_FIELDS:
+            if buffer_kb == 512 and metric == "dtlb_walk_per_1k":
+                # v4.3：512 KiB R_0x34 前后互判改用计数容差（同一量化
+                # 结构）：|before − after| ≤ max(3, 0.5×参照 median)。
+                # check 名由 dtlb_walk_per_1k_before_after_mutual 改为
+                # dtlb_walk_count_before_after_mutual（语义变化同判据
+                # 3 改名）；3072 KiB 互判维持区间规则不变。
+                count_before = _walk_count_median(before[512])
+                count_after = _walk_count_median(after[512])
+                deviation_count = abs(count_before - count_after)
+                checks.append({
+                    "check": "dtlb_walk_count_before_after_mutual",
+                    "run": "mutual",
+                    "buffer_kb": 512,
+                    "median_count_before": count_before,
+                    "median_count_after": count_after,
+                    "reference_median_count": reference_walk_count,
+                    "tolerance": walk_tolerance,
+                    "deviation_count": deviation_count,
+                    "ok": deviation_count <= walk_tolerance,
+                })
+                continue
             stats_before = before[buffer_kb][metric]
             stats_after = after[buffer_kb][metric]
             checks.append({
