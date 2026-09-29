@@ -16,6 +16,19 @@
     },
     {
       "type": 8,
+      "config": "0x11",
+      "name": "cycles",
+      "midr": "0x410fd821",
+      "source_doc": ["102484_0002_05_en", "cortex-x4.json"],
+      "source_revision": ["Issue 05", "sha256:c11c4ee0f6ad6b61 (accessed 2026-09-28)"],
+      "positive_control_run": "20260927T182457Z",
+      "outcome": "正控通过（P0 cache 组正控）：architected CPU_CYCLES，cyc/load 与 ns×cpufreq 自洽（各 case median 4.0–17.4 cyc 全区间）；全样本 time_running==time_enabled。",
+      "review_ref": "docs/reviews/2026-09-28-sm8650-pmu-positive-control.md",
+      "validity_scope": "redmi-k70pro-01 CPU7 Cortex-X4（armv8_pmuv3）；ptr_chase 依赖链；用于密度/趋势判定（cyc/load 比值、§6.2.2 第三条件）",
+      "qualification": "qualified"
+    },
+    {
+      "type": 8,
       "config": "0x34",
       "name": "dtlb_walk",
       "midr": "0x410fd821",
@@ -25,6 +38,19 @@
       "outcome": "正控通过：128 页 0.013/1k → 4096 页 39.9/1k（约 3100×），地板与规模双向验证；10 个新进程重复稳定、无恒零；全样本 time_running==time_enabled。复审更正后限 walk-like density 结论（= L2 TLB miss 触发）。",
       "review_ref": "docs/reviews/2026-09-28-sm8650-pmu-positive-control.md",
       "validity_scope": "redmi-k70pro-01 CPU7 Cortex-X4（armv8_pmuv3）；ptr_chase 依赖链、4KiB base pages；density 型结论，不支持容量定案",
+      "qualification": "qualified"
+    },
+    {
+      "type": 8,
+      "config": "0x66",
+      "name": "mem_access_rd",
+      "midr": "0x410fd821",
+      "source_doc": ["102484_0002_05_en", "cortex-x4.json"],
+      "source_revision": ["Issue 05", "sha256:c11c4ee0f6ad6b61 (accessed 2026-09-28)"],
+      "positive_control_run": "20260928T024022Z",
+      "outcome": "正控通过（P0″ 复测）：基线 1003–1062/1k（理想 1000/1k 之上的固定开销：短训练窗口 ~5–6%，长训练 ~0.3%）；全样本 time_running==time_enabled。",
+      "review_ref": "docs/reviews/2026-09-28-sm8650-x4-p0prime.md",
+      "validity_scope": "redmi-k70pro-01 CPU7 Cortex-X4（armv8_pmuv3）；ptr_chase 依赖链、base pages；含固定开销 caveat——跨档比较须先扣除基线偏移",
       "qualification": "qualified"
     },
     {

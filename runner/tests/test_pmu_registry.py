@@ -3,7 +3,9 @@
 
 对应任务书 §3.1/S4（docs/tasks/2026-09-28-sm8650-tlb-hierarchy.md）：事件资格是数据记录而
 非分析器常量——每条注册必须携带完整溯源字段，资格只取 candidate/qualified 两级；SM8650
-Cortex-X4（midr 0x410fd821）的 0x05/0x34/0x8144 三条锚点事件必须已升 qualified。
+Cortex-X4（midr 0x410fd821）的 0x05/0x11/0x34/0x66/0x8144 五条锚点事件必须已升
+qualified（含两条 architected 事件：cycles 0x11 经 P0 cache 正控、mem_access_rd 0x66 经
+P0″ 复测）。
 追加守卫：source_doc/source_revision 平行数组等长（防错位配对）、(midr, config) 唯一
 （防重复注册静默覆盖）、review_ref 落盘存在（防悬空引用）。
 """
@@ -30,7 +32,7 @@ REQUIRED_KEYS = {
 }
 QUALIFICATIONS = {"candidate", "qualified"}
 SM8650_X4_MIDR = "0x410fd821"
-SM8650_X4_QUALIFIED_CONFIGS = {"0x05", "0x34", "0x8144"}
+SM8650_X4_QUALIFIED_CONFIGS = {"0x05", "0x11", "0x34", "0x66", "0x8144"}
 
 
 class TestPmuEventRegistry(unittest.TestCase):
