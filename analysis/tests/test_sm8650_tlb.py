@@ -925,6 +925,21 @@ def _failed_env_record(timestamp, *, buffer_kb=512, sha=_PROBE_SHA):
     return record
 
 
+@contextlib.contextmanager
+def _references_root(path):
+    """临时替换参照 runs 根并清缓存（模拟参照 run 缺失/损坏）；退出时
+    恢复原根与原缓存，与测试执行顺序无关。"""
+    old_root = sm8650_tlb._ANCHOR_REF_RUNS_ROOT
+    old_cache = sm8650_tlb._ANCHOR_REFERENCES
+    sm8650_tlb._ANCHOR_REF_RUNS_ROOT = path
+    sm8650_tlb._ANCHOR_REFERENCES = None
+    try:
+        yield
+    finally:
+        sm8650_tlb._ANCHOR_REF_RUNS_ROOT = old_root
+        sm8650_tlb._ANCHOR_REFERENCES = old_cache
+
+
 class TestGroupBlock(unittest.TestCase):
     """§6.4 三块归组：角色由 experiment_id 决定；关联证据（probe
     SHA-256 / target / manifest 时序）不满足即硬错误，不降级推断。"""
@@ -1154,6 +1169,45 @@ class TestValidateAnchors(unittest.TestCase):
         with self.assertRaises(TlbError):
             validate_anchors(block)
 
+    def test_env_gate_short_circuits_before_reference_load(self):
+        # env 失真块先短路结案：即使参照 run 缺失（本会 TlbError），也
+        # 干净结案 BLOCK_FAILED——锚点失真不依赖参照分布。
+        after = _anchor_run("after", _T2,
+                            failed_records=[_failed_env_record(_T2)])
+        block = _block(after=after)
+        with tempfile.TemporaryDirectory() as tmp, _references_root(Path(tmp)):
+            verdict = validate_anchors(block)
+        self.assertEqual(verdict.status, "BLOCK_FAILED")
+        self.assertTrue(any(
+            failure["check"] == "environment_gate"
+            for failure in verdict.evidence["failures"]
+        ))
+
+    def test_anchor_rejected_counts_are_in_evidence(self):
+        # 锚点 run 的 rejected 样本计数（如 multiplex 拒绝）进 verdict
+        # evidence——审计面不缺段；余下 9 样本恒定，判定不受影响。
+        before = _anchor_run("before", _T0)
+        before.ok_records[0]["metrics"][1]["observations"][3][
+            "time_running_ns"] = 0  # multiplex：running<enabled → 拒绝
+        verdict = validate_anchors(
+            _block(before=before, after=_anchor_run("after", _T2))
+        )
+        self.assertEqual(verdict.status, "ANCHORS_OK")
+        self.assertEqual(verdict.evidence["anchor_rejected"],
+                         {"before": 1, "after": 0})
+        # 判失路径同样带计数（此处两锚点无 rejected → 全 0）。
+        drifted = validate_anchors(_block(
+            before=_anchor_run(
+                "before2", _T0,
+                lat_512=_REF["medians"][512]["latency_ns"] * 1.05),
+            after=_anchor_run(
+                "after2", _T2,
+                lat_512=_REF["medians"][512]["latency_ns"] * 1.05),
+        ))
+        self.assertEqual(drifted.status, "BLOCK_FAILED")
+        self.assertEqual(drifted.evidence["anchor_rejected"],
+                         {"before": 0, "after": 0})
+
 
 class TestAnchorReferences(unittest.TestCase):
     """§6.2.5 参照分布的运行时现读现算（冻结规则：不写死数字——仓内
@@ -1224,6 +1278,14 @@ class TestAnchorReferences(unittest.TestCase):
                 record["status"] = "failed"
                 (run_dir / "records.jsonl").write_text(
                     json.dumps(record) + "\n", encoding="utf-8"
+                )
+                with self.assertRaises(TlbError):
+                    sm8650_tlb._compute_anchor_references(root)
+            with self.subTest(case="corrupt records.jsonl"):
+                # 损坏 JSON 同样 fail-closed 为 TlbError（JSONDecodeError
+                # 不外泄）。
+                (run_dir / "records.jsonl").write_text(
+                    '{"schema_version": "2.0", corrupt\n', encoding="utf-8"
                 )
                 with self.assertRaises(TlbError):
                     sm8650_tlb._compute_anchor_references(root)

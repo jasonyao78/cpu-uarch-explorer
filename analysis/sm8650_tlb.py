@@ -852,7 +852,8 @@ def _load_reference_run(run_dir: Path) -> RunData:
     context = f"anchor reference run {run_dir.name}"
     try:
         run = load_run(run_dir)
-    except OSError as exc:
+    except (OSError, json.JSONDecodeError) as exc:
+        # 缺失/不可读/损坏 JSON 一律 fail-closed 为 TlbError。
         raise TlbError(f"{context}: unreadable ({exc})") from exc
     if run.failed_records:
         raise TlbError(f"{context}: reference run has failed records")
@@ -895,19 +896,21 @@ _ANCHOR_REFERENCES: dict | None = None
 
 def _anchor_references() -> dict:
     """§6.2.5 参照分布的模块级 lazy 缓存：进程内只现读现算一次，避免
-    每次块判定重读 evidence run。"""
+    每次块判定重读 evidence run。缓存只在进程内有效；数据修正走
+    revision history 后须重启进程生效。"""
     global _ANCHOR_REFERENCES
     if _ANCHOR_REFERENCES is None:
         _ANCHOR_REFERENCES = _compute_anchor_references(_ANCHOR_REF_RUNS_ROOT)
     return _ANCHOR_REFERENCES
 
 
-def _anchor_groups(run: RunData) -> dict[int, dict]:
-    """锚点 run 的 {buffer_kb: 组}（analyze_records 分组原样取用）。
+def _anchor_groups(run: RunData) -> tuple[dict[int, dict], int]:
+    """锚点 run 的 ({buffer_kb: 组}, rejected 计数)。
 
     组形契约：恰为 {512: 一组, 3072: 一组}——锚点配置的 case 集合与
     参数本身由 §9.3 plan 展开契约测试钉死，分析器只验组形；不符是契
-    约缺项，TlbError 而非判失。
+    约缺项，TlbError 而非判失。rejected 计数（multiplex/非 ok 记录等
+    被拒绝样本数）随组返回，进 verdict evidence（审计面不缺段）。
     """
     result = analyze_records(run.ok_records, run.run_dir.name)
     by_buffer: dict[int, list[dict]] = defaultdict(list)
@@ -921,7 +924,8 @@ def _anchor_groups(run: RunData) -> dict[int, dict]:
             f"buffer {sorted(_ANCHOR_BUFFERS)}, got "
             f"{sorted((buffer, len(groups)) for buffer, groups in by_buffer.items())}"
         )
-    return {buffer: groups[0] for buffer, groups in by_buffer.items()}
+    return ({buffer: groups[0] for buffer, groups in by_buffer.items()},
+            len(result.rejected))
 
 
 def _relative_deviation(value: float, reference: float) -> float:
@@ -961,7 +965,8 @@ def validate_anchors(block: BlockResult,
     判据：
 
     1. 环境门禁：任一锚点 run 的 summary failed>0 或记录带
-       environment-precondition-failed → 锚点失真；
+       environment-precondition-failed → 锚点失真（短路结案，先于参
+       照分布加载——env 失真块不依赖参照，参照缺失时也干净结案）；
     2. latency 与 cycles/load：前/后锚点各自同 buffer 组 median 对照
        short-base 参照（_anchor_references() 运行时现读现算，来源 run
        与纪律理由见其 docstring）偏差 ≤3%；
@@ -984,9 +989,6 @@ def validate_anchors(block: BlockResult,
             evidence={"reason": "missing anchor-after run",
                       "block": block.evidence},
         )
-    # 参照分布现读现算（模块级缓存）；参照 run 缺失/不全 → TlbError
-    # （fail-closed，任何判定路径都不豁免）。
-    references = _anchor_references()
     checks: list[dict] = []
     for role, run in (("anchor_before", block.anchor_before),
                       ("anchor_after", block.anchor_after)):
@@ -996,13 +998,21 @@ def validate_anchors(block: BlockResult,
     failures = [check for check in checks if not check["ok"]]
     if failures:
         # 锚点失真 → 块 fail-closed（§6.2.5）：短路结案，不再消费锚点
-        # 分布（失真的锚点分布不参与任何后续比较）。
+        # 分布（失真的锚点分布不参与任何后续比较）。短路先于参照加载：
+        # env 失真块不依赖参照分布，参照 run 缺失时仍干净结案而非
+        # TlbError。
         return AnchorVerdict(status=_BLOCK_FAILED,
                              evidence={"checks": checks, "failures": failures})
-    groups = {
-        "anchor_before": _anchor_groups(block.anchor_before),
-        "anchor_after": _anchor_groups(block.anchor_after),
-    }
+    # 参照分布现读现算（模块级缓存）；参照 run 缺失/不全 → TlbError
+    # （fail-closed，不静默降级为跳过判定）。
+    references = _anchor_references()
+    groups: dict[str, dict[int, dict]] = {}
+    anchor_rejected: dict[str, int] = {}
+    for role, key, run in (
+        ("anchor_before", "before", block.anchor_before),
+        ("anchor_after", "after", block.anchor_after),
+    ):
+        groups[role], anchor_rejected[key] = _anchor_groups(run)
     for role in ("anchor_before", "anchor_after"):
         for buffer_kb in _ANCHOR_BUFFERS:
             group = groups[role][buffer_kb]
@@ -1082,7 +1092,8 @@ def validate_anchors(block: BlockResult,
         return AnchorVerdict(
             status=_BLOCK_FAILED,
             evidence={"checks": checks, "failures": failures,
-                      "anchor_stats": _anchor_stats_evidence(groups)},
+                      "anchor_stats": _anchor_stats_evidence(groups),
+                      "anchor_rejected": anchor_rejected},
         )
     established = {
         metric: dict(before[3072][metric]) for metric in _ANCHOR_RATE_FIELDS
@@ -1092,6 +1103,7 @@ def validate_anchors(block: BlockResult,
         evidence={
             "checks": checks,
             "anchor_stats": _anchor_stats_evidence(groups),
+            "anchor_rejected": anchor_rejected,
             "baseline_3072_source": (
                 "prior" if prior_3072_baseline is not None else "established"
             ),
