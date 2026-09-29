@@ -22,7 +22,10 @@
 | 材料 | 位置（相对仓库根） | 内容摘要 | 许可证状态 | 允许使用范围 | 处置 |
 |---|---|---|---|---|---|
 | 历史 demo | `../cpu-uarch-ref/cpu-cache-demo-code/` | lmbench 衍生内存延迟探针 + SM8650/SM8550 历史数据 | lmbench 谱系，GPLv2 风险 | 仅存档查阅；代码不迁移（已由 ptr_chase 替代，ADR-0002） | 数据副本已在 `data/public/legacy/` |
-| CPUSUIT Benchmark | `../cpu-uarch-ref/cpu微架构材料/`（根目录及 src/include/script/thirdparty） | 第三方微架构探针工程：ROB 探测、port 分析、cache 延迟，xbyak_aarch64 运行时生成指令流 | **无 LICENSE（保留所有权利）** | **仅方法学借鉴，禁止搬代码**；借鉴须按下方工作流登记 | 评审中（OI-7） |
+| CPUSUIT Benchmark | `../cpu-uarch-ref/cpu微架构材料/`（根目录及 src/include/script/thirdparty） | 微架构探针工程（ROB/BTB/TLB/RAS 容量探针 + 部件延迟/吞吐表征 + 取指带宽/cache 时延），基于 xbyak_aarch64 运行时生成指令流 | **作者 = 仓库所有者本人**（2026-09-30 源码头核实：`include/probe_type.h` 等署名 Copyright(c) Michael Yao 且带 Apache-2.0 头注；src 多数文件无头注、根目录无 LICENSE 文件；**此前登记的"第三方/无 LICENSE"有误， hereby 更正**）；内嵌 xbyak_aarch64 为 Apache-2.0 | 本人作品：ROB 项目按方法学借鉴执行（借鉴登记见 rob-deep-analysis/probes/README.md 与报告 §0）；**代码复用范围待所有者拍板**（当前保守：不搬代码）；已知瑕疵：fdiv 缺测、`StartCycleCounter` 失败路径不检查 | 已更正（2026-09-30）；作者确认完成，复用范围待决策 |
+| 知乎《初评 Arm Cortex X4、A720、A520》 | `../cpu-uarch-ref/docs/初评Arm Cortex X4、A720、A520 - 知乎.md`（图片在同目录 `{pageTitle}/`） | JamesAslan 的 X4/A720/A520 微架构分析（ROB 非传统/条目打包/early deallocation 声称；X3 dispatch 实测声称） | 第三方文章（知乎 p/633012156；与 ROB 任务书所引 p/4577094382 链接不同，视为同作者系列文，出处以实际文件为准） | 仅个人阅读与方法学参考；声称一律预注册为待验假设（报告必读 4） | 已登记（2026-09-30） |
+| Cardyak《Cortex-X4 Microarchitecture Block Diagram》 | `../cpu-uarch-ref/docs/2023 - Cortex-X4.jpg` | X4 微架构框图（ROB 384 / 调度器 80+80+42 / LB 96 / SB 72 等） | 第三方示意图 | 仅作候选区间（最低权重），不进判据（报告 §3.2） | 已登记（2026-09-30） |
+| Arm Cortex-X4 官方文档 PDF（TRM 102484_0003_06_en / SW Optimization Guide Issue 3.0） | `../cpu-uarch-ref/docs/Arm_Cortex_X4_Core_TRM_102484_0003_06_en.pdf`、`Arm_Cortex_X4_Core_Software_Optimization_Guide.pdf` | Arm 官方非机密文档（TLB 真值表在第 5 章；ROB 零披露已全文核验；dispatch 宽度在优化指南 §4.1） | Arm 官方 Non-Confidential（可再分发） | 权威依据（报告/TRM 事件语义均逐字核验） | 已登记（2026-09-30） |
 | gem5 DDR 时延分析 | `../cpu-uarch-ref/cpu微架构材料/gem5-DDR访问通路时延细节全流程分析.md/.html` | Michael 自己的报告：gem5 DDR 读通路时延分解（trace + 源码 commit `3dc9dcc`） | 本人作品 | 可评估后移入 `docs/`（接入 gem5 时，OI-1） | 待 gem5 源码接入时处置 |
 | DDR 时序参数分析 | `../cpu-uarch-ref/cpu微架构材料/DDR关键时序参数分析.md` | DDR 关键时序参数讲解 | 作者待确认 | 确认作者前仅个人阅读 | 待确认 |
 | CPU MicroArchitecture Analysis.pptx | `../cpu-uarch-ref/cpu微架构材料/` | 微架构分析幻灯片 | **作者未知** | 确认作者与来源前不引用、不传播 | 待确认 |
