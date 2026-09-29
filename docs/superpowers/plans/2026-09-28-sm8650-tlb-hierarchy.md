@@ -7,7 +7,7 @@
 > `docs/tasks/2026-09-28-sm8650-tlb-hierarchy.md`）——本计划不得与
 > 之冲突；冲突一律以任务书为准并回写计划。
 
-**Goal:** 按任务书 v4.1 完成 SM8650 CPU7 的 TLB 层级探测：Q1（`0x05`
+**Goal:** 按任务书 v4.2 完成 SM8650 CPU7 的 TLB 层级探测：Q1（`0x05`
 第一转折）/ Q2a（`0x34` walk-onset）/ Q3（关联曲线，默认
 `MODEL_UNIDENTIFIABLE`）/ Q4（THP cohort 对照），全部按预注册规则裁
 定并如实结案。
