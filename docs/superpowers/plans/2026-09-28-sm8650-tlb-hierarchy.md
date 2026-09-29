@@ -88,7 +88,7 @@ JSON 配置、Arm TRM（Issue 05）+ `cortex-x4.json`（事件语义，已冻结
 
 - [ ] **Step 3: ctrl 配置**——同事件组（G0），sweep buffer `["512KiB","16MiB"]`（128/4096 页 floor/scale 锚点），其余同 anchor。备注：本配置即 Gate 1 的 floor/scale 锚点载体，新事件按 §5.1 顺序逐组加入（Gate 1 时改配置并重跑）。
 
-- [ ] **Step 4: coarse 配置（Phase A）**——G0 事件组；sweep buffer 由页数映射（pages×4KiB）：`["128KiB","256KiB","384KiB","512KiB","768KiB","1MiB","1536KiB","2MiB","3MiB","4MiB","6MiB","8MiB","16MiB","32MiB"]` = 32..8192 页 13 档 + seed 叉积 `[42, 7]` = 26 case；`base_pages=1`、`loads_per_slot=8`、`min_loads=4096`、`repetitions=10`。
+- [ ] **Step 4: coarse 配置（Phase A）**——G0 事件组；sweep buffer 由页数映射（pages×4KiB）：`["128KiB","256KiB","384KiB","512KiB","768KiB","1MiB","1536KiB","2MiB","3MiB","4MiB","8MiB","16MiB","32MiB"]` = 32..8192 页 13 档 + seed 叉积 `[42, 7]` = 26 case；`base_pages=1`、`loads_per_slot=8`、`min_loads=4096`、`repetitions=10`。
 
 - [ ] **Step 5: plan 预览验证**——三个配置分别 `runner.cli plan`：anchor=2 case（512/3072 KiB）、ctrl=2 case（512 KiB/16 MiB）、coarse=26 case（13 档 × 2 seed）；与 Step 1 守卫断言一致后跑 `runner.tests.test_plan` 全绿。
 
