@@ -48,5 +48,5 @@
       "base_pages", "seed", "pmu_events"
     ]
   },
-  "notes": "Gate 1 正控 floor/scale 锚点载体（计划 docs/superpowers/plans/2026-09-28-sm8650-tlb-hierarchy.md，任务书 §5.1/§6.2.2）：512KiB=128 页 floor 应近零 walk，16MiB=4096 页 scale 应产生规模 walk；新事件按 §5.1 顺序逐组加入，Gate 1 时改配置并重跑。seed 固定 42 不 sweep。"
+  "notes": "Gate 1 正控 floor/scale 锚点载体（计划 docs/superpowers/plans/2026-09-28-sm8650-tlb-hierarchy.md，任务书 §5.1/§5.3）：512KiB=128 页 floor 应近零 walk，16MiB=4096 页 scale 应产生规模 walk；新事件按 §5.1 顺序逐组加入，Gate 1 时改配置并重跑。seed 固定 42 不 sweep。"
 }
