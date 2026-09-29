@@ -1,4 +1,23 @@
-// tlb_capacity_probe.c — §5.3/§5.4 改进版指针追逐容量扫描探针（v2，外部评审修订）
+// tlb_capacity_probe.c — §5.3/§5.4 改进版指针追逐容量扫描探针
+//
+// 版本记录：
+//   v1.0 (2026-09-29) 初版骨架：预热/测量分离、PMU 事件、地址落盘、时延百分位
+//   v2.0 (2026-09-29) 外部评审1（R2/R4）修订：真集合四分布（修 stride 越界）、
+//                     -K 独立链并行 walk 探针（串行链单 outstanding miss，旧
+//                     快速/慢速协议测不了并行度，-m 降级为辅助观察）
+//   v2.1 (2026-09-29) 外部评审2（源码评审，基于 v1 代码、部分适用于 v2.0）修订：
+//                     - 预热循环 volatile 化（此前预热是非 volatile 追逐且结果
+//                       未使用，Clang -O2 实测将其整体消除——评审方在优化后 IR
+//                       中确认预热 load 消失，编译屏障救不回已删除的循环）
+//                     - sink 语义修正：char *volatile（此前 volatile char * 只
+//                       限定所指字符，指针 store 仍可被消除）
+//                     - perf 打开失败不再伪报"0 refill"：fd<0 → 明确 n/a 并在
+//                       打开时逐事件告警；读 time_enabled/time_running，多路复用
+//                       时输出 mux 比例提示
+//                     - 绑核失败即终止（异构平台上继续运行会使容量归属失效）
+//                     - slow 模式 ns_per_load 剔除轮间 busy-wait（此前把等待计
+//                       入分子）
+//                     - 新增 --rawlog：逐轮原始时延落盘（供首轮剔除/分布分析）
 //
 // 对应报告：《TLB微架构深度分析报告》§5.3（容量扫描）、§5.4（L1 全相联验证）、
 // §3.3/M4（in-flight 翻译并行度）。
@@ -51,7 +70,7 @@
 #endif
 
 static long g_pagesz;
-static volatile char *g_sink;
+static char *volatile g_sink; // volatile 指针对象本身：store 不可被消除（v2.1 修正）
 
 // ---------- 工具 ----------
 
@@ -114,7 +133,9 @@ static void gen_page_set(size_t *order, int n, int mode, size_t stride,
     }
 }
 
-// ---------- PMU ----------
+// ---------- PMU（v2.1：fd<0 不再返回 0；带 time_enabled/time_running） ----------
+
+typedef struct { uint64_t val, ena, run; } perf_snap_t;
 
 #ifdef __linux__
 static int perf_open(uint32_t event_no, int cpu) {
@@ -125,16 +146,26 @@ static int perf_open(uint32_t event_no, int cpu) {
     attr.config = event_no;
     attr.exclude_kernel = 0;
     attr.exclude_hv = 0;
-    return (int)syscall(SYS_perf_event_open, &attr, 0, -1, -1, 0);
+    attr.read_format = PERF_FORMAT_TOTAL_TIME_ENABLED |
+                       PERF_FORMAT_TOTAL_TIME_RUNNING; // 多路复用检测
+    int fd = (int)syscall(SYS_perf_event_open, &attr, 0, -1, -1, 0);
+    if (fd < 0)
+        fprintf(stderr, "WARN: perf_event_open(0x%x) failed: %s —— "
+                "该事件将输出 n/a（勿当作 0 refill 解读）\n",
+                event_no, strerror(errno));
+    return fd;
 }
-static uint64_t perf_read(int fd) {
-    uint64_t v = 0;
-    if (fd >= 0 && read(fd, &v, sizeof(v)) != sizeof(v)) return UINT64_MAX;
-    return v;
+// 返回 0 成功；-1 不可用（fd<0 或读失败）。禁止在失败时返回 0 冒充计数（评审2-6）。
+static int perf_snap(int fd, perf_snap_t *s) {
+    if (fd < 0) return -1;
+    uint64_t b[3];
+    if (read(fd, b, sizeof(b)) != sizeof(b)) return -1;
+    s->val = b[0]; s->ena = b[1]; s->run = b[2];
+    return 0;
 }
 #else
 static int perf_open(uint32_t e, int c) { (void)e; (void)c; return -1; }
-static uint64_t perf_read(int fd) { (void)fd; return UINT64_MAX; }
+static int perf_snap(int fd, perf_snap_t *s) { (void)fd; (void)s; return -1; }
 #endif
 
 // ---------- 主流程 ----------
@@ -147,6 +178,7 @@ int main(int argc, char **argv) {
     size_t stride = 256;
     uint32_t events[4]; int n_events = 0;
     const char *addrlog = NULL;
+    const char *rawlog = NULL;
 
     for (int i = 1; i < argc; i++) {
         if      (!strcmp(argv[i], "-N") && i+1 < argc) n_pages  = atoi(argv[++i]);
@@ -158,6 +190,7 @@ int main(int argc, char **argv) {
             events[n_events++] = (uint32_t)strtoul(argv[++i], 0, 0);
         else if (!strcmp(argv[i], "--pin") && i+1 < argc) pin_cpu = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--addrlog") && i+1 < argc) addrlog = argv[++i];
+        else if (!strcmp(argv[i], "--rawlog") && i+1 < argc) rawlog = argv[++i];
         else if (!strcmp(argv[i], "-m") && i+1 < argc) {
             const char *mv = argv[++i];
             if      (!strcmp(mv, "slow")) slow = 1;
@@ -167,8 +200,8 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--round-delay-ns") && i+1 < argc)
             round_delay_ns = strtol(argv[++i], 0, 0);
         else { fprintf(stderr, "usage: %s -N pages -R reps -d 0|1|2|3 [-s stride] "
-            "[-K chains] [-e event]* [--pin cpu] [--addrlog f] [-m fast|slow] "
-            "[--round-delay-ns ns]\n", argv[0]); return 2; }
+            "[-K chains] [-e event]* [--pin cpu] [--addrlog f] [--rawlog f] "
+            "[-m fast|slow] [--round-delay-ns ns]\n", argv[0]); return 2; }
     }
     if (reps < 3) { fprintf(stderr, "-R >= 3 required for percentiles\n"); return 2; }
     if (mode < 0 || mode > 3) { fprintf(stderr, "-d 0..3\n"); return 2; }
@@ -178,7 +211,12 @@ int main(int argc, char **argv) {
 #ifdef __linux__
     if (pin_cpu >= 0) {
         cpu_set_t set; CPU_ZERO(&set); CPU_SET(pin_cpu, &set);
-        if (sched_setaffinity(0, sizeof(set), &set)) perror("sched_setaffinity");
+        if (sched_setaffinity(0, sizeof(set), &set)) {
+            // 绑核失败即终止：异构平台（X4/A720/A520）上继续运行会使容量归属失效
+            fprintf(stderr, "FATAL: sched_setaffinity(cpu%d) failed: %s\n",
+                    pin_cpu, strerror(errno));
+            return 1;
+        }
     }
 #endif
 
@@ -215,10 +253,17 @@ int main(int argc, char **argv) {
         fclose(f);
     }
 
-    // 预热：每链整链一轮
-    for (int k = 0; k < n_chains; k++) {
-        char *p = heads[k];
-        for (int i = 0; i < n_pages; i++) p = *(char **)p;
+    // 预热：每链整链一轮。必须用与测量相同的 volatile 追逐（v2.1：此前非
+    // volatile 且结果未使用，Clang -O2 实测将预热循环整体消除），结果写入
+    // volatile 指针对象 g_sink。
+    {
+        char *pw = NULL;
+        for (int k = 0; k < n_chains; k++) {
+            char *p = heads[k];
+            for (int i = 0; i < n_pages; i++) p = *(char *volatile *)p;
+            pw = p;
+        }
+        g_sink = pw;
     }
 
     int fds[4];
@@ -263,16 +308,32 @@ int main(int argc, char **argv) {
     double rmax = sorted[reps - 1];
 
     long loads = (long)reps * n_pages * n_chains;
-    printf("N=%d mode=%d K=%d m=%s loads=%ld ns_per_load=%.3f "
+    // v2.1：ns_per_load 只计逐轮追逐时间之和（剔除 slow 模式轮间 busy-wait）；
+    // 墙钟时间单独输出 wall_ns。
+    double chase_ns = 0;
+    for (long r = 0; r < reps; r++) chase_ns += round_ns[r];
+    printf("N=%d mode=%d K=%d m=%s loads=%ld ns_per_load=%.3f wall_ns=%.0f "
            "p50=%.0f p90=%.0f p99=%.0f max=%.0f ns/round",
            n_pages, mode, n_chains, slow ? "slow" : "fast", loads,
-           (t1 - t0) / loads, p50, p90, p99, rmax);
+           chase_ns / loads, t1 - t0, p50, p90, p99, rmax);
     for (int i = 0; i < n_events; i++) {
-        uint64_t v = perf_read(fds[i]);
-        if (v == UINT64_MAX) printf(" event0x%x=n/a(non-Linux/no-perm)", events[i]);
-        else                 printf(" event0x%x=%llu", events[i], (unsigned long long)v);
+        perf_snap_t s;
+        if (perf_snap(fds[i], &s) != 0) {
+            printf(" event0x%x=n/a(non-Linux/no-perm)", events[i]);
+            continue;
+        }
+        printf(" event0x%x=%llu", events[i], (unsigned long long)s.val);
+        // 多路复用提示：run/ena 明显小于 1 时计数不完整（评审2-6）
+        if (s.ena > 0 && s.run * 100 < s.ena * 99)
+            printf("(mux=%.2f!)", (double)s.run / (double)s.ena);
     }
     printf("\n");
+    // v2.1：逐轮原始数据落盘（首轮剔除/分布分析用，评审2）
+    if (rawlog) {
+        FILE *f = fopen(rawlog, "w");
+        for (long r = 0; r < reps; r++) fprintf(f, "%.0f\n", round_ns[r]);
+        fclose(f);
+    }
 
     free(ps); free(round_ns); free(sorted); free(heads); free(order);
     munmap(base, total);

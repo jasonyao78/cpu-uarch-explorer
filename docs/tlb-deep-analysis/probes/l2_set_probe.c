@@ -1,26 +1,34 @@
-// l2_set_probe.c — §5.5 L2 TLB 同 set 地址生成器 + way 跳变实验（v2，外部评审修订）
+// l2_set_probe.c — §5.5 L2 TLB 同 set 地址生成器 + way 跳变实验
+//
+// 版本记录：
+//   v1.0 (2026-09-29) 初版：候选 XOR 反解 + 循环重访 way 测定
+//   v2.0 (2026-09-29) 外部评审1（R1/R3）修订：哈希/校验统一最终虚拟地址
+//                     （v1 误对相对页号）、候选分桶取样（跨高字段，避免 H1/H3
+//                     与 H2/H4 在样本上不可区分）；run 模式改 prime+probe
+//                     （filler 驱逐 L1 + 分阶段 PMU 增量 + round 0 剔除 + -T2
+//                     对照组）——v1 重访 w≤16 页全驻留 L1，测不到 L2
+//   v2.1 (2026-09-29) 外部评审2（源码评审，基于 v1 代码）修订：
+//                     - perf 打开失败不再伪报"0 refill"（fd<0 → n/a + 打开时
+//                       逐事件告警）；读 time_enabled/time_running，多路复用
+//                       时输出 mux 比例提示
+//                     - sink 语义修正：char *volatile
+//                     - run 模式同样落盘实际使用的目标 VA（v2.0 仅 gen 落盘，
+//                       而 gen/run 是不同进程、ASLR 基址不同，审计对不上）
 //
 // 对应报告：《TLB微架构深度分析报告》§5.5。
 // 背景（X4 TRM 地面真值）：L2 TLB = 8-way × 256 sets = 2048 条（Table 5-1,
 // Table 9-32）。sets/ways 已确认，本探针目标：检验"VPN→set 索引哈希"候选
 // 假设（H1~H4），并测定稳态 way 数（跳变点应=8）。
 //
-// v2 修订（回应外部评审 R1/R3）：
-//   [R3 修复] 哈希与校验一律用**最终虚拟地址**（base 页号计入 vpn），
-//             候选取样跨高字段步进（step=509 素数步长），H1/H3、H2/H4 可区分；
-//   [R1 修复] run 模式改为 prime+probe 协议：每轮先追逐 filler 链（默认 512 页，
-//             > L1 dTLB 96 条）驱逐 L1，再访问目标 w 页——保证每个目标访问都是
-//             L1 miss、真实到达 L2；计数按**阶段**（filler 段 / probe 段）在进程
-//             内读 perf 增量，建链与首轮自动排除；-T2 提供同 filler 干扰下的
-//             对照 set。判读顺序：先看 probe 段 L1D_TLB_REFILL ≈ w（协议有效
-//             门控），再看 L2D_TLB_REFILL 在 w=8→9 是否跳变。
-//   注意（评审 R1 强调）：即使协议正确，w>8 后"每页每轮必 miss"仍受替换策略
-//   与 walk 条目影响——跳变是判据，曲线形态不是。
+// 判读顺序：先看 probe 段 L1D_TLB_REFILL ≈ w（协议有效门控），再看
+// L2D_TLB_REFILL 在 w=8→9 是否跳变。注意（评审 R1 强调）：即使协议正确，
+// w>8 后"每页每轮必 miss"仍受替换策略与 walk 条目影响——跳变是判据，曲线
+// 形态不是。
 //
 // 编译：gcc -O2 -Wall -Wextra -Werror -o l2_set_probe l2_set_probe.c
 // 用法：
 //   ./l2_set_probe gen -H 2 -T 7 -c 16 -P 65536 --addrlog l2_h2_t7.txt
-//   ./l2_set_probe run -H 2 -T 7 -w 8  -R 20 -P 65536
+//   ./l2_set_probe run -H 2 -T 7 -w 8  -R 20 -P 65536 --addrlog run_h2_t7_w8.txt
 //   ./l2_set_probe run -H 2 -T 7 -w 16 -R 20 -P 65536 -T2 100
 // 事件（默认内嵌）：0x0005 L1D_TLB_REFILL / 0x002D L2D_TLB_REFILL / 0x002F L2D_TLB
 // 判据（报告 §5.5-3）：probe 段 L1D_TLB_REFILL ≈ w 且 L2D_TLB ≈ w 时协议有效；
@@ -34,6 +42,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <sys/mman.h>
 #ifdef __linux__
 #include <sys/syscall.h>
@@ -41,11 +50,10 @@
 #endif
 
 static long g_pagesz = 4096;
-static volatile char *g_sink;
+static char *volatile g_sink; // volatile 指针对象本身：store 不可被消除（v2.1）
 
 #define NSETS        256   // X4 TRM Table 9-32：L2 TLB entry 0-255 / way
 #define NWAYS_TRUTH    8   // X4 TRM Table 5-1：8-way
-#define CAND_STEP    509   // 候选取样步长（素数，跨越高字段，避免高位恒定）
 
 // ---------- 候选索引假设 H1~H4：一律对最终虚拟地址计算 ----------
 // 4K 粒度下 VPN[7:0] = VA[19:12]。
@@ -86,7 +94,8 @@ static int collect_set_addrs(int H, uint32_t target, int need, char *base,
     return found;
 }
 
-// ---------- PMU ----------
+// ---------- PMU（v2.1：fd<0 不再返回 0；带 time_enabled/time_running） ----------
+typedef struct { uint64_t val, ena, run; } perf_snap_t;
 #ifdef __linux__
 static int perf_open(uint32_t ev) {
     struct perf_event_attr attr;
@@ -94,16 +103,26 @@ static int perf_open(uint32_t ev) {
     attr.size = sizeof(attr);
     attr.type = PERF_TYPE_RAW;
     attr.config = ev;
-    return (int)syscall(SYS_perf_event_open, &attr, 0, -1, -1, 0);
+    attr.read_format = PERF_FORMAT_TOTAL_TIME_ENABLED |
+                       PERF_FORMAT_TOTAL_TIME_RUNNING; // 多路复用检测
+    int fd = (int)syscall(SYS_perf_event_open, &attr, 0, -1, -1, 0);
+    if (fd < 0)
+        fprintf(stderr, "WARN: perf_event_open(0x%x) failed: %s —— "
+                "该事件将输出 n/a（勿当作 0 refill 解读）\n",
+                ev, strerror(errno));
+    return fd;
 }
-static uint64_t perf_read(int fd) {
-    uint64_t v = 0;
-    if (fd >= 0 && read(fd, &v, sizeof(v)) != sizeof(v)) return UINT64_MAX;
-    return v;
+// 返回 0 成功；-1 不可用。禁止在失败时返回 0 冒充计数（评审2-6）。
+static int perf_snap(int fd, perf_snap_t *s) {
+    if (fd < 0) return -1;
+    uint64_t b[3];
+    if (read(fd, b, sizeof(b)) != sizeof(b)) return -1;
+    s->val = b[0]; s->ena = b[1]; s->run = b[2];
+    return 0;
 }
 #else
 static int perf_open(uint32_t e) { (void)e; return -1; }
-static uint64_t perf_read(int fd) { (void)fd; return UINT64_MAX; }
+static int perf_snap(int fd, perf_snap_t *s) { (void)fd; (void)s; return -1; }
 #endif
 
 static void build_chain(uintptr_t *vas, int n, char **cells) {
@@ -201,6 +220,7 @@ int main(int argc, char **argv) {
     build_filler(fbase, filler_pages, &fvas);
 
     int fds[4];
+    int mux_bad[4] = {0, 0, 0, 0};
     for (int i = 0; i < n_events; i++) fds[i] = perf_open(events[i]);
 #ifdef __linux__
     for (int i = 0; i < n_events; i++) ioctl(fds[i], PERF_EVENT_IOC_RESET, 0);
@@ -212,17 +232,19 @@ int main(int argc, char **argv) {
     char *tp = (char *)vas[0];
     asm volatile("" ::: "memory");
     for (int r = 0; r < rounds; r++) {
-        uint64_t c0[4], c1[4];
-        for (int i = 0; i < n_events; i++) c0[i] = perf_read(fds[i]);
+        perf_snap_t s0[4], s1[4], s2[4];
+        int ok0 = 1, ok1 = 1, ok2 = 1;
+        for (int i = 0; i < n_events; i++) ok0 &= (perf_snap(fds[i], &s0[i]) == 0);
         { char *p = (char *)fvas[0]; for (int i = 0; i < filler_pages; i++) p = *(char *volatile *)p; } // prime
-        for (int i = 0; i < n_events; i++) c1[i] = perf_read(fds[i]);
+        for (int i = 0; i < n_events; i++) ok1 &= (perf_snap(fds[i], &s1[i]) == 0);
         double t0 = now_ns();
         for (int i = 0; i < ways; i++) tp = *(char *volatile *)tp;                                   // probe
         probe_ns[r] = now_ns() - t0;
+        for (int i = 0; i < n_events; i++) ok2 &= (perf_snap(fds[i], &s2[i]) == 0);
         for (int i = 0; i < n_events; i++) {
-            uint64_t c2 = perf_read(fds[i]);
-            probe_delta[r][i] = (c0[i] == UINT64_MAX || c1[i] == UINT64_MAX || c2 == UINT64_MAX)
-                                ? UINT64_MAX : c2 - c1[i];
+            probe_delta[r][i] = (ok0 && ok1 && ok2) ? s2[i].val - s1[i].val : UINT64_MAX;
+            // 多路复用检测：任一拍 run<ena 则标记（评审2-6）
+            if (s2[i].ena > 0 && s2[i].run * 100 < s2[i].ena * 99) mux_bad[i] = 1;
         }
     }
     asm volatile("" ::: "memory");
@@ -231,6 +253,15 @@ int main(int argc, char **argv) {
     for (int i = 0; i < n_events; i++) ioctl(fds[i], PERF_EVENT_IOC_DISABLE, 0);
 #endif
 
+    // v2.1：run 模式同样落盘实际使用的目标 VA（gen/run 不同进程、ASLR 基址不同，
+    // 仅 gen 落盘无法审计 run 的地址集合——评审2-3）
+    if (addrlog) {
+        FILE *out = fopen(addrlog, "w");
+        for (int i = 0; i < ways; i++)
+            fprintf(out, "0x%lx set=%u\n", (unsigned long)vas[i], set_index(H, vas[i]));
+        fclose(out);
+    }
+
     // 统计：剔除 round 0（含冷启动），对剩余轮取均值
     printf("H%d set=%u w=%d rounds=%d filler=%d", H, target, ways, rounds, filler_pages);
     for (int i = 0; i < n_events; i++) {
@@ -238,6 +269,7 @@ int main(int argc, char **argv) {
         double sum = 0;
         for (int r = 1; r < rounds; r++) sum += (double)probe_delta[r][i];
         printf(" ev0x%x=%.1f", events[i], sum / (rounds - 1));
+        if (mux_bad[i]) printf("(mux!)");
     }
     { double sum = 0; for (int r = 1; r < rounds; r++) sum += probe_ns[r];
       printf(" probe_ns=%.0f", sum / (rounds - 1)); }

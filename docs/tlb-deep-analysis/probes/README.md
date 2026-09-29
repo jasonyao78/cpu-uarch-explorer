@@ -4,14 +4,15 @@
 
 | 文件 | 对应章节 | 用途 |
 |---|---|---|
-| `tlb_capacity_probe.c` | §5.3 / §5.4 / §3.3(M4) | 改进版指针追逐容量扫描（预热/测量分离、PMU 事件、**真集合**四分布、地址落盘、**-K 独立链并行 walk 探针** + 时延百分位） |
-| `l2_set_probe.c` | §5.5 | L2 同 set 地址生成器（H1~H4 假设 + **最终 VA 校验** + 分桶取样）+ **prime+probe** 稳态 way 跳变实验（filler 驱逐 + 分阶段 PMU + 首轮剔除 + 对照组） |
+| `tlb_capacity_probe.c` | §5.3 / §5.4 / §3.3(M4) | 改进版指针追逐容量扫描（预热 volatile 化、PMU 失败明确 n/a + mux 检测、真集合四分布、地址/逐轮数据落盘、**-K 独立链并行 walk 探针** + 时延百分位） |
+| `l2_set_probe.c` | §5.5 | L2 同 set 地址生成器（H1~H4 假设 + **最终 VA 校验** + 分桶取样）+ **prime+probe** 稳态 way 跳变实验（filler 驱逐 + 分阶段 PMU + 首轮剔除 + 对照组 + run 模式地址落盘） |
 
-**v2 变更（外部评审修订，详见报告 v1.4 审阅记录 R1–R4）**：
+**版本**：两文件头部均有完整版本记录（v1.0 → v2.1）。v2.0 为外部评审1 修订（真集合、prime+probe、最终 VA、-K 链）；v2.1 为外部评审2 修订（预热消除修复、perf fd<0 伪报 0 修复、mux 检测、slow 分子修正、绑核失败终止、--rawlog、run 模式地址落盘）。**TODO**：§5.6 的 iTLB 短跳板探针尚无源码（设计见报告），后续迭代补齐。
+
+**v2 变更要点（外部评审1）**：
 - `-d` 分布改为**真集合**：0 连续 / 1 大步距（修 v1 越界 bug）/ 2 随机集合 / 3 随机序（仅对照）；
-- L2 run 模式改 **prime+probe**：v1 直接重访 w≤16 页，全部驻留 L1 dTLB，稳态**测不到 L2**（R1）；
-- 哈希与校验统一用**最终虚拟地址**（v1 误对相对页号计算，R3）；
-- 新增 `-K` 独立链：v1 的串行链任意时刻只有 1 个 outstanding miss，**测不了并行 walk 深度**（R2）；`-m fast|slow` 保留为辅助观察，不再声称测并行度。
+- L2 run 模式改 **prime+probe**：v1 直接重访 w≤16 页，全部驻留 L1 dTLB，稳态**测不到 L2**；
+- 哈希与校验统一用**最终虚拟地址**；新增 `-K` 独立链测并行 walk 深度（串行链单 outstanding miss，旧 fast/slow 协议无效，`-m` 降为辅助观察）。
 
 ## 编译
 
@@ -70,12 +71,15 @@ done
 ```bash
 for h in 1 2 3 4; do
   for w in $(seq 1 16); do
-    taskset 80 ./l2_set_probe run -H $h -T 7 -w $w -R 20 -P 65536 -T2 100
+    taskset 80 ./l2_set_probe run -H $h -T 7 -w $w -R 20 -P 65536 -T2 100 \
+        --addrlog run_h${h}_t7_w${w}.txt
   done
 done
 # 协议门控：probe 段 L1D_TLB_REFILL(ev0x5)≈w 且 L2D_TLB(ev0x2f)≈w，否则 filler 不足；
 # 判据：w≤8 → L2D_TLB_REFILL(ev0x2d)≈0；w≥9 → 跳变（round 0 已剔除，计数为分阶段增量）；
-# -T2 对照 set：跳变应为目标 set 特异。gen 模式落盘最终 VA + 重算 set 供审计。
+# -T2 对照 set：跳变应为目标 set 特异。gen/run 均落盘最终 VA + 重算 set 供审计。
+# 事件由探针内嵌 perf_event_open 采集（无需外层 perf）；simpleperf 等价：
+#   simpleperf stat -e r5,r2d,r2f -- taskset 80 ./l2_set_probe run ...
 ```
 
 ## Android（SM8650）执行要点（报告 §5.2）
