@@ -40,6 +40,22 @@ INTERVAL_IDENTIFIED（单 seed 真空不晋升，保守降级 ORDER_SENSITIVE）
 标字段钉为 l1d_tlb_refill_per_1k——knee 判据的消费字段、逐进程布局
 /着色方差的主要暴露面。该标记只服务于"中位数不得掩盖双态"的报告纪
 律，不构成任何容量推断。
+
+块归组与锚点判定（§6.4/§6.2.5）：group_block 把 anchor-before + 主
+体 + anchor-after 三个已加载 run（RunData）归组为块——角色只由
+manifest 的 experiment_id 决定（锚点 = ptr-chase-sm8650-x4-tlb-
+anchor），不以 buffer 大小、case 顺序或时间邻近推断；关联证据校验
+probe SHA-256 与 target 一致、逐记录 timestamp 时序与角色一致（非
+交叠），任一不过即 TlbError 拒绝归组；缺 anchor-after →
+BLOCK_INCOMPLETE。validate_anchors 执行 §6.2.5 质量门槛：环境门禁
+（锚点 run summary failed>0 或记录带 environment-precondition-
+failed → 锚点失真）、latency/cyc 对照 short-base 参照 median 偏差
+≤3%、512 KiB R 值落入正控 [p25,p75]、3072 KiB 首块自校准
+（prior_3072_baseline 缺省时只记录建基线，后续块按同一规则比较）、
+前后锚点同指标互判。任一不过 → BLOCK_FAILED 且块 fail-closed：
+main_result 不产出，主体 case 不进入判定。ANCHORS_OK /
+BLOCK_FAILED / BLOCK_INCOMPLETE 是块级终态，与 §10.2 的 Q 级终态
+不同层。
 """
 
 from __future__ import annotations
@@ -50,12 +66,13 @@ import re
 import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Sequence
 
 from runner.statistics import summarize
 
-from .load import load_run
+from .load import RunData, load_run
 
 
 class TlbError(ValueError):
@@ -99,6 +116,45 @@ _STABLE_MIN_TRAININGS = 2     # 8/512 ring passes 两种训练量同制度
 _BIMODAL_RATIO = 4.0
 _BIMODAL_MIN_SIDE = 2
 
+# §6.4/§6.2.5 块归组与锚点判定的冻结常量（改阈值/参照 = 改冻结规则，
+# 走任务书变更）
+_ANCHOR_EXPERIMENT_ID = "ptr-chase-sm8650-x4-tlb-anchor"
+_ANCHOR_BUFFERS = (512, 3072)  # 锚点配置固定的两个 base case（KiB）
+_ANCHOR_MAX_DEVIATION = 0.03   # latency/cyc median 偏差上限（§6.2.5）
+_ANCHOR_MEDIAN_FIELDS = ("latency_ns", "cyc_per_load")
+_ANCHOR_RATE_FIELDS = ("l1d_tlb_refill_per_1k", "dtlb_walk_per_1k")
+
+# §6.2.5 latency/cyc 参照：short-base run 20260928T024022Z
+# （ptr-chase-sm8650-x4-p0prime-short-base）同 buffer 组的逐样本
+# median——每组 4 seed（42/7/1337/20260928）× 10 进程 = 40 个值，经
+# runner.statistics.summarize 计算。生成方式：2026-09-29 从
+# data/public/runs/20260928T024022Z-ptr-chase-sm8650-x4-p0prime-short-base/
+# records.jsonl 现读现算（latency_ns 与 cycles/loads 逐样本值），不是
+# 从任务书转抄——任务书只钉来源 run 与"median 偏差 ≤3%"的规则。
+_ANCHOR_REF_MEDIANS = {
+    512: {"latency_ns": 2.6548, "cyc_per_load": 7.524879455566406},
+    3072: {"latency_ns": 7.73815, "cyc_per_load": 21.27081807454427},
+}
+
+# §6.2.5 R 值参照（仅 512 KiB）：TLB 正控 run 20260927T182613Z
+# （ptr-chase-sm8650-x4-pmu-ctrl-tlb）512 KiB 组逐样本 R_0x05/R_0x34
+# 分布的 [p25, p75]（10 进程，summarize 口径；2026-09-29 现读现算自
+# data/public/runs/20260927T182613Z-ptr-chase-sm8650-x4-pmu-ctrl-tlb/
+# records.jsonl）。任务书原文括号值 288.08 [287.7, 289.6] /
+# 0.0129 [0.0098, 0.0141] 是它们的低位舍入，此处保留全精度。
+# 3072 KiB 无 G0 历史数据 → 首块自校准（validate_anchors 的
+# prior_3072_baseline 参数），故无 3072 参照常量。
+_ANCHOR_REF_R512_P25_P75 = {
+    "l1d_tlb_refill_per_1k": (287.7812832593918, 289.3509864807129),
+    "dtlb_walk_per_1k": (0.010460615158081055, 0.013381242752075195),
+}
+
+# 块级终态（§6.2.5/§6.4；与 §10.2 的 Q 级终态不同层）
+_BLOCK_GROUPED = "BLOCK_GROUPED"        # 三块齐备，待 §6.2.5 判定
+_BLOCK_INCOMPLETE = "BLOCK_INCOMPLETE"  # 缺 anchor-after，不成块
+_ANCHORS_OK = "ANCHORS_OK"
+_BLOCK_FAILED = "BLOCK_FAILED"
+
 _QUALIFICATIONS = ("candidate", "qualified")
 
 _DERIVED_FIELDS = tuple(derived for _, _, derived, _ in _PMU_EVENTS.values())
@@ -111,6 +167,41 @@ class AnalysisResult:
     run_label: str
     groups: list[dict] = field(default_factory=list)
     rejected: list[str] = field(default_factory=list)
+
+
+@dataclass
+class BlockResult:
+    """§6.4 三块归组产物：角色 + 关联证据。
+
+    status 为 BLOCK_GROUPED（anchor-before + 主体 + anchor-after 三块
+    齐备）或 BLOCK_INCOMPLETE（缺 anchor-after）；归组校验不过时
+    group_block 直接 TlbError，不产出 BlockResult。
+    """
+
+    status: str
+    anchor_before: RunData
+    main: RunData
+    anchor_after: RunData | None = None
+    evidence: dict = field(default_factory=dict)
+
+
+@dataclass
+class AnchorVerdict:
+    """§6.2.5 锚点判定产物（块级终态，与 §10.2 的 Q 级终态不同层）。
+
+    main_result 仅 ANCHORS_OK 时产出——锚点失真（BLOCK_FAILED）或块
+    不完整（BLOCK_INCOMPLETE）时主体 case 不进入判定（fail-closed：
+    无对象可消费）。main_result 消费主体 run 的全部记录：ok 记录分
+    组、failed 记录进 rejected 审计行（measurement-discipline：失败
+    的实验也是实验档案的一部分）。baseline_3072 为 3072 KiB 自校准
+    基线（首块由 anchor-before 的 3072 组分布建立，后续块回显传入
+    值）；非 ANCHORS_OK 时为 None——失败块的分布不晋升为基线。
+    """
+
+    status: str  # ANCHORS_OK / BLOCK_FAILED / BLOCK_INCOMPLETE
+    evidence: dict = field(default_factory=dict)
+    baseline_3072: dict | None = None
+    main_result: AnalysisResult | None = None
 
 
 class PmuEventRegistry:
@@ -584,6 +675,339 @@ def analyze_records(records: Iterable[dict], run_label: str,
             group[field_name] = summarize([s[field_name] for s in samples])
         result.groups.append(group)
     return result
+
+
+def _record_time_span(run: RunData, context: str) -> tuple[datetime, datetime]:
+    """run 全部记录（含失败记录）的 timestamp 跨度（min, max）。
+
+    缺/坏时间戳是硬错误——§6.4 的时序关联不接受"大概齐全"；无记录的
+    run 拿不出 SHA/时序证据，同样硬错误。
+    """
+    stamps = []
+    for record in (*run.ok_records, *run.failed_records):
+        timestamp = record.get("timestamp")
+        if not isinstance(timestamp, str):
+            raise TlbError(f"{context}: record missing timestamp")
+        try:
+            stamps.append(datetime.fromisoformat(
+                timestamp[:-1] + "+00:00" if timestamp.endswith("Z") else timestamp
+            ))
+        except ValueError:
+            raise TlbError(
+                f"{context}: invalid timestamp {timestamp!r}"
+            ) from None
+    if not stamps:
+        raise TlbError(f"{context}: no records (无记录则无 SHA/时序关联证据)")
+    return min(stamps), max(stamps)
+
+
+def group_block(runs: Sequence[RunData]) -> BlockResult:
+    """§6.4：已加载 run 按 experiment_id 归组为块。
+
+    块 = anchor-before + 主体 + anchor-after（调用方按 run 时序给出顺
+    序）。角色只由 manifest 的 experiment_id 决定（锚点 =
+    `ptr-chase-sm8650-x4-tlb-anchor`）——不以 buffer 大小、case 顺序
+    或时间邻近推断角色与关联。校验任一不过 → TlbError（拒绝归组，不
+    降级猜测）：
+
+    - 角色模式恰为 [锚, 主体] 或 [锚, 主体, 锚]；
+    - 关联证据①（target/probe SHA-256 一致）：全部记录（含失败记录）
+      的 probe.artifact.sha256 单一，且各 manifest 的 target.target_id
+      一致；
+    - 关联证据①（manifest 时序）：逐记录 timestamp 跨度与角色顺序一
+      致——前一 run 最晚样本 ≤ 后一 run 最早样本。非交叠是"时序相
+      邻"的可机读部分；三块之间是否夹着别的 run 无法本地证伪，任务
+      书沉默处取保守分支：只证顺序与角色一致，不证紧邻。关联证据②
+      （环境事务 journal）持久在 data/private/ 本地不入库，不在分析
+      面，归组不校验。
+
+    缺 anchor-after（[锚, 主体] 二 run）→ status=BLOCK_INCOMPLETE，
+    由 validate_anchors 原样结案。
+    """
+    if len(runs) not in (2, 3):
+        raise TlbError(f"group_block: 2 or 3 runs required, got {len(runs)}")
+    experiment_ids = []
+    for run in runs:
+        experiment_id = run.manifest.get("experiment_id")
+        if not isinstance(experiment_id, str) or not experiment_id:
+            raise TlbError(
+                f"group_block/{run.run_dir.name}: manifest missing experiment_id"
+            )
+        experiment_ids.append(experiment_id)
+    roles = [
+        "anchor" if experiment_id == _ANCHOR_EXPERIMENT_ID else "main"
+        for experiment_id in experiment_ids
+    ]
+    expected = ["anchor", "main"] + (["anchor"] if len(runs) == 3 else [])
+    if roles != expected:
+        raise TlbError(
+            f"group_block: role pattern {roles} != {expected} "
+            f"(角色只由 experiment_id 决定)"
+        )
+    shas: set[str] = set()
+    target_ids: set[str] = set()
+    spans = []
+    for run in runs:
+        context = f"group_block/{run.run_dir.name}"
+        target_id = run.manifest.get("target", {}).get("target_id")
+        if not target_id:
+            raise TlbError(f"{context}: manifest missing target.target_id")
+        target_ids.add(target_id)
+        for record in (*run.ok_records, *run.failed_records):
+            sha = (record.get("probe", {}).get("artifact") or {}).get("sha256")
+            if not sha:
+                raise TlbError(
+                    f"{context}: record missing probe.artifact.sha256"
+                )
+            shas.add(sha)
+        spans.append(_record_time_span(run, context))
+    if len(shas) != 1:
+        raise TlbError(
+            f"group_block: probe SHA-256 mismatch across runs "
+            f"({len(shas)} distinct)"
+        )
+    if len(target_ids) != 1:
+        raise TlbError(
+            f"group_block: target_id mismatch across runs {sorted(target_ids)}"
+        )
+    for previous, current in zip(spans, spans[1:]):
+        if previous[1] > current[0]:
+            raise TlbError(
+                "group_block: run time spans overlap or invert vs claimed "
+                "anchor-before/main/anchor-after order"
+            )
+    return BlockResult(
+        status=_BLOCK_GROUPED if len(runs) == 3 else _BLOCK_INCOMPLETE,
+        anchor_before=runs[0],
+        main=runs[1],
+        anchor_after=runs[2] if len(runs) == 3 else None,
+        evidence={
+            "experiment_ids": experiment_ids,
+            "probe_sha256": next(iter(shas)),
+            "target_id": next(iter(target_ids)),
+            "time_spans": [
+                [start.isoformat(), end.isoformat()] for start, end in spans
+            ],
+        },
+    )
+
+
+def _environment_gate_failure(run: RunData) -> dict | None:
+    """§6.2.5 环境门禁：锚点 run 的 manifest summary failed>0 或记录带
+    environment-precondition-failed → 等同锚点失真。返回证据或 None。"""
+    summary_failed = run.manifest.get("summary", {}).get("failed", 0)
+    env_buffers = [
+        record.get("params", {}).get("buffer_kb")
+        for record in run.failed_records
+        if (record.get("failure") or {}).get("reason")
+        == "environment-precondition-failed"
+    ]
+    if summary_failed > 0 or env_buffers:
+        return {"summary_failed": summary_failed,
+                "environment_failed_buffers": env_buffers}
+    return None
+
+
+def _anchor_groups(run: RunData) -> dict[int, dict]:
+    """锚点 run 的 {buffer_kb: 组}（analyze_records 分组原样取用）。
+
+    组形契约：恰为 {512: 一组, 3072: 一组}——锚点配置的 case 集合与
+    参数本身由 §9.3 plan 展开契约测试钉死，分析器只验组形；不符是契
+    约缺项，TlbError 而非判失。
+    """
+    result = analyze_records(run.ok_records, run.run_dir.name)
+    by_buffer: dict[int, list[dict]] = defaultdict(list)
+    for group in result.groups:
+        by_buffer[group["buffer_kb"]].append(group)
+    if set(by_buffer) != set(_ANCHOR_BUFFERS) or any(
+        len(groups) != 1 for groups in by_buffer.values()
+    ):
+        raise TlbError(
+            f"{run.run_dir.name}: anchor run must yield exactly one group per "
+            f"buffer {sorted(_ANCHOR_BUFFERS)}, got "
+            f"{sorted((buffer, len(groups)) for buffer, groups in by_buffer.items())}"
+        )
+    return {buffer: groups[0] for buffer, groups in by_buffer.items()}
+
+
+def _relative_deviation(value: float, reference: float) -> float:
+    """|value − reference| / reference；reference ≤0 时偏差视为无穷
+    （参照分布位置未定，保守判失）。"""
+    if reference <= 0:
+        return float("inf")
+    return abs(value - reference) / reference
+
+
+def _anchor_stats_evidence(groups: dict[str, dict[int, dict]]) -> dict:
+    """前/后锚点各 buffer 组的 median [p25, p75] 快照（审计用）。"""
+    return {
+        role: {
+            buffer_kb: {
+                metric: {
+                    "median": group[metric]["median"],
+                    "p25": group[metric]["p25"],
+                    "p75": group[metric]["p75"],
+                }
+                for metric in (*_ANCHOR_MEDIAN_FIELDS, *_ANCHOR_RATE_FIELDS)
+            }
+            for buffer_kb, group in by_buffer.items()
+        }
+        for role, by_buffer in groups.items()
+    }
+
+
+def validate_anchors(block: BlockResult,
+                     registry: PmuEventRegistry | None = None, *,
+                     prior_3072_baseline: dict | None = None) -> AnchorVerdict:
+    """§6.2.5 锚点判据（块级质量门槛；终态与 §10.2 的 Q 级不同层）。
+
+    全部满足 → ANCHORS_OK 并产出 main_result（主体 case 进入判定）；
+    任一不过 → BLOCK_FAILED，块 fail-closed（main_result=None，主体
+    case 不入判定）；块缺 anchor-after → BLOCK_INCOMPLETE 原样结案。
+    判据：
+
+    1. 环境门禁：任一锚点 run 的 summary failed>0 或记录带
+       environment-precondition-failed → 锚点失真；
+    2. latency 与 cycles/load：前/后锚点各自同 buffer 组 median 对照
+       short-base 参照（_ANCHOR_REF_MEDIANS，来源与生成方式见常量注
+       释）偏差 ≤3%；
+    3. R_0x05/R_0x34（512 KiB）：前/后锚点组 median 落入正控
+       [p25, p75]（_ANCHOR_REF_R512_P25_P75）；
+    4. R_0x05/R_0x34（3072 KiB）：无 G0 历史数据——prior_3072_baseline
+       缺省（首块）时只记录不判失，以 anchor-before 的 3072 组分布建
+       基线随 verdict 输出；有基线时前/后锚点 median 均须落入基线
+       [p25, p75]（同一规则，跨块一致性）；
+    5. 前后锚点互判（同一规则）：同 buffer latency/cyc median 相对偏
+       差 ≤3%（双向）；R 值 median 互落入对方 [p25, p75]（双向）。
+       3072 KiB 首块豁免只针对判据 4（无历史可比）——互判仍执行
+       （任务书沉默处取保守分支：块内漂移可独立于历史检出）。
+
+    baseline_3072 仅 ANCHORS_OK 时输出（失败块的分布不晋升为基线）。
+    """
+    if block.status != _BLOCK_GROUPED:
+        return AnchorVerdict(
+            status=_BLOCK_INCOMPLETE,
+            evidence={"reason": "missing anchor-after run",
+                      "block": block.evidence},
+        )
+    checks: list[dict] = []
+    for role, run in (("anchor_before", block.anchor_before),
+                      ("anchor_after", block.anchor_after)):
+        failure = _environment_gate_failure(run)
+        checks.append({"check": "environment_gate", "run": role,
+                       "ok": failure is None, **(failure or {})})
+    failures = [check for check in checks if not check["ok"]]
+    if failures:
+        # 锚点失真 → 块 fail-closed（§6.2.5）：短路结案，不再消费锚点
+        # 分布（失真的锚点分布不参与任何后续比较）。
+        return AnchorVerdict(status=_BLOCK_FAILED,
+                             evidence={"checks": checks, "failures": failures})
+    groups = {
+        "anchor_before": _anchor_groups(block.anchor_before),
+        "anchor_after": _anchor_groups(block.anchor_after),
+    }
+    for role in ("anchor_before", "anchor_after"):
+        for buffer_kb in _ANCHOR_BUFFERS:
+            group = groups[role][buffer_kb]
+            for metric in _ANCHOR_MEDIAN_FIELDS:
+                reference = _ANCHOR_REF_MEDIANS[buffer_kb][metric]
+                median = group[metric]["median"]
+                deviation = _relative_deviation(median, reference)
+                checks.append({
+                    "check": f"{metric}_vs_short_base",
+                    "run": role,
+                    "buffer_kb": buffer_kb,
+                    "median": median,
+                    "reference": reference,
+                    "deviation": deviation,
+                    "ok": deviation <= _ANCHOR_MAX_DEVIATION,
+                })
+        group_512 = groups[role][512]
+        for metric, interval in _ANCHOR_REF_R512_P25_P75.items():
+            median = group_512[metric]["median"]
+            checks.append({
+                "check": f"{metric}_within_positive_control_512",
+                "run": role,
+                "buffer_kb": 512,
+                "median": median,
+                "interval": list(interval),
+                "ok": interval[0] <= median <= interval[1],
+            })
+        if prior_3072_baseline is not None:
+            group_3072 = groups[role][3072]
+            for metric in _ANCHOR_RATE_FIELDS:
+                baseline_stats = prior_3072_baseline[metric]
+                median = group_3072[metric]["median"]
+                checks.append({
+                    "check": f"{metric}_within_3072_baseline",
+                    "run": role,
+                    "buffer_kb": 3072,
+                    "median": median,
+                    "interval": [baseline_stats["p25"], baseline_stats["p75"]],
+                    "ok": baseline_stats["p25"] <= median <= baseline_stats["p75"],
+                })
+    before, after = groups["anchor_before"], groups["anchor_after"]
+    for buffer_kb in _ANCHOR_BUFFERS:
+        for metric in _ANCHOR_MEDIAN_FIELDS:
+            median_before = before[buffer_kb][metric]["median"]
+            median_after = after[buffer_kb][metric]["median"]
+            deviation = max(
+                _relative_deviation(median_after, median_before),
+                _relative_deviation(median_before, median_after),
+            )
+            checks.append({
+                "check": f"{metric}_before_after_mutual",
+                "run": "mutual",
+                "buffer_kb": buffer_kb,
+                "median_before": median_before,
+                "median_after": median_after,
+                "deviation": deviation,
+                "ok": deviation <= _ANCHOR_MAX_DEVIATION,
+            })
+        for metric in _ANCHOR_RATE_FIELDS:
+            stats_before = before[buffer_kb][metric]
+            stats_after = after[buffer_kb][metric]
+            checks.append({
+                "check": f"{metric}_before_after_mutual",
+                "run": "mutual",
+                "buffer_kb": buffer_kb,
+                "median_before": stats_before["median"],
+                "median_after": stats_after["median"],
+                "interval_before": [stats_before["p25"], stats_before["p75"]],
+                "interval_after": [stats_after["p25"], stats_after["p75"]],
+                "ok": (
+                    stats_before["p25"] <= stats_after["median"] <= stats_before["p75"]
+                    and stats_after["p25"] <= stats_before["median"] <= stats_after["p75"]
+                ),
+            })
+    failures = [check for check in checks if not check["ok"]]
+    if failures:
+        return AnchorVerdict(
+            status=_BLOCK_FAILED,
+            evidence={"checks": checks, "failures": failures,
+                      "anchor_stats": _anchor_stats_evidence(groups)},
+        )
+    established = {
+        metric: dict(before[3072][metric]) for metric in _ANCHOR_RATE_FIELDS
+    }
+    return AnchorVerdict(
+        status=_ANCHORS_OK,
+        evidence={
+            "checks": checks,
+            "anchor_stats": _anchor_stats_evidence(groups),
+            "baseline_3072_source": (
+                "prior" if prior_3072_baseline is not None else "established"
+            ),
+        },
+        baseline_3072=(
+            prior_3072_baseline if prior_3072_baseline is not None else established
+        ),
+        main_result=analyze_records(
+            (*block.main.ok_records, *block.main.failed_records),
+            block.main.run_dir.name,
+            registry,
+        ),
+    )
 
 
 def _fmt(value: float) -> str:

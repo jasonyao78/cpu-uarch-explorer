@@ -8,7 +8,11 @@ knee（§6.2.2 三条件不全满足时无候选）、`0x05` density >1000/1k �
 但不阻断采集）、multiplex 样本拒绝、全失败 run 进 rejected 不抛错、
 契约缺项硬错误、注册表资格值白名单；以及终态机：§6.2.2 候选 + §6.2.8-1
 左删失优先 + §6.2.6 稳定条件（adjudicate_knee）、§6.2.3 walk-onset
-（detect_walk_onset）、双峰标记（§9.2 复用 p0prime 预注册规则）。
+（detect_walk_onset）、双峰标记（§9.2 复用 p0prime 预注册规则）；
+以及块机制：§6.4 三块归组（group_block，experiment_id 定角色 +
+probe SHA-256/target/时序关联证据）与 §6.2.5 锚点判据
+（validate_anchors：环境门禁、latency/cyc 对照 short-base 参照 ≤3%、
+512 KiB R 值落正控 [p25,p75]、3072 KiB 首块自校准、前后锚点互判）。
 """
 
 from __future__ import annotations
@@ -27,9 +31,12 @@ from analysis.sm8650_tlb import (
     build_markdown,
     detect_knee_candidates,
     detect_walk_onset,
+    group_block,
     load_registry,
     main,
+    validate_anchors,
 )
+from analysis.load import RunData
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _REGISTRY = _REPO_ROOT / "configs" / "pmu-event-registry.json"
@@ -677,6 +684,419 @@ class TestAllFailedRun(unittest.TestCase):
         output = buf.getvalue()
         self.assertIn("tlb-coarse", output)
         self.assertIn("environment-precondition-failed", output)
+
+
+# ---------------------------------------------------------------------------
+# §6.4/§6.2.5 块归组与锚点判定 fixture
+#
+# 参照常量与 sm8650_tlb 内嵌值同源同法（2026-09-29 现读现算自
+# data/public/runs/，runner.statistics.summarize 口径），此处独立写数
+# 以钉死实现侧常量（防漂移，不是从被测模块导入）：
+# - latency/cyc 参照 = short-base run 20260928T024022Z 同 buffer 组
+#   median（每组 4 seed × 10 进程 = 40 样本）；
+# - R 值参照 = TLB 正控 run 20260927T182613Z 512 KiB 组 [p25, p75]
+#   （10 进程；任务书 v4.1 §6.2.5 括号值 288.08 [287.7, 289.6] /
+#   0.0129 [0.0098, 0.0141] 的低位舍入与之吻合）。
+# ---------------------------------------------------------------------------
+
+_REF_LATENCY_NS = {512: 2.6548, 3072: 7.73815}
+_REF_CYC_PER_LOAD = {512: 7.524879455566406, 3072: 21.27081807454427}
+_CTRL_512_R05_P25, _CTRL_512_R05_P75 = 287.7812832593918, 289.3509864807129
+_CTRL_512_R34_P25, _CTRL_512_R34_P75 = 0.010460615158081055, 0.013381242752075195
+_CTRL_512_R05_MEDIAN = 288.0765497684479
+_CTRL_512_R34_MEDIAN = 0.012874603271484375
+
+_ANCHOR_ID = "ptr-chase-sm8650-x4-tlb-anchor"  # §6.4：锚点 experiment_id
+_MAIN_ID = "ptr-chase-sm8650-x4-tlb-coarse"
+_PROBE_SHA = "a1b2c3d4" * 8  # 64 hex，块内三 run 必须一致（§6.4 证据①）
+_T0 = "2026-09-29T01:00:00+00:00"  # anchor-before
+_T1 = "2026-09-29T02:00:00+00:00"  # 主体
+_T2 = "2026-09-29T03:00:00+00:00"  # anchor-after
+
+
+def _case_record(*, buffer_kb, latency_ns, cyc_per_load, refill_per_1k,
+                 walk_per_1k, timestamp, sha=_PROBE_SHA, seed=42):
+    """锚点/主体 case 记录：10 进程恒定逐样本值（median=p25=p75=给定值，
+    便于把判据偏差钉在阈值两侧）。"""
+    slots = buffer_kb * 1024 // 64
+    loads = slots * 8  # 短训练（loads_per_slot=8），同锚点配置展开
+    pmu_values = {
+        "pmu.cycles.count": cyc_per_load * loads,
+        "pmu.mem_access_rd.count": 1000.0,
+        "pmu.l1d_tlb_refill.count": refill_per_1k * loads / 1000.0,
+        "pmu.dtlb_walk.count": walk_per_1k * loads / 1000.0,
+    }
+    observations = [{
+        "sample_index": index,
+        "value": latency_ns,
+        "raw_sample_ref": f"raw:{index}",
+        "page_policy_requested": "base-madvise",
+        "page_policy_actual": "base",
+        "anon_huge_kb": 0,
+        "page_kb": 4,
+        "seed": seed,
+        "vma_base": f"0x7f3a{index:08x}",
+    } for index in range(10)]
+    metrics = [{
+        "name": "latency_ns",
+        "value": latency_ns,
+        "unit": "ns",
+        "repetitions": 10,
+        "observations": observations,
+    }]
+    for name, (typ, config, _) in _PMU.items():
+        metrics.append({
+            "name": name,
+            "value": pmu_values[name],
+            "unit": "events",
+            "repetitions": 10,
+            "observations": [{
+                "sample_index": index,
+                "value": pmu_values[name],
+                "raw_sample_ref": f"raw:{index}",
+                "pmu_type": typ,
+                "pmu_config": config,
+                "time_enabled_ns": 1000,
+                "time_running_ns": 1000,
+                "page_policy_requested": "base-madvise",
+                "page_policy_actual": "base",
+                "anon_huge_kb": 0,
+                "seed": seed,
+                "vma_base": f"0x7f3a{index:08x}",
+            } for index in range(10)],
+        })
+    return {
+        "schema_version": "2.0",
+        "run_id": f"00000000-0000-0000-0000-{buffer_kb:012d}",
+        "timestamp": timestamp,
+        "status": "ok",
+        "target": {"target_id": "redmi-k70pro-01"},
+        "probe": {
+            "name": "ptr_chase",
+            "protocol_version": "1.2",
+            "implementation_id": "portable",
+            "artifact": {"sha256": sha},
+        },
+        "params": {
+            "buffer_kb": buffer_kb,
+            "loads": loads,
+            "stride": 64,
+            "warmup_passes": 2,
+            "base_pages": 1,
+            "seed": seed,
+        },
+        "metrics": metrics,
+    }
+
+
+def _loaded_run(label, experiment_id, ok_records, *, failed_records=(),
+                summary_failed=None, target_id="redmi-k70pro-01"):
+    """直接构造 RunData（group_block 消费已加载 run，不走文件系统）。"""
+    manifest = {
+        "schema_version": "1.0",
+        "experiment_id": experiment_id,
+        "protocol_version": "1.2",
+        "target": {"target_id": target_id},
+        "records": f"/runs/{label}/records.jsonl",
+        "summary": {
+            "total": len(ok_records) + len(failed_records),
+            "ok": len(ok_records),
+            "failed": (
+                len(failed_records) if summary_failed is None else summary_failed
+            ),
+            "skipped": 0,
+            "unsupported": 0,
+        },
+    }
+    return RunData(run_dir=Path(label), manifest=manifest,
+                   ok_records=list(ok_records),
+                   failed_records=list(failed_records))
+
+
+def _anchor_run(label, timestamp, *, lat_512=None, cyc_512=None,
+                r05_512=_CTRL_512_R05_MEDIAN, r34_512=_CTRL_512_R34_MEDIAN,
+                lat_3072=None, cyc_3072=None, r05_3072=500.0, r34_3072=0.02,
+                sha=_PROBE_SHA, failed_records=(), summary_failed=None):
+    """锚点 run：固定 512/3072 KiB 两个 base case（§6.2.5），缺省值 =
+    参照中位（偏差 0）。3072 KiB R 值无历史参照，fixture 任取恒定值。"""
+    records = [
+        _case_record(
+            buffer_kb=512,
+            latency_ns=_REF_LATENCY_NS[512] if lat_512 is None else lat_512,
+            cyc_per_load=_REF_CYC_PER_LOAD[512] if cyc_512 is None else cyc_512,
+            refill_per_1k=r05_512, walk_per_1k=r34_512,
+            timestamp=timestamp, sha=sha,
+        ),
+        _case_record(
+            buffer_kb=3072,
+            latency_ns=_REF_LATENCY_NS[3072] if lat_3072 is None else lat_3072,
+            cyc_per_load=_REF_CYC_PER_LOAD[3072] if cyc_3072 is None else cyc_3072,
+            refill_per_1k=r05_3072, walk_per_1k=r34_3072,
+            timestamp=timestamp, sha=sha,
+        ),
+    ]
+    return _loaded_run(label, _ANCHOR_ID, records,
+                       failed_records=failed_records,
+                       summary_failed=summary_failed)
+
+
+def _main_run(label, timestamp, sha=_PROBE_SHA):
+    """主体 run（粗扫段）：两个非锚点 buffer，值不在判据消费面上。"""
+    records = [
+        _case_record(buffer_kb=128, latency_ns=2.0, cyc_per_load=2.0,
+                     refill_per_1k=10.0, walk_per_1k=0.0,
+                     timestamp=timestamp, sha=sha),
+        _case_record(buffer_kb=256, latency_ns=2.1, cyc_per_load=2.1,
+                     refill_per_1k=12.0, walk_per_1k=0.0,
+                     timestamp=timestamp, sha=sha),
+    ]
+    return _loaded_run(label, _MAIN_ID, records)
+
+
+def _block(*, before=None, after=None, main=None):
+    """按 §6.4 时序组块：anchor-before + 主体 [+ anchor-after]。"""
+    runs = [
+        before if before is not None else _anchor_run("before", _T0),
+        main if main is not None else _main_run("main", _T1),
+    ]
+    if after is not None:
+        runs.append(after)
+    return group_block(runs)
+
+
+def _failed_env_record(timestamp, *, buffer_kb=512, sha=_PROBE_SHA):
+    record = _case_record(buffer_kb=buffer_kb, latency_ns=0.0,
+                          cyc_per_load=0.0, refill_per_1k=0.0,
+                          walk_per_1k=0.0, timestamp=timestamp, sha=sha)
+    record["status"] = "failed"
+    record["metrics"] = []
+    record["failure"] = {
+        "reason": "environment-precondition-failed",
+        "detail": "cpufreq-max-mismatch:policy7",
+    }
+    return record
+
+
+class TestGroupBlock(unittest.TestCase):
+    """§6.4 三块归组：角色由 experiment_id 决定；关联证据（probe
+    SHA-256 / target / manifest 时序）不满足即硬错误，不降级推断。"""
+
+    def test_grouped_block_carries_roles_and_evidence(self):
+        block = _block(after=_anchor_run("after", _T2))
+        self.assertEqual(block.status, "BLOCK_GROUPED")
+        self.assertEqual(block.anchor_before.manifest["experiment_id"],
+                         _ANCHOR_ID)
+        self.assertEqual(block.main.manifest["experiment_id"], _MAIN_ID)
+        self.assertEqual(block.anchor_after.manifest["experiment_id"],
+                         _ANCHOR_ID)
+        self.assertEqual(block.evidence["probe_sha256"], _PROBE_SHA)
+        self.assertEqual(block.evidence["target_id"], "redmi-k70pro-01")
+
+    def test_missing_anchor_after_is_block_incomplete(self):
+        # ⑤缺 anchor-after → BLOCK_INCOMPLETE；validate_anchors 原样结案，
+        # 不判锚点、不产出主体（fail-closed）。
+        block = _block()
+        self.assertEqual(block.status, "BLOCK_INCOMPLETE")
+        self.assertIsNone(block.anchor_after)
+        verdict = validate_anchors(block)
+        self.assertEqual(verdict.status, "BLOCK_INCOMPLETE")
+        self.assertIsNone(verdict.main_result)
+
+    def test_association_violations_are_hard_errors(self):
+        before = _anchor_run("before", _T0)
+        main = _main_run("main", _T1)
+        after = _anchor_run("after", _T2)
+        with self.subTest(violation="probe sha mismatch"):
+            bad_main = _main_run("main-bad", _T1, sha="ff" * 32)
+            with self.assertRaises(TlbError):
+                group_block([before, bad_main, after])
+        with self.subTest(violation="target mismatch"):
+            other_target = _loaded_run(
+                "main-other", _MAIN_ID, _main_run("m", _T1).ok_records,
+                target_id="some-other-device",
+            )
+            with self.assertRaises(TlbError):
+                group_block([before, other_target, after])
+        with self.subTest(violation="role order not inferred from position"):
+            with self.assertRaises(TlbError):
+                group_block([main, before, after])
+        with self.subTest(violation="two anchors without main"):
+            with self.assertRaises(TlbError):
+                group_block([_anchor_run("b1", _T0), _anchor_run("b2", _T1)])
+        with self.subTest(violation="four runs"):
+            with self.assertRaises(TlbError):
+                group_block([before, main, after,
+                             _anchor_run("extra", "2026-09-29T04:00:00+00:00")])
+        with self.subTest(violation="timing inversion"):
+            early_after = _anchor_run("after-early", "2026-09-29T00:30:00+00:00")
+            with self.assertRaises(TlbError):
+                group_block([before, main, early_after])
+
+
+class TestValidateAnchors(unittest.TestCase):
+    """§6.2.5 锚点判据：ANCHORS_OK / BLOCK_FAILED / BLOCK_INCOMPLETE
+    是块级终态（与 §10.2 的 Q 级终态不同层）。"""
+
+    def test_latency_deviation_within_threshold_passes(self):
+        # ①latency 偏差 2%（≤3%）通过；主体 case 进入判定（main_result
+        # 产出主体分组）；首块 3072 KiB 自校准建立基线。
+        block = _block(
+            before=_anchor_run("before", _T0,
+                               lat_512=_REF_LATENCY_NS[512] * 1.02),
+            after=_anchor_run("after", _T2,
+                              lat_512=_REF_LATENCY_NS[512] * 1.02),
+        )
+        self.assertEqual(block.status, "BLOCK_GROUPED")
+        verdict = validate_anchors(block)
+        self.assertEqual(verdict.status, "ANCHORS_OK")
+        self.assertIsNotNone(verdict.main_result)
+        self.assertEqual(
+            sorted(group["buffer_kb"] for group in verdict.main_result.groups),
+            [128, 256],
+        )
+        self.assertIsNotNone(verdict.baseline_3072)
+
+    def test_latency_deviation_beyond_threshold_fails_block(self):
+        # ②latency 偏差 5%（>3%）→ BLOCK_FAILED；主体 case 不入判定
+        # （fail-closed：main_result 不产出，无对象可消费）。
+        block = _block(
+            before=_anchor_run("before", _T0,
+                               lat_512=_REF_LATENCY_NS[512] * 1.05),
+            after=_anchor_run("after", _T2,
+                              lat_512=_REF_LATENCY_NS[512] * 1.05),
+        )
+        verdict = validate_anchors(block)
+        self.assertEqual(verdict.status, "BLOCK_FAILED")
+        self.assertIsNone(verdict.main_result)
+        self.assertIsNone(verdict.baseline_3072)  # 失败块分布不晋升基线
+        failures = verdict.evidence["failures"]
+        self.assertTrue(any(
+            failure["check"] == "latency_ns_vs_short_base"
+            and failure["run"] == "anchor_before"
+            and failure["buffer_kb"] == 512
+            for failure in failures
+        ))
+
+    def test_512_r_values_outside_positive_control_interval_fail(self):
+        # ③512 KiB R_0x05/R_0x34 median 落在正控 [p25, p75] 外 → 失败
+        # （缺省 fixture 取正控 median，在区间内——①即反向对照）。
+        with self.subTest(metric="R_0x05 above p75"):
+            block = _block(
+                before=_anchor_run("before", _T0, r05_512=_CTRL_512_R05_P75 + 1.0),
+                after=_anchor_run("after", _T2, r05_512=_CTRL_512_R05_P75 + 1.0),
+            )
+            verdict = validate_anchors(block)
+            self.assertEqual(verdict.status, "BLOCK_FAILED")
+            self.assertIsNone(verdict.main_result)
+        with self.subTest(metric="R_0x34 below p25"):
+            block = _block(
+                before=_anchor_run("before", _T0, r34_512=_CTRL_512_R34_P25 / 2),
+                after=_anchor_run("after", _T2, r34_512=_CTRL_512_R34_P25 / 2),
+            )
+            verdict = validate_anchors(block)
+            self.assertEqual(verdict.status, "BLOCK_FAILED")
+            self.assertTrue(any(
+                "dtlb_walk_per_1k" in failure["check"]
+                for failure in verdict.evidence["failures"]
+            ))
+
+    def test_3072_first_block_self_calibrates_later_blocks_compare(self):
+        # ④3072 KiB 无 G0 历史数据：首块只记录不判失，以 anchor-before
+        # 的 3072 分布建基线；后续块与之比较（同一规则）。
+        first = validate_anchors(_block(after=_anchor_run("after", _T2)))
+        self.assertEqual(first.status, "ANCHORS_OK")
+        baseline = first.baseline_3072
+        self.assertEqual(baseline["l1d_tlb_refill_per_1k"]["median"], 500.0)
+        self.assertEqual(baseline["l1d_tlb_refill_per_1k"]["p25"], 500.0)
+        # 逐样本值经 ×loads/1000 → /loads×1000 往返，浮点末位有漂移。
+        self.assertAlmostEqual(baseline["dtlb_walk_per_1k"]["p75"], 0.02)
+        # 第二块与基线一致 → 通过且回显同一基线。
+        same = validate_anchors(
+            _block(after=_anchor_run("after2", _T2)),
+            prior_3072_baseline=baseline,
+        )
+        self.assertEqual(same.status, "ANCHORS_OK")
+        self.assertIs(same.baseline_3072, baseline)
+        # 第二块 3072 KiB median 落在基线 [p25, p75] 外 → 失败。
+        drifted = validate_anchors(
+            _block(
+                before=_anchor_run("before2", _T0, r05_3072=600.0),
+                after=_anchor_run("after2", _T2, r05_3072=600.0),
+            ),
+            prior_3072_baseline=baseline,
+        )
+        self.assertEqual(drifted.status, "BLOCK_FAILED")
+        self.assertIsNone(drifted.main_result)
+        self.assertTrue(any(
+            failure["check"] == "l1d_tlb_refill_per_1k_within_3072_baseline"
+            for failure in drifted.evidence["failures"]
+        ))
+
+    def test_environment_gate_failure_distorts_anchor(self):
+        # §6.2.5：任一锚点 run 环境门禁失败（summary failed>0 或记录带
+        # environment-precondition-failed）→ 等同锚点失真，块 fail-closed。
+        with self.subTest(mode="failed record with env reason"):
+            after = _anchor_run(
+                "after", _T2,
+                failed_records=[_failed_env_record(_T2)],
+            )
+            verdict = validate_anchors(_block(after=after))
+            self.assertEqual(verdict.status, "BLOCK_FAILED")
+            self.assertIsNone(verdict.main_result)
+            self.assertTrue(any(
+                failure["check"] == "environment_gate"
+                and failure["run"] == "anchor_after"
+                for failure in verdict.evidence["failures"]
+            ))
+        with self.subTest(mode="manifest summary failed>0"):
+            after = _anchor_run("after", _T2, summary_failed=1)
+            verdict = validate_anchors(_block(after=after))
+            self.assertEqual(verdict.status, "BLOCK_FAILED")
+
+    def test_before_after_mutual_judgment(self):
+        # 前后两次锚点 run 同指标互判（同一规则）：各自对照参照都合格、
+        # 但彼此之间漂移超阈也判失。
+        with self.subTest(mode="latency drift"):
+            # ×0.99 与 ×1.02 各自偏差 ≤3%，互判偏差 3.03% >3%。
+            block = _block(
+                before=_anchor_run("before", _T0,
+                                   lat_512=_REF_LATENCY_NS[512] * 0.99),
+                after=_anchor_run("after", _T2,
+                                  lat_512=_REF_LATENCY_NS[512] * 1.02),
+            )
+            verdict = validate_anchors(block)
+            self.assertEqual(verdict.status, "BLOCK_FAILED")
+            self.assertTrue(any(
+                failure["check"] == "latency_ns_before_after_mutual"
+                for failure in verdict.evidence["failures"]
+            ))
+        with self.subTest(mode="R value drift"):
+            # 两者各自落在正控 [p25, p75] 内，但 median 互不落对方
+            # [p25, p75]（恒定分布区间退化）→ 互判失败。
+            block = _block(
+                before=_anchor_run("before", _T0, r05_512=288.0),
+                after=_anchor_run("after", _T2, r05_512=288.5),
+            )
+            verdict = validate_anchors(block)
+            self.assertEqual(verdict.status, "BLOCK_FAILED")
+            self.assertTrue(any(
+                failure["check"] == "l1d_tlb_refill_per_1k_before_after_mutual"
+                for failure in verdict.evidence["failures"]
+            ))
+
+    def test_anchor_group_shape_is_validated(self):
+        # 锚点 run 组形契约：恰为 {512: 一组, 3072: 一组}——缺 buffer
+        # case 是契约缺项，硬错误而非判失（锚点配置的 case 集合本身由
+        # §9.3 plan 展开契约测试钉死，此处只验组形）。
+        broken = _loaded_run(
+            "before", _ANCHOR_ID,
+            [_case_record(buffer_kb=512, latency_ns=2.6, cyc_per_load=7.5,
+                          refill_per_1k=288.0, walk_per_1k=0.012,
+                          timestamp=_T0)],
+        )
+        block = _block(before=broken, after=_anchor_run("after", _T2))
+        with self.assertRaises(TlbError):
+            validate_anchors(block)
 
 
 if __name__ == "__main__":
