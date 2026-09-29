@@ -253,6 +253,54 @@ class TestPlan(unittest.TestCase):
                 if path.name in expected_case_counts:
                     self.assertEqual(len(plan.cases), expected_case_counts[path.name])
                     self.assertTrue(all(case.repetitions == 10 for case in plan.cases))
+                # §9.3⑮/§6.2.5：锚点/正控/粗扫的 case 参数与执行顺序也要钉死，不只是 case 数
+                tlb_expectations = {
+                    "ptr-chase-sm8650-x4-tlb-anchor.json": {
+                        "buffers": [512, 3072],
+                        "seeds": {42},
+                    },
+                    "ptr-chase-sm8650-x4-tlb-ctrl.json": {
+                        "buffers": [512, 16384],
+                        "seeds": {42},
+                    },
+                    "ptr-chase-sm8650-x4-tlb-coarse.json": {
+                        "buffers": None,  # 26 case 只钉集合，顺序由 sweep 笛卡尔积决定
+                        "seeds": {42, 7},
+                    },
+                }
+                if path.name in tlb_expectations:
+                    expected = tlb_expectations[path.name]
+                    if expected["buffers"] is not None:
+                        self.assertEqual(
+                            [case.param_value("buffer_kb") for case in plan.cases],
+                            expected["buffers"],
+                        )
+                    else:
+                        self.assertEqual(
+                            {case.param_value("buffer_kb") for case in plan.cases},
+                            {128, 256, 384, 512, 768, 1024, 1536, 2048, 3072,
+                             4096, 8192, 16384, 32768},
+                        )
+                    self.assertEqual(
+                        {case.param_value("seed") for case in plan.cases},
+                        expected["seeds"],
+                    )
+                    # loads_per_slot 是派生中间量、不进 case.params：声明默认值与
+                    # 派生 loads 两头钉（min_loads=4096 在最小 128KiB 档也不生效）
+                    defaults = {p["name"]: p.get("default") for p in spec["parameters"]}
+                    self.assertEqual(defaults["loads_per_slot"], 8)
+                    self.assertIn("loads_per_slot", spec["execution"]["fixed_params"])
+                    for case in plan.cases:
+                        slots = (case.param_value("buffer_kb") * 1024
+                                 // case.param_value("stride"))
+                        self.assertEqual(case.param_value("base_pages"), 1)
+                        self.assertEqual(case.param_value("loads"), 8 * slots)
+                        self.assertEqual(
+                            {event["name"]
+                             for event in case.param_value("pmu_events")},
+                            {"cycles", "mem_access_rd",
+                             "l1d_tlb_refill", "dtlb_walk"},
+                        )
                 for case in plan.cases:
                     params = dict(case.params)
                     slots = case.param_value("buffer_kb") * 1024 // case.param_value("stride")
