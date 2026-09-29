@@ -214,7 +214,7 @@ JSON 配置、Arm TRM（Issue 05）+ `cortex-x4.json`（事件语义，已冻结
 
 - [ ] ①`0x2d/0x2f`：ctrl 配置加入后重跑（G1 组）；过判据 → 注册表升 QUALIFIED（含 run ID）→ 提交 `data(sm8650): qualify L2 TLB events`。
 - [ ] ②`0x8136/0x8128`：G2 组同法；③`0x8138/0x813a`：G4 组（含 `-T` cohort 对照）同法。任一失败 → 注册 `SEMANTICS_UNVERIFIED`、对应结论降级、不续试新事件。
-- [ ] **§5.3 固定开销扫描（正控期间顺带执行）**：512 KiB 与 16 MiB 两点 × 8/64/256 ring passes × G0 组，逐事件拟合 `C_e(N)=a_e+b_e·N`；`|a_e|/C_e(N)` ≤5% 判定写入正控评审；超阈值事件在后续 Phase 报告标注"含固定开销"。
+- [ ] **§5.3 固定开销扫描（正控期间顺带执行）**：512 KiB 与 16 MiB 两点 × 8/64/256 ring passes × G0 组，逐事件拟合 `C_e(N)=a_e+b_e·N`；`|a_e|/C_e(N)` ≤5% 判定写入正控评审；超阈值事件在后续 Phase 报告标注"含固定开销"。判定函数 `adjudicate_fixed_overhead` 已前置实现（`c11f10a`）；**接入评审序列化前决定 ratio=inf 的 JSON 口径**（sanitize 为字符串标记，或在报告注明接受 python-json `Infinity` 扩展——2026-09-29 质量评审 Minor，届时显式决策不静默）。
 - [ ] 每步：schema 校验 + 注册表更新 + 提交。
 
 ---
