@@ -457,8 +457,9 @@ def detect_knee_candidates(rows: list[dict],
     return candidates
 
 
-def _intervals_overlap(left: tuple[int, int], right: tuple[int, int]) -> bool:
-    """闭区间在页数轴上相交（共享 ≥1 个页点，端点相触算重叠）。"""
+def _intervals_overlap(left: tuple[float, float],
+                       right: tuple[float, float]) -> bool:
+    """闭区间相交（端点相触算重叠；页数轴与 latency 分位轴通用）。"""
     return left[0] <= right[1] and right[0] <= left[1]
 
 
@@ -722,7 +723,21 @@ def _requested_policy(record: dict, context: str) -> str:
     猜测）；多旗标同 adapter 互斥契约 → TlbError。
     """
     params = record.get("params", {})
-    flags = [name for name in _PARAM_POLICIES if params.get(name)]
+    flags = []
+    for name in _PARAM_POLICIES:
+        if name not in params:
+            continue
+        raw = params[name]
+        # 与 adapter _binary_flag 同款的 0/1 归一（字符串 "0" 也是 OFF）；
+        # run 期已过 adapter 校验，此处再遇其他取值即数据问题，fail-closed。
+        if raw in (0, "0"):
+            continue
+        if raw in (1, "1"):
+            flags.append(name)
+            continue
+        raise TlbError(
+            f"{context}: page policy flag {name} must be 0 or 1, got {raw!r}"
+        )
     if len(flags) > 1:
         raise TlbError(
             f"{context}: mutually exclusive page policy flags {sorted(flags)}"
@@ -906,7 +921,9 @@ def grade_thp_cohorts(rows: Iterable[dict]) -> dict:
     跨 backing 合并路径。输出 {"cohorts": [{buffer_kb, cohort, merged,
     units, regime_failures?}]}，按 (buffer, backing) 排序；空输入 → 空表。
     """
-    pooled: dict[tuple[int, int, str], list[dict]] = defaultdict(list)
+    by_cohort: dict[tuple[int, str], dict[int, list[dict]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
     for row in rows:
         context = f"grade_thp_cohorts/buffer={row.get('buffer_kb')}KiB"
         buffer_kb = row.get("buffer_kb")
@@ -927,11 +944,6 @@ def grade_thp_cohorts(rows: Iterable[dict]) -> dict:
                     raise TlbError(
                         f"{context}: sample missing numeric {field_name}"
                     )
-        pooled[(buffer_kb, seed, cohort)].extend(samples)
-    by_cohort: dict[tuple[int, str], dict[int, list[dict]]] = defaultdict(
-        lambda: defaultdict(list)
-    )
-    for (buffer_kb, seed, cohort), samples in pooled.items():
         by_cohort[(buffer_kb, cohort)][seed].extend(samples)
     cohorts = []
     for (buffer_kb, cohort), by_seed in sorted(

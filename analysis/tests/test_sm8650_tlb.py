@@ -1491,6 +1491,20 @@ class TestThpCohortGrading(unittest.TestCase):
             with self.assertRaises(TlbError):
                 grade_thp_cohorts([row])
 
+    def test_seed_deviation_at_ten_percent_boundary_merges(self):
+        # 边界：median 偏差恰好 10%（≤ 阈值判同制度，取 > 才分列）且
+        # [p25,p75] 相交 → 合并。median 20.0/22.0：|22−20|/20 与字面量
+        # 0.10 为同一 double（2/20 的最近舍入），判定不依赖浮点运气。
+        rows = [_cohort_row(512, 42, "thp", [20.0] * 6 + [22.0] * 4),
+                _cohort_row(512, 7, "thp", [20.0] * 4 + [22.0] * 6)]
+        cohort = grade_thp_cohorts(rows)["cohorts"][0]
+        self.assertTrue(cohort["merged"])
+        self.assertNotIn("regime_failures", cohort)
+        unit = cohort["units"][0]
+        self.assertEqual(unit["seeds"], [7, 42])
+        self.assertEqual(unit["valid_samples"], 20)
+        self.assertEqual(unit["grade"], "comparative")
+
 
 class TestQ3DefaultOutcome(unittest.TestCase):
     """§7 Phase C Q3 默认终态（P1-6）：关联型报告 + MODEL_UNIDENTIFIABLE；
@@ -1525,6 +1539,12 @@ class TestQ3DefaultOutcome(unittest.TestCase):
                           if "cost" in key.lower()])
         with self.assertRaises(TlbError):
             adjudicate_q3(g3_executed=True, model_spec={"name": "ad-hoc"})
+
+    def test_evidence_marks_model_spec_unfrozen(self):
+        # evidence 显式登记"模型规格未冻结"：审计侧可机读区分默认终态与
+        # （未来）已冻结模型的判定，不靠 status 文案推断。
+        verdict = adjudicate_q3()
+        self.assertIs(verdict["evidence"]["model_spec_frozen"], False)
 
 
 class TestThpProcessBudget(unittest.TestCase):
@@ -1566,6 +1586,14 @@ class TestThpProcessBudget(unittest.TestCase):
         for entry in budget["entries"]:
             self.assertEqual(entry["processes_used"], 10)
 
+    def test_budget_exactly_over_cap(self):
+        # 边界：41 进程次 > 40 → 超支（40 恰好不超已在 ⑦ 钉过）。
+        records = [_thp_record(seed=seed) for seed in (42, 7, 1337, 20260928)]
+        records.append(_thp_record(seed=5, latencies=(2.4,)))
+        entry = audit_thp_budget(records)["entries"][0]
+        self.assertEqual(entry["processes_used"], 41)
+        self.assertTrue(entry["exceeded"])
+
 
 class TestThpConversionTable(unittest.TestCase):
     """§7 Phase D 必报转化表（选择偏差披露）：请求次数 → 实际 backing 构成
@@ -1604,6 +1632,63 @@ class TestThpConversionTable(unittest.TestCase):
             audit_thp_budget([record])
         with self.assertRaises(TlbError):
             build_thp_conversion([record], "run-a")
+
+
+class TestRequestedPolicyAttribution(unittest.TestCase):
+    """policy 归属的次要路径：params 旗标归一（同 adapter _binary_flag）、
+    观测回退、双缺省 "default"、互斥/未知取值硬错误。"""
+
+    def test_mutually_exclusive_flags_are_hard_error(self):
+        record = _thp_record()  # params thp=1
+        record["params"]["base_pages"] = 1
+        with self.assertRaisesRegex(TlbError, "mutually exclusive"):
+            audit_thp_budget([record])
+
+    def test_unknown_requested_observation_is_hard_error(self):
+        record = _record(buffer_kb=2304, seed=42, latencies=(2.4,) * 10)
+        for metric in record["metrics"]:
+            for observation in metric["observations"]:
+                observation["page_policy_requested"] = "mystery"
+        with self.assertRaisesRegex(TlbError, "unknown page_policy_requested"):
+            audit_thp_budget([record])
+
+    def test_string_zero_flag_is_off(self):
+        # 字符串 "0" = OFF（真值判定会误判为 ON 并与观测冲突——钉死归一）。
+        record = _record(buffer_kb=2304, seed=42, latencies=(2.4,) * 10)
+        record["params"]["thp"] = "0"  # OFF：不与 base_pages=1 互斥
+        entry = audit_thp_budget([record])["entries"][0]
+        self.assertEqual(entry["policy"], "base-madvise")
+
+    def test_string_one_flag_is_on(self):
+        record = _thp_record()
+        record["params"]["thp"] = "1"
+        entry = audit_thp_budget([record])["entries"][0]
+        self.assertEqual(entry["policy"], "thp-madvise")
+
+    def test_non_binary_flag_value_is_hard_error(self):
+        for bad in (2, "yes", 0.5):
+            with self.subTest(value=bad):
+                record = _thp_record()
+                record["params"]["thp"] = bad
+                with self.assertRaisesRegex(TlbError, "must be 0 or 1"):
+                    audit_thp_budget([record])
+
+    def test_observation_fallback_without_flags(self):
+        # params 无旗标 → 由观测的 page_policy_requested 回退归属。
+        record = _record(buffer_kb=2304, seed=42, latencies=(2.4,) * 10)
+        del record["params"]["base_pages"]
+        entry = audit_thp_budget([record])["entries"][0]
+        self.assertEqual(entry["policy"], "base-madvise")
+
+    def test_no_flag_no_observation_defaults(self):
+        # params 无旗标 + 观测无 requested 字段 → "default"（不猜测）。
+        record = _record(buffer_kb=2304, seed=42, latencies=(2.4,) * 10)
+        del record["params"]["base_pages"]
+        for metric in record["metrics"]:
+            for observation in metric["observations"]:
+                del observation["page_policy_requested"]
+        entry = audit_thp_budget([record])["entries"][0]
+        self.assertEqual(entry["policy"], "default")
 
 
 if __name__ == "__main__":

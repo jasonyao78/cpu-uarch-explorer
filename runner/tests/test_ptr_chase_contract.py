@@ -326,8 +326,35 @@ class TestPtrChaseContract(unittest.TestCase):
         metric = self.adapter.parse_output(
             "latency_ns=1 vma_base=0x7f12ab", "")[0]
         self.assertEqual(metric["vma_base"], "0x7f12ab")
-        with self.assertRaises(ParseError):
-            self.adapter.parse_output("latency_ns=1 vma_base=xyz", "")
+        # 负例逐枚钉死：非 hex、大写前缀、大写数字、缺前缀、无数字。
+        for bad in ("xyz", "0X7f12ab", "0x7F12AB", "7f12ab", "0x"):
+            with self.subTest(vma_base=bad):
+                with self.assertRaises(ParseError):
+                    self.adapter.parse_output(
+                        f"latency_ns=1 vma_base={bad}", "")
+
+    def test_vma_base_is_recorded_per_metric(self):
+        # 每 metric 扇出：latency 与 PMU 计数带同一样本的 vma_base。
+        stdout = (
+            "latency_ns=1.25 vma_base=0x7f12ab000 "
+            "pmu_cycles_type=8 pmu_cycles_config=17 pmu_cycles_count=100 "
+            "pmu_cycles_time_enabled_ns=1000 pmu_cycles_time_running_ns=1000"
+        )
+        metrics = self.adapter.parse_output(stdout, "")
+        self.assertEqual([metric["vma_base"] for metric in metrics],
+                         ["0x7f12ab000", "0x7f12ab000"])
+
+    def test_legacy_output_without_vma_base(self):
+        # 旧版探针输出（无 vma_base 字段）→ 任何 metric 都不补该键
+        # （布局观测缺失即缺失，不编造）。
+        metrics = self.adapter.parse_output(
+            "latency_ns=1.25 "
+            "pmu_cycles_type=8 pmu_cycles_config=17 pmu_cycles_count=100 "
+            "pmu_cycles_time_enabled_ns=1000 pmu_cycles_time_running_ns=1000",
+            "")
+        self.assertEqual(len(metrics), 2)
+        for metric in metrics:
+            self.assertNotIn("vma_base", metric)
 
 
 if __name__ == "__main__":
