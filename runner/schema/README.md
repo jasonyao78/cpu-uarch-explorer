@@ -17,6 +17,7 @@
 |---|---|---|---|
 | `execution.controls` | non-empty unique string array | 按 id 选择 platform `controls` 子集；保持控制定义归平台所有，实验只声明需要哪些控制，未知 id 在 plan 期失败 | 2026-09-28 |
 | `execution.params.repetitions` | positive integer | 实验级显式重复数，优先于平台默认；用于 ≥10 次等方法学门禁，计划预览必须显示实际值 | 2026-09-28 |
+| `generator` | object | 致密配置生成器审计块（input_run_sha256/rules_sha256/output_sha256 三锚定 + dense_points 来源标注 + quota 核算）；仅由 `analysis/tlb_dense_gen.py` 产出，非手写 | 2026-09-29 |
 
 ### 已登记的 target 扩展字段
 

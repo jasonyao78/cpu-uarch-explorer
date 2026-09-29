@@ -207,7 +207,7 @@ JSON 配置、Arm TRM（Issue 05）+ `cortex-x4.json`（事件语义，已冻结
 
 ### Task 13: Phase B 致密扫描（含长训练行）
 
-- [ ] `tlb_dense_gen.py` 产出 dense 配置 + 三哈希；plan 预览 + 守卫登记（case 数与 §6.2.7 对齐）。
+- [ ] `tlb_dense_gen.py` 产出 dense 配置 + 三哈希；plan 预览 + 守卫登记（case 数与 §6.2.7 对齐）。多 seed `refill_ratio` 聚合口径 = 各 seed 最大比值（冻结，见 `analysis/tlb_dense_gen.py` docstring）；`generator` 扩展字段已登记 `runner/schema/README.md`（执行时核对登记行仍在）。
 - [ ] 块结构执行主体（短训练）；随后长训练行（≤12 case，timed=slots×512，逐点核算执行量，热中止按 §7 规则整块重试一次）。
 - [ ] §6.2.6 稳定条件判定 → Q1/Q2a 终态；提交：`data(sm8650): record TLB Phase B dense scans`。
 
