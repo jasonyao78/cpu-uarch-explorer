@@ -14,6 +14,21 @@
 //                     - sink 语义修正：char *volatile
 //                     - run 模式同样落盘实际使用的目标 VA（v2.0 仅 gen 落盘，
 //                       而 gen/run 是不同进程、ASLR 基址不同，审计对不上）
+//   v2.2 (2026-09-29) 外部评审3（基于 v2.1，条件性通过）修订：
+//                     - [P0-1] filler 改独立 mmap 并与目标/T2 显式断言无交集
+//                       （v2.1  filler 固定占映射中间 512 页，目标页可能落入
+//                       并被建链覆盖）
+//                     - [P0-2] filler 按候选 H 过滤目标 set 的页（v2.1 连续
+//                       512 页在 H1 下每 set 恰占 2 页，目标 set 竞争从 w+2
+//                       起算）；“w=8→9 干净跳变”在报告中降级为理想预期
+//                     - [P0-3] 实现 -T2 真实对照组（每轮 prime 后交替测 T 与
+//                       T2 两组，分别输出分阶段计数；v2.1 只解析未运行）
+//                     - [P0-4] perf_snap 失败路径不再读未初始化值（s 数组
+//                       零初始化）；计数窗口覆盖逐轮快照与 read/计时调用的
+//                       固有污染以"每次访问 refill 率"报告对冲
+//                     - [P0-5] 页大小 != 4K 直接拒绝（set_index 固定 4K 粒度）；
+//                       mmap 后尽力 MADV_NOHUGEPAGE（pagemap 查不了 PTE_CONT，
+//                       THP 是唯一可从用户态控制的合组来源）
 //
 // 对应报告：《TLB微架构深度分析报告》§5.5。
 // 背景（X4 TRM 地面真值）：L2 TLB = 8-way × 256 sets = 2048 条（Table 5-1,
@@ -131,19 +146,8 @@ static void build_chain(uintptr_t *vas, int n, char **cells) {
         *(char **)vas[i] = (char *)vas[(i + 1) % n]; // 环形链
 }
 
-// 随机序填充 filler 链（驱逐 L1 dTLB 用，页集合本身无需约束）
-static void build_filler(char *fbase, int fpages, uintptr_t **vas_out) {
-    uintptr_t *vas = malloc(sizeof(uintptr_t) * fpages);
-    for (int i = 0; i < fpages; i++) vas[i] = (uintptr_t)fbase + (uint64_t)i * g_pagesz;
-    srand(99991);
-    for (int i = fpages - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
-        uintptr_t t = vas[i]; vas[i] = vas[j]; vas[j] = t;
-    }
-    for (int i = 0; i < fpages; i++)
-        *(char **)vas[i] = (char *)vas[(i + 1) % fpages];
-    *vas_out = vas;
-}
+// filler 页选择与建链在 run 模式内联完成（v2.2：按候选 H 过滤目标 set +
+// 独立 mmap，见 main）；此处不再保留旧版连续页 filler 构造函数。
 
 static double now_ns(void) {
     struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -184,10 +188,20 @@ int main(int argc, char **argv) {
     }
     if (rounds < 2) { fprintf(stderr, "-R >= 2 (round 0 = warmup)\n"); return 2; }
     g_pagesz = sysconf(_SC_PAGESIZE);
+    // v2.2（评审3-P0-5）：set_index 固定按 4K 粒度计算，页大小不符直接拒绝，
+    // 并尽力禁用 THP（匿名大页会破坏"每页一条 4K 翻译"的前提）。
+    if (g_pagesz != 4096) {
+        fprintf(stderr, "FATAL: page size %ld != 4096, probe assumes 4K granule\n",
+                g_pagesz);
+        return 2;
+    }
 
     char *base = mmap(NULL, total_pages * (size_t)g_pagesz,
                       PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (base == MAP_FAILED) { perror("mmap"); return 1; }
+#ifdef MADV_NOHUGEPAGE
+    madvise(base, total_pages * (size_t)g_pagesz, MADV_NOHUGEPAGE);
+#endif
 
     int want = is_gen ? need : ways;
     uintptr_t *vas = malloc(sizeof(uintptr_t) * (size_t)want);
@@ -211,13 +225,51 @@ int main(int argc, char **argv) {
     // ---- run 模式：prime+probe ----
     // 目标链
     build_chain(vas, ways, (char **)vas);
-    // filler 区（与目标不同页，>= L1 dTLB 容量 96 才能驱逐目标）
-    char *fbase = base + (total_pages / 2) * (size_t)g_pagesz;
-    if ((size_t)filler_pages >= total_pages / 2) {
-        fprintf(stderr, "-F too large vs -P/2\n"); return 2;
+    // 对照组 T2（评审3-P0-3：v2.1 只解析未运行，本版实现真实第二组）
+    uintptr_t *vas2 = NULL;
+    if (have_T2) {
+        vas2 = malloc(sizeof(uintptr_t) * (size_t)ways);
+        if (collect_set_addrs(H, target2, ways, base, total_pages, vas2) < ways) {
+            fprintf(stderr, "cannot collect T2 set %u under H%d\n", target2, H);
+            return 1;
+        }
+        for (int i = 0; i < ways; i++)     // 显式无交集断言（评审3-P0-1）
+            for (int j = 0; j < ways; j++)
+                if (vas[i] == vas2[j]) { fprintf(stderr, "FATAL: T/T2 overlap\n"); return 3; }
+        build_chain(vas2, ways, (char **)vas2);
     }
-    uintptr_t *fvas;
-    build_filler(fbase, filler_pages, &fvas);
+    // filler：独立 mmap（与目标映射天然不相交，评审3-P0-1），并按候选 H 过滤
+    // 掉目标 set 的页（评审3-P0-2：连续 512 页在 H1 下每 set 恰占 2 页，会把目标
+    // set 的竞争从 w+2 起算）；filler 散布于其余 set。>= 96 页才能驱逐 L1。
+    uintptr_t *fvas_holder = NULL;
+    uintptr_t fvas_first = 0;
+    {
+        char *fmap = mmap(NULL, (size_t)filler_pages * (size_t)g_pagesz,
+                          PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (fmap == MAP_FAILED) { perror("mmap filler"); return 1; }
+#ifdef MADV_NOHUGEPAGE
+        madvise(fmap, (size_t)filler_pages * (size_t)g_pagesz, MADV_NOHUGEPAGE);
+#endif
+        // 选 filler 页：跳过 set_index == target（有 T2 时也跳过 target2）的页
+        uintptr_t *tmp = malloc(sizeof(uintptr_t) * (size_t)filler_pages);
+        int got_f = 0;
+        for (uint64_t i = 1; got_f < filler_pages; i++) {
+            uintptr_t va = (uintptr_t)fmap + i * (uint64_t)g_pagesz;
+            if (set_index(H, va) == target) continue;
+            if (have_T2 && set_index(H, va) == target2) continue;
+            tmp[got_f++] = va;
+        }
+        // 随机序 + 建链
+        srand(99991);
+        for (int i = filler_pages - 1; i > 0; i--) {
+            int j = rand() % (i + 1);
+            uintptr_t t = tmp[i]; tmp[i] = tmp[j]; tmp[j] = t;
+        }
+        for (int i = 0; i < filler_pages; i++)
+            *(char **)tmp[i] = (char *)tmp[(i + 1) % filler_pages];
+        fvas_holder = tmp;
+        fvas_first = tmp[0];
+    }
 
     int fds[4];
     int mux_bad[4] = {0, 0, 0, 0};
@@ -227,49 +279,73 @@ int main(int argc, char **argv) {
     for (int i = 0; i < n_events; i++) ioctl(fds[i], PERF_EVENT_IOC_ENABLE, 0);
 #endif
 
-    uint64_t (*probe_delta)[4] = malloc(sizeof(uint64_t[4]) * rounds); // probe 段每事件增量
+    uint64_t (*probe_delta)[4] = malloc(sizeof(uint64_t[4]) * rounds);  // T probe 段
+    uint64_t (*probe2_delta)[4] = calloc(rounds, sizeof(uint64_t[4]));  // T2 对照段
     double *probe_ns = malloc(sizeof(double) * rounds);
-    char *tp = (char *)vas[0];
+    char *tp  = (char *)vas[0];
+    char *tp2 = have_T2 ? (char *)vas2[0] : NULL;
     asm volatile("" ::: "memory");
     for (int r = 0; r < rounds; r++) {
-        perf_snap_t s0[4], s1[4], s2[4];
-        int ok0 = 1, ok1 = 1, ok2 = 1;
-        for (int i = 0; i < n_events; i++) ok0 &= (perf_snap(fds[i], &s0[i]) == 0);
-        { char *p = (char *)fvas[0]; for (int i = 0; i < filler_pages; i++) p = *(char *volatile *)p; } // prime
-        for (int i = 0; i < n_events; i++) ok1 &= (perf_snap(fds[i], &s1[i]) == 0);
+        // s 数组零初始化：snap 失败时 mux 检查不读未初始化值（评审3-P0-4）
+        perf_snap_t s1[4] = {{0,0,0}}, s2[4] = {{0,0,0}}, s3[4] = {{0,0,0}}, s4[4] = {{0,0,0}};
+        int ok = 1;
+        for (int i = 0; i < n_events; i++) ok &= (perf_snap(fds[i], &s1[i]) == 0);
+        { char *p = (char *)fvas_first; for (int i = 0; i < filler_pages; i++) p = *(char *volatile *)p; } // prime
+        for (int i = 0; i < n_events; i++) ok &= (perf_snap(fds[i], &s2[i]) == 0);
         double t0 = now_ns();
-        for (int i = 0; i < ways; i++) tp = *(char *volatile *)tp;                                   // probe
+        for (int i = 0; i < ways; i++) tp = *(char *volatile *)tp;                    // probe T
         probe_ns[r] = now_ns() - t0;
-        for (int i = 0; i < n_events; i++) ok2 &= (perf_snap(fds[i], &s2[i]) == 0);
+        for (int i = 0; i < n_events; i++) ok &= (perf_snap(fds[i], &s3[i]) == 0);
         for (int i = 0; i < n_events; i++) {
-            probe_delta[r][i] = (ok0 && ok1 && ok2) ? s2[i].val - s1[i].val : UINT64_MAX;
-            // 多路复用检测：任一拍 run<ena 则标记（评审2-6）
-            if (s2[i].ena > 0 && s2[i].run * 100 < s2[i].ena * 99) mux_bad[i] = 1;
+            probe_delta[r][i] = ok ? s3[i].val - s2[i].val : UINT64_MAX;
+            if (ok && s3[i].ena > 0 && s3[i].run * 100 < s3[i].ena * 99) mux_bad[i] = 1;
+        }
+        if (have_T2) {
+            { char *p = (char *)fvas_first; for (int i = 0; i < filler_pages; i++) p = *(char *volatile *)p; } // 再 prime
+            for (int i = 0; i < n_events; i++) ok &= (perf_snap(fds[i], &s2[i]) == 0);
+            for (int i = 0; i < ways; i++) tp2 = *(char *volatile *)tp2;              // probe T2
+            for (int i = 0; i < n_events; i++) ok &= (perf_snap(fds[i], &s4[i]) == 0);
+            for (int i = 0; i < n_events; i++)
+                probe2_delta[r][i] = ok ? s4[i].val - s2[i].val : UINT64_MAX;
         }
     }
     asm volatile("" ::: "memory");
-    g_sink = tp;
+    g_sink = have_T2 ? tp2 : tp;
 #ifdef __linux__
     for (int i = 0; i < n_events; i++) ioctl(fds[i], PERF_EVENT_IOC_DISABLE, 0);
 #endif
 
-    // v2.1：run 模式同样落盘实际使用的目标 VA（gen/run 不同进程、ASLR 基址不同，
-    // 仅 gen 落盘无法审计 run 的地址集合——评审2-3）
+    // run 模式落盘实际使用的目标 VA（v2.1；评审3-P0-1：含 filler 不相交断言说明）
     if (addrlog) {
         FILE *out = fopen(addrlog, "w");
         for (int i = 0; i < ways; i++)
-            fprintf(out, "0x%lx set=%u\n", (unsigned long)vas[i], set_index(H, vas[i]));
+            fprintf(out, "T  0x%lx set=%u\n", (unsigned long)vas[i], set_index(H, vas[i]));
+        if (have_T2)
+            for (int i = 0; i < ways; i++)
+                fprintf(out, "T2 0x%lx set=%u\n", (unsigned long)vas2[i], set_index(H, vas2[i]));
         fclose(out);
     }
 
-    // 统计：剔除 round 0（含冷启动），对剩余轮取均值
-    printf("H%d set=%u w=%d rounds=%d filler=%d", H, target, ways, rounds, filler_pages);
+    // 统计：剔除 round 0（含冷启动），对剩余轮取均值；报告每次目标访问的 refill 率
+    printf("H%d set=%u w=%d rounds=%d filler=%d%s", H, target, ways, rounds,
+           filler_pages, have_T2 ? " +T2ctrl" : "");
     for (int i = 0; i < n_events; i++) {
         if (probe_delta[1][i] == UINT64_MAX) { printf(" ev0x%x=n/a", events[i]); continue; }
         double sum = 0;
         for (int r = 1; r < rounds; r++) sum += (double)probe_delta[r][i];
-        printf(" ev0x%x=%.1f", events[i], sum / (rounds - 1));
+        double per_round = sum / (rounds - 1);
+        printf(" ev0x%x=%.1f(/round)/%.3f(/access)", events[i], per_round,
+               ways > 0 ? per_round / ways : 0.0);
         if (mux_bad[i]) printf("(mux!)");
+    }
+    if (have_T2) {
+        printf(" | T2:");
+        for (int i = 0; i < n_events; i++) {
+            if (probe2_delta[1][i] == UINT64_MAX) { printf(" ev0x%x=n/a", events[i]); continue; }
+            double sum = 0;
+            for (int r = 1; r < rounds; r++) sum += (double)probe2_delta[r][i];
+            printf(" ev0x%x=%.1f", events[i], sum / (rounds - 1));
+        }
     }
     { double sum = 0; for (int r = 1; r < rounds; r++) sum += probe_ns[r];
       printf(" probe_ns=%.0f", sum / (rounds - 1)); }
@@ -277,6 +353,6 @@ int main(int argc, char **argv) {
     printf("gate: L1D_TLB_REFILL(ev0x5) 应≈w=%d 且 L2D_TLB(ev0x2f) 应≈w；"
            "w≤%d 时 L2D_TLB_REFILL(ev0x2d) 应≈0，w≥%d 时应跳变\n", ways, NWAYS_TRUTH, NWAYS_TRUTH + 1);
 
-    free(probe_delta); free(probe_ns); free(vas); free(fvas);
+    free(probe_delta); free(probe2_delta); free(probe_ns); free(vas); free(vas2); free(fvas_holder);
     return 0;
 }

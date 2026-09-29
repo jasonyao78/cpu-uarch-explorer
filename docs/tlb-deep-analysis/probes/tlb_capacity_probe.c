@@ -18,6 +18,15 @@
 //                     - slow 模式 ns_per_load 剔除轮间 busy-wait（此前把等待计
 //                       入分子）
 //                     - 新增 --rawlog：逐轮原始时延落盘（供首轮剔除/分布分析）
+//   v2.2 (2026-09-29) 外部评审3（基于 v2.1，条件性通过）修订：
+//                     - [P0-4] 逐轮采集事件快照，--rawlog 扩展为"时延+各事件
+//                       分轮增量"（此前 PMU 只给全程总量、无法执行首轮剔除；
+//                       事件失败配置整轮标记 n/a 而非混用未初始化值）
+//                     - [P0-5] 页大小 != 4K 直接拒绝；mmap 后尽力 MADV_NOHUGEPAGE
+//                     - [P0-6] 同时给出 0x8128 DTLB_WALK_PERCYC 与 0x0011
+//                       CPU_CYCLES 时，输出二者比值 = 平均每周期在飞 walk 数
+//                       （WALK_PERCYC 是逐周期累计值，跨 K 比较原始总量无意义；
+//                       该比值也只能先称为"该负载下的有效在飞占用"）
 //
 // 对应报告：《TLB微架构深度分析报告》§5.3（容量扫描）、§5.4（L1 全相联验证）、
 // §3.3/M4（in-flight 翻译并行度）。
@@ -207,6 +216,12 @@ int main(int argc, char **argv) {
     if (mode < 0 || mode > 3) { fprintf(stderr, "-d 0..3\n"); return 2; }
 
     g_pagesz = sysconf(_SC_PAGESIZE);
+    // v2.2（评审3-P0-5）：页分布与真值对照按 4K 设计，页大小不符直接拒绝。
+    if (g_pagesz != 4096) {
+        fprintf(stderr, "FATAL: page size %ld != 4096, probe assumes 4K granule "
+                "(本机 macOS/16K 页宿主仅可编译验证，不能运行)\n", g_pagesz);
+        return 2;
+    }
 
 #ifdef __linux__
     if (pin_cpu >= 0) {
@@ -230,6 +245,9 @@ int main(int argc, char **argv) {
     char *base = mmap(NULL, total, PROT_READ | PROT_WRITE,
                       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (base == MAP_FAILED) { perror("mmap"); return 1; }
+#ifdef MADV_NOHUGEPAGE
+    madvise(base, total, MADV_NOHUGEPAGE); // 尽力禁 THP（评审3-P0-5）
+#endif
 
     // 建链：链 k 的页 k*region_pages + order[i]，页首字指向链内下一页（环形）
     char **heads = malloc(sizeof(char *) * n_chains);
@@ -275,17 +293,30 @@ int main(int argc, char **argv) {
 
     // 测量：reps 个宏轮；宏轮内逐拍交错推进 K 条链（K 路独立翻译 miss 可并行）。
     // 编译屏障防重排消除（开发实测 clang -O2 会删未用结果的追逐循环）。
+    // v2.2（评审3-P0-4）：逐轮采集事件快照，分轮增量随 rawlog 落盘——
+    // PMU 窗口虽覆盖全部轮，但首轮剔除在分析阶段按分轮数据执行。
     char **ps = malloc(sizeof(char *) * n_chains);
     memcpy(ps, heads, sizeof(char *) * n_chains);
     double *round_ns = malloc(sizeof(double) * reps);
+    uint64_t (*ev_delta)[4] = malloc(sizeof(uint64_t[4]) * reps);
+    int *ev_ok = malloc(sizeof(int) * reps);
     asm volatile("" ::: "memory");
     double t0 = now_ns();
     for (long r = 0; r < reps; r++) {
+        perf_snap_t s_a[4] = {{0,0,0}}, s_b[4] = {{0,0,0}};
+        int ok = 1;
+        if (n_events)
+            for (int i = 0; i < n_events; i++) ok &= (perf_snap(fds[i], &s_a[i]) == 0);
         double rs = now_ns();
         for (int i = 0; i < n_pages; i++)
             for (int k = 0; k < n_chains; k++)
                 ps[k] = *(char *volatile *)ps[k];
         round_ns[r] = now_ns() - rs;
+        if (n_events)
+            for (int i = 0; i < n_events; i++) ok &= (perf_snap(fds[i], &s_b[i]) == 0);
+        ev_ok[r] = ok;
+        for (int i = 0; i < 4; i++)
+            ev_delta[r][i] = (i < n_events && ok) ? s_b[i].val - s_a[i].val : UINT64_MAX;
         if (slow) {
             double deadline = rs + (double)round_delay_ns;
             while (now_ns() < deadline) { /* busy-wait */ }
@@ -328,14 +359,44 @@ int main(int argc, char **argv) {
             printf("(mux=%.2f!)", (double)s.run / (double)s.ena);
     }
     printf("\n");
-    // v2.1：逐轮原始数据落盘（首轮剔除/分布分析用，评审2）
+    // v2.2：逐轮原始数据落盘（时延 + 各事件分轮增量，首轮剔除/分布分析用）
     if (rawlog) {
         FILE *f = fopen(rawlog, "w");
-        for (long r = 0; r < reps; r++) fprintf(f, "%.0f\n", round_ns[r]);
+        fprintf(f, "# round_ns");
+        for (int i = 0; i < n_events; i++) fprintf(f, " ev0x%x", events[i]);
+        fprintf(f, "\n");
+        for (long r = 0; r < reps; r++) {
+            fprintf(f, "%.0f", round_ns[r]);
+            for (int i = 0; i < n_events; i++)
+                fprintf(f, " %llu", ev_delta[r][i] == UINT64_MAX ? 0ULL
+                                     : (unsigned long long)ev_delta[r][i]);
+            fprintf(f, "\n");
+        }
         fclose(f);
     }
+    // v2.2（评审3-P0-6）：0x8128 WALK_PERCYC 是逐周期在飞计数累计，跨 K 比较
+    // 原始总量无意义；与 0x0011 CPU_CYCLES 同窗口相除得"平均每周期在飞 walk 数"
+    // ——也只称为该负载下的有效在飞占用，不等于硬件队列深度。
+    {
+        int i_w = -1, i_c = -1;
+        for (int i = 0; i < n_events; i++) {
+            if (events[i] == 0x8128) i_w = i;
+            if (events[i] == 0x0011) i_c = i;
+        }
+        if (i_w >= 0 && i_c >= 0) {
+            uint64_t sum_w = 0, sum_c = 0;
+            for (long r = 1; r < reps; r++) { // 剔除首轮
+                if (ev_delta[r][i_w] == UINT64_MAX || ev_delta[r][i_c] == UINT64_MAX)
+                    continue;
+                sum_w += ev_delta[r][i_w]; sum_c += ev_delta[r][i_c];
+            }
+            if (sum_c > 0)
+                printf("walk_inflight_per_cycle=%.3f (WALK_PERCYC/CPU_CYCLES, "
+                       "有效在飞占用，非队列深度)\n", (double)sum_w / (double)sum_c);
+        }
+    }
 
-    free(ps); free(round_ns); free(sorted); free(heads); free(order);
+    free(ps); free(round_ns); free(ev_delta); free(ev_ok); free(sorted); free(heads); free(order);
     munmap(base, total);
     return 0;
 }

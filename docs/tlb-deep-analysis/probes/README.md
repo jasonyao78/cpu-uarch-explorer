@@ -7,7 +7,9 @@
 | `tlb_capacity_probe.c` | §5.3 / §5.4 / §3.3(M4) | 改进版指针追逐容量扫描（预热 volatile 化、PMU 失败明确 n/a + mux 检测、真集合四分布、地址/逐轮数据落盘、**-K 独立链并行 walk 探针** + 时延百分位） |
 | `l2_set_probe.c` | §5.5 | L2 同 set 地址生成器（H1~H4 假设 + **最终 VA 校验** + 分桶取样）+ **prime+probe** 稳态 way 跳变实验（filler 驱逐 + 分阶段 PMU + 首轮剔除 + 对照组 + run 模式地址落盘） |
 
-**版本**：两文件头部均有完整版本记录（v1.0 → v2.1）。v2.0 为外部评审1 修订（真集合、prime+probe、最终 VA、-K 链）；v2.1 为外部评审2 修订（预热消除修复、perf fd<0 伪报 0 修复、mux 检测、slow 分子修正、绑核失败终止、--rawlog、run 模式地址落盘）。**TODO**：§5.6 的 iTLB 短跳板探针尚无源码（设计见报告），后续迭代补齐。
+**版本**：两文件头部均有完整版本记录（v1.0 → v2.2）。v2.0 为外部评审1 修订（真集合、prime+probe、最终 VA、-K 链）；v2.1 为外部评审2 修订（预热消除修复、perf fd<0 伪报 0 修复、mux 检测、slow 分子修正、绑核失败终止、--rawlog、run 模式地址落盘）；v2.2 为外部评审3 修订（filler 独立映射且按候选 H 避目标 set、-T2 真实交替对照、snap 失败路径零初始化、页大小 4K 检查 + MADV_NOHUGEPAGE、逐轮事件快照、WALK_PERCYC/CPU_CYCLES 派生比值）。**TODO**：§5.6 的 iTLB 短跳板探针尚无源码（设计见报告），后续迭代补齐。
+
+**运行环境注意**：探针按 4K 页设计，页大小 ≠ 4K 会直接拒绝——本机 macOS（16K 页）只能编译验证，**运行必须在 Android 目标板**（4K 页）。
 
 **v2 变更要点（外部评审1）**：
 - `-d` 分布改为**真集合**：0 连续 / 1 大步距（修 v1 越界 bug）/ 2 随机集合 / 3 随机序（仅对照）；
@@ -57,10 +59,13 @@ for d in 0 1 2; do taskset 80 ./tlb_capacity_probe -N 96 -R 200 -d $d -s 256; do
 ```bash
 # 每链工作集须 > 2048 页（持续 L2 miss → walk）；K 递增找饱和
 for k in 1 2 4 8 16; do
-  taskset 80 ./tlb_capacity_probe -N 4096 -R 20 -d 2 -K $k -e 0x8128 -e 0x0034
+  taskset 80 ./tlb_capacity_probe -N 4096 -R 20 -d 2 -K $k \
+      -e 0x8128 -e 0x0011 -e 0x0034 --rawlog k$k.csv
 done
-# 判读：DTLB_WALK_PERCYC(0x8128) 均值随 K 上升至平台 = 并行 walk 深度；
-#       饱和后时延/负载线性增长。K 链逐拍交错（宏轮内 for step { for k {...} }）。
+# 判读（v2.2，评审3-P0-6）：WALK_PERCYC 是逐周期在飞计数累计，跨 K 比原始总量无意义；
+#       探针同时给 0x8128 与 0x0011 时输出 walk_inflight_per_cycle 比值（剔除首轮），
+#       其平台只称"该负载下的有效在飞占用"——排除发射/缓存/内存带宽限制前，
+#       不宣称硬件 walk 队列深度。K 链逐拍交错（宏轮内 for step { for k {...} }）。
 ```
 
 输出 `p50/p90/p99/max`（ns/宏轮）。注意：macOS 部分宿主 CLOCK_MONOTONIC
