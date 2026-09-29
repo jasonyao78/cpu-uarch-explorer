@@ -192,6 +192,59 @@ class TestPlan(unittest.TestCase):
             {42, 7, 1337, 20260928},
         )
 
+    def test_swept_uncovered_param_enters_case_id(self):
+        # 通用 id 段：模板（buffer/stride/seed/页策略旗标）未覆盖的 swept 参数
+        # 按 sweep 名排序追加 -{name}{value}（overhead 触发：sweep loads_per_slot
+        # 时 24 case 仅 8 唯一 id，raw 样本按 id 命名会互相覆盖）；未 sweep 时
+        # 不得追加——由 tlb-ctrl id 稳定性钉反向保证
+        spec = {
+            **PASS_SPEC,
+            "parameters": [
+                *PASS_SPEC["parameters"],
+                {"name": "loads_per_slot", "type": "int", "default": 8},
+            ],
+            "execution": {
+                **PASS_SPEC["execution"],
+                "sweep": {"buffer": ["4MiB"], "loads_per_slot": [8, 64]},
+            },
+        }
+        plan = build_plan(spec, {**PLATFORM, "controls": []})
+        self.assertEqual(
+            [case.id for case in plan.cases],
+            ["exp:uncontrolled:b4096K-s64B-loads_per_slot8",
+             "exp:uncontrolled:b4096K-s64B-loads_per_slot64"],
+        )
+
+    def test_non_scalar_swept_param_in_case_id_fails_closed(self):
+        # 列表/字典值字符串化进 id 会让 id 不可读且可能再引入碰撞：fail-closed
+        events = [{"name": "cycles", "type": 8, "config": "0x11"}]
+        spec = {
+            **PASS_SPEC,
+            "parameters": [
+                *PASS_SPEC["parameters"],
+                {"name": "pmu_events", "type": "pmu-event-list", "default": events},
+            ],
+            "execution": {
+                **PASS_SPEC["execution"],
+                "sweep": {"buffer": ["4MiB"], "pmu_events": [events]},
+            },
+        }
+        with self.assertRaisesRegex(RunnerError, "non-scalar"):
+            build_plan(spec, {**PLATFORM, "controls": []})
+
+    def test_duplicate_case_ids_fail_at_plan_time(self):
+        # 纵深防御：任何未来的 id 碰撞（如此处重复 sweep 值）必须炸在 plan 期，
+        # 而不是 run 期由 artifacts 覆盖写静默吞掉 raw 样本
+        spec = {
+            **PASS_SPEC,
+            "execution": {
+                **PASS_SPEC["execution"],
+                "sweep": {"buffer": ["512KiB", "512KiB"]},
+            },
+        }
+        with self.assertRaisesRegex(RunnerError, "duplicate case ids"):
+            build_plan(spec, {**PLATFORM, "controls": []})
+
     def test_current_ptr_chase_specs_use_pass_based_warmup_protocol(self):
         paths = sorted((ROOT / "configs" / "experiments").glob("ptr-chase*.json"))
         self.assertTrue(paths)
@@ -234,6 +287,20 @@ class TestPlan(unittest.TestCase):
                         ],
                     }
                 plan = build_plan(spec, case_platform)
+                # 通用防线：任何配置的 case id 必须全唯一——raw 样本按 case id
+                # 命名落盘（覆盖写），碰撞即样本互覆、manifest id 重复、SHA256
+                # 锚定失效（overhead 24 case 仅 8 唯一 id 触发的修复，见
+                # build_plan 通用 id 段与唯一性断言）
+                self.assertEqual(
+                    len({case.id for case in plan.cases}), len(plan.cases))
+                # id 稳定性钉：通用 id 段不得改变既有配置的 id（sweep 集合未变
+                # ⇒ id 逐字不变），下游 raw 样本/manifest 全部按 id 寻址
+                if path.name == "ptr-chase-sm8650-x4-tlb-ctrl.json":
+                    self.assertEqual(
+                        [case.id for case in plan.cases],
+                        ["ptr-chase-sm8650-x4-tlb-ctrl:x4-prime:b512K-s64B-seed42-base",
+                         "ptr-chase-sm8650-x4-tlb-ctrl:x4-prime:b16384K-s64B-seed42-base"],
+                    )
                 expected_case_counts = {
                     "ptr-chase-sm8650-x4-l2-base.json": 14,
                     "ptr-chase-sm8650-x4-l2-thp.json": 14,
@@ -374,9 +441,12 @@ class TestPlan(unittest.TestCase):
                         else:
                             # 逐 case 反推：loads == loads_per_slot × slots（min_loads 不生效）
                             self.assertEqual(case.param_value("loads") % slots, 0)
-                            combos.add((case.param_value("buffer_kb"),
-                                        case.param_value("loads") // slots,
+                            lps = case.param_value("loads") // slots
+                            combos.add((case.param_value("buffer_kb"), lps,
                                         case.param_value("seed")))
+                            # 通用 id 段：swept loads_per_slot 必须进 case id——
+                            # 否则三档长度共享 id，raw 样本按 id 命名互相覆盖
+                            self.assertIn(f"-loads_per_slot{lps}", case.id)
                         self.assertEqual(
                             {event["name"]
                              for event in case.param_value("pmu_events")},

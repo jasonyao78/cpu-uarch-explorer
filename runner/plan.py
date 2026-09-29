@@ -20,6 +20,10 @@ from .resolve import ResolvedValue, parse_size_bytes, parse_size_kb, resolve_par
 
 MAX_PROBE_LOADS = (1 << 63) - 1
 _PMU_LABEL_RE = re.compile(r"^[a-z0-9_]+$")
+# case_id 模板已覆盖的 sweep 参数（见 build_plan 的 case_id 构造）；其余 swept
+# 参数一律追加通用 -{name}{value} 段，防止未覆盖参数共享 id
+_CASE_ID_COVERED_PARAMS = frozenset(
+    {"buffer", "stride", "seed", "hugepage", "thp", "base_pages"})
 
 
 @dataclass(frozen=True)
@@ -294,9 +298,36 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                        + ("-hp2m" if hugepage else "")
                        + ("-thp" if thp else "")
                        + ("-base" if base_pages else ""))
+            # 通用 id 段（触发案例：tlb-overhead 配置 sweep loads_per_slot 后
+            # 24 case 仅 8 个唯一 id，raw 样本按 case id 命名覆盖写 → 样本互覆、
+            # manifest id 重复、SHA256 锚定失效）：模板未覆盖的 swept 参数按
+            # sweep 名排序追加 -{name}{value}；未 sweep 的参数不进 id（既有配置
+            # id 逐字不变）。非 int/str 标量（如 pmu_events 列表）fail-closed——
+            # 字符串化进 id 既不可读又可能再引入碰撞。
+            for name in sweep_names:
+                if name in _CASE_ID_COVERED_PARAMS:
+                    continue
+                value = params[name].value
+                if type(value) is not int and not isinstance(value, str):
+                    raise RunnerError(
+                        "plan-error",
+                        f"swept param {name!r} has non-scalar value, "
+                        f"cannot form case id segment: {value!r}",
+                    )
+                case_id += f"-{name}{value}"
             cases.append(Case(id=case_id, probe=probe, control=control,
                               params=tuple(sorted(case_params.items())),
                               repetitions=repetitions))
+
+    # 纵深防御（同一触发案例）：任何未来的 id 碰撞炸在 plan 期，而不是 run 期
+    # 由 artifacts 覆盖写静默吞掉样本（铁律 1：失败要响，不许静默降级）。
+    ids = [case.id for case in cases]
+    if len(set(ids)) != len(ids):
+        duplicates = sorted({case_id for case_id in ids if ids.count(case_id) > 1})
+        raise RunnerError(
+            "plan-error",
+            f"duplicate case ids (raw samples are named by case id): {duplicates}",
+        )
 
     return Plan(experiment_id=spec["id"], protocol_version=spec["protocol_version"],
                 cases=tuple(cases), target=platform["target"])
