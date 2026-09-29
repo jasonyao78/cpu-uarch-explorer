@@ -204,6 +204,7 @@ class TestPlan(unittest.TestCase):
                     "ptr-chase-sm8650-x4-l2-",
                     "ptr-chase-sm8650-x4-pmu-ctrl-",
                     "ptr-chase-sm8650-x4-p0prime-",
+                    "ptr-chase-sm8650-x4-tlb-",
                 )
                 expected_protocol = (
                     "1.2" if path.name.startswith(protocol_12_prefixes) else "1.1"
@@ -245,6 +246,9 @@ class TestPlan(unittest.TestCase):
                     "ptr-chase-sm8650-x4-p0prime-long-base-r2b.json": 12,
                     "ptr-chase-sm8650-x4-p0prime-short-thp.json": 8,
                     "ptr-chase-sm8650-x4-p0prime-long-thp.json": 8,
+                    "ptr-chase-sm8650-x4-tlb-anchor.json": 2,
+                    "ptr-chase-sm8650-x4-tlb-ctrl.json": 2,
+                    "ptr-chase-sm8650-x4-tlb-coarse.json": 26,
                 }
                 if path.name in expected_case_counts:
                     self.assertEqual(len(plan.cases), expected_case_counts[path.name])
@@ -257,6 +261,9 @@ class TestPlan(unittest.TestCase):
                         case.param_value("warmup_passes") * slots,
                     )
                     self.assertEqual(params["warmup"].source, "derived")
+
+        # 计数登记不许悬空：列了期望 case 数的配置必须存在，否则缺失配置让守卫静默通过
+        self.assertLessEqual(set(expected_case_counts), {p.name for p in paths})
 
     def test_thp_request_is_recorded_and_conflicts_are_rejected(self):
         thp_spec = {

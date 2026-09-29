@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-sm8650-x4-tlb-coarse",
+  "title": "SM8650 X4 TLB Phase A 粗扫（32..8192 页 13 档 × 2 seed）",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    { "name": "buffer", "type": "size", "range": "128KiB..32MiB，32..8192 页共 13 档（pages × 4KiB 映射）" },
+    { "name": "stride", "type": "size", "default": "64B" },
+    { "name": "warmup_passes", "type": "int", "default": 2 },
+    { "name": "loads_per_slot", "type": "int", "default": 8 },
+    { "name": "min_loads", "type": "int", "default": 4096 },
+    { "name": "repetitions", "type": "int", "default": 10 },
+    { "name": "base_pages", "type": "int", "default": 1 },
+    { "name": "seed", "type": "int", "default": 42 },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        { "name": "cycles", "type": 8, "config": "0x11" },
+        { "name": "mem_access_rd", "type": 8, "config": "0x66" },
+        { "name": "l1d_tlb_refill", "type": 8, "config": "0x05" },
+        { "name": "dtlb_walk", "type": 8, "config": "0x34" }
+      ]
+    }
+  ],
+  "preconditions": [
+    "redmi-k70pro-01 controlled-baseline profile 前后门禁通过",
+    "CPU7 Cortex-X4；四个 core PMU event 同窗且 time_running == time_enabled（拒绝复用）",
+    "每个 repetition 为新进程/新匿名映射；actual backing 必须为 base；逐样本 seed 入档"
+  ],
+  "metrics": [
+    { "name": "latency_ns", "unit": "ns", "statistic": "median" },
+    { "name": "pmu.cycles.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.mem_access_rd.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l1d_tlb_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.dtlb_walk.count", "unit": "events", "statistic": "median" }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "controls": ["x4-prime"],
+    "params": { "repetitions": 10 },
+    "sweep": {
+      "buffer": [
+        "128KiB", "256KiB", "384KiB", "512KiB", "768KiB", "1MiB",
+        "1536KiB", "2MiB", "3MiB", "4MiB", "8MiB", "16MiB", "32MiB"
+      ],
+      "seed": [42, 7]
+    },
+    "fixed_params": [
+      "stride", "warmup_passes", "loads_per_slot", "min_loads",
+      "base_pages", "pmu_events"
+    ]
+  },
+  "notes": "Phase A 粗扫（计划 docs/superpowers/plans/2026-09-28-sm8650-tlb-hierarchy.md，任务书 §6.2.1）：13 个页数档（32, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 2048, 4096, 8192 页 = 128KiB..32MiB）× order_seed [42, 7] 叉积 = 26 case（§6.2.7 主体额度 ≤26）；G0 事件组、短训练。"
+}
