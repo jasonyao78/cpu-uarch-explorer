@@ -1064,11 +1064,12 @@ def adjudicate_q3(*, g3_executed: bool = False,
     }
 
 
-def _fit_line(points: list[tuple[float, float]]) -> tuple[float, float]:
+def _fit_line(points: list[tuple[float, float]], context: str) -> tuple[float, float]:
     """最小二乘拟合 C = a + b·N（闭式解，不引第三方库）。
 
-    points 为 (N, C) 对（≥2 个不同 N，调用方保证）；返回 (a, b)。求和
-    顺序固定（按 N 升序的输入顺序），结果确定性。
+    points 为 (N, C) 对（≥2 个不同 N，调用方保证）；context 为调用方定
+    位前缀（同模块错误消息惯例）；返回 (a, b)。求和顺序固定（按 N 升
+    序的输入顺序），结果确定性。
     """
     count = len(points)
     mean_n = sum(point[0] for point in points) / count
@@ -1077,7 +1078,7 @@ def _fit_line(points: list[tuple[float, float]]) -> tuple[float, float]:
     if denom == 0:
         # N 全同则斜率不可识别；调用方已校验组内 3 个不同 loads，到此即
         # 契约破坏，fail-closed 而非静默除零。
-        raise TlbError("fit_line: points share a single N (slope unidentified)")
+        raise TlbError(f"{context}: points share a single N (slope unidentified)")
     slope = sum(
         (point[0] - mean_n) * (point[1] - mean_c) for point in points
     ) / denom
@@ -1195,7 +1196,9 @@ def adjudicate_fixed_overhead(rows: Iterable[dict], *,
                 f"group must have exactly {_OVERHEAD_LENGTH_TIERS} distinct "
                 f"loads values, got {len(group)} (协议偏离 fail-closed)"
             )
-        a, b = _fit_line(sorted(group.items()))
+        a, b = _fit_line(sorted(group.items()),
+                         f"{context}/buffer={buffer_kb}KiB"
+                         f"/event={event}/seed={seed}")
         n_formal = slots_by_buffer[buffer_kb] * formal_loads_per_slot
         c_formal = a + b * n_formal
         ratio = abs(a) / c_formal if c_formal > 0 else float("inf")
