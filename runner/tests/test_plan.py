@@ -327,7 +327,13 @@ class TestPlan(unittest.TestCase):
                 if path.name in expected_case_counts:
                     self.assertEqual(len(plan.cases), expected_case_counts[path.name])
                     self.assertTrue(all(case.repetitions == 10 for case in plan.cases))
-                # §9.3⑮/§6.2.5：锚点/正控/粗扫的 case 参数与执行顺序也要钉死，不只是 case 数
+                # §9.3⑮/§6.2.5：锚点/正控/粗扫的 case 参数与执行顺序也要钉死，不只是 case 数。
+                # 事件钉 (name, type, config) 三元组而非只钉名（规范评审实证：name 集合钉
+                # 对 "0x2d"→"0x2c" 篡改无感——plan/adapter 只做结构校验，name↔config
+                # 错配必须有自动化兜底层）；期望值写归一化后的 int 形态（0x2d==45），
+                # 与 case.param_value("pmu_events") 返回形态对齐
+                g0_events = {("cycles", 8, 0x11), ("mem_access_rd", 8, 0x66),
+                             ("l1d_tlb_refill", 8, 0x05), ("dtlb_walk", 8, 0x34)}
                 tlb_expectations = {
                     "ptr-chase-sm8650-x4-tlb-anchor.json": {
                         "buffers": [512, 3072],
@@ -343,31 +349,36 @@ class TestPlan(unittest.TestCase):
                                        3072, 4096, 8192, 16384, 32768},
                         "seeds": {42, 7},
                     },
-                    # Gate 1 正控（§5.1 ①②③ / §5.2 事件组）：各组事件名按 §3.1 表钉死
+                    # Gate 1 正控（§5.1 ①②③ / §5.2 事件组）：各组事件三元组按 §3.1 表钉死
                     "ptr-chase-sm8650-x4-tlb-ctrl-g1.json": {
                         "buffers": [512, 16384],
                         "seeds": {42},
-                        "events": {"cycles", "mem_access_rd", "l1d_tlb_refill",
-                                   "dtlb_walk", "l2d_tlb_refill", "l2d_tlb"},
+                        "events": g0_events | {("l2d_tlb_refill", 8, 0x2d),
+                                               ("l2d_tlb", 8, 0x2f)},
                     },
                     "ptr-chase-sm8650-x4-tlb-ctrl-g2.json": {
                         "buffers": [512, 16384],
                         "seeds": {42},
                         # §5.2 G2 行原文：cycles+0x05+0x34+0x8136+0x8128，不含 mem_access_rd
-                        "events": {"cycles", "l1d_tlb_refill", "dtlb_walk",
-                                   "dtlb_step", "dtlb_walk_percyc"},
+                        "events": {("cycles", 8, 0x11), ("l1d_tlb_refill", 8, 0x05),
+                                   ("dtlb_walk", 8, 0x34), ("dtlb_step", 8, 0x8136),
+                                   ("dtlb_walk_percyc", 8, 0x8128)},
                     },
                     "ptr-chase-sm8650-x4-tlb-ctrl-g4.json": {
                         "buffers": [512, 16384, 2304, 3072],
                         "seeds": {42},
-                        "events": {"cycles", "l1d_tlb_refill", "dtlb_walk",
-                                   "dtlb_walk_large", "dtlb_walk_small"},
+                        "events": {("cycles", 8, 0x11), ("l1d_tlb_refill", 8, 0x05),
+                                   ("dtlb_walk", 8, 0x34),
+                                   ("dtlb_walk_large", 8, 0x8138),
+                                   ("dtlb_walk_small", 8, 0x813a)},
                     },
                     "ptr-chase-sm8650-x4-tlb-ctrl-g4-thp.json": {
                         "buffers": [2304, 3072],
                         "seeds": {42},
-                        "events": {"cycles", "l1d_tlb_refill", "dtlb_walk",
-                                   "dtlb_walk_large", "dtlb_walk_small"},
+                        "events": {("cycles", 8, 0x11), ("l1d_tlb_refill", 8, 0x05),
+                                   ("dtlb_walk", 8, 0x34),
+                                   ("dtlb_walk_large", 8, 0x8138),
+                                   ("dtlb_walk_small", 8, 0x813a)},
                         "page_policy": "thp",
                     },
                     # §5.3 固定开销扫描：两点 × 三长度 × 4 order_seed 全叉积
@@ -404,11 +415,8 @@ class TestPlan(unittest.TestCase):
                         {case.param_value("seed") for case in plan.cases},
                         expected["seeds"],
                     )
-                    # G0 主曲线组（§5.2）是默认事件集；G1/G2/G4 各配置按组钉名
-                    expected_events = expected.get(
-                        "events",
-                        {"cycles", "mem_access_rd", "l1d_tlb_refill", "dtlb_walk"},
-                    )
+                    # G0 主曲线组（§5.2）是默认事件集；G1/G2/G4 各配置按组钉三元组
+                    expected_events = expected.get("events", g0_events)
                     # base/thp 互斥（plan 期硬拒绝）：逐 case 钉本方旗标在场、
                     # 对方旗标缺席（-T 记录 params 只有 thp=1，见 §9.3 ⑮）
                     page_policy = expected.get("page_policy", "base")
@@ -448,7 +456,7 @@ class TestPlan(unittest.TestCase):
                             # 否则三档长度共享 id，raw 样本按 id 命名互相覆盖
                             self.assertIn(f"-loads_per_slot{lps}", case.id)
                         self.assertEqual(
-                            {event["name"]
+                            {(event["name"], event["type"], event["config"])
                              for event in case.param_value("pmu_events")},
                             expected_events,
                         )
