@@ -127,7 +127,7 @@ JSON 配置、Arm TRM（Issue 05）+ `cortex-x4.json`（事件语义，已冻结
 
 - [ ] **Step 1: 失败测试**——合成曲线用例：§6.2.1 页序下的 ①单膝点（128→192 满足三条件）；②双膝点；③无膝点（连续上升）→ `RIGHT_CENSORED`；④`R_0x05(32)=120/1k` → `LEFT_CENSORED`（优先于 knee）；⑤walk-onset 满足 §6.2.3 三条件；⑥onset 仅在单点满足无持续 → 不报 onset；⑦边界点（8192 未满足）→ `RIGHT_CENSORED`。
 
-- [ ] **Step 2-4: 实现并转绿**——§6.2.2/6.2.3/6.2.8-1 的确定性实现（输入为 (buffer, R_0x05, R_0x34, cyc/load) 序列）。
+- [ ] **Step 2-4: 实现并转绿**——§6.2.2/6.2.3/6.2.8-1 的确定性实现（输入为 (buffer, R_0x05, R_0x34, cyc/load) 序列）。**另含双峰标记补齐**（任务书 §9.2 的复用契约）：移植 p0prime 的 `_is_bimodal` 规则（排序相邻比 ≥4 且两侧各 ≥2），目标字段钉为 `l1d_tlb_refill_per_1k`（knee 判据的消费字段；逐进程布局/着色方差的主要暴露面），测试用例：清晰双峰组 → bimodal=True、干净组 → False。
 
 - [ ] **Step 5: 提交**——`git commit -m "feat(analysis): detect TLB knee and walk onset per frozen rules"`。
 
