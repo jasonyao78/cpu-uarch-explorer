@@ -60,6 +60,7 @@
 | `page_policy`, `page_kb` | string, non-negative integer | 兼容既有 reader 的摘要；新判断必须优先使用 requested/actual 字段 | 2026-09-27 |
 | `pmu_type`, `pmu_config` | non-negative integer | `pmu.<label>.count` 的 Linux perf PMU type/config；来自 ExperimentSpec 的显式事件描述 | 2026-09-28 |
 | `time_enabled_ns`, `time_running_ns` | non-negative integer | 每个 PMU observation 的 perf enabled/running delta；零 running 拒绝，multiplex 判定由二者比值审计 | 2026-09-28 |
+| `vma_base` | string (hex) | 建链缓冲区起始 VA（ASLR，布局观测，路线 A） | 2026-09-29 |
 
 ExperimentSpec 的可选固定参数 `pmu_events` 登记为
 `[{"name": <安全小写标签>, "type": <uint32>, "config": <uint64/base-0 string>}]`；

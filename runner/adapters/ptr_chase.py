@@ -8,6 +8,7 @@ Probe ABI（与源码头部注释一致）：
           warmup_passes_effective=.. warmup_state=.. page_policy=.. page_kb=..
           page_policy_actual_before/after=.. anon_huge_kb_before/after=..
           page_backing_endpoints_equal=1（两端观测一致，不代表连续观测）
+          vma_base=0x…（建链缓冲区起始 VA，ASLR 布局观测，路线 A）
           seed=N（链洗牌种子，默认 42；访问序列是实验变量，必须入档）
   退出码: 0 成功 / 1 输入或环境错误 / 2 能力不支持（hugepage 无平台能力或
           strict 模式缺页池；fallback 非 strict 模式下成功但标注 fallback-4k）
@@ -27,6 +28,7 @@ from runner.errors import ParseError
 from .base import parse_key_value_lines, require_finite_number
 
 _PMU_LABEL_RE = re.compile(r"^[a-z0-9_]+$")
+_VMA_BASE_RE = re.compile(r"^0x[0-9a-f]+$")
 _PMU_SUFFIXES = (
     "_time_enabled_ns", "_time_running_ns", "_config", "_count", "_type",
 )
@@ -292,4 +294,14 @@ class PtrChaseAdapter:
             seed = _require_uint(fields, "seed", (1 << 64) - 1)
             for item in metrics:
                 item["seed"] = seed
+        if "vma_base" in fields:
+            # 建链缓冲区起始 VA 随每条 metric 入档（SM8650 TLB 任务书路线 A：
+            # order_seed 之外的布局观测依赖逐样本 VA；保持 hex 字符串不转
+            # int，避免 reader 误当数值聚合）。
+            vma_base = fields["vma_base"]
+            if not _VMA_BASE_RE.fullmatch(vma_base):
+                raise ParseError(
+                    f"vma_base must be a lowercase hex address: {vma_base!r}")
+            for item in metrics:
+                item["vma_base"] = vma_base
         return metrics

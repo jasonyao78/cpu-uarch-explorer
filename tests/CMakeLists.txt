@@ -143,3 +143,7 @@ set_tests_properties(ptr_chase_seed_default_42 PROPERTIES
 
 add_test(NAME ptr_chase_rejects_seed_garbage COMMAND ${PT} -b 64 -s 64 -n 8000 -S abc)
 set_tests_properties(ptr_chase_rejects_seed_garbage PROPERTIES WILL_FAIL TRUE)
+
+add_test(NAME ptr_chase_vma_base_is_recorded COMMAND ${PT} -b 64 -s 64 -n 8000)
+set_tests_properties(ptr_chase_vma_base_is_recorded PROPERTIES
+    PASS_REGULAR_EXPRESSION "vma_base=0x[0-9a-f]+")

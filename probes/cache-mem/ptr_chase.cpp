@@ -66,7 +66,8 @@
 // warmup_loads / warmup_passes_effective / warmup_state / page_policy /
 // page_policy_requested / page_policy_actual / anon_huge_kb / page_kb /
 // page_policy_actual_before/after / anon_huge_kb_before/after /
-// page_backing_endpoints_equal / seed），由 runner 层包装为
+// page_backing_endpoints_equal / vma_base（建链缓冲区起始 VA，ASLR 布局
+// 观测）/ seed），由 runner 层包装为
 // record.schema.json 记录。
 
 #include <algorithm>
@@ -631,12 +632,13 @@ int main(int argc, char** argv) {
                 "page_policy_actual=%s anon_huge_kb=%zu "
                 "page_policy_actual_before=%s page_policy_actual_after=%s "
                 "anon_huge_kb_before=%zu anon_huge_kb_after=%zu "
-                "page_backing_endpoints_equal=1 seed=%llu",
+                "page_backing_endpoints_equal=1 vma_base=%p seed=%llu",
                 buffer_kb, stride, loads, elapsed, latency, warmup, warmup_passes,
                 warmup_state, page_policy.c_str(), page_kb, page_policy_requested,
                 page_policy_actual_before.c_str(), anon_huge_kb_before,
                 page_policy_actual_before.c_str(), page_policy_actual_after.c_str(),
                 anon_huge_kb_before, anon_huge_kb_after,
+                static_cast<void*>(buf),
                 static_cast<unsigned long long>(seed));
 #if defined(CPU_UARCH_HAVE_LINUX_PERF)
     for (const auto& observation : perf_observations) {

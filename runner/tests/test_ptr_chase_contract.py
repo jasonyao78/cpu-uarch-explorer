@@ -313,6 +313,22 @@ class TestPtrChaseContract(unittest.TestCase):
         metrics = self.adapter.parse_output(stdout, "")
         self.assertEqual([metric["seed"] for metric in metrics], [1337, 1337])
 
+    def test_vma_base_is_recorded(self):
+        argv = self.adapter.build_argv(
+            {"buffer_kb": 64, "stride": 64, "loads": 8000, "warmup": 1000})
+        proc = self._run(argv)
+        self.assertEqual(proc.returncode, 0)
+        metric = self.adapter.parse_output(proc.stdout, proc.stderr)[0]
+        self.assertIn("vma_base", metric)
+        self.assertRegex(metric["vma_base"], r"^0x[0-9a-f]+$")
+
+    def test_parser_records_vma_base_and_refuses_non_hex(self):
+        metric = self.adapter.parse_output(
+            "latency_ns=1 vma_base=0x7f12ab", "")[0]
+        self.assertEqual(metric["vma_base"], "0x7f12ab")
+        with self.assertRaises(ParseError):
+            self.adapter.parse_output("latency_ns=1 vma_base=xyz", "")
+
 
 if __name__ == "__main__":
     unittest.main()
