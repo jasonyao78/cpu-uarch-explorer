@@ -23,10 +23,22 @@ loads 数），分析器保留原值——不截断、不改写为 miss 概率�
 detect_knee_candidates 门控返回空。SEMANTICS_UNVERIFIED 只阻断结论
 晋升，不阻断采集与审计——样本照常入表（否则 Gate 1 正控无法完成）。
 
-knee 候选（§6.2.2 冻结规则；骨架版只实现相邻点对三条件提名，左删失
-优先、RIGHT_CENSORED、walk-onset 等完整终态机属后续任务）：相邻页数
-点 (p_i, p_{i+1}) 同时满足 R_0x05 比值 ≥2.0、绝对增量 ≥50/1k、
-cyc/load 比值 ≥1.15 才提名候选区间 (p_i, p_{i+1})。
+knee 终态机（§6.2.2/6.2.8-1/6.2.6 冻结规则）：detect_knee_candidates
+做相邻页数点对的三条件提名（R_0x05 比值 ≥2.0、绝对增量 ≥50/1k、
+cyc/load 比值 ≥1.15）；adjudicate_knee 在其上判定终态——左删失优先
+（R_0x05(32 页) ≥100/1k → LEFT_CENSORED，先于提名执行）、无候选 →
+RIGHT_CENSORED、稳定条件不足（<3/4 order_seed 区间相互重叠 / 未覆盖
+8/512 双训练量）→ ORDER_SENSITIVE / TRAINING_SENSITIVE、齐备 →
+INTERVAL_IDENTIFIED。walk-onset（§6.2.3/6.2.8-5）：detect_walk_onset
+按每个 order_seed 各自的逐样本地板（≥8/10 样本 >0.5/1k）+ 点中位数
+≥1.0/1k + 下一页数点持续三条件判 onset；跨 seed 区间一致才报
+INTERVAL_IDENTIFIED，8192 页仍未满足 → RIGHT_CENSORED。
+
+双峰标记（任务书 §9.2 复用契约）：移植 sm8650_x4_p0prime 的预注册规
+则（排序后相邻比值 ≥4 且两侧各 ≥2 样本，零值按比值未定义跳过），目
+标字段钉为 l1d_tlb_refill_per_1k——knee 判据的消费字段、逐进程布局
+/着色方差的主要暴露面。该标记只服务于"中位数不得掩盖双态"的报告纪
+律，不构成任何容量推断。
 """
 
 from __future__ import annotations
@@ -67,6 +79,24 @@ _VMA_BASE_RE = re.compile(r"^0x[0-9a-f]+$")
 _KNEE_REFILL_RATIO = 2.0
 _KNEE_REFILL_DELTA_PER_1K = 50.0
 _KNEE_CYC_RATIO = 1.15
+
+# §6.2.8-1 左删失阈值（先于 knee 检测执行；改阈值 = 改冻结规则）
+_LEFT_CENSOR_PAGES = 32
+_LEFT_CENSOR_REFILL_PER_1K = 100.0
+
+# §6.2.3 walk-onset 三条件的冻结阈值（改阈值 = 改冻结规则）
+_WALK_ONSET_MIN_PER_1K = 1.0
+_WALK_FLOOR_PER_1K = 0.5
+_WALK_FLOOR_MIN_SAMPLES = 8
+
+# §6.2.6 稳定条件的覆盖要求（改阈值 = 改冻结规则）
+_STABLE_MIN_SEED_OVERLAP = 3  # ≥3/4 个 order_seed 致密区间相互重叠
+_STABLE_MIN_TRAININGS = 2     # 8/512 ring passes 两种训练量同制度
+
+# 双峰标记规则（任务书 §9.2 复用契约：移植 sm8650_x4_p0prime 的预注册
+# 规则；改阈值 = 改冻结规则）
+_BIMODAL_RATIO = 4.0
+_BIMODAL_MIN_SIDE = 2
 
 _QUALIFICATIONS = ("candidate", "qualified")
 
@@ -273,12 +303,13 @@ def _samples_from_record(record: dict, run_label: str,
 def detect_knee_candidates(rows: list[dict],
                            unqualified_events: Iterable[str] = ()
                            ) -> list[tuple[int, int]]:
-    """§6.2.2 相邻页数点对的三条件提名（骨架版）。
+    """§6.2.2 相邻页数点对的三条件提名。
 
     rows 为每点 {"pages", "l1d_tlb_refill_per_1k", "cyc_per_load"}（组中
     位数），内部按页数排序；返回候选区间 [(p_i, p_{i+1}), ...]。任一事
     件资格不足（unqualified_events 非空）门控返回空——SEMANTICS_UNVERIFIED
-    不出结论。左删失优先、RIGHT_CENSORED 终态与 walk-onset 属后续任务。
+    不出结论。终态判定（左删失优先 / RIGHT_CENSORED / §6.2.6 稳定条件）
+    见 adjudicate_knee；walk-onset 见 detect_walk_onset。
     """
     if unqualified_events:
         return []
@@ -296,6 +327,185 @@ def detect_knee_candidates(rows: list[dict],
                 and cyc_high / cyc_low >= _KNEE_CYC_RATIO):
             candidates.append((left["pages"], right["pages"]))
     return candidates
+
+
+def _intervals_overlap(left: tuple[int, int], right: tuple[int, int]) -> bool:
+    """闭区间在页数轴上相交（共享 ≥1 个页点，端点相触算重叠）。"""
+    return left[0] <= right[1] and right[0] <= left[1]
+
+
+def adjudicate_knee(rows_by_seed: dict[int, list[dict]], *,
+                    seed_coverage: int | None = None,
+                    training_coverage: int | None = None,
+                    unqualified_events: Iterable[str] = ()) -> dict:
+    """§6.2.2 候选 + §6.2.8-1 左删失优先 + §6.2.6 稳定条件的终态判定。
+
+    rows_by_seed：{order_seed: [{"pages", "l1d_tlb_refill_per_1k",
+    "cyc_per_load"}]}（每点为该页数组中位数）。返回 {status, intervals,
+    evidence}；status 取 §10.2 终态子集：
+
+    - 资格不足事件门控 → SEMANTICS_UNVERIFIED（§9.2，不出结论）；
+    - 空输入 → OPEN；
+    - 任一 seed 的 32 页点 R_0x05 ≥100/1k → LEFT_CENSORED（§6.2.8-1，
+      先于 §6.2.2；任务书未定义跨 seed 聚合，取保守分支：一个 seed 已
+      处高位制度即判定，evidence 逐 seed 列值供评审）；
+    - 全 seed 无候选 → RIGHT_CENSORED（上界内未识别）；
+    - seed 覆盖 <3/4（致密区间相互重叠的 order_seed 数）→
+      ORDER_SENSITIVE；训练覆盖 <2（8/512 ring passes 两制度）→
+      TRAINING_SENSITIVE（§6.2.6；两者皆不足时按 ORDER_SENSITIVE 结案，
+      顺序同任务书列举）；齐备 → INTERVAL_IDENTIFIED。
+
+    seed_coverage / training_coverage 由调用方按致密（Phase B）覆盖情
+    况显式传入；缺省时 seed 覆盖按输入曲线候选区间的最大重叠计数、训
+    练覆盖按 1 计——Phase A 粗扫（2 seed × 短训练）进来自然落在敏感
+    终态，不会被误晋升。
+    """
+    if unqualified_events:
+        return {"status": "SEMANTICS_UNVERIFIED", "intervals": [],
+                "evidence": {"unqualified_events": sorted(str(event) for event in unqualified_events)}}
+    per_seed: dict[int, dict] = {}
+    for seed, rows in sorted(rows_by_seed.items()):
+        ordered = sorted(rows, key=lambda row: row["pages"])
+        floor = next(
+            (row for row in ordered if row["pages"] == _LEFT_CENSOR_PAGES),
+            None,
+        )
+        per_seed[seed] = {
+            "floor_refill_per_1k": (
+                floor["l1d_tlb_refill_per_1k"] if floor is not None else None
+            ),
+            "left_censored": (
+                floor is not None
+                and floor["l1d_tlb_refill_per_1k"] >= _LEFT_CENSOR_REFILL_PER_1K
+            ),
+            "candidates": detect_knee_candidates(ordered),
+        }
+    if not per_seed:
+        return {"status": "OPEN", "intervals": [],
+                "evidence": {"per_seed": per_seed}}
+    censored = [seed for seed, entry in per_seed.items() if entry["left_censored"]]
+    if censored:
+        return {"status": "LEFT_CENSORED", "intervals": [],
+                "evidence": {"per_seed": per_seed, "censored_seeds": censored}}
+    intervals = sorted({
+        candidate for entry in per_seed.values() for candidate in entry["candidates"]
+    })
+    if not intervals:
+        return {"status": "RIGHT_CENSORED", "intervals": [],
+                "evidence": {"per_seed": per_seed}}
+    if seed_coverage is None:
+        seed_coverage = max(
+            sum(
+                1
+                for entry in per_seed.values()
+                if any(
+                    _intervals_overlap(interval, candidate)
+                    for candidate in entry["candidates"]
+                )
+            )
+            for interval in intervals
+        )
+    if training_coverage is None:
+        training_coverage = 1
+    evidence = {
+        "per_seed": per_seed,
+        "seed_coverage": seed_coverage,
+        "training_coverage": training_coverage,
+    }
+    if seed_coverage < _STABLE_MIN_SEED_OVERLAP:
+        return {"status": "ORDER_SENSITIVE", "intervals": intervals,
+                "evidence": evidence}
+    if training_coverage < _STABLE_MIN_TRAININGS:
+        return {"status": "TRAINING_SENSITIVE", "intervals": intervals,
+                "evidence": evidence}
+    return {"status": "INTERVAL_IDENTIFIED", "intervals": intervals,
+            "evidence": evidence}
+
+
+def _walk_point_qualifies(row: dict) -> tuple[bool, int]:
+    """§6.2.3 单点前两条件：median R_0x34 ≥1.0/1k 且逐样本地板分离
+    （≥8/10 样本 >0.5/1k，§6.2.8-5 按每个 order_seed 各自判定）。
+    样本数不足 10 时仍按绝对计数 ≥8 判（§6.2.8-6 的补跑纪律保证
+    10 进程，缺样本不放宽门槛）。返回 (合格, 地板样本数)。"""
+    floor_samples = sum(
+        1 for value in row["walk_samples"] if value > _WALK_FLOOR_PER_1K
+    )
+    qualified = (
+        row["dtlb_walk_per_1k"] >= _WALK_ONSET_MIN_PER_1K
+        and floor_samples >= _WALK_FLOOR_MIN_SAMPLES
+    )
+    return qualified, floor_samples
+
+
+def detect_walk_onset(rows_by_seed: dict[int, list[dict]], *,
+                      unqualified_events: Iterable[str] = ()) -> dict:
+    """§6.2.3 walk-onset 检测（Q2a）+ §6.2.8-5 逐 seed 地板判定。
+
+    rows_by_seed：{order_seed: [{"pages", "dtlb_walk_per_1k"（该页数 median）,
+    "walk_samples"（逐进程 R_0x34 值）}]}。返回 {status, intervals,
+    evidence}：
+
+    - 资格不足事件门控 → SEMANTICS_UNVERIFIED；空输入 → OPEN；
+    - 逐 seed 取首个"本点与下一页数点同满足前两项"的相邻点对
+      （持续性条件）；末点（如 8192 页）无下一页数点，永不单独构成
+      onset——8192 页仍未满足 → RIGHT_CENSORED（onset 下界报告）；
+    - 跨 seed：全部一致 → INTERVAL_IDENTIFIED（onset 位于区间内的相
+      邻点对）；全部无 → RIGHT_CENSORED；不一致或部分缺失 →
+      ORDER_SENSITIVE（任务书未定义跨 seed 聚合，取同 §6.2.6 一致
+      精神的保守分支，evidence 逐 seed 列 onset 供评审）。
+    """
+    if unqualified_events:
+        return {"status": "SEMANTICS_UNVERIFIED", "intervals": [],
+                "evidence": {"unqualified_events": sorted(str(event) for event in unqualified_events)}}
+    per_seed: dict[int, dict] = {}
+    for seed, rows in sorted(rows_by_seed.items()):
+        points = []
+        for row in sorted(rows, key=lambda row: row["pages"]):
+            qualified, floor_samples = _walk_point_qualifies(row)
+            points.append({
+                "pages": row["pages"],
+                "median": row["dtlb_walk_per_1k"],
+                "floor_samples": floor_samples,
+                "qualified": qualified,
+            })
+        onset = None
+        for left, right in zip(points, points[1:]):
+            if left["qualified"] and right["qualified"]:
+                onset = (left["pages"], right["pages"])
+                break
+        per_seed[seed] = {
+            "onset": onset,
+            "scan_max_pages": points[-1]["pages"] if points else None,
+            "points": points,
+        }
+    if not per_seed:
+        return {"status": "OPEN", "intervals": [],
+                "evidence": {"per_seed": per_seed}}
+    onsets = {entry["onset"] for entry in per_seed.values()}
+    if onsets == {None}:
+        return {"status": "RIGHT_CENSORED", "intervals": [],
+                "evidence": {"per_seed": per_seed}}
+    if len(onsets) == 1:
+        return {"status": "INTERVAL_IDENTIFIED",
+                "intervals": [next(iter(onsets))],
+                "evidence": {"per_seed": per_seed}}
+    intervals = sorted(onset for onset in onsets if onset is not None)
+    return {"status": "ORDER_SENSITIVE", "intervals": intervals,
+            "evidence": {"per_seed": per_seed}}
+
+
+def _is_bimodal(values: list[float]) -> bool:
+    """双峰规则（任务书 §9.2 复用契约，移植 sm8650_x4_p0prime 预注册规
+    则）：排序后相邻比值 ≥ _BIMODAL_RATIO 且两侧各 ≥ _BIMODAL_MIN_SIDE
+    个样本。零值按比值未定义处理（不参与标记）。"""
+    ordered = sorted(values)
+    for left in range(_BIMODAL_MIN_SIDE, len(ordered) - _BIMODAL_MIN_SIDE + 1):
+        low, high = ordered[left - 1], ordered[left]
+        if low <= 0:
+            continue
+        if high / low >= _BIMODAL_RATIO:
+            return True
+    return False
 
 
 def analyze_records(records: Iterable[dict], run_label: str,
@@ -340,6 +550,9 @@ def analyze_records(records: Iterable[dict], run_label: str,
             "ring_passes": int(passes) if passes == int(passes) else passes,
             "samples": samples,
             "unqualified_events": _unqualified_events(registry),
+            # §9.2 复用契约：双峰字段钉为 l1d_tlb_refill_per_1k（knee 判
+            # 据的消费字段、逐进程布局/着色方差的主要暴露面）。
+            "bimodal": _is_bimodal([s["l1d_tlb_refill_per_1k"] for s in samples]),
         }
         for field_name in ("latency_ns", *_DERIVED_FIELDS):
             group[field_name] = summarize([s[field_name] for s in samples])
@@ -365,8 +578,8 @@ def build_markdown(results: list[AnalysisResult], show_samples: bool = False) ->
         "Events under `unverified` are SEMANTICS_UNVERIFIED (registry gate): "
         "samples stay in the table, structural conclusions are blocked.",
         "",
-        "| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | unverified |",
-        "|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|",
+        "| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | bimodal | unverified |",
+        "|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|",
     ]
     for result in results:
         for group in result.groups:
@@ -382,6 +595,7 @@ def build_markdown(results: list[AnalysisResult], show_samples: bool = False) ->
                                "l1d_tlb_refill_per_1k", "dtlb_walk_per_1k"):
                 stats = group[field_name]
                 cells.append(f"{_fmt(stats['median'])} [{_fmt(stats['p25'])}, {_fmt(stats['p75'])}]")
+            cells.append("YES" if group["bimodal"] else "no")
             cells.append(
                 ", ".join(_short_name(name) for name in group["unqualified_events"])
                 or "-"

@@ -6,7 +6,9 @@
 knee（§6.2.2 三条件不全满足时无候选）、`0x05` density >1000/1k 保留
 原值不截断、注册表资格门控（未注册/CANDIDATE → SEMANTICS_UNVERIFIED
 但不阻断采集）、multiplex 样本拒绝、全失败 run 进 rejected 不抛错、
-契约缺项硬错误、注册表资格值白名单。
+契约缺项硬错误、注册表资格值白名单；以及终态机：§6.2.2 候选 + §6.2.8-1
+左删失优先 + §6.2.6 稳定条件（adjudicate_knee）、§6.2.3 walk-onset
+（detect_walk_onset）、双峰标记（§9.2 复用 p0prime 预注册规则）。
 """
 
 from __future__ import annotations
@@ -20,9 +22,11 @@ from pathlib import Path
 
 from analysis.sm8650_tlb import (
     TlbError,
+    adjudicate_knee,
     analyze_records,
     build_markdown,
     detect_knee_candidates,
+    detect_walk_onset,
     load_registry,
     main,
 )
@@ -138,6 +142,27 @@ def _rows(groups):
             "cyc_per_load": group["cyc_per_load"]["median"],
         }
         for group in sorted(groups, key=lambda group: group["buffer_kb"])
+    ]
+
+
+_COARSE_PAGES = (32, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 2048,
+                 4096, 8192)  # §6.2.1 粗扫页序
+
+
+def _knee_rows(refills, cycs):
+    """§6.2.1 页序上的 (R_0x05 /1k, cyc/load) 中位数曲线 → adjudicate_knee 行。"""
+    assert len(refills) == len(cycs) == len(_COARSE_PAGES)
+    return [
+        {"pages": pages, "l1d_tlb_refill_per_1k": refill, "cyc_per_load": cyc}
+        for pages, refill, cyc in zip(_COARSE_PAGES, refills, cycs)
+    ]
+
+
+def _walk_rows(points):
+    """(pages, R_0x34 median /1k, 逐样本 R_0x34 列) → detect_walk_onset 行。"""
+    return [
+        {"pages": pages, "dtlb_walk_per_1k": median, "walk_samples": list(samples)}
+        for pages, median, samples in points
     ]
 
 
@@ -269,6 +294,232 @@ class TestKneeCandidates(unittest.TestCase):
         self.assertEqual(result.groups[0]["samples"][0]["sample_index"], 0)
         self.assertEqual(len(result.rejected), 1)
         self.assertIn("multiplexed", result.rejected[0])
+
+
+_SINGLE_KNEE_REFILLS = [10, 11, 12, 14, 100, 105, 110, 115, 120, 125,
+                        130, 135, 140]
+_SINGLE_KNEE_CYCS = [2.0] * 4 + [2.4] * 9
+
+
+class TestAdjudicateKnee(unittest.TestCase):
+    """§6.2.2 候选 + §6.2.8-1 左删失优先 + §6.2.6 稳定条件的终态机。"""
+
+    def test_single_knee_interval_identified(self):
+        # ①单膝点：§6.2.1 页序下仅 128→192 三条件全满足。
+        rows = _knee_rows(_SINGLE_KNEE_REFILLS, _SINGLE_KNEE_CYCS)
+        verdict = adjudicate_knee({42: rows}, seed_coverage=3,
+                                  training_coverage=2)
+        self.assertEqual(verdict["status"], "INTERVAL_IDENTIFIED")
+        self.assertEqual(verdict["intervals"], [(128, 192)])
+        self.assertEqual(verdict["evidence"]["per_seed"][42]["candidates"],
+                         [(128, 192)])
+
+    def test_double_knee_intervals_listed_separately(self):
+        # ②双膝点：128→192 与 1024→2048 分别列出（§6.2.2 多候选）。
+        rows = _knee_rows(
+            [10, 11, 12, 14, 100, 105, 110, 115, 120, 125, 300, 305, 310],
+            [2.0] * 4 + [2.4] * 6 + [2.9] * 3,
+        )
+        verdict = adjudicate_knee({42: rows}, seed_coverage=4,
+                                  training_coverage=2)
+        self.assertEqual(verdict["status"], "INTERVAL_IDENTIFIED")
+        self.assertEqual(verdict["intervals"], [(128, 192), (1024, 2048)])
+
+    def test_continuous_rise_is_right_censored(self):
+        # ③无膝点：连续上升但任一点对三条件都不全满足 → RIGHT_CENSORED。
+        rows = _knee_rows(
+            [10, 12, 15, 19, 24, 30, 38, 48, 60, 75, 95, 120, 150],
+            [2.0 + 0.1 * k for k in range(13)],
+        )
+        verdict = adjudicate_knee({42: rows}, seed_coverage=4,
+                                  training_coverage=2)
+        self.assertEqual(verdict["status"], "RIGHT_CENSORED")
+        self.assertEqual(verdict["intervals"], [])
+
+    def test_left_censor_precedes_knee_detection(self):
+        # ④R_0x05(32 页)=120/1k ≥100 → LEFT_CENSORED，先于 knee 检测执行
+        # （§6.2.8-1）：即使 128→192 满足三条件也不提名。
+        rows = _knee_rows(
+            [120, 122, 125, 130, 300, 305, 310, 315, 320, 325, 330, 335, 340],
+            [2.0] * 4 + [2.5] * 9,
+        )
+        # 防空心化：同一曲线若走到 §6.2.2 本会提名 (128, 192)。
+        self.assertEqual(detect_knee_candidates(rows), [(128, 192)])
+        verdict = adjudicate_knee({42: rows}, seed_coverage=4,
+                                  training_coverage=2)
+        self.assertEqual(verdict["status"], "LEFT_CENSORED")
+        self.assertEqual(verdict["intervals"], [])
+        per_seed = verdict["evidence"]["per_seed"][42]
+        self.assertTrue(per_seed["left_censored"])
+        self.assertEqual(per_seed["floor_refill_per_1k"], 120)
+
+    def test_phase_a_coverage_naturally_yields_sensitive_terminals(self):
+        # §6.2.6：seed/训练覆盖参数缺省时按输入曲线计 seed 覆盖、训练覆
+        # 盖=1——Phase A 粗扫（2 seed × 短训练）进来自然落在敏感终态。
+        rows = _knee_rows(_SINGLE_KNEE_REFILLS, _SINGLE_KNEE_CYCS)
+        one_seed = adjudicate_knee({42: rows})
+        self.assertEqual(one_seed["status"], "ORDER_SENSITIVE")
+        self.assertEqual(one_seed["evidence"]["seed_coverage"], 1)
+        two_seeds = adjudicate_knee({42: rows, 7: rows})
+        self.assertEqual(two_seeds["status"], "ORDER_SENSITIVE")
+        self.assertEqual(two_seeds["evidence"]["seed_coverage"], 2)
+        three_seeds = adjudicate_knee({42: rows, 7: rows, 1337: rows})
+        self.assertEqual(three_seeds["status"], "TRAINING_SENSITIVE")
+        self.assertEqual(three_seeds["evidence"]["training_coverage"], 1)
+        stable = adjudicate_knee({42: rows, 7: rows, 1337: rows},
+                                 training_coverage=2)
+        self.assertEqual(stable["status"], "INTERVAL_IDENTIFIED")
+        self.assertEqual(stable["intervals"], [(128, 192)])
+
+    def test_disjoint_seed_candidates_are_order_sensitive(self):
+        # 3 个 seed 但候选区间互不重叠（重叠计数最大 2，不足 ≥3/4）→ 仍
+        # ORDER_SENSITIVE（§6.2.6 要求致密区间相互重叠）。
+        knee_low = _knee_rows(_SINGLE_KNEE_REFILLS, _SINGLE_KNEE_CYCS)
+        knee_high = _knee_rows(
+            [10, 11, 12, 14, 16, 17, 18, 19, 20, 21, 100, 105, 110],
+            [2.0] * 10 + [2.4] * 3,
+        )
+        verdict = adjudicate_knee({42: knee_low, 7: knee_high, 1337: knee_low},
+                                  training_coverage=2)
+        self.assertEqual(verdict["status"], "ORDER_SENSITIVE")
+        self.assertEqual(verdict["evidence"]["seed_coverage"], 2)
+        self.assertEqual(verdict["intervals"], [(128, 192), (1024, 2048)])
+
+    def test_unqualified_events_gate_to_semantics_unverified(self):
+        rows = _knee_rows(_SINGLE_KNEE_REFILLS, _SINGLE_KNEE_CYCS)
+        verdict = adjudicate_knee(
+            {42: rows}, seed_coverage=4, training_coverage=2,
+            unqualified_events=["pmu.l1d_tlb_refill.count"],
+        )
+        self.assertEqual(verdict["status"], "SEMANTICS_UNVERIFIED")
+        self.assertEqual(verdict["intervals"], [])
+
+    def test_empty_input_is_open(self):
+        verdict = adjudicate_knee({})
+        self.assertEqual(verdict["status"], "OPEN")
+        self.assertEqual(verdict["intervals"], [])
+
+
+class TestWalkOnset(unittest.TestCase):
+    """§6.2.3 walk-onset 三条件 + §6.2.8-5 逐 seed 地板判定。"""
+
+    def test_walk_onset_detected_with_persistence(self):
+        # ⑤三条件全满足且有持续性：2048 起 R_0x34 ≥1.0、≥8/10 样本
+        # >0.5/1k，下一页数点同样满足 → onset 区间 (2048, 4096)；
+        # 两个 order_seed 各自判定（§6.2.8-5）且一致。
+        rows = _walk_rows([
+            (1024, 0.4, [0.4] * 10),
+            (2048, 1.2, [0.6] * 9 + [0.4]),
+            (4096, 1.5, [0.8] * 10),
+            (8192, 2.0, [1.0] * 10),
+        ])
+        verdict = detect_walk_onset({42: rows, 7: rows})
+        self.assertEqual(verdict["status"], "INTERVAL_IDENTIFIED")
+        self.assertEqual(verdict["intervals"], [(2048, 4096)])
+        self.assertEqual(verdict["evidence"]["per_seed"][42]["onset"],
+                         (2048, 4096))
+
+    def test_single_point_without_persistence_is_not_onset(self):
+        # ⑥仅单点满足、下一页数点回落 → 不报 onset；8192 单点满足也
+        # 无"下一页数点"可证持续 → 同样不报，终态 RIGHT_CENSORED。
+        rows = _walk_rows([
+            (1024, 0.4, [0.4] * 10),
+            (2048, 1.2, [0.6] * 9 + [0.4]),
+            (4096, 0.3, [0.3] * 10),
+            (8192, 2.0, [1.0] * 10),
+        ])
+        verdict = detect_walk_onset({42: rows})
+        self.assertEqual(verdict["status"], "RIGHT_CENSORED")
+        self.assertEqual(verdict["intervals"], [])
+        self.assertIsNone(verdict["evidence"]["per_seed"][42]["onset"])
+
+    def test_floor_rule_requires_8_of_10_samples_per_seed(self):
+        # §6.2.8-5：median ≥1.0 不够——同一 order_seed 自己的 10 进程里
+        # ≥8 个 >0.5/1k 才算地板分离（此处 7/10 → 该点不合格）。
+        rows = _walk_rows([
+            (2048, 5.0, [5.0] * 7 + [0.1] * 3),
+            (4096, 1.5, [0.8] * 10),
+            (8192, 0.2, [0.2] * 10),
+        ])
+        verdict = detect_walk_onset({42: rows})
+        self.assertEqual(verdict["status"], "RIGHT_CENSORED")
+        point = verdict["evidence"]["per_seed"][42]["points"][0]
+        self.assertEqual(point["pages"], 2048)
+        self.assertEqual(point["floor_samples"], 7)
+        self.assertFalse(point["qualified"])
+
+    def test_boundary_point_unsatisfied_is_right_censored(self):
+        # ⑦边界点：8192 仍未满足（median 0.95 <1.0）→ RIGHT_CENSORED。
+        rows = _walk_rows([
+            (1024, 0.4, [0.4] * 10),
+            (4096, 0.9, [0.9] * 10),
+            (8192, 0.95, [0.95] * 10),
+        ])
+        verdict = detect_walk_onset({42: rows})
+        self.assertEqual(verdict["status"], "RIGHT_CENSORED")
+        self.assertEqual(verdict["intervals"], [])
+
+    def test_disagreeing_seeds_are_order_sensitive(self):
+        # 两 seed onset 区间不一致 → ORDER_SENSITIVE（逐 seed 判定后区间
+        # 一致才可报告，同 §6.2.6 的跨 seed 稳定精神）。
+        low = _walk_rows([
+            (2048, 1.2, [0.6] * 9 + [0.4]),
+            (4096, 1.5, [0.8] * 10),
+            (8192, 2.0, [1.0] * 10),
+        ])
+        high = _walk_rows([
+            (2048, 0.3, [0.3] * 10),
+            (4096, 1.5, [0.8] * 10),
+            (8192, 2.0, [1.0] * 10),
+        ])
+        verdict = detect_walk_onset({42: low, 7: high})
+        self.assertEqual(verdict["status"], "ORDER_SENSITIVE")
+        self.assertEqual(verdict["intervals"], [(2048, 4096), (4096, 8192)])
+
+    def test_unqualified_events_gate_to_semantics_unverified(self):
+        rows = _walk_rows([
+            (2048, 1.2, [0.6] * 9 + [0.4]),
+            (4096, 1.5, [0.8] * 10),
+        ])
+        verdict = detect_walk_onset({42: rows},
+                                    unqualified_events=["pmu.dtlb_walk.count"])
+        self.assertEqual(verdict["status"], "SEMANTICS_UNVERIFIED")
+        self.assertEqual(verdict["intervals"], [])
+
+    def test_empty_input_is_open(self):
+        verdict = detect_walk_onset({})
+        self.assertEqual(verdict["status"], "OPEN")
+        self.assertEqual(verdict["intervals"], [])
+
+
+class TestBimodalFlag(unittest.TestCase):
+    """双峰标记（§9.2 复用契约）：移植 p0prime 预注册规则，目标字段钉为
+    l1d_tlb_refill_per_1k（knee 判据消费字段）。"""
+
+    def test_clear_bimodal_group_is_flagged(self):
+        # 低簇 3 样本、高簇 3 样本，排序相邻比 9 ≥4 且两侧各 ≥2 → bimodal。
+        record = _record(latencies=(2.0,) * 6,
+                         refills=(100, 100, 100, 900, 900, 900))
+        result = analyze_records([record], "run-a")
+        self.assertTrue(result.groups[0]["bimodal"])
+        markdown = build_markdown([result])
+        header = next(line for line in markdown.splitlines()
+                      if line.startswith("| run |"))
+        self.assertIn("bimodal", header)
+        self.assertIn("| YES |", markdown)
+
+    def test_clean_group_is_not_flagged(self):
+        record = _record(latencies=(2.0,) * 4, refills=(295, 300, 305, 310))
+        result = analyze_records([record], "run-a")
+        self.assertFalse(result.groups[0]["bimodal"])
+        self.assertIn("| no |", build_markdown([result]))
+
+    def test_zero_values_do_not_trigger_bimodal(self):
+        # 排序 [0, 0, x, x]：唯一满足两侧各 ≥2 的分割低侧为 0，比值未定
+        # 义 → 跳过（移植规则：零值不参与标记）。
+        record = _record(latencies=(2.0,) * 4, refills=(0, 0, 900, 900))
+        result = analyze_records([record], "run-a")
+        self.assertFalse(result.groups[0]["bimodal"])
 
 
 class TestContractErrors(unittest.TestCase):
