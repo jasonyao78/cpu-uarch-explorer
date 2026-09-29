@@ -249,6 +249,10 @@ class TestPlan(unittest.TestCase):
                     "ptr-chase-sm8650-x4-tlb-anchor.json": 2,
                     "ptr-chase-sm8650-x4-tlb-ctrl.json": 2,
                     "ptr-chase-sm8650-x4-tlb-coarse.json": 26,
+                    "ptr-chase-sm8650-x4-tlb-ctrl-g1.json": 2,
+                    "ptr-chase-sm8650-x4-tlb-ctrl-g2.json": 2,
+                    "ptr-chase-sm8650-x4-tlb-ctrl-g4.json": 4,
+                    "ptr-chase-sm8650-x4-tlb-ctrl-g4-thp.json": 2,
                 }
                 if path.name in expected_case_counts:
                     self.assertEqual(len(plan.cases), expected_case_counts[path.name])
@@ -265,7 +269,36 @@ class TestPlan(unittest.TestCase):
                     },
                     "ptr-chase-sm8650-x4-tlb-coarse.json": {
                         "buffers": None,  # 26 case 只钉集合，顺序由 sweep 笛卡尔积决定
+                        "buffer_set": {128, 256, 384, 512, 768, 1024, 1536, 2048,
+                                       3072, 4096, 8192, 16384, 32768},
                         "seeds": {42, 7},
+                    },
+                    # Gate 1 正控（§5.1 ①②③ / §5.2 事件组）：各组事件名按 §3.1 表钉死
+                    "ptr-chase-sm8650-x4-tlb-ctrl-g1.json": {
+                        "buffers": [512, 16384],
+                        "seeds": {42},
+                        "events": {"cycles", "mem_access_rd", "l1d_tlb_refill",
+                                   "dtlb_walk", "l2d_tlb_refill", "l2d_tlb"},
+                    },
+                    "ptr-chase-sm8650-x4-tlb-ctrl-g2.json": {
+                        "buffers": [512, 16384],
+                        "seeds": {42},
+                        # §5.2 G2 行原文：cycles+0x05+0x34+0x8136+0x8128，不含 mem_access_rd
+                        "events": {"cycles", "l1d_tlb_refill", "dtlb_walk",
+                                   "dtlb_step", "dtlb_walk_percyc"},
+                    },
+                    "ptr-chase-sm8650-x4-tlb-ctrl-g4.json": {
+                        "buffers": [512, 16384, 2304, 3072],
+                        "seeds": {42},
+                        "events": {"cycles", "l1d_tlb_refill", "dtlb_walk",
+                                   "dtlb_walk_large", "dtlb_walk_small"},
+                    },
+                    "ptr-chase-sm8650-x4-tlb-ctrl-g4-thp.json": {
+                        "buffers": [2304, 3072],
+                        "seeds": {42},
+                        "events": {"cycles", "l1d_tlb_refill", "dtlb_walk",
+                                   "dtlb_walk_large", "dtlb_walk_small"},
+                        "page_policy": "thp",
                     },
                 }
                 if path.name in tlb_expectations:
@@ -278,13 +311,20 @@ class TestPlan(unittest.TestCase):
                     else:
                         self.assertEqual(
                             {case.param_value("buffer_kb") for case in plan.cases},
-                            {128, 256, 384, 512, 768, 1024, 1536, 2048, 3072,
-                             4096, 8192, 16384, 32768},
+                            expected["buffer_set"],
                         )
                     self.assertEqual(
                         {case.param_value("seed") for case in plan.cases},
                         expected["seeds"],
                     )
+                    # G0 主曲线组（§5.2）是默认事件集；G1/G2/G4 各配置按组钉名
+                    expected_events = expected.get(
+                        "events",
+                        {"cycles", "mem_access_rd", "l1d_tlb_refill", "dtlb_walk"},
+                    )
+                    # base/thp 互斥（plan 期硬拒绝）：逐 case 钉本方旗标在场、
+                    # 对方旗标缺席（-T 记录 params 只有 thp=1，见 §9.3 ⑮）
+                    page_policy = expected.get("page_policy", "base")
                     # loads_per_slot 是派生中间量、不进 case.params：声明默认值与
                     # 派生 loads 两头钉（min_loads=4096 在最小 128KiB 档也不生效）
                     defaults = {p["name"]: p.get("default") for p in spec["parameters"]}
@@ -293,13 +333,17 @@ class TestPlan(unittest.TestCase):
                     for case in plan.cases:
                         slots = (case.param_value("buffer_kb") * 1024
                                  // case.param_value("stride"))
-                        self.assertEqual(case.param_value("base_pages"), 1)
+                        if page_policy == "base":
+                            self.assertEqual(case.param_value("base_pages"), 1)
+                            self.assertNotIn("thp", dict(case.params))
+                        else:
+                            self.assertEqual(case.param_value("thp"), 1)
+                            self.assertNotIn("base_pages", dict(case.params))
                         self.assertEqual(case.param_value("loads"), 8 * slots)
                         self.assertEqual(
                             {event["name"]
                              for event in case.param_value("pmu_events")},
-                            {"cycles", "mem_access_rd",
-                             "l1d_tlb_refill", "dtlb_walk"},
+                            expected_events,
                         )
                 for case in plan.cases:
                     params = dict(case.params)
