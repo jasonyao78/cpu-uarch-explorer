@@ -52,10 +52,13 @@ BLOCK_INCOMPLETE。validate_anchors 执行 §6.2.5 质量门槛：环境门禁
 failed → 锚点失真）、latency/cyc 对照 short-base 参照 median 偏差
 ≤3%、512 KiB R 值落入正控 [p25,p75]、3072 KiB 首块自校准
 （prior_3072_baseline 缺省时只记录建基线，后续块按同一规则比较）、
-前后锚点同指标互判。任一不过 → BLOCK_FAILED 且块 fail-closed：
-main_result 不产出，主体 case 不进入判定。ANCHORS_OK /
-BLOCK_FAILED / BLOCK_INCOMPLETE 是块级终态，与 §10.2 的 Q 级终态
-不同层。
+前后锚点同指标互判。参照分布不写死：_anchor_references() 运行时从
+data/public/runs/ 的两个 evidence run 现读现算并缓存（仓内数据修正
+走 revision history，参照系自动跟踪；硬编码会静默过期），参照 run
+缺失/不全 → TlbError fail-closed。任一不过 → BLOCK_FAILED 且块
+fail-closed：main_result 不产出，主体 case 不进入判定。
+ANCHORS_OK / BLOCK_FAILED / BLOCK_INCOMPLETE 是块级终态，与 §10.2
+的 Q 级终态不同层。
 """
 
 from __future__ import annotations
@@ -124,30 +127,22 @@ _ANCHOR_MAX_DEVIATION = 0.03   # latency/cyc median 偏差上限（§6.2.5）
 _ANCHOR_MEDIAN_FIELDS = ("latency_ns", "cyc_per_load")
 _ANCHOR_RATE_FIELDS = ("l1d_tlb_refill_per_1k", "dtlb_walk_per_1k")
 
-# §6.2.5 latency/cyc 参照：short-base run 20260928T024022Z
-# （ptr-chase-sm8650-x4-p0prime-short-base）同 buffer 组的逐样本
-# median——每组 4 seed（42/7/1337/20260928）× 10 进程 = 40 个值，经
-# runner.statistics.summarize 计算。生成方式：2026-09-29 从
-# data/public/runs/20260928T024022Z-ptr-chase-sm8650-x4-p0prime-short-base/
-# records.jsonl 现读现算（latency_ns 与 cycles/loads 逐样本值），不是
-# 从任务书转抄——任务书只钉来源 run 与"median 偏差 ≤3%"的规则。
-_ANCHOR_REF_MEDIANS = {
-    512: {"latency_ns": 2.6548, "cyc_per_load": 7.524879455566406},
-    3072: {"latency_ns": 7.73815, "cyc_per_load": 21.27081807454427},
-}
-
-# §6.2.5 R 值参照（仅 512 KiB）：TLB 正控 run 20260927T182613Z
-# （ptr-chase-sm8650-x4-pmu-ctrl-tlb）512 KiB 组逐样本 R_0x05/R_0x34
-# 分布的 [p25, p75]（10 进程，summarize 口径；2026-09-29 现读现算自
-# data/public/runs/20260927T182613Z-ptr-chase-sm8650-x4-pmu-ctrl-tlb/
-# records.jsonl）。任务书原文括号值 288.08 [287.7, 289.6] /
-# 0.0129 [0.0098, 0.0141] 是它们的低位舍入，此处保留全精度。
+# §6.2.5 参照 evidence run（来源 run 由任务书钉死）：
+# - latency/cyc 参照 = short-base run 同 buffer 组（该 run 含
+#   cycles+latency，制度匹配已核；4 seed × 10 进程 = 40 样本/组）；
+# - R 值参照（仅 512 KiB）= TLB 正控 run 512 KiB 组（10 进程）。
+# 冻结规则要求参照分布**运行时从这些 run 现读现算，不写死数字**——
+# 仓内数据修正走 revision history，参照系必须自动跟踪修正（硬编码会
+# 静默过期）。现读现算见 _compute_anchor_references/_anchor_references。
 # 3072 KiB 无 G0 历史数据 → 首块自校准（validate_anchors 的
-# prior_3072_baseline 参数），故无 3072 参照常量。
-_ANCHOR_REF_R512_P25_P75 = {
-    "l1d_tlb_refill_per_1k": (287.7812832593918, 289.3509864807129),
-    "dtlb_walk_per_1k": (0.010460615158081055, 0.013381242752075195),
-}
+# prior_3072_baseline 参数），故无 3072 R 参照。
+_ANCHOR_REF_SHORT_BASE_RUN = (
+    "20260928T024022Z-ptr-chase-sm8650-x4-p0prime-short-base"
+)
+_ANCHOR_REF_CTRL_RUN = "20260927T182613Z-ptr-chase-sm8650-x4-pmu-ctrl-tlb"
+_ANCHOR_REF_RUNS_ROOT = (
+    Path(__file__).resolve().parents[1] / "data" / "public" / "runs"
+)
 
 # 块级终态（§6.2.5/§6.4；与 §10.2 的 Q 级终态不同层）
 _BLOCK_GROUPED = "BLOCK_GROUPED"        # 三块齐备，待 §6.2.5 判定
@@ -808,6 +803,105 @@ def _environment_gate_failure(run: RunData) -> dict | None:
     return None
 
 
+def _reference_values(run: RunData, buffer_kb: int, metric: str,
+                      per_loads_scale: float | None) -> list[float]:
+    """参照 run 同 buffer 组的逐样本值（跨 ok 记录合并）。
+
+    per_loads_scale=None 取原值（latency_ns）；否则按 record 的 loads
+    归一（cyc/load 用 1.0、R 值用 1000.0，同 §3.2 派生口径）。组内无
+    样本、metric 缺失或 observation 无数值都是 TlbError——参照数据不
+    全时 fail-closed，不静默降级为跳过判定。
+    """
+    context = f"anchor reference {run.run_dir.name}/buffer={buffer_kb}KiB"
+    values = []
+    for record in run.ok_records:
+        params = record.get("params", {})
+        if params.get("buffer_kb") != buffer_kb:
+            continue
+        loads = params.get("loads")
+        if per_loads_scale is not None and (
+            not isinstance(loads, int) or loads <= 0
+        ):
+            raise TlbError(f"{context}: positive integer loads required")
+        by_name = {entry.get("name"): entry
+                   for entry in record.get("metrics", [])}
+        entry = by_name.get(metric)
+        observations = (entry or {}).get("observations")
+        if not isinstance(observations, list) or not observations:
+            raise TlbError(f"{context}: metric {metric} has no observations")
+        for observation in observations:
+            raw = observation.get("value")
+            if not isinstance(raw, (int, float)):
+                raise TlbError(
+                    f"{context}: metric {metric} observation missing "
+                    f"numeric value"
+                )
+            value = float(raw)
+            if per_loads_scale is not None:
+                value = value / loads * per_loads_scale
+            values.append(value)
+    if not values:
+        raise TlbError(f"{context}: no samples in reference group")
+    return values
+
+
+def _load_reference_run(run_dir: Path) -> RunData:
+    """加载 §6.2.5 参照 evidence run；目录/records 缺失不可读、带失败
+    记录或全无 ok 记录 → TlbError（fail-closed：参照 run 必须是干净
+    全 ok 的 evidence）。"""
+    context = f"anchor reference run {run_dir.name}"
+    try:
+        run = load_run(run_dir)
+    except OSError as exc:
+        raise TlbError(f"{context}: unreadable ({exc})") from exc
+    if run.failed_records:
+        raise TlbError(f"{context}: reference run has failed records")
+    if not run.ok_records:
+        raise TlbError(f"{context}: no ok records")
+    return run
+
+
+def _compute_anchor_references(runs_root: Path) -> dict:
+    """§6.2.5 参照分布：运行时从两个 evidence run 现读现算。
+
+    冻结规则要求参照常量不写死（仓内数据修正走 revision history，参
+    照系自动跟踪修正；硬编码会静默过期）。返回 {"medians": {buffer:
+    {"latency_ns", "cyc_per_load"}}（short-base 同 buffer 组 median）、
+    "r512_p25_p75": {field: (p25, p75)}（正控 512 KiB 组）}。
+    """
+    short_base = _load_reference_run(runs_root / _ANCHOR_REF_SHORT_BASE_RUN)
+    medians = {
+        buffer_kb: {
+            "latency_ns": summarize(_reference_values(
+                short_base, buffer_kb, "latency_ns", None))["median"],
+            "cyc_per_load": summarize(_reference_values(
+                short_base, buffer_kb, "pmu.cycles.count", 1.0))["median"],
+        }
+        for buffer_kb in _ANCHOR_BUFFERS
+    }
+    ctrl = _load_reference_run(runs_root / _ANCHOR_REF_CTRL_RUN)
+    r512_p25_p75 = {}
+    for metric, field in (
+        ("pmu.l1d_tlb_refill.count", "l1d_tlb_refill_per_1k"),
+        ("pmu.dtlb_walk.count", "dtlb_walk_per_1k"),
+    ):
+        stats = summarize(_reference_values(ctrl, 512, metric, 1000.0))
+        r512_p25_p75[field] = (stats["p25"], stats["p75"])
+    return {"medians": medians, "r512_p25_p75": r512_p25_p75}
+
+
+_ANCHOR_REFERENCES: dict | None = None
+
+
+def _anchor_references() -> dict:
+    """§6.2.5 参照分布的模块级 lazy 缓存：进程内只现读现算一次，避免
+    每次块判定重读 evidence run。"""
+    global _ANCHOR_REFERENCES
+    if _ANCHOR_REFERENCES is None:
+        _ANCHOR_REFERENCES = _compute_anchor_references(_ANCHOR_REF_RUNS_ROOT)
+    return _ANCHOR_REFERENCES
+
+
 def _anchor_groups(run: RunData) -> dict[int, dict]:
     """锚点 run 的 {buffer_kb: 组}（analyze_records 分组原样取用）。
 
@@ -869,10 +963,10 @@ def validate_anchors(block: BlockResult,
     1. 环境门禁：任一锚点 run 的 summary failed>0 或记录带
        environment-precondition-failed → 锚点失真；
     2. latency 与 cycles/load：前/后锚点各自同 buffer 组 median 对照
-       short-base 参照（_ANCHOR_REF_MEDIANS，来源与生成方式见常量注
-       释）偏差 ≤3%；
+       short-base 参照（_anchor_references() 运行时现读现算，来源 run
+       与纪律理由见其 docstring）偏差 ≤3%；
     3. R_0x05/R_0x34（512 KiB）：前/后锚点组 median 落入正控
-       [p25, p75]（_ANCHOR_REF_R512_P25_P75）；
+       [p25, p75]（同前，运行时现读现算）；
     4. R_0x05/R_0x34（3072 KiB）：无 G0 历史数据——prior_3072_baseline
        缺省（首块）时只记录不判失，以 anchor-before 的 3072 组分布建
        基线随 verdict 输出；有基线时前/后锚点 median 均须落入基线
@@ -890,6 +984,9 @@ def validate_anchors(block: BlockResult,
             evidence={"reason": "missing anchor-after run",
                       "block": block.evidence},
         )
+    # 参照分布现读现算（模块级缓存）；参照 run 缺失/不全 → TlbError
+    # （fail-closed，任何判定路径都不豁免）。
+    references = _anchor_references()
     checks: list[dict] = []
     for role, run in (("anchor_before", block.anchor_before),
                       ("anchor_after", block.anchor_after)):
@@ -910,7 +1007,7 @@ def validate_anchors(block: BlockResult,
         for buffer_kb in _ANCHOR_BUFFERS:
             group = groups[role][buffer_kb]
             for metric in _ANCHOR_MEDIAN_FIELDS:
-                reference = _ANCHOR_REF_MEDIANS[buffer_kb][metric]
+                reference = references["medians"][buffer_kb][metric]
                 median = group[metric]["median"]
                 deviation = _relative_deviation(median, reference)
                 checks.append({
@@ -923,7 +1020,7 @@ def validate_anchors(block: BlockResult,
                     "ok": deviation <= _ANCHOR_MAX_DEVIATION,
                 })
         group_512 = groups[role][512]
-        for metric, interval in _ANCHOR_REF_R512_P25_P75.items():
+        for metric, interval in references["r512_p25_p75"].items():
             median = group_512[metric]["median"]
             checks.append({
                 "check": f"{metric}_within_positive_control_512",

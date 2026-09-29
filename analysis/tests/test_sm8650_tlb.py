@@ -36,7 +36,9 @@ from analysis.sm8650_tlb import (
     main,
     validate_anchors,
 )
+from analysis import sm8650_tlb
 from analysis.load import RunData
+from runner.statistics import summarize
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _REGISTRY = _REPO_ROOT / "configs" / "pmu-event-registry.json"
@@ -689,22 +691,60 @@ class TestAllFailedRun(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # §6.4/§6.2.5 块归组与锚点判定 fixture
 #
-# 参照常量与 sm8650_tlb 内嵌值同源同法（2026-09-29 现读现算自
-# data/public/runs/，runner.statistics.summarize 口径），此处独立写数
-# 以钉死实现侧常量（防漂移，不是从被测模块导入）：
-# - latency/cyc 参照 = short-base run 20260928T024022Z 同 buffer 组
-#   median（每组 4 seed × 10 进程 = 40 样本）；
-# - R 值参照 = TLB 正控 run 20260927T182613Z 512 KiB 组 [p25, p75]
-#   （10 进程；任务书 v4.1 §6.2.5 括号值 288.08 [287.7, 289.6] /
-#   0.0129 [0.0098, 0.0141] 的低位舍入与之吻合）。
+# 参照期望值现场从真实 evidence run 独立重算（本文件自己的 JSON 解析路
+# 径 + runner.statistics.summarize 口径），不写死数字——冻结规则要求参
+# 照现读现算（仓内数据修正走 revision history，硬编码会静默过期）。测
+# 试钉的是模块计算的正确性（两路独立计算逐位一致），不是常量值；参照
+# run 修正后期望值自动跟踪。
 # ---------------------------------------------------------------------------
 
-_REF_LATENCY_NS = {512: 2.6548, 3072: 7.73815}
-_REF_CYC_PER_LOAD = {512: 7.524879455566406, 3072: 21.27081807454427}
-_CTRL_512_R05_P25, _CTRL_512_R05_P75 = 287.7812832593918, 289.3509864807129
-_CTRL_512_R34_P25, _CTRL_512_R34_P75 = 0.010460615158081055, 0.013381242752075195
-_CTRL_512_R05_MEDIAN = 288.0765497684479
-_CTRL_512_R34_MEDIAN = 0.012874603271484375
+_SHORT_BASE_RUN = "20260928T024022Z-ptr-chase-sm8650-x4-p0prime-short-base"
+_CTRL_RUN = "20260927T182613Z-ptr-chase-sm8650-x4-pmu-ctrl-tlb"
+
+
+def _evidence_group_stats(run_label, buffer_kb, metric, per_loads_scale):
+    """参照 run 同 buffer 组逐样本统计（独立重算，不经过被测模块）。"""
+    path = (_REPO_ROOT / "data" / "public" / "runs" / run_label
+            / "records.jsonl")
+    values = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        record = json.loads(line)
+        if record.get("status") != "ok":
+            continue
+        params = record.get("params", {})
+        if params.get("buffer_kb") != buffer_kb:
+            continue
+        by_name = {entry["name"]: entry for entry in record["metrics"]}
+        for observation in by_name[metric]["observations"]:
+            value = observation["value"]
+            if per_loads_scale is not None:
+                value = value / params["loads"] * per_loads_scale
+            values.append(value)
+    return summarize(values)
+
+
+def _reference_expectations():
+    """§6.2.5 参照期望值：short-base 512/3072 KiB 组 median（latency 与
+    cyc/load）+ 正控 512 KiB 组 R 值 [p25, p75] 与 median。"""
+    expectations = {"medians": {}, "r512_p25_p75": {}, "r512_median": {}}
+    for buffer_kb in (512, 3072):
+        expectations["medians"][buffer_kb] = {
+            "latency_ns": _evidence_group_stats(
+                _SHORT_BASE_RUN, buffer_kb, "latency_ns", None)["median"],
+            "cyc_per_load": _evidence_group_stats(
+                _SHORT_BASE_RUN, buffer_kb, "pmu.cycles.count", 1.0)["median"],
+        }
+    for metric, field in (
+        ("pmu.l1d_tlb_refill.count", "l1d_tlb_refill_per_1k"),
+        ("pmu.dtlb_walk.count", "dtlb_walk_per_1k"),
+    ):
+        stats = _evidence_group_stats(_CTRL_RUN, 512, metric, 1000.0)
+        expectations["r512_p25_p75"][field] = (stats["p25"], stats["p75"])
+        expectations["r512_median"][field] = stats["median"]
+    return expectations
+
+
+_REF = _reference_expectations()  # import 时现读现算一次
 
 _ANCHOR_ID = "ptr-chase-sm8650-x4-tlb-anchor"  # §6.4：锚点 experiment_id
 _MAIN_ID = "ptr-chase-sm8650-x4-tlb-coarse"
@@ -814,23 +854,31 @@ def _loaded_run(label, experiment_id, ok_records, *, failed_records=(),
 
 
 def _anchor_run(label, timestamp, *, lat_512=None, cyc_512=None,
-                r05_512=_CTRL_512_R05_MEDIAN, r34_512=_CTRL_512_R34_MEDIAN,
+                r05_512=None, r34_512=None,
                 lat_3072=None, cyc_3072=None, r05_3072=500.0, r34_3072=0.02,
                 sha=_PROBE_SHA, failed_records=(), summary_failed=None):
     """锚点 run：固定 512/3072 KiB 两个 base case（§6.2.5），缺省值 =
-    参照中位（偏差 0）。3072 KiB R 值无历史参照，fixture 任取恒定值。"""
+    现场重算的参照中位（偏差 0、落在正控区间内）。3072 KiB R 值无历
+    史参照，fixture 任取恒定值。"""
     records = [
         _case_record(
             buffer_kb=512,
-            latency_ns=_REF_LATENCY_NS[512] if lat_512 is None else lat_512,
-            cyc_per_load=_REF_CYC_PER_LOAD[512] if cyc_512 is None else cyc_512,
-            refill_per_1k=r05_512, walk_per_1k=r34_512,
+            latency_ns=(_REF["medians"][512]["latency_ns"]
+                        if lat_512 is None else lat_512),
+            cyc_per_load=(_REF["medians"][512]["cyc_per_load"]
+                          if cyc_512 is None else cyc_512),
+            refill_per_1k=(_REF["r512_median"]["l1d_tlb_refill_per_1k"]
+                           if r05_512 is None else r05_512),
+            walk_per_1k=(_REF["r512_median"]["dtlb_walk_per_1k"]
+                         if r34_512 is None else r34_512),
             timestamp=timestamp, sha=sha,
         ),
         _case_record(
             buffer_kb=3072,
-            latency_ns=_REF_LATENCY_NS[3072] if lat_3072 is None else lat_3072,
-            cyc_per_load=_REF_CYC_PER_LOAD[3072] if cyc_3072 is None else cyc_3072,
+            latency_ns=(_REF["medians"][3072]["latency_ns"]
+                        if lat_3072 is None else lat_3072),
+            cyc_per_load=(_REF["medians"][3072]["cyc_per_load"]
+                          if cyc_3072 is None else cyc_3072),
             refill_per_1k=r05_3072, walk_per_1k=r34_3072,
             timestamp=timestamp, sha=sha,
         ),
@@ -942,9 +990,9 @@ class TestValidateAnchors(unittest.TestCase):
         # 产出主体分组）；首块 3072 KiB 自校准建立基线。
         block = _block(
             before=_anchor_run("before", _T0,
-                               lat_512=_REF_LATENCY_NS[512] * 1.02),
+                               lat_512=_REF["medians"][512]["latency_ns"] * 1.02),
             after=_anchor_run("after", _T2,
-                              lat_512=_REF_LATENCY_NS[512] * 1.02),
+                              lat_512=_REF["medians"][512]["latency_ns"] * 1.02),
         )
         self.assertEqual(block.status, "BLOCK_GROUPED")
         verdict = validate_anchors(block)
@@ -961,9 +1009,9 @@ class TestValidateAnchors(unittest.TestCase):
         # （fail-closed：main_result 不产出，无对象可消费）。
         block = _block(
             before=_anchor_run("before", _T0,
-                               lat_512=_REF_LATENCY_NS[512] * 1.05),
+                               lat_512=_REF["medians"][512]["latency_ns"] * 1.05),
             after=_anchor_run("after", _T2,
-                              lat_512=_REF_LATENCY_NS[512] * 1.05),
+                              lat_512=_REF["medians"][512]["latency_ns"] * 1.05),
         )
         verdict = validate_anchors(block)
         self.assertEqual(verdict.status, "BLOCK_FAILED")
@@ -980,18 +1028,20 @@ class TestValidateAnchors(unittest.TestCase):
     def test_512_r_values_outside_positive_control_interval_fail(self):
         # ③512 KiB R_0x05/R_0x34 median 落在正控 [p25, p75] 外 → 失败
         # （缺省 fixture 取正控 median，在区间内——①即反向对照）。
+        r05_p25, r05_p75 = _REF["r512_p25_p75"]["l1d_tlb_refill_per_1k"]
+        r34_p25, _ = _REF["r512_p25_p75"]["dtlb_walk_per_1k"]
         with self.subTest(metric="R_0x05 above p75"):
             block = _block(
-                before=_anchor_run("before", _T0, r05_512=_CTRL_512_R05_P75 + 1.0),
-                after=_anchor_run("after", _T2, r05_512=_CTRL_512_R05_P75 + 1.0),
+                before=_anchor_run("before", _T0, r05_512=r05_p75 + 1.0),
+                after=_anchor_run("after", _T2, r05_512=r05_p75 + 1.0),
             )
             verdict = validate_anchors(block)
             self.assertEqual(verdict.status, "BLOCK_FAILED")
             self.assertIsNone(verdict.main_result)
         with self.subTest(metric="R_0x34 below p25"):
             block = _block(
-                before=_anchor_run("before", _T0, r34_512=_CTRL_512_R34_P25 / 2),
-                after=_anchor_run("after", _T2, r34_512=_CTRL_512_R34_P25 / 2),
+                before=_anchor_run("before", _T0, r34_512=r34_p25 / 2),
+                after=_anchor_run("after", _T2, r34_512=r34_p25 / 2),
             )
             verdict = validate_anchors(block)
             self.assertEqual(verdict.status, "BLOCK_FAILED")
@@ -1059,10 +1109,12 @@ class TestValidateAnchors(unittest.TestCase):
         with self.subTest(mode="latency drift"):
             # ×0.99 与 ×1.02 各自偏差 ≤3%，互判偏差 3.03% >3%。
             block = _block(
-                before=_anchor_run("before", _T0,
-                                   lat_512=_REF_LATENCY_NS[512] * 0.99),
-                after=_anchor_run("after", _T2,
-                                  lat_512=_REF_LATENCY_NS[512] * 1.02),
+                before=_anchor_run(
+                    "before", _T0,
+                    lat_512=_REF["medians"][512]["latency_ns"] * 0.99),
+                after=_anchor_run(
+                    "after", _T2,
+                    lat_512=_REF["medians"][512]["latency_ns"] * 1.02),
             )
             verdict = validate_anchors(block)
             self.assertEqual(verdict.status, "BLOCK_FAILED")
@@ -1071,11 +1123,15 @@ class TestValidateAnchors(unittest.TestCase):
                 for failure in verdict.evidence["failures"]
             ))
         with self.subTest(mode="R value drift"):
-            # 两者各自落在正控 [p25, p75] 内，但 median 互不落对方
-            # [p25, p75]（恒定分布区间退化）→ 互判失败。
+            # 两者各自落在正控 [p25, p75] 内（取 p25/p75 与 median 的中
+            # 点，严格在区间内），但 median 互不落对方 [p25, p75]（恒定
+            # 分布区间退化）→ 互判失败。
+            r05_p25, r05_p75 = _REF["r512_p25_p75"]["l1d_tlb_refill_per_1k"]
+            r05_median = _REF["r512_median"]["l1d_tlb_refill_per_1k"]
+            low, high = (r05_p25 + r05_median) / 2, (r05_p75 + r05_median) / 2
             block = _block(
-                before=_anchor_run("before", _T0, r05_512=288.0),
-                after=_anchor_run("after", _T2, r05_512=288.5),
+                before=_anchor_run("before", _T0, r05_512=low),
+                after=_anchor_run("after", _T2, r05_512=high),
             )
             verdict = validate_anchors(block)
             self.assertEqual(verdict.status, "BLOCK_FAILED")
@@ -1097,6 +1153,80 @@ class TestValidateAnchors(unittest.TestCase):
         block = _block(before=broken, after=_anchor_run("after", _T2))
         with self.assertRaises(TlbError):
             validate_anchors(block)
+
+
+class TestAnchorReferences(unittest.TestCase):
+    """§6.2.5 参照分布的运行时现读现算（冻结规则：不写死数字——仓内
+    数据修正走 revision history，参照系自动跟踪修正）。"""
+
+    def test_references_match_independent_recomputation(self):
+        # 模块参照（经 validate_anchors 判定证据暴露）与本测试独立重算
+        # 的期望值逐位一致；_anchor_references() 进程内只算一次（lazy
+        # 缓存，重复调用返回同一对象）。
+        verdict = validate_anchors(_block(after=_anchor_run("after", _T2)))
+        self.assertEqual(verdict.status, "ANCHORS_OK")
+        seen = set()
+        for check in verdict.evidence["checks"]:
+            if check["check"].endswith("_vs_short_base"):
+                field = check["check"].removesuffix("_vs_short_base")
+                self.assertEqual(
+                    check["reference"],
+                    _REF["medians"][check["buffer_kb"]][field],
+                )
+                seen.add(("median", check["buffer_kb"], field))
+            elif check["check"].endswith("_within_positive_control_512"):
+                field = check["check"].removesuffix("_within_positive_control_512")
+                self.assertEqual(
+                    tuple(check["interval"]), _REF["r512_p25_p75"][field]
+                )
+                seen.add(("r512", field))
+        # 防空心化：四类参照（2 buffer × 2 median 字段 + 2 个 R 区间）
+        # 都被证据覆盖。
+        self.assertEqual(
+            seen,
+            {("median", buffer, field)
+             for buffer in (512, 3072)
+             for field in ("latency_ns", "cyc_per_load")}
+            | {("r512", field)
+               for field in ("l1d_tlb_refill_per_1k", "dtlb_walk_per_1k")},
+        )
+        self.assertIs(sm8650_tlb._anchor_references(),
+                      sm8650_tlb._anchor_references())
+
+    def test_missing_or_incomplete_reference_runs_are_hard_errors(self):
+        # fail-closed：参照 run 缺失、带失败记录或 buffer 组不全 →
+        # TlbError，不静默降级为跳过判定。
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "runs"
+            with self.subTest(case="runs root missing"):
+                with self.assertRaises(TlbError):
+                    sm8650_tlb._compute_anchor_references(root)
+            run_dir = root / sm8650_tlb._ANCHOR_REF_SHORT_BASE_RUN
+            run_dir.mkdir(parents=True)
+            record = {
+                "schema_version": "2.0",
+                "status": "ok",
+                "params": {"buffer_kb": 512, "loads": 65536},
+                "metrics": [
+                    {"name": "latency_ns",
+                     "observations": [{"sample_index": 0, "value": 2.6}]},
+                    {"name": "pmu.cycles.count",
+                     "observations": [{"sample_index": 0, "value": 490000}]},
+                ],
+            }
+            (run_dir / "records.jsonl").write_text(
+                json.dumps(record) + "\n", encoding="utf-8"
+            )
+            with self.subTest(case="buffer group missing"):
+                with self.assertRaises(TlbError):
+                    sm8650_tlb._compute_anchor_references(root)
+            with self.subTest(case="reference run with failed records"):
+                record["status"] = "failed"
+                (run_dir / "records.jsonl").write_text(
+                    json.dumps(record) + "\n", encoding="utf-8"
+                )
+                with self.assertRaises(TlbError):
+                    sm8650_tlb._compute_anchor_references(root)
 
 
 if __name__ == "__main__":
