@@ -232,6 +232,20 @@ class TestPlan(unittest.TestCase):
         with self.assertRaisesRegex(RunnerError, "non-scalar"):
             build_plan(spec, {**PLATFORM, "controls": []})
 
+    def test_swept_case_id_segment_value_charset_fails_closed(self):
+        # str sweep 值直接进 raw 样本文件名（artifacts 的 safe_case 只替换
+        # "/"与":"，且唯一性断言作用于净化前 id）：含 "/"、空格等字符的值会
+        # 绕过 plan 期防线后仍在落盘时互覆——白名单字符集 fail-closed
+        spec = {
+            **PASS_SPEC,
+            "execution": {
+                **PASS_SPEC["execution"],
+                "sweep": {"buffer": ["4MiB"], "label": ["a/b"]},
+            },
+        }
+        with self.assertRaisesRegex(RunnerError, "unsafe characters"):
+            build_plan(spec, {**PLATFORM, "controls": []})
+
     def test_duplicate_case_ids_fail_at_plan_time(self):
         # 纵深防御：任何未来的 id 碰撞（如此处重复 sweep 值）必须炸在 plan 期，
         # 而不是 run 期由 artifacts 覆盖写静默吞掉 raw 样本

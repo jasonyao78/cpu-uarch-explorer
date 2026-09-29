@@ -24,6 +24,9 @@ _PMU_LABEL_RE = re.compile(r"^[a-z0-9_]+$")
 # 参数一律追加通用 -{name}{value} 段，防止未覆盖参数共享 id
 _CASE_ID_COVERED_PARAMS = frozenset(
     {"buffer", "stride", "seed", "hugepage", "thp", "base_pages"})
+# 通用 id 段 str 值的字符白名单：段值会进 raw 样本文件名（artifacts.safe_case
+# 只替换 "/"与":"），文件系统不安全字符在此 fail-closed
+_CASE_ID_VALUE_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
 @dataclass(frozen=True)
@@ -313,6 +316,16 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                         "plan-error",
                         f"swept param {name!r} has non-scalar value, "
                         f"cannot form case id segment: {value!r}",
+                    )
+                # str 值直接进 raw 样本文件名：artifacts.safe_case 只替换 "/"
+                # 与":"，唯一性断言又作用于净化前 id——含 "/"、空格等字符的值
+                # 会绕过断言后仍在落盘时互覆；白名单（仿 _PMU_LABEL_RE 先例）
+                # 把这一层残留风险同样 fail-closed 在 plan 期
+                if isinstance(value, str) and not _CASE_ID_VALUE_RE.fullmatch(value):
+                    raise RunnerError(
+                        "plan-error",
+                        f"swept param {name!r} case id segment value has unsafe "
+                        f"characters: {value!r}",
                     )
                 case_id += f"-{name}{value}"
             cases.append(Case(id=case_id, probe=probe, control=control,
