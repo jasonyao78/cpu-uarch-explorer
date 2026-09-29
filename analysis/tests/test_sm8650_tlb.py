@@ -12,7 +12,12 @@ knee（§6.2.2 三条件不全满足时无候选）、`0x05` density >1000/1k �
 以及块机制：§6.4 三块归组（group_block，experiment_id 定角色 +
 probe SHA-256/target/时序关联证据）与 §6.2.5 锚点判据
 （validate_anchors：环境门禁、latency/cyc 对照 short-base 参照 ≤3%、
-512 KiB R 值落正控 [p25,p75]、3072 KiB 首块自校准、前后锚点互判）。
+512 KiB R 值落正控 [p25,p75]、3072 KiB 首块自校准、前后锚点互判）；
+以及 §7 Phase D THP cohort（分级：比较级 ≥5 有效样本出 median / 描述级
+3–4 只报原始观测 / <3 与未达比较级终态 INSUFFICIENT_COHORT；跨 seed
+同制度合并、异制度分列；mixed 不并入 thp；40 进程次/(buffer×policy)
+停止预算含失败计额；转化表）与 §7 Phase C Q3 默认终态（G3 缺失 →
+MODEL_UNIDENTIFIABLE 且绝无成本值）。
 """
 
 from __future__ import annotations
@@ -27,10 +32,14 @@ from pathlib import Path
 from analysis.sm8650_tlb import (
     TlbError,
     adjudicate_knee,
+    adjudicate_q3,
     analyze_records,
+    audit_thp_budget,
     build_markdown,
+    build_thp_conversion,
     detect_knee_candidates,
     detect_walk_onset,
+    grade_thp_cohorts,
     group_block,
     load_registry,
     main,
@@ -1289,6 +1298,312 @@ class TestAnchorReferences(unittest.TestCase):
                 )
                 with self.assertRaises(TlbError):
                     sm8650_tlb._compute_anchor_references(root)
+
+
+# ---------------------------------------------------------------------------
+# §7 Phase D THP cohort 分级 / 停止预算 / 转化表 + §7 Phase C Q3 默认终态
+#
+# cohort 输入行与 AnalysisResult.groups 同形——分级只消费已过
+# analyze_records 拒绝机制的有效样本；budget/转化表消费原始 records（含
+# 失败记录），policy 归属取自 records 的 params 策略旗标 / 观测 requested
+# 字段（确定性来源，不读时钟或随机源）。
+# ---------------------------------------------------------------------------
+
+
+def _all_keys(node):
+    """递归收集嵌套 dict/list 的全部键（Q3 "无成本值" 断言用）。"""
+    keys = set()
+    if isinstance(node, dict):
+        for key, value in node.items():
+            keys.add(key)
+            keys |= _all_keys(value)
+    elif isinstance(node, list):
+        for item in node:
+            keys |= _all_keys(item)
+    return keys
+
+
+def _cohort_row(buffer_kb, seed, backing, latencies,
+                refill_per_1k=300.0, walk_per_1k=1.0):
+    """Phase D cohort 分级输入行（per-(buffer × seed × 实际 backing) 的有
+    效样本集，同 AnalysisResult.groups 形）。"""
+    return {
+        "buffer_kb": buffer_kb,
+        "seed": seed,
+        "page_policy_actual": backing,
+        "samples": [{
+            "latency_ns": float(latency),
+            "l1d_tlb_refill_per_1k": float(refill_per_1k),
+            "dtlb_walk_per_1k": float(walk_per_1k),
+        } for latency in latencies],
+    }
+
+
+def _thp_record(seed=42, *, buffer_kb=2304, latencies=(2.4,) * 10,
+                multiplexed=()):
+    """Phase D -T case 记录：params thp=1（无 base_pages），观测 requested
+    =thp-madvise——budget/转化表的 policy 归属两来源保持一致。"""
+    record = _record(buffer_kb=buffer_kb, seed=seed, backing="thp",
+                     latencies=latencies, multiplexed=multiplexed)
+    del record["params"]["base_pages"]
+    record["params"]["thp"] = 1
+    for metric in record["metrics"]:
+        for observation in metric["observations"]:
+            observation["page_policy_requested"] = "thp-madvise"
+    return record
+
+
+def _failed_thp_record(seed=20260928, *, buffer_kb=2304, reason="probe-exit-1"):
+    """Phase D 失败 case：空 metrics + 结构化 failure（schema v2）。"""
+    record = _thp_record(seed=seed, buffer_kb=buffer_kb)
+    record["status"] = "failed"
+    record["metrics"] = []
+    record["failure"] = {"reason": reason, "detail": "synthetic Phase D failure"}
+    return record
+
+
+class TestThpCohortGrading(unittest.TestCase):
+    """§7 Phase D cohort 分级（P0-5）：比较级 ≥5 / 描述级 3–4 / <3 →
+    INSUFFICIENT_COHORT；跨 seed 同制度合并、异制度分列；mixed 不并入 thp。"""
+
+    def test_five_valid_samples_are_comparative_with_median(self):
+        # ① 5 个有效样本 → 比较级：median [p25, p75] 齐备（满足 §6.3 的
+        # ≥5 取 median 纪律），终态无（可进入正式 cohort 比较）。
+        row = _cohort_row(512, 42, "thp", [2.0, 2.1, 2.2, 2.3, 4.0])
+        cohorts = grade_thp_cohorts([row])["cohorts"]
+        self.assertEqual(len(cohorts), 1)
+        cohort = cohorts[0]
+        self.assertEqual(cohort["cohort"], "thp")
+        self.assertTrue(cohort["merged"])
+        unit = cohort["units"][0]
+        self.assertEqual(unit["grade"], "comparative")
+        self.assertIsNone(unit["terminal"])
+        self.assertEqual(unit["valid_samples"], 5)
+        self.assertEqual(unit["seeds"], [42])
+        # 三个 Q4 预注册指标（latency / R_0x05 / R_0x34）都有统计。
+        self.assertEqual(set(unit["stats"]), {"latency_ns",
+                                              "l1d_tlb_refill_per_1k",
+                                              "dtlb_walk_per_1k"})
+        self.assertEqual(unit["stats"]["latency_ns"]["median"], 2.2)
+        self.assertEqual(unit["stats"]["latency_ns"]["p25"], 2.1)
+        self.assertEqual(unit["stats"]["latency_ns"]["p75"], 2.3)
+
+    def test_four_valid_samples_are_descriptive_without_median(self):
+        # ② 4 个 → 描述级：只报转化计数与描述性原始观测，**不输出**
+        # cohort median；未达比较级 → 终态 INSUFFICIENT_COHORT。
+        row = _cohort_row(512, 42, "thp", [2.0, 2.1, 2.2, 2.3])
+        unit = grade_thp_cohorts([row])["cohorts"][0]["units"][0]
+        self.assertEqual(unit["grade"], "descriptive")
+        self.assertEqual(unit["terminal"], "INSUFFICIENT_COHORT")
+        self.assertNotIn("stats", unit)
+        self.assertEqual(unit["observations"]["latency_ns"], [2.0, 2.1, 2.2, 2.3])
+
+    def test_two_valid_samples_are_insufficient_cohort(self):
+        # ③ 2 个 → INSUFFICIENT_COHORT（预注册终态，不追加尝试）。
+        row = _cohort_row(512, 42, "thp", [2.0, 2.1])
+        unit = grade_thp_cohorts([row])["cohorts"][0]["units"][0]
+        self.assertEqual(unit["grade"], "insufficient")
+        self.assertEqual(unit["terminal"], "INSUFFICIENT_COHORT")
+        self.assertNotIn("stats", unit)
+        self.assertNotIn("observations", unit)
+
+    def test_cross_seed_same_regime_merges_counts(self):
+        # ④ 跨 seed 同制度（median 偏差 ≤10% 且 [p25,p75] 两两相交）→
+        # 合并计样本数。4 seed × 10 = 40 → 比较级。
+        rows = [_cohort_row(512, seed, "thp", [2.0 + 0.01 * k for k in range(10)])
+                for seed in (42, 7, 1337, 20260928)]
+        cohort = grade_thp_cohorts(rows)["cohorts"][0]
+        self.assertTrue(cohort["merged"])
+        self.assertNotIn("regime_failures", cohort)
+        unit = cohort["units"][0]
+        self.assertEqual(unit["seeds"], [7, 42, 1337, 20260928])
+        self.assertEqual(unit["valid_samples"], 40)
+        self.assertEqual(unit["grade"], "comparative")
+        # 合并不要求分布全等：偏差 7% ≤10% 且区间相交的同制度 seed 对也合并。
+        rows = [_cohort_row(512, 42, "thp", [1.9] * 3 + [2.0] * 4 + [2.1] * 3),
+                _cohort_row(512, 7, "thp", [2.033] * 3 + [2.14] * 4 + [2.247] * 3)]
+        cohort = grade_thp_cohorts(rows)["cohorts"][0]
+        self.assertTrue(cohort["merged"])
+        self.assertEqual(cohort["units"][0]["valid_samples"], 20)
+
+    def test_cross_seed_regime_split_lists_per_seed(self):
+        # ④ 异制度 → 按 seed 分列报告（每 seed 自成报告单元、各自分级）。
+        rows = [_cohort_row(512, 42, "thp", [2.0] * 10),
+                _cohort_row(512, 7, "thp", [2.0] * 10),
+                _cohort_row(512, 1337, "thp", [2.42] * 10)]  # median 偏差 21%
+        cohort = grade_thp_cohorts(rows)["cohorts"][0]
+        self.assertFalse(cohort["merged"])
+        self.assertEqual(len(cohort["units"]), 3)
+        self.assertEqual([unit["seeds"] for unit in cohort["units"]],
+                         [[7], [42], [1337]])
+        for unit in cohort["units"]:
+            self.assertEqual(unit["valid_samples"], 10)
+            self.assertEqual(unit["grade"], "comparative")
+        self.assertTrue(any(
+            failure["seeds"] == [42, 1337] and not failure["intervals_intersect"]
+            for failure in cohort["regime_failures"]
+        ))
+        # 合取的另一支也要钉：median 偏差 9% ≤10% 但 [p25,p75] 不相交 → 分列。
+        rows = [_cohort_row(512, 42, "thp", [2.0] * 10),
+                _cohort_row(512, 7, "thp", [2.18] * 10)]
+        cohort = grade_thp_cohorts(rows)["cohorts"][0]
+        self.assertFalse(cohort["merged"])
+        self.assertEqual(len(cohort["units"]), 2)
+        failure = cohort["regime_failures"][0]
+        self.assertLessEqual(failure["median_deviation"], 0.10)
+        self.assertFalse(failure["intervals_intersect"])
+
+    def test_mixed_backing_is_not_merged_into_thp(self):
+        # ⑥ 同一 -T case 内逐进程实际 backing 不同：analyze_records 按
+        # actual backing 分列（§9.3 ④），cohort 分级同样分列——mixed 样本
+        # 不补 thp 的计数（若并入，thp 会显示 10 → 钉死分列）。
+        record = _thp_record(seed=42)
+        for metric in record["metrics"]:
+            for index in (7, 8, 9):
+                metric["observations"][index]["page_policy_actual"] = "mixed"
+        result = analyze_records([record], "run-a")
+        groups = {group["page_policy_actual"]: group
+                  for group in result.groups}
+        self.assertEqual(set(groups), {"thp", "mixed"})
+        self.assertEqual(len(groups["thp"]["samples"]), 7)
+        self.assertEqual(len(groups["mixed"]["samples"]), 3)
+        cohorts = {cohort["cohort"]: cohort
+                   for cohort in grade_thp_cohorts(result.groups)["cohorts"]}
+        self.assertEqual(cohorts["thp"]["units"][0]["valid_samples"], 7)
+        self.assertEqual(cohorts["thp"]["units"][0]["grade"], "comparative")
+        self.assertEqual(cohorts["mixed"]["units"][0]["valid_samples"], 3)
+        self.assertEqual(cohorts["mixed"]["units"][0]["grade"], "descriptive")
+
+    def test_cohort_row_contract_errors(self):
+        # 契约缺项硬错误：未知 backing / 空样本 / 缺数值字段；空输入 → 空表。
+        self.assertEqual(grade_thp_cohorts([]), {"cohorts": []})
+        with self.subTest(case="unknown backing"):
+            with self.assertRaises(TlbError):
+                grade_thp_cohorts([_cohort_row(512, 42, "weird", [2.0])])
+        with self.subTest(case="empty samples"):
+            row = _cohort_row(512, 42, "thp", [2.0])
+            row["samples"] = []
+            with self.assertRaises(TlbError):
+                grade_thp_cohorts([row])
+        with self.subTest(case="missing metric field"):
+            row = _cohort_row(512, 42, "thp", [2.0])
+            del row["samples"][0]["dtlb_walk_per_1k"]
+            with self.assertRaises(TlbError):
+                grade_thp_cohorts([row])
+
+
+class TestQ3DefaultOutcome(unittest.TestCase):
+    """§7 Phase C Q3 默认终态（P1-6）：关联型报告 + MODEL_UNIDENTIFIABLE；
+    本计划不含冻结模型规格 → 绝不输出成本值。"""
+
+    def test_missing_g3_yields_model_unidentifiable_without_cost(self):
+        # ⑤ G3 缺失 → MODEL_UNIDENTIFIABLE；不得声称"已检验 data-miss 共线
+        # 性"（§9.3 ⑬）；输出无任何成本字段（递归扫描所有键）。
+        verdict = adjudicate_q3(g3_executed=False)
+        self.assertEqual(verdict["status"], "MODEL_UNIDENTIFIABLE")
+        evidence = verdict["evidence"]
+        self.assertFalse(evidence["g3_executed"])
+        self.assertFalse(evidence["data_miss_collinearity_checked"])
+        self.assertTrue(evidence["mmutc_confound_unresolved"])
+        keys = _all_keys(verdict)
+        self.assertFalse([key for key in keys if "cost" in key.lower()],
+                         f"cost-like keys present: {sorted(keys)}")
+
+    def test_g3_executed_still_defaults_without_frozen_model_spec(self):
+        # G3 执行也不自动升级：G3 只解决"没测 data miss"，不解决因果识别；
+        # 成本型升级须实施计划另行冻结模型规格——本计划不含 → 传入即硬错误。
+        points = [{"pages": 2048, "dtlb_walk_per_1k": 1.2, "cyc_per_load": 3.0},
+                  {"pages": 512, "dtlb_walk_per_1k": 0.01, "cyc_per_load": 2.0}]
+        verdict = adjudicate_q3(g3_executed=True, anchors_comparable=True,
+                                association_points=points)
+        self.assertEqual(verdict["status"], "MODEL_UNIDENTIFIABLE")
+        self.assertTrue(verdict["evidence"]["g3_executed"])
+        # 关联数据占位原样回显、按页数排序（无成本值）。
+        self.assertEqual([point["pages"] for point in verdict["association_points"]],
+                         [512, 2048])
+        self.assertFalse([key for key in _all_keys(verdict)
+                          if "cost" in key.lower()])
+        with self.assertRaises(TlbError):
+            adjudicate_q3(g3_executed=True, model_spec={"name": "ad-hoc"})
+
+
+class TestThpProcessBudget(unittest.TestCase):
+    """§7 Phase D 停止预算：每（buffer × policy）≤40 进程次（4 seed × 10），
+    失败/被拒样本计入额度（§9.3 ⑮ 失败计额）。"""
+
+    def test_budget_counts_failed_records_toward_cap(self):
+        # ⑦ 3 case × 10 进程 + 1 失败 case（计 10）= 40 → 恰好到上限不超；
+        # 再加一个 ok case → 50 → 超支。
+        ok = [_thp_record(seed=seed) for seed in (42, 7, 1337)]
+        budget = audit_thp_budget([*ok, _failed_thp_record()])
+        self.assertEqual(budget["cap"], 40)
+        entry = budget["entries"][0]
+        self.assertEqual(entry["buffer_kb"], 2304)
+        self.assertEqual(entry["policy"], "thp-madvise")
+        self.assertEqual(entry["processes_used"], 40)
+        self.assertEqual(entry["ok_records"], 3)
+        self.assertEqual(entry["failed_records"], 1)
+        self.assertFalse(entry["exceeded"])
+        over = audit_thp_budget([*ok, _thp_record(seed=20260928),
+                                 _failed_thp_record(seed=5)])
+        entry = over["entries"][0]
+        self.assertEqual(entry["processes_used"], 50)
+        self.assertTrue(entry["exceeded"])
+
+    def test_rejected_samples_still_count_toward_budget(self):
+        # 被拒样本（multiplex）进程已产生 → 计入额度（10 观测 = 10 进程次）。
+        entry = audit_thp_budget([_thp_record(multiplexed=(3, 4))])["entries"][0]
+        self.assertEqual(entry["processes_used"], 10)
+        self.assertEqual(entry["ok_records"], 1)
+
+    def test_budget_is_per_buffer_per_policy(self):
+        # (buffer × policy) 各自计额：-B 与 -T 同 buffer 分列、互不占额。
+        base_record = _record(buffer_kb=2304, seed=42, latencies=(2.4,) * 10)
+        budget = audit_thp_budget([base_record, _thp_record(seed=42)])
+        keys = [(entry["buffer_kb"], entry["policy"])
+                for entry in budget["entries"]]
+        self.assertEqual(keys, [(2304, "base-madvise"), (2304, "thp-madvise")])
+        for entry in budget["entries"]:
+            self.assertEqual(entry["processes_used"], 10)
+
+
+class TestThpConversionTable(unittest.TestCase):
+    """§7 Phase D 必报转化表（选择偏差披露）：请求次数 → 实际 backing 构成
+    → 失败数 → 进入分析样本数。"""
+
+    def test_conversion_table_flow(self):
+        full_thp = _thp_record(seed=42)                       # 10 × thp
+        mixed_case = _thp_record(seed=7)                      # 5 thp + 5 mixed
+        for metric in mixed_case["metrics"]:
+            for index in range(5):
+                metric["observations"][index]["page_policy_actual"] = "mixed"
+        rejected_case = _thp_record(seed=1337, multiplexed=(0, 1))  # 8 有效
+        failed = _failed_thp_record()                         # 计 10 请求
+        table = build_thp_conversion(
+            [full_thp, mixed_case, rejected_case, failed], "run-a"
+        )
+        self.assertEqual(len(table), 1)
+        entry = table[0]
+        self.assertEqual(entry["buffer_kb"], 2304)
+        self.assertEqual(entry["policy"], "thp-madvise")
+        self.assertEqual(entry["requested"], 40)
+        self.assertEqual(entry["backing"], {"thp": 23, "mixed": 5})
+        self.assertEqual(entry["failed_records"], 1)
+        self.assertEqual(entry["failure_reasons"], {"probe-exit-1": 1})
+        self.assertEqual(entry["analysis_samples"], 28)
+        self.assertEqual(entry["rejected_samples"], 2)
+
+    def test_requested_policy_disagreement_is_hard_error(self):
+        # policy 归属两来源（params 旗标 / 观测 requested）不一致 → 硬错误，
+        # 不猜测归属。
+        record = _thp_record()  # params thp=1
+        for metric in record["metrics"]:
+            for observation in metric["observations"]:
+                observation["page_policy_requested"] = "base-madvise"
+        with self.assertRaises(TlbError):
+            audit_thp_budget([record])
+        with self.assertRaises(TlbError):
+            build_thp_conversion([record], "run-a")
 
 
 if __name__ == "__main__":

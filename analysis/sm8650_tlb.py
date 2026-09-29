@@ -41,6 +41,24 @@ INTERVAL_IDENTIFIED（单 seed 真空不晋升，保守降级 ORDER_SENSITIVE）
 /着色方差的主要暴露面。该标记只服务于"中位数不得掩盖双态"的报告纪
 律，不构成任何容量推断。
 
+Q3 默认终态（§7 Phase C，P1-6）：adjudicate_q3 输出关联数据占位 +
+MODEL_UNIDENTIFIABLE——当前协议下页数同时改变 cache footprint、
+translation footprint 与 MMUTC 命中状态，G3 只解决"没测 data miss"；
+成本型升级须实施计划另行冻结模型规格（本计划不含），故本函数无升级
+路径：传入 model_spec 即 TlbError，输出绝不含成本值；evidence 恒明示
+data-miss 共线性未检验（§9.3 ⑬）与 MMUTC 混杂未分离。
+
+THP cohort（§7 Phase D，P0-5）：grade_thp_cohorts 按（buffer × 实际
+backing cohort）分级——比较级 ≥5 有效样本（median [p25, p75]）、描
+述级 3–4（只报转化计数与描述性原始观测，不输出 cohort median）、<3
+不足；未达比较级终态 INSUFFICIENT_COHORT。跨 seed 仅当同制度
+（latency median 偏差 ≤10% 且 [p25,p75] 两两相交）才合并计样本数，
+否则按 seed 分列；mixed 与 thp 永不并组（cohort 键即实际 backing）。
+audit_thp_budget / build_thp_conversion 消费原始 records（含失败记
+录）：每（buffer × 请求 policy）40 进程次上限，失败记录按 case 计
+10 进程次、被拒样本含在观测计数内；转化表按 请求 → 实际 backing 构
+成 → 失败数 → 进入分析样本数 披露选择偏差。
+
 块归组与锚点判定（§6.4/§6.2.5）：group_block 把 anchor-before + 主
 体 + anchor-after 三个已加载 run（RunData）归组为块——角色只由
 manifest 的 experiment_id 决定（锚点 = ptr-chase-sm8650-x4-tlb-
@@ -149,6 +167,29 @@ _BLOCK_GROUPED = "BLOCK_GROUPED"        # 三块齐备，待 §6.2.5 判定
 _BLOCK_INCOMPLETE = "BLOCK_INCOMPLETE"  # 缺 anchor-after，不成块
 _ANCHORS_OK = "ANCHORS_OK"
 _BLOCK_FAILED = "BLOCK_FAILED"
+
+# §7 Phase D cohort 分级与停止预算的冻结常量（改阈值 = 改冻结规则，走任
+# 务书变更）
+_COHORT_COMPARATIVE_MIN = 5   # 比较级下限（§6.3 的 ≥5 取 median 纪律）
+_COHORT_DESCRIPTIVE_MIN = 3   # 描述级下限；<3 → INSUFFICIENT_COHORT
+_COHORT_SEED_MEDIAN_DEVIATION = 0.10  # 跨 seed 同制度：median 相对偏差上限
+_PHASE_D_MAX_PROCESSES = 40   # 每（buffer × policy）进程次上限（4 seed × 10）
+_CASE_PROCESSES = 10          # §6.1：每 case 10 个全新进程（失败 case 计额单位）
+
+# Q4 预注册三指标（§7 Phase D：latency / R_0x05 / R_0x34 各自方向与阈值）
+_COHORT_METRIC_FIELDS = ("latency_ns", "l1d_tlb_refill_per_1k",
+                         "dtlb_walk_per_1k")
+
+# §10.2 的 Q 级终态（Q3/Q4 用）
+_INSUFFICIENT_COHORT = "INSUFFICIENT_COHORT"
+_MODEL_UNIDENTIFIABLE = "MODEL_UNIDENTIFIABLE"
+
+# ptr_chase params 策略旗标 → 请求 policy（同 adapter build_argv 的互斥语
+# 义）；观测侧取值集合同 adapter parse_output 的白名单。
+_PARAM_POLICIES = {"thp": "thp-madvise", "base_pages": "base-madvise",
+                   "hugepage": "hugetlb-fallback"}
+_REQUESTED_POLICIES = {"default", "base-madvise", "hugetlb-fallback",
+                       "hugetlb-strict", "thp-madvise"}
 
 _QUALIFICATIONS = ("candidate", "qualified")
 
@@ -670,6 +711,330 @@ def analyze_records(records: Iterable[dict], run_label: str,
             group[field_name] = summarize([s[field_name] for s in samples])
         result.groups.append(group)
     return result
+
+
+def _requested_policy(record: dict, context: str) -> str:
+    """记录的请求 policy（budget/转化表的 (buffer × policy) 归属键）。
+
+    首选 params 的 ptr_chase 策略旗标（失败记录无观测，params 是唯一来
+    源）；params 无旗标时回退 latency 观测的 page_policy_requested；两
+    者皆无 → "default"。两来源同在且不一致 → TlbError（请求归属不许
+    猜测）；多旗标同 adapter 互斥契约 → TlbError。
+    """
+    params = record.get("params", {})
+    flags = [name for name in _PARAM_POLICIES if params.get(name)]
+    if len(flags) > 1:
+        raise TlbError(
+            f"{context}: mutually exclusive page policy flags {sorted(flags)}"
+        )
+    from_params = _PARAM_POLICIES[flags[0]] if flags else None
+    from_observation = None
+    if record.get("status") == "ok":
+        by_name = {metric.get("name"): metric
+                   for metric in record.get("metrics", [])}
+        observations = (by_name.get(_LATENCY) or {}).get("observations") or []
+        if observations:
+            requested = observations[0].get("page_policy_requested")
+            if requested is not None:
+                if requested not in _REQUESTED_POLICIES:
+                    raise TlbError(
+                        f"{context}: unknown page_policy_requested {requested!r}"
+                    )
+                from_observation = requested
+    if (from_params is not None and from_observation is not None
+            and from_params != from_observation):
+        raise TlbError(
+            f"{context}: page policy disagreement "
+            f"(params={from_params}, observation={from_observation})"
+        )
+    return from_params or from_observation or "default"
+
+
+def _budget_key(record: dict, context: str) -> tuple[int, str]:
+    """(buffer_kb, policy) 归属键：buffer 取 params（失败记录也有），
+    policy 取 _requested_policy。"""
+    buffer_kb = record.get("params", {}).get("buffer_kb")
+    if not isinstance(buffer_kb, int) or buffer_kb <= 0:
+        raise TlbError(f"{context}: positive integer buffer_kb required")
+    return buffer_kb, _requested_policy(record, context)
+
+
+def _ok_record_processes(record: dict, context: str) -> int:
+    """ok 记录的已产生进程数 = latency 观测数（每个观测一个进程；multiplex
+    等被拒样本的进程已产生，计入额度——§7 Phase D"失败/被拒样本计入该
+    额度"）。"""
+    by_name = {metric.get("name"): metric
+               for metric in record.get("metrics", [])}
+    observations = (by_name.get(_LATENCY) or {}).get("observations")
+    if not isinstance(observations, list) or not observations:
+        raise TlbError(f"{context}: ok record without latency observations")
+    return len(observations)
+
+
+def audit_thp_budget(records: Iterable[dict]) -> dict:
+    """§7 Phase D 停止预算审计：每（buffer × 请求 policy）≤40 进程次。
+
+    进程次计数（确定性来源 = records 的 params/backing/观测字段，不读时
+    钟或随机源）：ok 记录按 latency 观测数（被拒样本含在内）；非 ok 记
+    录无逐进程观测，按 case 计 _CASE_PROCESSES 进程次（§6.1 每 case 10
+    个全新进程——失败 case 消耗其全部额度位，取保守上界而非按 0 计）。
+    达到上限即停是执行侧纪律，本函数只审计已发生的计数。返回 {"cap",
+    "entries": [{buffer_kb, policy, processes_used, cap, exceeded,
+    ok_records, failed_records}]}（按 buffer/policy 排序）。
+    """
+    context = "audit_thp_budget"
+    entries: dict[tuple[int, str], dict] = {}
+    for record in records:
+        buffer_kb, policy = _budget_key(record, context)
+        entry = entries.setdefault((buffer_kb, policy), {
+            "buffer_kb": buffer_kb, "policy": policy,
+            "processes_used": 0, "ok_records": 0, "failed_records": 0,
+        })
+        if record.get("status") == "ok":
+            entry["processes_used"] += _ok_record_processes(record, context)
+            entry["ok_records"] += 1
+        else:
+            entry["processes_used"] += _CASE_PROCESSES
+            entry["failed_records"] += 1
+    ordered = [entries[key] for key in sorted(entries)]
+    for entry in ordered:
+        entry["cap"] = _PHASE_D_MAX_PROCESSES
+        entry["exceeded"] = entry["processes_used"] > _PHASE_D_MAX_PROCESSES
+    return {"cap": _PHASE_D_MAX_PROCESSES, "entries": ordered}
+
+
+def build_thp_conversion(records: Iterable[dict],
+                         run_label: str = "thp-conversion") -> list[dict]:
+    """§7 Phase D 必报转化表（选择偏差披露），按（buffer × 请求 policy）：
+    请求次数 → 实际 backing 构成 → 失败数 → 进入分析样本数。
+
+    - requested：请求进程次数（ok 记录按 latency 观测数；非 ok 记录按
+      case 计 _CASE_PROCESSES，口径同 audit_thp_budget）；
+    - backing：实际 backing（page_policy_actual）构成，只统计进入分析的
+      有效样本——被拒样本整体不可信，其 backing 不披露；
+    - failed_records / failure_reasons：失败记录数与 reason 分解。runner
+      无独立"端点 drift"原因码：端点失配经 adapter ParseError 落地为
+      parse-error/probe-exit（runner/engine.py），按 reason 分解可检索；
+    - analysis_samples / rejected_samples：进入分析的有效样本数与被拒
+      样本数——拒绝机制与 analyze_records 同一实现（_samples_from_record，
+      口径对齐 §6.3）；契约缺项随 _samples_from_record 硬错误。
+
+    按 (buffer_kb, policy) 排序返回；空输入 → 空表。
+    """
+    entries: dict[tuple[int, str], dict] = {}
+    for record in records:
+        context = (f"{run_label}/buffer="
+                   f"{record.get('params', {}).get('buffer_kb')}KiB")
+        buffer_kb, policy = _budget_key(record, context)
+        entry = entries.setdefault((buffer_kb, policy), {
+            "buffer_kb": buffer_kb, "policy": policy,
+            "requested": 0, "backing": defaultdict(int),
+            "failed_records": 0, "failure_reasons": defaultdict(int),
+            "analysis_samples": 0, "rejected_samples": 0,
+        })
+        if record.get("status") == "ok":
+            entry["requested"] += _ok_record_processes(record, context)
+            sink: list[str] = []
+            samples = _samples_from_record(record, run_label, sink)
+            entry["rejected_samples"] += len(sink)
+            entry["analysis_samples"] += len(samples)
+            for sample in samples:
+                entry["backing"][sample["page_policy_actual"]] += 1
+        else:
+            entry["requested"] += _CASE_PROCESSES
+            entry["failed_records"] += 1
+            reason = (record.get("failure") or {}).get("reason") or "unknown"
+            entry["failure_reasons"][reason] += 1
+    table = []
+    for key in sorted(entries):
+        entry = entries[key]
+        entry["backing"] = dict(sorted(
+            entry["backing"].items(),
+            key=lambda item: _BACKING_ORDER[item[0]],
+        ))
+        entry["failure_reasons"] = dict(sorted(entry["failure_reasons"].items()))
+        table.append(entry)
+    return table
+
+
+def _grade_cohort_unit(seeds: list[int], samples: list[dict]) -> dict:
+    """单报告单元的分级（§7 Phase D）：≥5 比较级（median [p25, p75]）、
+    3–4 描述级（只报原始观测，不输出 cohort median）、<3 不足。未达比
+    较级 → 终态 INSUFFICIENT_COHORT（§7 Phase D："未达比较级 → 该
+    cohort 终态 INSUFFICIENT_COHORT"——描述级只影响报告内容，不免除
+    该终态；§10.2 无"比较级达成"终态名，达成时 terminal=None）。"""
+    unit = {"seeds": sorted(seeds), "valid_samples": len(samples)}
+    if len(samples) >= _COHORT_COMPARATIVE_MIN:
+        unit["grade"] = "comparative"
+        unit["terminal"] = None
+        unit["stats"] = {
+            field_name: summarize([sample[field_name] for sample in samples])
+            for field_name in _COHORT_METRIC_FIELDS
+        }
+    elif len(samples) >= _COHORT_DESCRIPTIVE_MIN:
+        unit["grade"] = "descriptive"
+        unit["terminal"] = _INSUFFICIENT_COHORT
+        unit["observations"] = {
+            field_name: sorted(sample[field_name] for sample in samples)
+            for field_name in _COHORT_METRIC_FIELDS
+        }
+    else:
+        unit["grade"] = "insufficient"
+        unit["terminal"] = _INSUFFICIENT_COHORT
+    return unit
+
+
+def grade_thp_cohorts(rows: Iterable[dict]) -> dict:
+    """§7 Phase D THP cohort 分级（P0-5）。
+
+    rows 为 per-(buffer × seed × 实际 backing) 的有效样本行（与
+    AnalysisResult.groups 同形：{"buffer_kb", "seed", "page_policy_actual",
+    "samples"}）——samples 即已过 analyze_records 拒绝机制的有效样本，
+    本函数不重新校验 PMU 契约；同键行跨 run 合并（样本拼接）。契约缺项
+    （未知 backing、空样本、缺数值字段）一律 TlbError。
+
+    跨 seed 汇总合法性（§7 Phase D）：同一（buffer × cohort）的各 seed
+    仅当同制度才合并计样本数——逐 seed 对的 latency_ns 中位数相对偏差
+    ≤10%（双向，同 validate_anchors 互判口径）且 [p25, p75] 两两相交；
+    否则按 seed 分列报告（每 seed 自成报告单元、各自分级）。
+    regime_failures 登记未通过的 seed 对（审计用）。任务书未指明同制度
+    判定的指标字段：取 latency_ns（Q4 首要观测 = mixed-THP 降延迟）——
+    近地板的 R 值相对偏差由噪声主导，三指标全判会令合并事实上不可用；
+    沉默处取可用且口径单一的读法。
+
+    mixed 不并入 thp（§9.3 ④）：cohort 键即逐样本实际 backing，无任何
+    跨 backing 合并路径。输出 {"cohorts": [{buffer_kb, cohort, merged,
+    units, regime_failures?}]}，按 (buffer, backing) 排序；空输入 → 空表。
+    """
+    pooled: dict[tuple[int, int, str], list[dict]] = defaultdict(list)
+    for row in rows:
+        context = f"grade_thp_cohorts/buffer={row.get('buffer_kb')}KiB"
+        buffer_kb = row.get("buffer_kb")
+        seed = row.get("seed")
+        cohort = row.get("page_policy_actual")
+        samples = row.get("samples")
+        if not isinstance(buffer_kb, int) or buffer_kb <= 0:
+            raise TlbError(f"{context}: positive integer buffer_kb required")
+        if not isinstance(seed, int) or seed < 0:
+            raise TlbError(f"{context}: seed missing or invalid ({seed!r})")
+        if cohort not in _BACKING_ORDER:
+            raise TlbError(f"{context}: unknown page backing {cohort!r}")
+        if not isinstance(samples, list) or not samples:
+            raise TlbError(f"{context}: non-empty samples list required")
+        for sample in samples:
+            for field_name in _COHORT_METRIC_FIELDS:
+                if not isinstance(sample.get(field_name), (int, float)):
+                    raise TlbError(
+                        f"{context}: sample missing numeric {field_name}"
+                    )
+        pooled[(buffer_kb, seed, cohort)].extend(samples)
+    by_cohort: dict[tuple[int, str], dict[int, list[dict]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+    for (buffer_kb, seed, cohort), samples in pooled.items():
+        by_cohort[(buffer_kb, cohort)][seed].extend(samples)
+    cohorts = []
+    for (buffer_kb, cohort), by_seed in sorted(
+        by_cohort.items(), key=lambda item: (item[0][0], _BACKING_ORDER[item[0][1]])
+    ):
+        seed_stats = {
+            seed: summarize([sample["latency_ns"] for sample in samples])
+            for seed, samples in sorted(by_seed.items())
+        }
+        seeds = sorted(by_seed)
+        regime_failures = []
+        for left_index, left in enumerate(seeds):
+            for right in seeds[left_index + 1:]:
+                stats_left = seed_stats[left]
+                stats_right = seed_stats[right]
+                deviation = max(
+                    _relative_deviation(stats_left["median"], stats_right["median"]),
+                    _relative_deviation(stats_right["median"], stats_left["median"]),
+                )
+                intersect = _intervals_overlap(
+                    (stats_left["p25"], stats_left["p75"]),
+                    (stats_right["p25"], stats_right["p75"]),
+                )
+                if deviation > _COHORT_SEED_MEDIAN_DEVIATION or not intersect:
+                    regime_failures.append({
+                        "seeds": [left, right],
+                        "median_deviation": deviation,
+                        "intervals_intersect": intersect,
+                    })
+        merged = not regime_failures
+        if merged:
+            units = [_grade_cohort_unit(
+                seeds,
+                [sample for seed in seeds for sample in by_seed[seed]],
+            )]
+        else:
+            units = [
+                _grade_cohort_unit([seed], by_seed[seed]) for seed in seeds
+            ]
+        entry = {"buffer_kb": buffer_kb, "cohort": cohort,
+                 "merged": merged, "units": units}
+        if regime_failures:
+            entry["regime_failures"] = regime_failures
+        cohorts.append(entry)
+    return {"cohorts": cohorts}
+
+
+def adjudicate_q3(*, g3_executed: bool = False,
+                  anchors_comparable: bool = False,
+                  association_points: Iterable[dict] = (),
+                  model_spec: dict | None = None) -> dict:
+    """§7 Phase C Q3 默认终态（P1-6）：关联型报告 + MODEL_UNIDENTIFIABLE。
+
+    当前协议下页数同时改变 cache footprint、translation footprint 与
+    MMUTC 命中状态；G3（含 `0x8144`）只解决"没测 data miss"，不自动解
+    决因果识别——成本型"translation 暴露成本估计"仅当实施计划另行冻
+    结模型规格（独立变化源/配对规则/模型式/参数稳定性/拒绝条件）才可
+    升级。本计划不含该规格 → 本函数无升级路径：
+
+    - status 恒为 MODEL_UNIDENTIFIABLE（默认产出 = 关联曲线 + 该判定）；
+    - 绝不输出成本值：输出不含任何成本型字段；
+    - model_spec 非 None → TlbError（不允许执行者自行选择回归模型）；
+    - association_points：关联数据占位（逐点 {pages, dtlb_walk_per_1k,
+      cyc_per_load}），校验后按页数排序原样回显；
+    - evidence 明示：data_miss_collinearity_checked 恒 False——本函数
+      不消费 G3 数据（G3 五事件组不满足本模块 G0 metric 集合契约），
+      G3 未执行时不得声称"已检验 data-miss 共线性"（§5.2/§9.3 ⑬）；
+      mmutc_confound_unresolved 恒 True——walk 服务时间受 MMUTC（2048
+      项 walk 缓存）命中状态影响，任何成本型估计必须声明该混杂未分离
+      （§7 Phase C 的 MMUTC 混杂声明）。
+    """
+    if model_spec is not None:
+        raise TlbError(
+            "adjudicate_q3: 本计划不含冻结模型规格——成本型升级须先走任务书"
+            "变更流程（§7 Phase C），不允许执行者自行选择回归模型"
+        )
+    points = []
+    for point in association_points:
+        pages = point.get("pages")
+        walk = point.get("dtlb_walk_per_1k")
+        cyc = point.get("cyc_per_load")
+        if not isinstance(pages, int) or pages <= 0:
+            raise TlbError(
+                f"adjudicate_q3: positive integer pages required ({pages!r})"
+            )
+        if not isinstance(walk, (int, float)) or not isinstance(cyc, (int, float)):
+            raise TlbError(
+                "adjudicate_q3: numeric dtlb_walk_per_1k/cyc_per_load required"
+            )
+        points.append({"pages": pages, "dtlb_walk_per_1k": float(walk),
+                       "cyc_per_load": float(cyc)})
+    points.sort(key=lambda point: point["pages"])
+    return {
+        "status": _MODEL_UNIDENTIFIABLE,
+        "association_points": points,
+        "evidence": {
+            "g3_executed": bool(g3_executed),
+            "anchors_comparable": bool(anchors_comparable),
+            "data_miss_collinearity_checked": False,
+            "mmutc_confound_unresolved": True,
+            "model_spec_frozen": False,
+        },
+    }
 
 
 def _record_time_span(run: RunData, context: str) -> tuple[datetime, datetime]:
