@@ -246,6 +246,36 @@ class TestPlan(unittest.TestCase):
         with self.assertRaisesRegex(RunnerError, "unsafe characters"):
             build_plan(spec, {**PLATFORM, "controls": []})
 
+    def test_swept_case_id_segment_accepts_whitelisted_str_value(self):
+        # 正向钉：合法 str 值必须放行且逐字进 id——白名单条件写反时拒绝路径
+        # 测试不变、此测试变红（覆盖 -_. 三类白名单字符）
+        spec = {
+            **PASS_SPEC,
+            "execution": {
+                **PASS_SPEC["execution"],
+                "sweep": {"buffer": ["4MiB"], "label": ["4KiB", "v2.1_x-b"]},
+            },
+        }
+        plan = build_plan(spec, {**PLATFORM, "controls": []})
+        self.assertEqual(
+            [case.id for case in plan.cases],
+            ["exp:uncontrolled:b4096K-s64B-label4KiB",
+             "exp:uncontrolled:b4096K-s64B-labelv2.1_x-b"],
+        )
+
+    def test_swept_case_id_segment_name_charset_fails_closed(self):
+        # sweep 键名同样进 id 与样本文件名：含 "/" 的键名在 safe_case 净化后
+        # 可能互覆——与 value 同一白名单 fail-closed
+        spec = {
+            **PASS_SPEC,
+            "execution": {
+                **PASS_SPEC["execution"],
+                "sweep": {"buffer": ["4MiB"], "a/b": [1]},
+            },
+        }
+        with self.assertRaisesRegex(RunnerError, "unsafe characters"):
+            build_plan(spec, {**PLATFORM, "controls": []})
+
     def test_duplicate_case_ids_fail_at_plan_time(self):
         # 纵深防御：任何未来的 id 碰撞（如此处重复 sweep 值）必须炸在 plan 期，
         # 而不是 run 期由 artifacts 覆盖写静默吞掉 raw 样本

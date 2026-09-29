@@ -24,8 +24,9 @@ _PMU_LABEL_RE = re.compile(r"^[a-z0-9_]+$")
 # 参数一律追加通用 -{name}{value} 段，防止未覆盖参数共享 id
 _CASE_ID_COVERED_PARAMS = frozenset(
     {"buffer", "stride", "seed", "hugepage", "thp", "base_pages"})
-# 通用 id 段 str 值的字符白名单：段值会进 raw 样本文件名（artifacts.safe_case
-# 只替换 "/"与":"），文件系统不安全字符在此 fail-closed
+# 通用 id 段（sweep 键名与 str 值）的字符白名单：段内容直接进 raw 样本文件名
+# （artifacts.py 落盘前的 safe_case 净化是内联局部表达式，只替换 "/"与":"），
+# 文件系统不安全字符在此 fail-closed
 _CASE_ID_VALUE_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
@@ -310,6 +311,18 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
             for name in sweep_names:
                 if name in _CASE_ID_COVERED_PARAMS:
                     continue
+                # 段（sweep 键名与 str 值）直接进 raw 样本文件名：artifacts.py
+                # 落盘前的 safe_case 净化是内联局部表达式（artifacts.py 中
+                # case_id.replace("/", "_").replace(":", "_")，非函数），只替换
+                # "/"与":"，唯一性断言又作用于净化前 id——含 "/"、空格等字符的
+                # 键名/值会绕过断言后仍在落盘时互覆；白名单（仿 _PMU_LABEL_RE
+                # 先例）把这一层残留风险同样 fail-closed 在 plan 期
+                if not _CASE_ID_VALUE_RE.fullmatch(name):
+                    raise RunnerError(
+                        "plan-error",
+                        f"swept param name {name!r} has unsafe characters, "
+                        "cannot form case id segment",
+                    )
                 value = params[name].value
                 if type(value) is not int and not isinstance(value, str):
                     raise RunnerError(
@@ -317,10 +330,6 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                         f"swept param {name!r} has non-scalar value, "
                         f"cannot form case id segment: {value!r}",
                     )
-                # str 值直接进 raw 样本文件名：artifacts.safe_case 只替换 "/"
-                # 与":"，唯一性断言又作用于净化前 id——含 "/"、空格等字符的值
-                # 会绕过断言后仍在落盘时互覆；白名单（仿 _PMU_LABEL_RE 先例）
-                # 把这一层残留风险同样 fail-closed 在 plan 期
                 if isinstance(value, str) and not _CASE_ID_VALUE_RE.fullmatch(value):
                     raise RunnerError(
                         "plan-error",
