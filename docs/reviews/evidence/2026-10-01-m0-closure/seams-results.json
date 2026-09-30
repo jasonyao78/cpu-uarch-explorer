@@ -1,0 +1,730 @@
+{
+  "tree_head": "2d48704bdb39b1a7e583ca2bda3633ae66d7e4b8",
+  "main_head": "798f7749aec5e2e29827ecf0020070f0d7996654",
+  "chains_sweep": [
+    {
+      "id": "exp:c0:b64K-s64B-chains1",
+      "params": {
+        "buffer_kb": 64,
+        "chains": 1,
+        "loads": 4194304,
+        "stride": 64,
+        "warmup": 1000
+      }
+    },
+    {
+      "id": "exp:c0:b64K-s64B-chains2",
+      "params": {
+        "buffer_kb": 64,
+        "chains": 2,
+        "loads": 4194304,
+        "stride": 64,
+        "warmup": 1000
+      }
+    },
+    {
+      "id": "exp:c0:b65536K-s64B-chains1",
+      "params": {
+        "buffer_kb": 65536,
+        "chains": 1,
+        "loads": 8388608,
+        "stride": 64,
+        "warmup": 1000
+      }
+    },
+    {
+      "id": "exp:c0:b65536K-s64B-chains2",
+      "params": {
+        "buffer_kb": 65536,
+        "chains": 2,
+        "loads": 8388608,
+        "stride": 64,
+        "warmup": 1000
+      }
+    },
+    {
+      "id": "exp:c1:b64K-s64B-chains1",
+      "params": {
+        "buffer_kb": 64,
+        "chains": 1,
+        "loads": 4194304,
+        "stride": 64,
+        "warmup": 1000
+      }
+    },
+    {
+      "id": "exp:c1:b64K-s64B-chains2",
+      "params": {
+        "buffer_kb": 64,
+        "chains": 2,
+        "loads": 4194304,
+        "stride": 64,
+        "warmup": 1000
+      }
+    },
+    {
+      "id": "exp:c1:b65536K-s64B-chains1",
+      "params": {
+        "buffer_kb": 65536,
+        "chains": 1,
+        "loads": 8388608,
+        "stride": 64,
+        "warmup": 1000
+      }
+    },
+    {
+      "id": "exp:c1:b65536K-s64B-chains2",
+      "params": {
+        "buffer_kb": 65536,
+        "chains": 2,
+        "loads": 8388608,
+        "stride": 64,
+        "warmup": 1000
+      }
+    }
+  ],
+  "chains_argv": [
+    {
+      "id": "exp:c0:b64K-s64B-chains1",
+      "chains": 1,
+      "argv": [
+        "-b",
+        "64",
+        "-s",
+        "64",
+        "-n",
+        "4194304",
+        "-w",
+        "1000"
+      ]
+    },
+    {
+      "id": "exp:c0:b64K-s64B-chains2",
+      "chains": 2,
+      "argv": [
+        "-b",
+        "64",
+        "-s",
+        "64",
+        "-n",
+        "4194304",
+        "-w",
+        "1000"
+      ]
+    },
+    {
+      "id": "exp:c0:b65536K-s64B-chains1",
+      "chains": 1,
+      "argv": [
+        "-b",
+        "65536",
+        "-s",
+        "64",
+        "-n",
+        "8388608",
+        "-w",
+        "1000"
+      ]
+    },
+    {
+      "id": "exp:c0:b65536K-s64B-chains2",
+      "chains": 2,
+      "argv": [
+        "-b",
+        "65536",
+        "-s",
+        "64",
+        "-n",
+        "8388608",
+        "-w",
+        "1000"
+      ]
+    },
+    {
+      "id": "exp:c1:b64K-s64B-chains1",
+      "chains": 1,
+      "argv": [
+        "-b",
+        "64",
+        "-s",
+        "64",
+        "-n",
+        "4194304",
+        "-w",
+        "1000"
+      ]
+    },
+    {
+      "id": "exp:c1:b64K-s64B-chains2",
+      "chains": 2,
+      "argv": [
+        "-b",
+        "64",
+        "-s",
+        "64",
+        "-n",
+        "4194304",
+        "-w",
+        "1000"
+      ]
+    },
+    {
+      "id": "exp:c1:b65536K-s64B-chains1",
+      "chains": 1,
+      "argv": [
+        "-b",
+        "65536",
+        "-s",
+        "64",
+        "-n",
+        "8388608",
+        "-w",
+        "1000"
+      ]
+    },
+    {
+      "id": "exp:c1:b65536K-s64B-chains2",
+      "chains": 2,
+      "argv": [
+        "-b",
+        "65536",
+        "-s",
+        "64",
+        "-n",
+        "8388608",
+        "-w",
+        "1000"
+      ]
+    }
+  ],
+  "unsupported_sweep": {
+    "accepted_cases": 8,
+    "recorded": false
+  },
+  "new_shape": {
+    "ok": false,
+    "exception": "KeyError",
+    "message": "'buffer_kb'"
+  },
+  "generic_shape_pmu": {
+    "ok": false,
+    "exception": "RunnerError",
+    "message": "param 'pmu_events' value [{'name': 'cycles', 'type': 4, 'config': 17}] cannot form a case id segment (int/str scalar required)"
+  },
+  "partial_metric_chart_cli": {
+    "rc": 0,
+    "stderr": "note: 2 degraded point(s) skipped from curves: [{'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 128, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 128, 'seed': 42, 'field': 'dtlb_walk_per_1k'}]\n",
+    "walk_circles": 19,
+    "expected_complete_walk_circles": 20,
+    "report": "# SM8650 X4 TLB 战役：同事版图表与读法\n\n> 面向无微架构背景的同事：四张图 + 大白话读法。终态口径以战役终审 `docs/reviews/2026-09-28-sm8650-tlb-hierarchy.md` 为准（本报告是它的图表附件）。报告由 `python -m analysis.tlb_figures` 生成：只读 `records.jsonl`（中位数经 `runner.statistics.summarize`），无时钟/随机/环境依赖，同输入必同输出。\n\n## 一分钟背景\n\nTLB（Translation Lookaside Buffer）是「虚拟页 → 物理页」翻译的缓存：程序每访问一次内存，CPU 都要把虚拟页号翻译成物理页号，TLB 缓存最近用过的翻译，免得每次都走内存里的页表。本战役用指针追逐负载逐级加大程序同时使用的内存量：buffer 越大、用到的页数越多（4 KiB 一页），TLB 压力越大。测试机 redmi-k70pro-01（SM8650 Cortex-X4 核），全部数字为 8 环正式窗口下逐进程样本的中位数口径。\n\n## 数据来源（钉死的战役数据集）\n\n- 粗扫 `20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse`：13 档 buffer × seed{7,42}，8 环；\n- 致密 `20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense`：8 档 × 4 seed，8 环（4096 KiB 与粗扫重合，逐 seed 合并中位数）；\n- Phase D `-B` `20260930T014014Z-ptr-chase-sm8650-x4-tlb-thp-base` / `-T` `20260930T013743Z-ptr-chase-sm8650-x4-tlb-thp-madvise`：各 3 点 × 4 seed。\n\n曲线构造：每 (buffer, seed) 取组中位数，跨 seed 合并 = 各 seed 中位数的中位数；粗扫/致密重合点（4096 KiB）逐 seed 先合并。\n\n## 图 1：L1 TLB 重填密度（refill-density.svg）\n\n![L1 dTLB refill 密度](refill-density.svg)\n\n**怎么读**：TLB 是页表翻译的缓存；横轴是程序正在用的内存量（换算成页数 = KiB ÷ 4），纵轴是每 1000 次访问里有多少次要重填 L1 TLB。灰蓝区（480 KiB–4 MiB，对应 120–1024 页）是终审判定的转折区：进入灰蓝区前已开始陡升（384→480 KiB 从 ~4 到 ~235/1k），区内继续爬升到超过每次访问一次——这一片宽区间就是「L1 TLB 开始不够用」的区域。注意两点：它不是悬崖而是缓坡；纵轴超过 1000/1k 并不矛盾——它是事件密度而不是概率（一次访问可能触发多次重填事件）。\n\n## 图 2：page table walk onset（walk-onset.svg）\n\n![dtlb walk 密度](walk-onset.svg)\n\n**怎么读**：这条曲线回答「什么时候连片上缓存都救不了、必须走内存里的页表」——这个动作叫 page table walk。4 MiB 以下几乎为零；8 MiB 已明显抬升（≈10/1k，约地板的 65 倍）；10–12 MiB 全开（≈50/1k）——onset 判定区间 [2560,3072] 页是全开段，抬升从它左边已经开始。竖虚线是芯片手册（TRM）写的 MMUTC 2048 项参考位置（2048 页 × 4 KiB = 8 MiB）：walk onset 落在它右边，这件事目前只是机制联想，不是证明。\n\n## 图 3：延迟对照（latency-cycles.svg）\n\n![延迟与 cycles/load](latency-cycles.svg)\n\n**怎么读**：延迟和 TLB 事件不是一回事。中段（约 4 MiB）延迟最高时 walk 还没开始，walk 开始后延迟反而下降——中段由 L1 refill 风暴主导（图 1 里 >1000/1k 的区间），其成本高过 onset 后的 walk 服务。所以本报告的结论都不画在延迟轴上；这张图只是对照，提醒「看延迟猜 TLB」会误判。\n\n## 图 4：THP cohort 对照（thp-cohort.svg）\n\n![THP cohort 对照](thp-cohort.svg)\n\n**怎么读**：进程内部分页拿到大页（THP，2 MiB 一页）的 cohort，TLB 压力掉到约 1/5（3072 KiB 处 R_0x05 **-82%**），延迟 **-12.4%**。但只有一部分进程真的拿到了大页（3072 KiB 转化表：40 进程次中 base 25 + mixed 15），其余仍用普通 4 KiB 页。图上只画达到「比较级」（≥5 有效样本）的 cohort 中位数：3072 KiB 的 mixed 只有 seed42 达标（n=5）；2304 KiB 的 mixed 全体 INSUFFICIENT_COHORT，如实不出点。\n\ncohort 分级明细（`grade_thp_cohorts` 产出原样，可审计）：\n\n- 2304 KiB × base（跨 seed 合并=True）：seed7/42/1337/20260928 comparative n=47\n- 2304 KiB × mixed（跨 seed 合并=True）：seed7 insufficient n=1（终态 INSUFFICIENT_COHORT）\n- 3072 KiB × base（跨 seed 合并=True）：seed7/42/1337/20260928 comparative n=43\n- 3072 KiB × mixed（跨 seed 合并=True）：seed42 comparative n=5\n\n## 终态表（终审 §1，每 Q 独立）\n\n| Q | 终态 | 结果 |\n|---|---|---|\n| Q1 `0x05` 第一有效转折 | INTERVAL_IDENTIFIED | [120, 1024] 页（480 KiB–4 MiB），宽饱和区而非锐边；4 seed × 双训练量同区间 |\n| Q2a `0x34` walk-onset | INTERVAL_IDENTIFIED | [2560, 3072] 页（10–12 MiB）；4 seed × 双训练量一致 |\n| Q2b L2 层级辨识 | 降级完成 | `0x2d`（unified refill）QUALIFIED；`0x2f` SEMANTICS_UNVERIFIED |\n| Q2c 第二级 effective reach | 未授权（OPEN） | 授权门槛未满足，不结案 |\n| Q3 walk 暴露成本 | MODEL_UNIDENTIFIABLE | walk 密度与延迟/cyc 反相关，单调性不成立；MMUTC 混杂未分离 |\n| Q4 THP cohort 对照 | 机制方向一致（受限比较级） | 3072 mixed（seed42，n=5）延迟 -12.4%、R_0x05 -82%；2304 mixed 与 3072 其余 seed = INSUFFICIENT_COHORT |\n\n## 没测到什么（边界）\n\n- **TLB 物理项数没有测出来**，也不能由本协议报出：固定随机环访问分不清容量、预取与页布局各自的贡献（同一条曲线三种解释都兼容）。要测需要可控布局探针——已登记备选（`docs/open-items.md` OI-14，条件后置）。\n- **Q2c（L2 TLB 容量 / effective reach）未授权**：`0x2f` 事件语义未核实 + 授权门槛未满足，保持 OPEN，不由 walk-onset 区间外推。\n- 图上的「页数」全部按 4 KiB base 页换算；TRM 的 MMUTC 2048 项只是参考线（假设级联想），不构成结构证明。\n\n## 复算\n\n- 本报告全部图表再生（同输入必同输出）：\n  `python -m analysis.tlb_figures --runs-root data/public/runs --out <目录>`\n- 终态数字的复算入口：判定分析器 `analysis/sm8650_tlb.py`（knee / walk-onset / THP cohort 分级等冻结规则）与战役终审 `docs/reviews/2026-09-28-sm8650-tlb-hierarchy.md`（§1 终态总表 + §3 分 Q 证据）。\n\n\n## 数据局限（降级跳过点，MB-07 披露）\n\n以下 (run, buffer, seed, field) 因 metric 契约降级未进曲线；相关区间的科学结论按可用点重判，不沿用完整网格读法。\n\n- 20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse b128K seed=7 dtlb_walk_per_1k\n- 20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse b128K seed=42 dtlb_walk_per_1k"
+  },
+  "removed_walk_onset_region": {
+    "rc": 0,
+    "stderr": "note: 24 degraded point(s) skipped from curves: [{'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 128, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 128, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 4096, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 4096, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 8192, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 8192, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 16384, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 16384, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}]\n",
+    "walk_available_buffers_kb": [
+      192,
+      256,
+      384,
+      416,
+      448,
+      480,
+      512,
+      768,
+      1024,
+      1536,
+      2048,
+      3072,
+      32768
+    ],
+    "skipped_points": [
+      {
+        "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+        "buffer_kb": 128,
+        "seed": 7,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+        "buffer_kb": 128,
+        "seed": 42,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+        "buffer_kb": 4096,
+        "seed": 7,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+        "buffer_kb": 4096,
+        "seed": 42,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+        "buffer_kb": 8192,
+        "seed": 7,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+        "buffer_kb": 8192,
+        "seed": 42,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+        "buffer_kb": 16384,
+        "seed": 7,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+        "buffer_kb": 16384,
+        "seed": 42,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 4096,
+        "seed": 7,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 4096,
+        "seed": 42,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 4096,
+        "seed": 1337,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 4096,
+        "seed": 20260928,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 10240,
+        "seed": 7,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 10240,
+        "seed": 42,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 10240,
+        "seed": 1337,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 10240,
+        "seed": 20260928,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 12288,
+        "seed": 7,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 12288,
+        "seed": 42,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 12288,
+        "seed": 1337,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 12288,
+        "seed": 20260928,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 14336,
+        "seed": 7,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 14336,
+        "seed": 42,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 14336,
+        "seed": 1337,
+        "field": "dtlb_walk_per_1k"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "buffer_kb": 14336,
+        "seed": 20260928,
+        "field": "dtlb_walk_per_1k"
+      }
+    ],
+    "report": "# SM8650 X4 TLB 战役：同事版图表与读法\n\n> 面向无微架构背景的同事：四张图 + 大白话读法。终态口径以战役终审 `docs/reviews/2026-09-28-sm8650-tlb-hierarchy.md` 为准（本报告是它的图表附件）。报告由 `python -m analysis.tlb_figures` 生成：只读 `records.jsonl`（中位数经 `runner.statistics.summarize`），无时钟/随机/环境依赖，同输入必同输出。\n\n## 一分钟背景\n\nTLB（Translation Lookaside Buffer）是「虚拟页 → 物理页」翻译的缓存：程序每访问一次内存，CPU 都要把虚拟页号翻译成物理页号，TLB 缓存最近用过的翻译，免得每次都走内存里的页表。本战役用指针追逐负载逐级加大程序同时使用的内存量：buffer 越大、用到的页数越多（4 KiB 一页），TLB 压力越大。测试机 redmi-k70pro-01（SM8650 Cortex-X4 核），全部数字为 8 环正式窗口下逐进程样本的中位数口径。\n\n## 数据来源（钉死的战役数据集）\n\n- 粗扫 `20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse`：13 档 buffer × seed{7,42}，8 环；\n- 致密 `20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense`：8 档 × 4 seed，8 环（4096 KiB 与粗扫重合，逐 seed 合并中位数）；\n- Phase D `-B` `20260930T014014Z-ptr-chase-sm8650-x4-tlb-thp-base` / `-T` `20260930T013743Z-ptr-chase-sm8650-x4-tlb-thp-madvise`：各 3 点 × 4 seed。\n\n曲线构造：每 (buffer, seed) 取组中位数，跨 seed 合并 = 各 seed 中位数的中位数；粗扫/致密重合点（4096 KiB）逐 seed 先合并。\n\n## 图 1：L1 TLB 重填密度（refill-density.svg）\n\n![L1 dTLB refill 密度](refill-density.svg)\n\n**怎么读**：TLB 是页表翻译的缓存；横轴是程序正在用的内存量（换算成页数 = KiB ÷ 4），纵轴是每 1000 次访问里有多少次要重填 L1 TLB。灰蓝区（480 KiB–4 MiB，对应 120–1024 页）是终审判定的转折区：进入灰蓝区前已开始陡升（384→480 KiB 从 ~4 到 ~235/1k），区内继续爬升到超过每次访问一次——这一片宽区间就是「L1 TLB 开始不够用」的区域。注意两点：它不是悬崖而是缓坡；纵轴超过 1000/1k 并不矛盾——它是事件密度而不是概率（一次访问可能触发多次重填事件）。\n\n## 图 2：page table walk onset（walk-onset.svg）\n\n![dtlb walk 密度](walk-onset.svg)\n\n**怎么读**：这条曲线回答「什么时候连片上缓存都救不了、必须走内存里的页表」——这个动作叫 page table walk。4 MiB 以下几乎为零；8 MiB 已明显抬升（≈10/1k，约地板的 65 倍）；10–12 MiB 全开（≈50/1k）——onset 判定区间 [2560,3072] 页是全开段，抬升从它左边已经开始。竖虚线是芯片手册（TRM）写的 MMUTC 2048 项参考位置（2048 页 × 4 KiB = 8 MiB）：walk onset 落在它右边，这件事目前只是机制联想，不是证明。\n\n## 图 3：延迟对照（latency-cycles.svg）\n\n![延迟与 cycles/load](latency-cycles.svg)\n\n**怎么读**：延迟和 TLB 事件不是一回事。中段（约 4 MiB）延迟最高时 walk 还没开始，walk 开始后延迟反而下降——中段由 L1 refill 风暴主导（图 1 里 >1000/1k 的区间），其成本高过 onset 后的 walk 服务。所以本报告的结论都不画在延迟轴上；这张图只是对照，提醒「看延迟猜 TLB」会误判。\n\n## 图 4：THP cohort 对照（thp-cohort.svg）\n\n![THP cohort 对照](thp-cohort.svg)\n\n**怎么读**：进程内部分页拿到大页（THP，2 MiB 一页）的 cohort，TLB 压力掉到约 1/5（3072 KiB 处 R_0x05 **-82%**），延迟 **-12.4%**。但只有一部分进程真的拿到了大页（3072 KiB 转化表：40 进程次中 base 25 + mixed 15），其余仍用普通 4 KiB 页。图上只画达到「比较级」（≥5 有效样本）的 cohort 中位数：3072 KiB 的 mixed 只有 seed42 达标（n=5）；2304 KiB 的 mixed 全体 INSUFFICIENT_COHORT，如实不出点。\n\ncohort 分级明细（`grade_thp_cohorts` 产出原样，可审计）：\n\n- 2304 KiB × base（跨 seed 合并=True）：seed7/42/1337/20260928 comparative n=47\n- 2304 KiB × mixed（跨 seed 合并=True）：seed7 insufficient n=1（终态 INSUFFICIENT_COHORT）\n- 3072 KiB × base（跨 seed 合并=True）：seed7/42/1337/20260928 comparative n=43\n- 3072 KiB × mixed（跨 seed 合并=True）：seed42 comparative n=5\n\n## 终态表（终审 §1，每 Q 独立）\n\n| Q | 终态 | 结果 |\n|---|---|---|\n| Q1 `0x05` 第一有效转折 | INTERVAL_IDENTIFIED | [120, 1024] 页（480 KiB–4 MiB），宽饱和区而非锐边；4 seed × 双训练量同区间 |\n| Q2a `0x34` walk-onset | INTERVAL_IDENTIFIED | [2560, 3072] 页（10–12 MiB）；4 seed × 双训练量一致 |\n| Q2b L2 层级辨识 | 降级完成 | `0x2d`（unified refill）QUALIFIED；`0x2f` SEMANTICS_UNVERIFIED |\n| Q2c 第二级 effective reach | 未授权（OPEN） | 授权门槛未满足，不结案 |\n| Q3 walk 暴露成本 | MODEL_UNIDENTIFIABLE | walk 密度与延迟/cyc 反相关，单调性不成立；MMUTC 混杂未分离 |\n| Q4 THP cohort 对照 | 机制方向一致（受限比较级） | 3072 mixed（seed42，n=5）延迟 -12.4%、R_0x05 -82%；2304 mixed 与 3072 其余 seed = INSUFFICIENT_COHORT |\n\n## 没测到什么（边界）\n\n- **TLB 物理项数没有测出来**，也不能由本协议报出：固定随机环访问分不清容量、预取与页布局各自的贡献（同一条曲线三种解释都兼容）。要测需要可控布局探针——已登记备选（`docs/open-items.md` OI-14，条件后置）。\n- **Q2c（L2 TLB 容量 / effective reach）未授权**：`0x2f` 事件语义未核实 + 授权门槛未满足，保持 OPEN，不由 walk-onset 区间外推。\n- 图上的「页数」全部按 4 KiB base 页换算；TRM 的 MMUTC 2048 项只是参考线（假设级联想），不构成结构证明。\n\n## 复算\n\n- 本报告全部图表再生（同输入必同输出）：\n  `python -m analysis.tlb_figures --runs-root data/public/runs --out <目录>`\n- 终态数字的复算入口：判定分析器 `analysis/sm8650_tlb.py`（knee / walk-onset / THP cohort 分级等冻结规则）与战役终审 `docs/reviews/2026-09-28-sm8650-tlb-hierarchy.md`（§1 终态总表 + §3 分 Q 证据）。\n\n\n## 数据局限（降级跳过点，MB-07 披露）\n\n以下 (run, buffer, seed, field) 因 metric 契约降级未进曲线；相关区间的科学结论按可用点重判，不沿用完整网格读法。\n\n- 20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse b128K seed=7 dtlb_walk_per_1k\n- 20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse b128K seed=42 dtlb_walk_per_1k\n- 20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse b4096K seed=7 dtlb_walk_per_1k\n- 20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse b4096K seed=42 dtlb_walk_per_1k\n- 20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse b8192K seed=7 dtlb_walk_per_1k\n- 20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse b8192K seed=42 dtlb_walk_per_1k\n- 20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse b16384K seed=7 dtlb_walk_per_1k\n- 20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse b16384K seed=42 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b4096K seed=7 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b4096K seed=42 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b4096K seed=1337 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b4096K seed=20260928 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b10240K seed=7 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b10240K seed=42 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b10240K seed=1337 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b10240K seed=20260928 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b12288K seed=7 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b12288K seed=42 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b12288K seed=1337 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b12288K seed=20260928 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b14336K seed=7 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b14336K seed=42 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b14336K seed=1337 dtlb_walk_per_1k\n- 20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense b14336K seed=20260928 dtlb_walk_per_1k"
+  },
+  "identity_groups": [
+    {
+      "identity": {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": 1,
+        "mapping_span_kb": null
+      },
+      "cyc_per_load": 0.031280517578125
+    },
+    {
+      "identity": {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": 2,
+        "mapping_span_kb": null
+      },
+      "cyc_per_load": 100.0
+    }
+  ],
+  "chart_curves": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "SYNTHETIC-identity: 非 legacy identity {'chain_distribution': None, 'node_offset_policy': None, 'chains': 1, 'mapping_span_kb': None}（MB-04：扫描曲线禁止跨条件合并；buffer=512KiB）"
+  },
+  "cohort_sample_n": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "grade_thp_cohorts/buffer=512KiB: non-legacy identity {'chain_distribution': None, 'node_offset_policy': None, 'chains': 1, 'mapping_span_kb': None} — THP cohort grading requires uniform legacy identity (MB-04); conditioned cohorts need an explicit preregistered rule"
+  },
+  "different_hypotheses_groups": 1,
+  "bool_integer_chains_groups": 1,
+  "inherited_defects": {
+    "markdown": {
+      "ok": true,
+      "value": "# SM8650 X4 TLB per-sample analysis\n\nAll numeric cells are median [p25, p75]; rates are per 1,000 timed loads.\nPMU rows are accepted only when time_running_ns == time_enabled_ns for every event.\nEvents under `unverified` are SEMANTICS_UNVERIFIED (registry gate): samples stay in the table, structural conclusions are blocked.\n\n| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | bimodal | unverified |\n|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n| SYNTHETIC-missing | 128 | seed=42 | base | 32 | 2 | 3.400 [2.900, 3.900] | 0.031 [0.031, 0.032] | 15.259 [15.259, 15.259] | n/a | 0.023 [0.019, 0.027] | n/a | cycles, dtlb_walk, l1d_tlb_refill, mem_access_rd |\n"
+    },
+    "knee_floor": {
+      "ok": false,
+      "exception": "TlbError",
+      "message": "adjudicate_knee: INCOMPUTABLE — field l1d_tlb_refill_per_1k degraded (metric_contract missing; row pages=32)"
+    },
+    "chart": {
+      "ok": true,
+      "value": []
+    }
+  },
+  "replay": [
+    {
+      "run": "20260929T143631Z-ptr-chase-sm8650-x4-tlb-ctrl",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T144937Z-ptr-chase-sm8650-x4-tlb-ctrl-g1",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T145255Z-ptr-chase-sm8650-x4-tlb-ctrl-g2",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T145432Z-ptr-chase-sm8650-x4-tlb-ctrl-g4",
+      "records": 4,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T145551Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T145659Z-ptr-chase-sm8650-x4-tlb-overhead",
+      "records": 24,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T150212Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp-walk",
+      "records": 1,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T181512Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T181521Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T181716Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T182214Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T182223Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T182418Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T235909Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T235918Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T235927Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T235938Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T235948Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260929T235957Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T004833Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T005033Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T010800Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+      "records": 32,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T011025Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T011631Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T011639Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T011814Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T012107Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T012117Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T012253Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T012815Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T012824Z-ptr-chase-sm8650-x4-tlb-assoc-g2",
+      "records": 6,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T012852Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T012902Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T012912Z-ptr-chase-sm8650-x4-tlb-assoc-g3",
+      "records": 6,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T012939Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T013628Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T013636Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "records": 12,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T013724Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T013733Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T013743Z-ptr-chase-sm8650-x4-tlb-thp-madvise",
+      "records": 12,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T013829Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T014005Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T014014Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "records": 12,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T014103Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T051530Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T051540Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    },
+    {
+      "run": "20260930T051715Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "equal_after_removing_empty_identity": true,
+      "cohort_outcome_equal": true
+    }
+  ]
+}

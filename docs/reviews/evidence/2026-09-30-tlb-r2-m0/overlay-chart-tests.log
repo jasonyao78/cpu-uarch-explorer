@@ -1,0 +1,48 @@
+test_end_to_end_synthetic (analysis.tests.test_tlb_figures.TestCli.test_end_to_end_synthetic) ... ok
+test_failed_record_fails (analysis.tests.test_tlb_figures.TestCli.test_failed_record_fails) ... ok
+test_grid_gap_fails (analysis.tests.test_tlb_figures.TestCli.test_grid_gap_fails) ... ok
+test_missing_metric_fails (analysis.tests.test_tlb_figures.TestCli.test_missing_metric_fails) ... ERROR
+test_missing_run_fails (analysis.tests.test_tlb_figures.TestCli.test_missing_run_fails) ... ok
+test_no_comparative_mixed_fails (analysis.tests.test_tlb_figures.TestCli.test_no_comparative_mixed_fails) ... ok
+test_ring_passes_not_formal_fails (analysis.tests.test_tlb_figures.TestCli.test_ring_passes_not_formal_fails) ... ok
+test_lines_carry_grade_and_terminal (analysis.tests.test_tlb_figures.TestCohortGradingLines.test_lines_carry_grade_and_terminal) ... ok
+test_buffers_outside_figure_filtered (analysis.tests.test_tlb_figures.TestCohortSeries.test_buffers_outside_figure_filtered) ... ok
+test_only_comparative_units_plotted (analysis.tests.test_tlb_figures.TestCohortSeries.test_only_comparative_units_plotted) ... ok
+test_unmerged_cohort_takes_median_of_unit_medians (analysis.tests.test_tlb_figures.TestCohortSeries.test_unmerged_cohort_takes_median_of_unit_medians) ... ok
+test_overlap_merge_then_across_seed_merge (analysis.tests.test_tlb_figures.TestCurveFromGroups.test_overlap_merge_then_across_seed_merge) ... ok
+test_median_of_seed_medians (analysis.tests.test_tlb_figures.TestMergeSeedMedians.test_median_of_seed_medians) ... ok
+test_sorted_by_buffer_and_deterministic (analysis.tests.test_tlb_figures.TestMergeSeedMedians.test_sorted_by_buffer_and_deterministic) ... ok
+test_cli_against_repo_dataset (analysis.tests.test_tlb_figures.TestRealDatasetShape.test_cli_against_repo_dataset) ... ok
+test_merged_curve_and_cohort_shape (analysis.tests.test_tlb_figures.TestRealDatasetShape.test_merged_curve_and_cohort_shape) ... ok
+test_roster (analysis.tests.test_tlb_figures.TestRunRosterPinned.test_roster) ... ok
+test_overlap_point_merges_per_seed_across_runs (analysis.tests.test_tlb_figures.TestSeedMedians.test_overlap_point_merges_per_seed_across_runs) ... ok
+test_single_group_passthrough (analysis.tests.test_tlb_figures.TestSeedMedians.test_single_group_passthrough) ... ok
+
+======================================================================
+ERROR: test_missing_metric_fails (analysis.tests.test_tlb_figures.TestCli.test_missing_metric_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer/analysis/tests/test_tlb_figures.py", line 303, in test_missing_metric_fails
+    rc, _, err = _run_cli(root, Path(d) / "out")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer/analysis/tests/test_tlb_figures.py", line 251, in _run_cli
+    rc = tlb_figures.main(["--runs-root", str(root), "--out", str(out)])
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer/analysis/tlb_figures.py", line 383, in main
+    figures = build_figures(scan_groups, graded)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer/analysis/tlb_figures.py", line 182, in build_figures
+    _F_WALK: curve_from_groups(scan_groups, _F_WALK),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer/analysis/tlb_figures.py", line 99, in curve_from_groups
+    return merge_seed_medians(seed_medians(groups, field))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer/analysis/tlb_figures.py", line 83, in seed_medians
+    by_point[(group["buffer_kb"], group["seed"])].append(group[field]["median"])
+                                                         ~~~~~~~~~~~~^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.076s
+
+FAILED (errors=1)

@@ -1,0 +1,37 @@
+adaac4d docs(probes): prototype role headers (M0-6)
+
+ docs/cpu-uarch-deep-analysis/tlb-deep-analysis/probes/README.md      | 4 ++++
+ docs/cpu-uarch-deep-analysis/tlb-deep-analysis/probes/l2_set_probe.c | 5 +++++
+ .../tlb-deep-analysis/probes/tlb_capacity_probe.c                    | 5 +++++
+ 3 files changed, 14 insertions(+)
+0169d78 feat(analysis): close OI-13 metric-contract relaxation (M0-2)
+
+ analysis/sm8650_tlb.py            | 90 +++++++++++++++++++++++++++++++++------
+ analysis/tests/test_sm8650_tlb.py | 79 +++++++++++++++++++++++++++++++++-
+ 2 files changed, 154 insertions(+), 15 deletions(-)
+a9e7cde refactor(probes): lift page-policy machinery into probes/common (M0-1)
+
+ CMakeLists.txt                  |   1 +
+ probes/cache-mem/CMakeLists.txt |   1 +
+ probes/cache-mem/ptr_chase.cpp  | 148 +++++-------------------------------
+ probes/common/CMakeLists.txt    |   4 +
+ probes/common/page_policy.h     | 162 ++++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 188 insertions(+), 128 deletions(-)
+2c07ce1 docs(reviews): archive REV-TLB-R2 first-principles review + synthesis script
+
+ .../2026-09-30-sm8650-tlb-r2-first-principles.md   | 293 +++++++++++++++++++++
+ docs/tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md   |   2 +-
+ scripts/review_sm8650_tlb_r2.py                    | 120 +++++++++
+ 3 files changed, 414 insertions(+), 1 deletion(-)
+6aede89 docs(design): execution-side probe program (ROB/ALU-FPU/I-side)
+
+ .../2026-09-30-execution-side-probe-program.md     | 56 ++++++++++++++++++++++
+ 1 file changed, 56 insertions(+)
+3ef8398 docs(tasks): r2 task book v1.1 per REV-TLB-R2 first-principles review
+
+ docs/tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md | 223 +++++++++++------------
+ 1 file changed, 111 insertions(+), 112 deletions(-)
+69806f6 fix(probes): l2_set_probe v2.3 per REV-TLB-R2 F3
+
+ .../tlb-deep-analysis/probes/l2_set_probe.c        | 95 ++++++++++++++++------
+ 1 file changed, 70 insertions(+), 25 deletions(-)

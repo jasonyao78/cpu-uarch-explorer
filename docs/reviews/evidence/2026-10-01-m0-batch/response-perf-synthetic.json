@@ -1,0 +1,5 @@
+{
+  "evidence": "synthetic syscall injection, no kernel/PMU execution",
+  "compile_stderr": "",
+  "output": "n=1 actual_bytes=32 opened=1 read_ok=0\nn=2 actual_bytes=40 opened=1 read_ok=0\nn=4 actual_bytes=56 opened=1 read_ok=0\nn=16 actual_bytes=152 opened=1 read_ok=1\nspec=0 failed=1 value_index=-1 name=refill\nspec=1 failed=0 value_index=0 name=walk\nspec=2 name=out_of_range\nsynthetic_zero_time read_ok=1 mux=0 enabled=0 running=0\ncopy_assignment_close_calls=2 fds=100,100\n"
+}

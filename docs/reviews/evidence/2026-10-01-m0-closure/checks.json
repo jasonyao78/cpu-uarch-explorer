@@ -1,0 +1,52 @@
+{
+  "reviewed_code": {
+    "m0b": "2d48704",
+    "main": "798f774",
+    "r2_response": "46b1daa",
+    "r2_replay_head": "ae8532d"
+  },
+  "target_syntax": {
+    "compiler": "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android29-clang++",
+    "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+    "argv": [
+      "-std=c++17",
+      "-fsyntax-only",
+      "-DCPU_UARCH_HAVE_LINUX_PERF=1",
+      "-I",
+      "probes/common",
+      "-I",
+      "probes/platform/linux",
+      "probes/cache-mem/ptr_chase.cpp",
+      "probes/tests/perf_window_golden.cpp"
+    ],
+    "exit_code": 0,
+    "target_executed": false
+  },
+  "tests": {
+    "m0b_analysis": {
+      "run": 149,
+      "failures": 0,
+      "errors": 0
+    },
+    "m0b_runner": {
+      "run": 158,
+      "failures": 0,
+      "errors": 0
+    },
+    "m0b_ctest": {
+      "run": 19,
+      "failures": 0
+    },
+    "main_analysis": {
+      "run": 167,
+      "failures": 0,
+      "errors": 0
+    },
+    "main_r2_chart_overlay": {
+      "run": 21,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "evidence_boundary": "Synthetic software fixtures and syscall injection; no Linux kernel or target PMU execution; archived public records replayed as stated in the review."
+}

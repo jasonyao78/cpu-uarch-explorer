@@ -1,0 +1,29 @@
+{
+  "perf_window_golden": {
+    "command": [
+      "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android29-clang++",
+      "-std=c++17",
+      "-fsyntax-only",
+      "-I",
+      "probes/common",
+      "probes/tests/perf_window_golden.cpp"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  "ptr_chase": {
+    "command": [
+      "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android29-clang++",
+      "-std=c++17",
+      "-fsyntax-only",
+      "-DCPU_UARCH_HAVE_LINUX_PERF=1",
+      "-I",
+      "probes/common",
+      "-I",
+      "probes/platform/linux",
+      "probes/cache-mem/ptr_chase.cpp"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  }
+}

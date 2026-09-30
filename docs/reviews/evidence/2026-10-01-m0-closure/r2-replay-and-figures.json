@@ -1,0 +1,541 @@
+{
+  "r2_head": "ae8532dbeae98b68b6ed34abf66eb397c19b254c",
+  "main_head": "798f7749aec5e2e29827ecf0020070f0d7996654",
+  "baseline": "a104dbf",
+  "replay_counts": {
+    "runs": 49,
+    "equal": 42,
+    "changed": 7,
+    "both_accept": 42,
+    "both_reject": 0,
+    "old_reject_new_accept": 7
+  },
+  "main_figures_real_data": {
+    "refill-density.svg": {
+      "bytes": 5623,
+      "sha256": "701cb9ee1ec8d873759a8c5ec5b47cf82b05d220b78fbbea290593000919717c",
+      "equal_to_old_analyzer": true,
+      "circles": 20
+    },
+    "walk-onset.svg": {
+      "bytes": 6075,
+      "sha256": "bb86c07fab4e578df8a6133621b296efcdac1c52c69283ad7f1578996fc72bb3",
+      "equal_to_old_analyzer": true,
+      "circles": 20
+    },
+    "latency-cycles.svg": {
+      "bytes": 6437,
+      "sha256": "555e64eb2b2aee8e6fed395c25cb1a939d34c846cbdd2690a7c1ea082df0fd28",
+      "equal_to_old_analyzer": true,
+      "circles": 40
+    },
+    "thp-cohort.svg": {
+      "bytes": 1644,
+      "sha256": "9ab1b4ab5e0e437defe4cd22e9363f26bcb1aa0bd7266d68412f3c98d6a34147",
+      "equal_to_old_analyzer": true,
+      "circles": 3
+    },
+    "report.md": {
+      "bytes": 6661,
+      "sha256": "364618e1ad73e7f3c2d4213d7cf7a0fc24fe1a34975ca2ba3ed7149c05c72e70",
+      "equal_to_old_analyzer": true
+    }
+  },
+  "overlay_chart_tests": {
+    "run": 21,
+    "failures": 0,
+    "errors": 0
+  },
+  "replay": [
+    {
+      "run": "20260929T143631Z-ptr-chase-sm8650-x4-tlb-ctrl",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T144937Z-ptr-chase-sm8650-x4-tlb-ctrl-g1",
+      "records": 2,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null
+    },
+    {
+      "run": "20260929T145255Z-ptr-chase-sm8650-x4-tlb-ctrl-g2",
+      "records": 2,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null
+    },
+    {
+      "run": "20260929T145432Z-ptr-chase-sm8650-x4-tlb-ctrl-g4",
+      "records": 4,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null
+    },
+    {
+      "run": "20260929T145551Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp",
+      "records": 2,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null
+    },
+    {
+      "run": "20260929T145659Z-ptr-chase-sm8650-x4-tlb-overhead",
+      "records": 24,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T150212Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp-walk",
+      "records": 1,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null
+    },
+    {
+      "run": "20260929T181512Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T181521Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T181716Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T182214Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T182223Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T182418Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235909Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235918Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235927Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235938Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235948Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235957Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T004833Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T005033Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T010800Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+      "records": 32,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T011025Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T011631Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T011639Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T011814Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012107Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012117Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012253Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012815Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012824Z-ptr-chase-sm8650-x4-tlb-assoc-g2",
+      "records": 6,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null
+    },
+    {
+      "run": "20260930T012852Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012902Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012912Z-ptr-chase-sm8650-x4-tlb-assoc-g3",
+      "records": 6,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null
+    },
+    {
+      "run": "20260930T012939Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013628Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013636Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013724Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013733Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013743Z-ptr-chase-sm8650-x4-tlb-thp-madvise",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013829Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T014005Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T014014Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T014103Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T051530Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T051540Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T051715Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "evidence": "synthetic syscall injection, no kernel/PMU execution",
+  "compile_stderr": "",
+  "output": "n=1 actual_bytes=32 opened=1 read_ok=1\nn=2 actual_bytes=40 opened=1 read_ok=1\nn=4 actual_bytes=56 opened=1 read_ok=1\nn=16 actual_bytes=152 opened=1 read_ok=1\nspec=0 failed=1 value_index=-1 name=cycles\nspec=1 failed=0 value_index=0 name=refill\nspec=2 failed=0 value_index=1 name=walk\nsynthetic_zero_time read_ok=1 mux=0 enabled=0 running=0\nmove_transfer_close_calls=2 fds=101,100\nmalformed_mode=1 read_ok=0 reason=read:syscall\nmalformed_mode=2 read_ok=0 reason=read:partial-or-unaligned\nmalformed_mode=3 read_ok=0 reason=read:partial-or-unaligned\nmalformed_mode=4 read_ok=0 reason=read:too-short\nmalformed_mode=5 read_ok=0 reason=read:nr-mismatch-or-truncated\nmalformed_mode=6 read_ok=0 reason=read:nr-mismatch-or-truncated\n"
+}

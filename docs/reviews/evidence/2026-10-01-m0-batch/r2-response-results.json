@@ -1,0 +1,1192 @@
+{
+  "r2_head": "3e539c6922b7418bca79c3f5942ce6b62296ddc4",
+  "main_head": "dd4e46ac4833f36d1ac9cccce5620be708af3e03",
+  "baseline": "a104dbf",
+  "synthetic": {
+    "pmu.cycles.count": {
+      "contract": {
+        "missing": [
+          "pmu.cycles.count"
+        ],
+        "extras": []
+      },
+      "group_field": null,
+      "markdown": {
+        "ok": true,
+        "value": "# SM8650 X4 TLB per-sample analysis\n\nAll numeric cells are median [p25, p75]; rates are per 1,000 timed loads.\nPMU rows are accepted only when time_running_ns == time_enabled_ns for every event.\nEvents under `unverified` are SEMANTICS_UNVERIFIED (registry gate): samples stay in the table, structural conclusions are blocked.\n\n| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | bimodal | unverified |\n|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n| SYNTHETIC-missing | 512 | seed=42 | base | 8 | 2 | 3.400 [2.900, 3.900] | n/a | 15.259 [15.259, 15.259] | 4.654 [4.616, 4.692] | 0.023 [0.019, 0.027] | no | cycles, dtlb_walk, l1d_tlb_refill, mem_access_rd |\n"
+      },
+      "markdown_samples": {
+        "ok": true,
+        "value": "# SM8650 X4 TLB per-sample analysis\n\nAll numeric cells are median [p25, p75]; rates are per 1,000 timed loads.\nPMU rows are accepted only when time_running_ns == time_enabled_ns for every event.\nEvents under `unverified` are SEMANTICS_UNVERIFIED (registry gate): samples stay in the table, structural conclusions are blocked.\n\n| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | bimodal | unverified |\n|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n| SYNTHETIC-missing | 512 | seed=42 | base | 8 | 2 | 3.400 [2.900, 3.900] | n/a | 15.259 [15.259, 15.259] | 4.654 [4.616, 4.692] | 0.023 [0.019, 0.027] | no | cycles, dtlb_walk, l1d_tlb_refill, mem_access_rd |\n<!-- sample SYNTHETIC-missing b512K seed=42 s0: lat=2.4000 cyc=n/a mem_rd=15.26 refill=4.58 walk=0.015 vma=0x7f3a00000000 -->\n<!-- sample SYNTHETIC-missing b512K seed=42 s1: lat=4.4000 cyc=n/a mem_rd=15.26 refill=4.73 walk=0.031 vma=0x7f3a00000001 -->\n"
+      },
+      "cohort": {
+        "ok": true,
+        "value": {
+          "cohorts": [
+            {
+              "buffer_kb": 512,
+              "cohort": "base",
+              "merged": true,
+              "units": [
+                {
+                  "seeds": [
+                    42
+                  ],
+                  "valid_samples": 2,
+                  "grade": "insufficient",
+                  "terminal": "INSUFFICIENT_COHORT"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "main_chart_curve": {
+        "ok": true,
+        "value": []
+      },
+      "detect_knee": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "detect_knee_candidates: INCOMPUTABLE — field cyc_per_load degraded (metric_contract missing; row pages=32)"
+      },
+      "adjudicate_knee_at_32_pages": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "adjudicate_knee: INCOMPUTABLE — field cyc_per_load degraded (metric_contract missing; row pages=32)"
+      },
+      "walk_onset": {
+        "ok": true,
+        "value": {
+          "status": "RIGHT_CENSORED",
+          "intervals": [],
+          "evidence": {
+            "per_seed": {
+              "42": {
+                "onset": null,
+                "scan_max_pages": 32,
+                "points": [
+                  {
+                    "pages": 32,
+                    "median": 1.0,
+                    "floor_samples": 10,
+                    "qualified": true
+                  }
+                ]
+              }
+            },
+            "empty_seeds": []
+          }
+        }
+      },
+      "q3": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "adjudicate_q3: numeric dtlb_walk_per_1k/cyc_per_load required"
+      },
+      "fixed_overhead_none_count": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "adjudicate_fixed_overhead/row=0/buffer=512KiB: finite non-negative numeric count required (None)"
+      },
+      "anchor_missing_event": {
+        "ok": true,
+        "value": {
+          "status": "BLOCK_FAILED",
+          "main_metric_contract": null
+        }
+      },
+      "main_missing_event_anchor_decoupling": {
+        "ok": true,
+        "value": {
+          "status": "ANCHORS_OK",
+          "main_metric_contract": [
+            "('pmu.cycles.count',)"
+          ]
+        }
+      }
+    },
+    "pmu.mem_access_rd.count": {
+      "contract": {
+        "missing": [
+          "pmu.mem_access_rd.count"
+        ],
+        "extras": []
+      },
+      "group_field": null,
+      "markdown": {
+        "ok": true,
+        "value": "# SM8650 X4 TLB per-sample analysis\n\nAll numeric cells are median [p25, p75]; rates are per 1,000 timed loads.\nPMU rows are accepted only when time_running_ns == time_enabled_ns for every event.\nEvents under `unverified` are SEMANTICS_UNVERIFIED (registry gate): samples stay in the table, structural conclusions are blocked.\n\n| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | bimodal | unverified |\n|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n| SYNTHETIC-missing | 512 | seed=42 | base | 8 | 2 | 3.400 [2.900, 3.900] | 0.031 [0.031, 0.032] | n/a | 4.654 [4.616, 4.692] | 0.023 [0.019, 0.027] | no | cycles, dtlb_walk, l1d_tlb_refill, mem_access_rd |\n"
+      },
+      "markdown_samples": {
+        "ok": true,
+        "value": "# SM8650 X4 TLB per-sample analysis\n\nAll numeric cells are median [p25, p75]; rates are per 1,000 timed loads.\nPMU rows are accepted only when time_running_ns == time_enabled_ns for every event.\nEvents under `unverified` are SEMANTICS_UNVERIFIED (registry gate): samples stay in the table, structural conclusions are blocked.\n\n| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | bimodal | unverified |\n|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n| SYNTHETIC-missing | 512 | seed=42 | base | 8 | 2 | 3.400 [2.900, 3.900] | 0.031 [0.031, 0.032] | n/a | 4.654 [4.616, 4.692] | 0.023 [0.019, 0.027] | no | cycles, dtlb_walk, l1d_tlb_refill, mem_access_rd |\n<!-- sample SYNTHETIC-missing b512K seed=42 s0: lat=2.4000 cyc=0.031 mem_rd=n/a refill=4.58 walk=0.015 vma=0x7f3a00000000 -->\n<!-- sample SYNTHETIC-missing b512K seed=42 s1: lat=4.4000 cyc=0.032 mem_rd=n/a refill=4.73 walk=0.031 vma=0x7f3a00000001 -->\n"
+      },
+      "cohort": {
+        "ok": true,
+        "value": {
+          "cohorts": [
+            {
+              "buffer_kb": 512,
+              "cohort": "base",
+              "merged": true,
+              "units": [
+                {
+                  "seeds": [
+                    42
+                  ],
+                  "valid_samples": 2,
+                  "grade": "insufficient",
+                  "terminal": "INSUFFICIENT_COHORT"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "main_chart_curve": {
+        "ok": true,
+        "value": []
+      },
+      "detect_knee": {
+        "ok": true,
+        "value": []
+      },
+      "adjudicate_knee_at_32_pages": {
+        "ok": true,
+        "value": {
+          "status": "RIGHT_CENSORED",
+          "intervals": [],
+          "evidence": {
+            "per_seed": {
+              "42": {
+                "floor_refill_per_1k": 1.0,
+                "left_censored": false,
+                "candidates": [],
+                "scan_max_pages": 32
+              }
+            },
+            "empty_seeds": []
+          }
+        }
+      },
+      "walk_onset": {
+        "ok": true,
+        "value": {
+          "status": "RIGHT_CENSORED",
+          "intervals": [],
+          "evidence": {
+            "per_seed": {
+              "42": {
+                "onset": null,
+                "scan_max_pages": 32,
+                "points": [
+                  {
+                    "pages": 32,
+                    "median": 1.0,
+                    "floor_samples": 10,
+                    "qualified": true
+                  }
+                ]
+              }
+            },
+            "empty_seeds": []
+          }
+        }
+      },
+      "q3": {
+        "ok": true,
+        "value": {
+          "status": "MODEL_UNIDENTIFIABLE",
+          "association_points": [
+            {
+              "pages": 32,
+              "dtlb_walk_per_1k": 1.0,
+              "cyc_per_load": 1.0
+            }
+          ],
+          "evidence": {
+            "g3_executed": false,
+            "anchors_comparable": false,
+            "data_miss_collinearity_checked": false,
+            "mmutc_confound_unresolved": true,
+            "model_spec_frozen": false
+          }
+        }
+      },
+      "fixed_overhead_none_count": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "adjudicate_fixed_overhead/row=0/buffer=512KiB: finite non-negative numeric count required (None)"
+      },
+      "anchor_missing_event": {
+        "ok": true,
+        "value": {
+          "status": "ANCHORS_OK",
+          "main_metric_contract": [
+            "()"
+          ]
+        }
+      },
+      "main_missing_event_anchor_decoupling": {
+        "ok": true,
+        "value": {
+          "status": "ANCHORS_OK",
+          "main_metric_contract": [
+            "('pmu.mem_access_rd.count',)"
+          ]
+        }
+      }
+    },
+    "pmu.l1d_tlb_refill.count": {
+      "contract": {
+        "missing": [
+          "pmu.l1d_tlb_refill.count"
+        ],
+        "extras": []
+      },
+      "group_field": null,
+      "markdown": {
+        "ok": true,
+        "value": "# SM8650 X4 TLB per-sample analysis\n\nAll numeric cells are median [p25, p75]; rates are per 1,000 timed loads.\nPMU rows are accepted only when time_running_ns == time_enabled_ns for every event.\nEvents under `unverified` are SEMANTICS_UNVERIFIED (registry gate): samples stay in the table, structural conclusions are blocked.\n\n| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | bimodal | unverified |\n|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n| SYNTHETIC-missing | 512 | seed=42 | base | 8 | 2 | 3.400 [2.900, 3.900] | 0.031 [0.031, 0.032] | 15.259 [15.259, 15.259] | n/a | 0.023 [0.019, 0.027] | n/a | cycles, dtlb_walk, l1d_tlb_refill, mem_access_rd |\n"
+      },
+      "markdown_samples": {
+        "ok": true,
+        "value": "# SM8650 X4 TLB per-sample analysis\n\nAll numeric cells are median [p25, p75]; rates are per 1,000 timed loads.\nPMU rows are accepted only when time_running_ns == time_enabled_ns for every event.\nEvents under `unverified` are SEMANTICS_UNVERIFIED (registry gate): samples stay in the table, structural conclusions are blocked.\n\n| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | bimodal | unverified |\n|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n| SYNTHETIC-missing | 512 | seed=42 | base | 8 | 2 | 3.400 [2.900, 3.900] | 0.031 [0.031, 0.032] | 15.259 [15.259, 15.259] | n/a | 0.023 [0.019, 0.027] | n/a | cycles, dtlb_walk, l1d_tlb_refill, mem_access_rd |\n<!-- sample SYNTHETIC-missing b512K seed=42 s0: lat=2.4000 cyc=0.031 mem_rd=15.26 refill=n/a walk=0.015 vma=0x7f3a00000000 -->\n<!-- sample SYNTHETIC-missing b512K seed=42 s1: lat=4.4000 cyc=0.032 mem_rd=15.26 refill=n/a walk=0.031 vma=0x7f3a00000001 -->\n"
+      },
+      "cohort": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "grade_thp_cohorts/buffer=512KiB: sample missing numeric l1d_tlb_refill_per_1k"
+      },
+      "main_chart_curve": {
+        "ok": true,
+        "value": []
+      },
+      "detect_knee": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "detect_knee_candidates: INCOMPUTABLE — field l1d_tlb_refill_per_1k degraded (metric_contract missing; row pages=32)"
+      },
+      "adjudicate_knee_at_32_pages": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "adjudicate_knee: INCOMPUTABLE — field l1d_tlb_refill_per_1k degraded (metric_contract missing; row pages=32)"
+      },
+      "walk_onset": {
+        "ok": true,
+        "value": {
+          "status": "RIGHT_CENSORED",
+          "intervals": [],
+          "evidence": {
+            "per_seed": {
+              "42": {
+                "onset": null,
+                "scan_max_pages": 32,
+                "points": [
+                  {
+                    "pages": 32,
+                    "median": 1.0,
+                    "floor_samples": 10,
+                    "qualified": true
+                  }
+                ]
+              }
+            },
+            "empty_seeds": []
+          }
+        }
+      },
+      "q3": {
+        "ok": true,
+        "value": {
+          "status": "MODEL_UNIDENTIFIABLE",
+          "association_points": [
+            {
+              "pages": 32,
+              "dtlb_walk_per_1k": 1.0,
+              "cyc_per_load": 1.0
+            }
+          ],
+          "evidence": {
+            "g3_executed": false,
+            "anchors_comparable": false,
+            "data_miss_collinearity_checked": false,
+            "mmutc_confound_unresolved": true,
+            "model_spec_frozen": false
+          }
+        }
+      },
+      "fixed_overhead_none_count": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "adjudicate_fixed_overhead/row=0/buffer=512KiB: finite non-negative numeric count required (None)"
+      },
+      "anchor_missing_event": {
+        "ok": true,
+        "value": {
+          "status": "BLOCK_FAILED",
+          "main_metric_contract": null
+        }
+      },
+      "main_missing_event_anchor_decoupling": {
+        "ok": true,
+        "value": {
+          "status": "ANCHORS_OK",
+          "main_metric_contract": [
+            "('pmu.l1d_tlb_refill.count',)"
+          ]
+        }
+      }
+    },
+    "pmu.dtlb_walk.count": {
+      "contract": {
+        "missing": [
+          "pmu.dtlb_walk.count"
+        ],
+        "extras": []
+      },
+      "group_field": null,
+      "markdown": {
+        "ok": true,
+        "value": "# SM8650 X4 TLB per-sample analysis\n\nAll numeric cells are median [p25, p75]; rates are per 1,000 timed loads.\nPMU rows are accepted only when time_running_ns == time_enabled_ns for every event.\nEvents under `unverified` are SEMANTICS_UNVERIFIED (registry gate): samples stay in the table, structural conclusions are blocked.\n\n| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | bimodal | unverified |\n|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n| SYNTHETIC-missing | 512 | seed=42 | base | 8 | 2 | 3.400 [2.900, 3.900] | 0.031 [0.031, 0.032] | 15.259 [15.259, 15.259] | 4.654 [4.616, 4.692] | n/a | no | cycles, dtlb_walk, l1d_tlb_refill, mem_access_rd |\n"
+      },
+      "markdown_samples": {
+        "ok": true,
+        "value": "# SM8650 X4 TLB per-sample analysis\n\nAll numeric cells are median [p25, p75]; rates are per 1,000 timed loads.\nPMU rows are accepted only when time_running_ns == time_enabled_ns for every event.\nEvents under `unverified` are SEMANTICS_UNVERIFIED (registry gate): samples stay in the table, structural conclusions are blocked.\n\n| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | bimodal | unverified |\n|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n| SYNTHETIC-missing | 512 | seed=42 | base | 8 | 2 | 3.400 [2.900, 3.900] | 0.031 [0.031, 0.032] | 15.259 [15.259, 15.259] | 4.654 [4.616, 4.692] | n/a | no | cycles, dtlb_walk, l1d_tlb_refill, mem_access_rd |\n<!-- sample SYNTHETIC-missing b512K seed=42 s0: lat=2.4000 cyc=0.031 mem_rd=15.26 refill=4.58 walk=n/a vma=0x7f3a00000000 -->\n<!-- sample SYNTHETIC-missing b512K seed=42 s1: lat=4.4000 cyc=0.032 mem_rd=15.26 refill=4.73 walk=n/a vma=0x7f3a00000001 -->\n"
+      },
+      "cohort": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "grade_thp_cohorts/buffer=512KiB: sample missing numeric dtlb_walk_per_1k"
+      },
+      "main_chart_curve": {
+        "ok": true,
+        "value": []
+      },
+      "detect_knee": {
+        "ok": true,
+        "value": []
+      },
+      "adjudicate_knee_at_32_pages": {
+        "ok": true,
+        "value": {
+          "status": "RIGHT_CENSORED",
+          "intervals": [],
+          "evidence": {
+            "per_seed": {
+              "42": {
+                "floor_refill_per_1k": 1.0,
+                "left_censored": false,
+                "candidates": [],
+                "scan_max_pages": 32
+              }
+            },
+            "empty_seeds": []
+          }
+        }
+      },
+      "walk_onset": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "detect_walk_onset: INCOMPUTABLE — field dtlb_walk_per_1k degraded (metric_contract missing; row pages=32)"
+      },
+      "q3": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "adjudicate_q3: numeric dtlb_walk_per_1k/cyc_per_load required"
+      },
+      "fixed_overhead_none_count": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "adjudicate_fixed_overhead/row=0/buffer=512KiB: finite non-negative numeric count required (None)"
+      },
+      "anchor_missing_event": {
+        "ok": true,
+        "value": {
+          "status": "BLOCK_FAILED",
+          "main_metric_contract": null
+        }
+      },
+      "main_missing_event_anchor_decoupling": {
+        "ok": true,
+        "value": {
+          "status": "ANCHORS_OK",
+          "main_metric_contract": [
+            "('pmu.dtlb_walk.count',)"
+          ]
+        }
+      }
+    }
+  },
+  "mixed_coverage": {
+    "samples": 2,
+    "missing": [],
+    "latency_stats": {
+      "min": 100.0,
+      "median": 105.0,
+      "p25": 102.5,
+      "p75": 107.5,
+      "max": 110.0
+    },
+    "cycles_stats": {
+      "min": 100.0,
+      "median": 105.0,
+      "p25": 102.5,
+      "p75": 107.5,
+      "max": 110.0
+    },
+    "available_cycles": 2,
+    "chart_cycles": {
+      "ok": true,
+      "value": [
+        [
+          512,
+          105.0
+        ]
+      ]
+    }
+  },
+  "mixed_walk_onset": {
+    "ok": true,
+    "value": {
+      "status": "RIGHT_CENSORED",
+      "intervals": [],
+      "evidence": {
+        "per_seed": {
+          "42": {
+            "onset": null,
+            "scan_max_pages": 128,
+            "points": [
+              {
+                "pages": 128,
+                "median": 0.02288818359375,
+                "floor_samples": 0,
+                "qualified": false
+              }
+            ]
+          }
+        },
+        "empty_seeds": []
+      }
+    }
+  },
+  "bimodal_none_markdown": {
+    "ok": true,
+    "value": "# SM8650 X4 TLB per-sample analysis\n\nAll numeric cells are median [p25, p75]; rates are per 1,000 timed loads.\nPMU rows are accepted only when time_running_ns == time_enabled_ns for every event.\nEvents under `unverified` are SEMANTICS_UNVERIFIED (registry gate): samples stay in the table, structural conclusions are blocked.\n\n| run | buffer KiB | seed | backing | passes | n | latency ns | cyc/load | mem rd/1k | l1d tlb refill/1k | dtlb walk/1k | bimodal | unverified |\n|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|---|\n| SYNTHETIC-bimodal | 512 | seed=42 | base | 8 | 2 | 3.400 [2.900, 3.900] | 0.031 [0.031, 0.032] | 15.259 [15.259, 15.259] | 4.654 [4.616, 4.692] | 0.023 [0.019, 0.027] | n/a | cycles, dtlb_walk, l1d_tlb_refill, mem_access_rd |\n"
+  },
+  "extras_retention": {
+    "contract": {
+      "missing": [],
+      "extras": [
+        "pmu.data_miss_collinearity.count"
+      ]
+    },
+    "sample_keys": [
+      "buffer_kb",
+      "cyc_per_load",
+      "dtlb_walk_per_1k",
+      "l1d_tlb_refill_per_1k",
+      "latency_ns",
+      "loads",
+      "mem_rd_per_1k",
+      "page_policy_actual",
+      "ring_passes",
+      "run_label",
+      "sample_index",
+      "seed",
+      "vma_base"
+    ],
+    "extra_value_retained": false
+  },
+  "replay": [
+    {
+      "run": "20260929T143631Z-ptr-chase-sm8650-x4-tlb-ctrl",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T144937Z-ptr-chase-sm8650-x4-tlb-ctrl-g1",
+      "records": 2,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null,
+      "old_outcome": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "20260929T144937Z-ptr-chase-sm8650-x4-tlb-ctrl-g1/buffer=512KiB: metric set ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.l1d_tlb_refill.count', 'pmu.l2d_tlb.count', 'pmu.l2d_tlb_refill.count', 'pmu.mem_access_rd.count'] != ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.l1d_tlb_refill.count', 'pmu.mem_access_rd.count']"
+      },
+      "new_outcome": {
+        "ok": true
+      }
+    },
+    {
+      "run": "20260929T145255Z-ptr-chase-sm8650-x4-tlb-ctrl-g2",
+      "records": 2,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null,
+      "old_outcome": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "20260929T145255Z-ptr-chase-sm8650-x4-tlb-ctrl-g2/buffer=512KiB: metric set ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_step.count', 'pmu.dtlb_walk.count', 'pmu.dtlb_walk_percyc.count', 'pmu.l1d_tlb_refill.count'] != ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.l1d_tlb_refill.count', 'pmu.mem_access_rd.count']"
+      },
+      "new_outcome": {
+        "ok": true
+      }
+    },
+    {
+      "run": "20260929T145432Z-ptr-chase-sm8650-x4-tlb-ctrl-g4",
+      "records": 4,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null,
+      "old_outcome": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "20260929T145432Z-ptr-chase-sm8650-x4-tlb-ctrl-g4/buffer=512KiB: metric set ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.dtlb_walk_large.count', 'pmu.dtlb_walk_small.count', 'pmu.l1d_tlb_refill.count'] != ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.l1d_tlb_refill.count', 'pmu.mem_access_rd.count']"
+      },
+      "new_outcome": {
+        "ok": true
+      }
+    },
+    {
+      "run": "20260929T145551Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp",
+      "records": 2,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null,
+      "old_outcome": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "20260929T145551Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp/buffer=2304KiB: metric set ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.dtlb_walk_large.count', 'pmu.dtlb_walk_small.count', 'pmu.l1d_tlb_refill.count'] != ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.l1d_tlb_refill.count', 'pmu.mem_access_rd.count']"
+      },
+      "new_outcome": {
+        "ok": true
+      }
+    },
+    {
+      "run": "20260929T145659Z-ptr-chase-sm8650-x4-tlb-overhead",
+      "records": 24,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T150212Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp-walk",
+      "records": 1,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null,
+      "old_outcome": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "20260929T150212Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp-walk/buffer=16384KiB: metric set ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.dtlb_walk_large.count', 'pmu.dtlb_walk_small.count', 'pmu.l1d_tlb_refill.count'] != ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.l1d_tlb_refill.count', 'pmu.mem_access_rd.count']"
+      },
+      "new_outcome": {
+        "ok": true
+      }
+    },
+    {
+      "run": "20260929T181512Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T181521Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T181716Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T182214Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T182223Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T182418Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235909Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235918Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235927Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235938Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235948Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260929T235957Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T004833Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T005033Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T010800Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+      "records": 32,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T011025Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T011631Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T011639Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T011814Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012107Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012117Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012253Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012815Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012824Z-ptr-chase-sm8650-x4-tlb-assoc-g2",
+      "records": 6,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null,
+      "old_outcome": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "20260930T012824Z-ptr-chase-sm8650-x4-tlb-assoc-g2/buffer=4096KiB: metric set ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_step.count', 'pmu.dtlb_walk.count', 'pmu.dtlb_walk_percyc.count', 'pmu.l1d_tlb_refill.count'] != ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.l1d_tlb_refill.count', 'pmu.mem_access_rd.count']"
+      },
+      "new_outcome": {
+        "ok": true
+      }
+    },
+    {
+      "run": "20260930T012852Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012902Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T012912Z-ptr-chase-sm8650-x4-tlb-assoc-g3",
+      "records": 6,
+      "old_ok": false,
+      "new_ok": true,
+      "normalized_equal": false,
+      "markdown_equal": null,
+      "derived_judgments_equal": null,
+      "derived_judgments_ok": null,
+      "old_outcome": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "20260930T012912Z-ptr-chase-sm8650-x4-tlb-assoc-g3/buffer=4096KiB: metric set ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.l1d_cache_miss.count', 'pmu.l1d_tlb_refill.count', 'pmu.mem_access_rd.count'] != ['latency_ns', 'pmu.cycles.count', 'pmu.dtlb_walk.count', 'pmu.l1d_tlb_refill.count', 'pmu.mem_access_rd.count']"
+      },
+      "new_outcome": {
+        "ok": true
+      }
+    },
+    {
+      "run": "20260930T012939Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013628Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013636Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013724Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013733Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013743Z-ptr-chase-sm8650-x4-tlb-thp-madvise",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T013829Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T014005Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T014014Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T014103Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T051530Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T051540Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    },
+    {
+      "run": "20260930T051715Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "old_ok": true,
+      "new_ok": true,
+      "normalized_equal": true,
+      "markdown_equal": true,
+      "derived_judgments_equal": true,
+      "derived_judgments_ok": true
+    }
+  ],
+  "replay_counts": {
+    "runs": 49,
+    "equal": 42,
+    "changed": 7,
+    "both_accept": 42,
+    "both_reject": 0,
+    "old_reject_new_accept": 7
+  },
+  "block_replay": [
+    {
+      "main": "20260929T181521Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "old_ok": true,
+      "new_ok": true,
+      "old_status": "ANCHORS_OK",
+      "new_status": "ANCHORS_OK",
+      "normalized_equal": false
+    },
+    {
+      "main": "20260929T182223Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "old_ok": true,
+      "new_ok": true,
+      "old_status": "ANCHORS_OK",
+      "new_status": "ANCHORS_OK",
+      "normalized_equal": false
+    },
+    {
+      "main": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "old_ok": true,
+      "new_ok": true,
+      "old_status": "ANCHORS_OK",
+      "new_status": "ANCHORS_OK",
+      "normalized_equal": false
+    },
+    {
+      "main": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+      "old_ok": true,
+      "new_ok": true,
+      "old_status": "ANCHORS_OK",
+      "new_status": "ANCHORS_OK",
+      "normalized_equal": false
+    },
+    {
+      "main": "20260930T011639Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "old_ok": true,
+      "new_ok": true,
+      "old_status": "BLOCK_FAILED",
+      "new_status": "BLOCK_FAILED",
+      "normalized_equal": false
+    },
+    {
+      "main": "20260930T012117Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "old_ok": true,
+      "new_ok": true,
+      "old_status": "ANCHORS_OK",
+      "new_status": "ANCHORS_OK",
+      "normalized_equal": false
+    },
+    {
+      "main": "20260930T012824Z-ptr-chase-sm8650-x4-tlb-assoc-g2",
+      "old_ok": false,
+      "new_ok": true,
+      "old_status": null,
+      "new_status": "ANCHORS_OK",
+      "normalized_equal": false
+    },
+    {
+      "main": "20260930T012912Z-ptr-chase-sm8650-x4-tlb-assoc-g3",
+      "old_ok": false,
+      "new_ok": true,
+      "old_status": null,
+      "new_status": "ANCHORS_OK",
+      "normalized_equal": false
+    },
+    {
+      "main": "20260930T013636Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "old_ok": true,
+      "new_ok": true,
+      "old_status": "BLOCK_FAILED",
+      "new_status": "BLOCK_FAILED",
+      "normalized_equal": false
+    },
+    {
+      "main": "20260930T013743Z-ptr-chase-sm8650-x4-tlb-thp-madvise",
+      "old_ok": true,
+      "new_ok": true,
+      "old_status": "ANCHORS_OK",
+      "new_status": "ANCHORS_OK",
+      "normalized_equal": false
+    },
+    {
+      "main": "20260930T014014Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "old_ok": true,
+      "new_ok": true,
+      "old_status": "ANCHORS_OK",
+      "new_status": "ANCHORS_OK",
+      "normalized_equal": false
+    },
+    {
+      "main": "20260930T051540Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "old_ok": true,
+      "new_ok": true,
+      "old_status": "ANCHORS_OK",
+      "new_status": "ANCHORS_OK",
+      "normalized_equal": false
+    }
+  ],
+  "main_figures_real_data": {
+    "refill-density.svg": {
+      "bytes": 5623,
+      "sha256": "701cb9ee1ec8d873759a8c5ec5b47cf82b05d220b78fbbea290593000919717c",
+      "equal_to_old_analyzer": true,
+      "circles": 20
+    },
+    "walk-onset.svg": {
+      "bytes": 6075,
+      "sha256": "bb86c07fab4e578df8a6133621b296efcdac1c52c69283ad7f1578996fc72bb3",
+      "equal_to_old_analyzer": true,
+      "circles": 20
+    },
+    "latency-cycles.svg": {
+      "bytes": 6437,
+      "sha256": "555e64eb2b2aee8e6fed395c25cb1a939d34c846cbdd2690a7c1ea082df0fd28",
+      "equal_to_old_analyzer": true,
+      "circles": 40
+    },
+    "thp-cohort.svg": {
+      "bytes": 1644,
+      "sha256": "9ab1b4ab5e0e437defe4cd22e9363f26bcb1aa0bd7266d68412f3c98d6a34147",
+      "equal_to_old_analyzer": true,
+      "circles": 3
+    },
+    "report.md": {
+      "bytes": 6661,
+      "sha256": "364618e1ad73e7f3c2d4213d7cf7a0fc24fe1a34975ca2ba3ed7149c05c72e70",
+      "equal_to_old_analyzer": true
+    }
+  },
+  "overlay_chart_tests": {
+    "run": 19,
+    "failures": 1,
+    "errors": 0
+  }
+}

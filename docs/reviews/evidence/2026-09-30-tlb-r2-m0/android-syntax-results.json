@@ -1,0 +1,47 @@
+{
+  "baseline_a104dbf": {
+    "command": [
+      "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android29-clang++",
+      "-std=c++17",
+      "-fsyntax-only",
+      "-DCPU_UARCH_HAVE_LINUX_PERF=1",
+      "-I",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/probes/common",
+      "-I",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/probes/platform/linux",
+      "/private/tmp/tlb-r2-baseline-ptr_chase.cpp"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  },
+  "current_r2": {
+    "command": [
+      "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android29-clang++",
+      "-std=c++17",
+      "-fsyntax-only",
+      "-DCPU_UARCH_HAVE_LINUX_PERF=1",
+      "-I",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/probes/common",
+      "-I",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/probes/platform/linux",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/probes/cache-mem/ptr_chase.cpp"
+    ],
+    "exit_code": 1,
+    "stderr": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/probes/cache-mem/ptr_chase.cpp:409:15: error: unknown type name 'PageBackingClass'; did you mean 'probe_common::PageBackingClass'?\n  409 |         const PageBackingClass before =\n      |               ^~~~~~~~~~~~~~~~\n      |               probe_common::PageBackingClass\n/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/probes/common/page_policy.h:148:8: note: 'probe_common::PageBackingClass' declared here\n  148 | struct PageBackingClass {\n      |        ^\n/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/probes/cache-mem/ptr_chase.cpp:484:15: error: unknown type name 'PageBackingClass'; did you mean 'probe_common::PageBackingClass'?\n  484 |         const PageBackingClass after =\n      |               ^~~~~~~~~~~~~~~~\n      |               probe_common::PageBackingClass\n/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/probes/common/page_policy.h:148:8: note: 'probe_common::PageBackingClass' declared here\n  148 | struct PageBackingClass {\n      |        ^\n2 errors generated.\n"
+  },
+  "temporary_two_qualifications": {
+    "command": [
+      "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android29-clang++",
+      "-std=c++17",
+      "-fsyntax-only",
+      "-DCPU_UARCH_HAVE_LINUX_PERF=1",
+      "-I",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/probes/common",
+      "-I",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/probes/platform/linux",
+      "/private/tmp/tlb-r2-qualified-ptr_chase.cpp"
+    ],
+    "exit_code": 0,
+    "stderr": ""
+  }
+}

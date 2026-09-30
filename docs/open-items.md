@@ -182,3 +182,23 @@
 | 固定开销标签 | cycles 与 dtlb_walk 的绝对密度"含固定开销"（§5.3 判定：512K 冷启动 ≈8 walks/窗、cycles ≈55k cycles/窗） | 触发：任何复用本战役密度数据的分析须先读 Gate 1 评审 §4；转折判定用跨长度斜率 | ✅ 持续约束（Gate 1 评审已载） |
 | Q4 达成率方法学 | mixed 达成率 2304=12.5%、3072=37.5%（16 MiB=87.5% 覆盖）；比较级证据需预设更大尝试预算或更强达成手段 | 触发：未来 THP 类对照设计时引用为预期达成率 | ✅ 已登记（本行即参照） |
 | 最小点 R_0x34 反常 | Phase A/B 粗扫/致密的最小页数点（32/48 页）R_0x34 反常高于 64–1024 页段（0.45–0.82 vs 0.05–0.31/1k）；onset 算法按地板处理，判读不受其影响 | 触发：未来以 walk 地板绝对水平为证据时先解释该最小点抬升（候选：冷启动摊薄、小 footprint 下每页重复访问频率）；当前仅登记观察，不影响 Q2a 终态 | ⬜ 观察项 |
+
+## REV-TLB-R2-M0-20260930 批次复审遗留（M0-1/2）
+
+- **归属**：SM8650 TLB r2 的 M0-1/M0-2；评审 [M0 批次复审](reviews/2026-09-30-sm8650-tlb-r2-m0-review.md)，输入提交 adaac4d。
+- **状态**：3e539c6 已修原目标编译、判据/锚点/Markdown 异常；本会话 2026-10-01 已复核。group 内契约分组已修，二次聚合/图表语义仍有遗留，见下方 REV-M0-BATCH。M0-6 可接受；OI-13 保持未关闭，不构成双独立评审通过。
+- **关闭前置**：C1 Android/Linux 两处 PageBackingClass 类型限定与正常目标构建；C2 指标 coverage/联合样本集合；C3 knee floor 与 walk_samples 完整入口守卫；C4 锚点必要事件守卫；C5 Markdown/main 图表 nullable 兼容（组合现有图表测试 18 通过、1 error）。修复后以缺项/超集/部分覆盖的集成回归及旧 runs 差分重放验收。
+- **交付口径**：C6 extra 事件在原始 record 与 AnalysisResult 的保留范围、OI-13 状态/docstring；M0-1 当前仅页策略提取子项，RAII/合法地址池/timer/CPU 身份仍按任务书跟踪。
+- **正式测量前冻结**：C7 B1/B2 选择规则及 pilot 隔离、offset 节点地址实现与 realized geometry；分别归属 Phase B 与 M0-4/Phase A。
+- **首轮快照证据（adaac4d，最新结果见下方收口复核）**：macOS build、analysis 140、runner 154、CTest 18 通过；NDK 目标语法检查失败；49 runs/291 records 重放中 42 原可处理 runs 不变，7 非 G0 为预期接纳扩展；完整数据四图不变，缺指标图表路径失败。Linux/Android 运行、raw 哈希重验和 main 合并未执行。
+- **触发条件**：下一次 M0-1/M0-2 子项验收前关闭 C1–C6；Phase A/B 正式采样前冻结 C7；科学问题终态不代替工程缺陷关闭。
+
+## REV-M0-BATCH-20260930 两层复审遗留（2026-10-01 更新）
+
+- **归属**：r2 数据管道 M0-3/4 + main 图表；[原两层评审](reviews/2026-10-01-m0-two-layer-review.md)、[46b1daa 收口复核](reviews/2026-10-01-m0-closure-review.md)。最新代码基线 m0b 2d48704、main 798f774；作者回执 r2 46b1daa（上板清单提交后 HEAD ae8532d）。
+- **已关闭**：MB-01 GROUP read 实际字节长度；MB-02 失败项名称/spec 映射；MB-04 cohort/图表非 legacy identity 命名拒绝；MB-08 v1.3 B1→B2 三条件合格门口径满足（阈值/证据仍在正式矩阵前冻结）。
+- **P1 未关闭**：MB-03 case.params 中 chains 等请求虽留存，adapter/kernel 未消费，同 buffer/control 的 K=1/2 argv 相同；新形状仍先读 buffer_kb/stride，通用 ID 又拒绝 PMU 列表；未知 swept 参数仍可进 ID 后消失。MB-07 缺点审计与空系列诊断已修，但报告沿用固定终态却宣称按剩余点重判，删除 onset 区间仍输出原 INTERVAL_IDENTIFIED。
+- **P2/后置**：MB-05 FD 不可复制及 move 所有权已验证，snapshot/window 差分与有效性待交付；MB-06 descriptor requested→canonical→执行→realized→identity/类型/schema 的最小契约待交付。适用触发为首个依赖该契约的 Phase A/K 链/Phase B 实验，不能统一推到 Phase B。MB-02 旧头注释及任务书的事件 ID 口径仍需与位置映射实现对齐。
+- **最新证据**：m0b analysis 149、runner 158、preset build/CTest 19；main analysis 167；main/r2 图表 overlay 21/21；NDK 两源码目标语法检查通过。生产 PerfWindow 头文件 syscall 注入通过读长/错误拒绝/映射/move 检查，无内核执行。m0b 对3e539c6：49 runs/291 records 的规范化分析输出与 cohort 结果一致；r2 对a104dbf：42原可处理 runs 不变、7预期接纳扩展；完整旧数据四图+报告为5/5文件字节一致。
+- **出口裁定**：当前代码侧未通过；原回执保留，复核文档列出最小修复与集成验证。MB-03/07清零后再做两层合并/main组合验证；M0-3/4仅组件/扩展缝子项不能代替完整能力验收。
+- **完整 M0 前置**：Linux/SM8650执行证据、短窗能力/窗口有效性、M0-5 pilot→独立校准冻结→锚点池。OI-13仍部分关闭；所有新条件在正式采样前完成最小证据契约。
