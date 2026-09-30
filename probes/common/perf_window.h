@@ -14,6 +14,9 @@
 //   - 显式特权级 scope（exclude_kernel/exclude_hv 可配，默认排除内核，
 //     短窗协议 F5 要求内核访问不污染或少污染并显式记录）；
 //   - decode_group_read 与平台无关（合成输入可测）；syscall 部分仅 Linux。
+//   - 事件→值映射契约（MB-02 澄清，对齐任务书口径）：当前为**位置映射 +
+//     身份表**（value_index_ 把 spec 身份映射到组内值位置）；未使用
+//     PERF_FORMAT_ID/PERF_EVENT_IOC_ID，不宣称"按内核事件 ID 解码"。
 #pragma once
 
 #include <cstdint>
@@ -78,6 +81,14 @@ class PerfWindow {
 public:
     PerfWindow() = default;
     PerfWindow(const PerfWindow&) = delete;
+    PerfWindow& operator=(const PerfWindow&) = delete;  // MB-05：单一所有权
+    // MB-05：正确转移语义（评审"删除或提供正确转移语义"双选项的完整版）——
+    // 搬迁后源对象清空，析构不重复 close。
+    PerfWindow(PerfWindow&& other) noexcept { steal_from(other); }
+    PerfWindow& operator=(PerfWindow&& other) noexcept {
+        if (this != &other) { close_all(); steal_from(other); }
+        return *this;
+    }
     ~PerfWindow() { close_all(); }
 
     // exclude_kernel/exclude_hv 显式特权级 scope（F5：短窗协议要求显式记录）
@@ -87,7 +98,9 @@ public:
             return false;
         exclude_kernel_ = exclude_kernel;
         exclude_hv_ = exclude_hv;
-        names_.clear();
+        names_.assign(n, "?");        // MB-02：名称按原始 spec 身份全程占位
+        for (size_t i = 0; i < n; ++i)
+            names_[i] = specs[i].name ? specs[i].name : "?";
         failed_.assign(n, false);
         value_index_.assign(n, -1);   // spec 下标 → values[] 位置（-1 = n/a）
         int leader = -1;
@@ -109,9 +122,8 @@ public:
             if (fd < 0) { failed_[i] = true; continue; }   // 身份制 n/a
             value_index_[i] = (int)opened++;
             if (leader < 0) leader = fd;
-            else ioctl(fd, PERF_EVENT_IOC_SET_OUTPUT, leader);
+            else (void)ioctl(fd, PERF_EVENT_IOC_SET_OUTPUT, leader);
             fds_.push_back(fd);
-            names_.push_back(specs[i].name ? specs[i].name : "?");
         }
         if (leader < 0) return false;   // 全失败
         leader_ = leader;
@@ -127,12 +139,22 @@ public:
     }
 
     // 组读 + 按身份解码。成员打开失败的位在 ok_mask 中置 false。
+    // MB-01：read 有效载荷 = (3 + 实际组内事件数)×8 字节，随成功打开的
+    // 事件数变化——按实际返回字节判定（最低长度/8 对齐/nr/组构成），
+    // 不以最大容量判定完整性。
     bool read(GroupSample* out, bool* ok_mask, bool* mux_flag) {
-        if (!opened_ || out == nullptr) return false;
+        if (!opened_ || out == nullptr) { last_error_ = "not-opened"; return false; }
         uint64_t buf[3 + kMaxEvents] = {0};
-        const ssize_t want = (ssize_t)sizeof(buf);
-        if (::read(leader_, buf, want) != want) return false;
-        if (!decode_group_read(buf, 3 + fds_.size(), fds_.size(), out)) {
+        const ssize_t got = ::read(leader_, buf, sizeof(buf));
+        if (got < 0) { last_error_ = "read:syscall"; return false; }
+        if (got == 0 || (got % 8) != 0) {
+            last_error_ = "read:partial-or-unaligned";
+            return false;
+        }
+        const size_t words = (size_t)got / 8;
+        if (words < 3) { last_error_ = "read:too-short"; return false; }
+        if (!decode_group_read(buf, words, fds_.size(), out)) {
+            last_error_ = "read:nr-mismatch-or-truncated";
             return false;
         }
         if (ok_mask) {
@@ -146,11 +168,28 @@ public:
 
     // 事件身份 → values[] 下标（-1 = 该事件打开失败，n/a）
     int value_index(size_t spec_i) const { return value_index_.at(spec_i); }
+    // 上次 read/open 的命名失败原因（MB-01：截断/nr 不符/syscall 失败
+    // 保留明确原因，不静默 false）。
+    const char* last_error() const { return last_error_.c_str(); }
     size_t event_count() const { return failed_.size(); }
     const std::string& name(size_t i) const { return names_.at(i); }
     bool failed(size_t i) const { return failed_.at(i); }
     bool exclude_kernel() const { return exclude_kernel_; }
     bool exclude_hv() const { return exclude_hv_; }
+
+    void steal_from(PerfWindow& other) {
+        fds_ = std::move(other.fds_);
+        names_ = std::move(other.names_);
+        failed_ = std::move(other.failed_);
+        value_index_ = std::move(other.value_index_);
+        leader_ = other.leader_;
+        opened_ = other.opened_;
+        exclude_kernel_ = other.exclude_kernel_;
+        exclude_hv_ = other.exclude_hv_;
+        last_error_ = std::move(other.last_error_);
+        other.leader_ = -1;
+        other.opened_ = false;
+    }
 
     void close_all() {
         for (int fd : fds_) close(fd);
@@ -171,6 +210,7 @@ private:
     bool opened_ = false;
     bool exclude_kernel_ = true;
     bool exclude_hv_ = true;
+    std::string last_error_;
 };
 
 #else  // 非 Linux 桩：可编译，全部 n/a

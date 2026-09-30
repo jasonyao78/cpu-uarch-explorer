@@ -713,6 +713,14 @@ class TestRevM0BatchRegression(unittest.TestCase):
             rec["metrics"] = [m for m in rec["metrics"] if m["name"] != name]
         return run
 
+    def test_mb04_cohort_rejects_nonlegacy_identity(self):
+        record = _record()
+        record["params"]["chains"] = 2
+        result = analyze_records([record], "run-a")
+        with self.assertRaisesRegex(TlbError, "MB-04"):
+            grade_thp_cohorts(result.groups)
+
+
     def test_c2_mixed_contract_same_identity_separates_groups(self):
         # 同几何同 seed，契约不同 → 不同组；组内各指标样本集合恒一致
         full = _record(latencies=(100.0, 110.0), cycles=(100.0, 110.0))

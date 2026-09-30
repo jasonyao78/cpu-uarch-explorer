@@ -102,6 +102,33 @@ class TestPlan(unittest.TestCase):
         self.assertEqual(prov["stride"].source, "spec-default")
         self.assertEqual(prov["loads"].source, "derived")
 
+    def test_identity_passthrough_param_reaches_case_params(self):
+        # MB-03：chains sweep → 进 case_params（engine 记录通道）而非仅进 ID
+        spec = {
+            **SPEC,
+            "parameters": SPEC["parameters"]
+            + [{"name": "chains", "type": "int", "default": 1}],
+            "execution": {**SPEC["execution"],
+                          "sweep": {"buffer": ["64KiB"], "chains": [1, 2]}},
+        }
+        plan = build_plan(spec, {**PLATFORM, "controls": []})
+        self.assertEqual(
+            sorted(c.param_value("chains") for c in plan.cases), [1, 2])
+        # 同时进 case ID（既有 sweep 段机制）——命名与证据不分裂
+        self.assertTrue(all("chains" in c.id for c in plan.cases))
+
+    def test_unconsumed_fixed_param_rejected_at_plan_time(self):
+        # MB-03：不被形状消费、也不进 ID 段的参数 = plan 期显式拒绝
+        spec = {
+            **SPEC,
+            "parameters": SPEC["parameters"]
+            + [{"name": "gadget", "type": "int", "default": 7}],
+            "execution": {**SPEC["execution"],
+                          "fixed_params": ["stride", "warmup", "gadget"]},
+        }
+        with self.assertRaisesRegex(RunnerError, "does not consume"):
+            build_plan(spec, PLATFORM)
+
     def test_unknown_probe_shape_fails_at_plan_time(self):
         # M0-4：probe_shape 扩展缝——未注册形状在 plan 期拒绝（不静默按
         # ptr_chase 派生几何，防新探头参数被旧公式曲解）

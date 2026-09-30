@@ -230,6 +230,15 @@ def _derive_ptr_chase_case_params(params: dict[str, ResolvedValue]) -> dict[str,
     return case_params
 
 
+# MB-03：直通参数（语义/身份维度）——与 analysis/sm8650_tlb.py 的
+# _IDENTITY_PARAM_KEYS 对齐；新增维度必须两侧同时登记（schema 演进纪律）。
+_PASSTHROUGH_PARAMS = (
+    "chain_distribution",   # 连续/大步距/随机集合/随机序
+    "node_offset_policy",   # 页内 line 分布（节点地址策略）
+    "chains",               # K 独立链数
+    "mapping_span_kb",      # 保留 VA 跨度
+)
+
 # M0-4 扩展缝：probe_shape → 语义参数派生函数。新探头形状在此注册；
 # planner 主循环只负责 sweep 展开/fixed_params/通用旗标（页策略/PMU/seed）/case 组装。
 _CASE_DERIVERS = {
@@ -328,6 +337,14 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                 )
             if seed_rv is not None:
                 case_params["seed"] = ResolvedValue(seed, seed_rv.source)
+
+            # MB-03：语义/身份参数直通——analysis 身份键与 record params
+            # 以 case_params 为唯一通道（engine 只记录 case_params）；仅
+            # 进 case ID 不进执行参数 = "命名不同实验、证据无该维度"。
+            for name in _PASSTHROUGH_PARAMS:
+                rv = params.get(name)
+                if rv is not None:
+                    case_params[name] = rv
             case_id = (f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"
                        + (f"-seed{seed}" if seed_rv is not None else "")
                        + ("-hp2m" if hugepage else "")
@@ -339,9 +356,35 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
             # sweep 名排序追加 -{name}{value}；未 sweep 的参数不进 id（既有配置
             # id 逐字不变）。非 int/str 标量（如 pmu_events 列表）fail-closed——
             # 字符串化进 id 既不可读又可能再引入碰撞。
+            if shape != "ptr_chase":
+                # MB-03：新形状 case_id = 全部 case_params 的规范化枚举
+                # （无隐含 ptr_chase 几何契约）；值须为 int/str 标量。
+                segs = []
+                for name in sorted(case_params):
+                    val = case_params[name].value
+                    if isinstance(val, bool) or not isinstance(val, (int, str)):
+                        raise RunnerError(
+                            "plan-error",
+                            f"param {name!r} value {val!r} cannot form a "
+                            "case id segment (int/str scalar required)",
+                        )
+                    if not _CASE_ID_VALUE_RE.fullmatch(name):
+                        raise RunnerError(
+                            "plan-error",
+                            f"param name {name!r} has unsafe characters",
+                        )
+                    if not _CASE_ID_VALUE_RE.fullmatch(str(val)):
+                        raise RunnerError(
+                            "plan-error",
+                            f"param {name!r} value has unsafe characters",
+                        )
+                    segs.append(f"{name}{val}")
+                case_id = f"{spec['id']}:{control.id}-" + "-".join(segs)
+            id_seg_names = set()
             for name in sweep_names:
-                if name in _CASE_ID_COVERED_PARAMS:
+                if shape != "ptr_chase" or name in _CASE_ID_COVERED_PARAMS:
                     continue
+                id_seg_names.add(name)
                 # 段（sweep 键名与 str 值）直接进 raw 样本文件名：artifacts.py
                 # 落盘前的 safe_case 净化是内联局部表达式（artifacts.py 中
                 # case_id.replace("/", "_").replace(":", "_")，非函数），只替换
@@ -368,6 +411,22 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                         f"characters: {value!r}",
                     )
                 case_id += f"-{name}{value}"
+            # MB-03：未被当前形状消费的参数在 plan 期显式拒绝。"消费" =
+            # case_params（证据通道）/ deriver 派生输入 / 战役 ID 段机制
+            # （既有行为，钉桩测试覆盖）。语义/身份维度必须走 _PASSTHROUGH
+            # 进 case_params——仅进 ID 不进证据即命名-执行分裂。
+            _consumed = set(case_params) | id_seg_names | {
+                "buffer", "stride", "loads_per_slot", "min_loads",
+                "warmup", "warmup_passes",
+            }
+            leftover = sorted(set(params) - _consumed)
+            if leftover:
+                raise RunnerError(
+                    "plan-error",
+                    f"probe_shape {shape!r} does not consume params "
+                    f"{leftover}; register them in the shape's deriver or "
+                    "add them to _PASSTHROUGH_PARAMS with analyzer support",
+                )
             cases.append(Case(id=case_id, probe=probe, control=control,
                               params=tuple(sorted(case_params.items())),
                               repetitions=repetitions))

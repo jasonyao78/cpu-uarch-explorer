@@ -1104,6 +1104,16 @@ def grade_thp_cohorts(rows: Iterable[dict]) -> dict:
                     raise TlbError(
                         f"{context}: sample missing numeric {field_name}"
                     )
+        # REV-M0-BATCH MB-04：cohort 是战役固定路径——拒绝非 legacy 身份
+        # 的实验条件（K 分布/offset 等），禁止无声跨条件合并；条件化
+        # cohort 走未来的显式预注册汇总规则。
+        ident = row.get("identity")
+        if ident and any(value is not None for value in ident.values()):
+            raise TlbError(
+                f"{context}: non-legacy identity {ident} — THP cohort "
+                "grading requires uniform legacy identity (MB-04); "
+                "conditioned cohorts need an explicit preregistered rule"
+            )
         by_cohort[(buffer_kb, cohort)][seed].extend(samples)
     cohorts = []
     for (buffer_kb, cohort), by_seed in sorted(
