@@ -1,6 +1,6 @@
 # SM8650 Cortex-X4 TLB 层级探测 · 第二次战役（r2）任务书 v1.1
 
-> 版本：v1.2（2026-09-30；v1.0 = `a104dbf` → v1.1 按 REV-TLB-R2 → v1.2 按 **REV-M0-BATCH**，处置见 §10.3）
+> 版本：v1.3（2026-09-30；v1.0 → v1.1（REV-TLB-R2）→ v1.2（REV-M0-BATCH 首层）→ **v1.3（REV-M0-BATCH 两层回执 2026-10-01）**，处置见 §10.3）
 > 修订依据：外部评审 REV-TLB-R2-20260930（第一性原理评审，13 项发现 F1–F9/R1–R4；归档于本分支 `docs/reviews/2026-09-30-sm8650-tlb-r2-first-principles.md`，合成复核脚本 `scripts/review_sm8650_tlb_r2.py`）。**逐条处置见 §10.3 修订映射**。
 > 基线：`main @ 9316853`（第一次战役集成终点；main 此后已推进 `459b135..bc96ff1` 图表报告工作，Phase D 前须同步）。
 > 方法资产：`docs/cpu-uarch-deep-analysis/`（TLB 报告 v1.6、矩阵 v0.2、原型 v2.3——角色见 §2.3）
@@ -36,7 +36,7 @@
 - **B2 单 victim 驱逐概率**：victim v 填入 → m 个候选同 set aggressor（须验证其实际进入 L2 查找）→ 经验证的 L1 驱逐 → 测 v；估计量 `P(v 被驱逐 | m, H, 协议)`，负控 = aggressor 置于其它候选 set。
 - 协议纪律：先以**不依赖 H 的经验驱逐集**取得正控，再测候选 H（否则循环论证）；AB/BA 或随机配对次序（v1.0 固定先 T 后 T2 无次序平衡）；filler 避目标 leaf set **不保证**中间描述符不占目标 set——**先报告冲突曲线/概率，再有条件解释为"混合条目有效相联度"**；"8→9"仅适用于总竞争条目数口径，B2 的 victim 是否计入横轴须明示。
 - 门控不依赖 0x2f：`0x05` 差分 + `probe_ns` 上界双门控。
-- **定型预注册（REV-M0-BATCH C7，Phase B 正式采样前冻结）**：默认主估计量 = **B1 自冲突曲线**；切换 B2 的条件 = pilot 证明 B1 的"目标访问实际暴露 L2 查找"不成立（仅驻留 L1）或 B2 的 victim 二值分类器误判率完成校准；决策时点 = Phase B pilot 之后、正式矩阵之前；pilot 与正式验证样本隔离（同 REV 批次纪律）。
+- **定型预注册（REV-M0-BATCH C7 + MB-08 合格门，Phase B 正式采样前冻结）**：默认主估计量 = **B1 自冲突曲线**。**切换 B2 的合格门**（全部满足，非 OR）：① pilot 证明 B1 不合格（目标访问未实际暴露 L2 查找/仅驻留 L1，门控证据在档）；② B2 的正控 + 负控 + victim 二值分类器 + 误判率门全部达标；③ 切换决策按预注册规则在 pilot 后、正式矩阵前做出，**正式数据不得参与选择**。两方案均不合格 → `GATE_FAILED`/重新设计，不进入正式矩阵。试点与正式验证样本隔离（同 REV 批次纪律）。
 - 终态：`CONFLICT_CURVE_IDENTIFIED` / `EVICTION_PROB_IDENTIFIED` / `CONTROL_ONLY` / `GATE_FAILED` / `H_NOT_FOUND`。
 
 **Q-C（L2 索引哈希假设族，探索性）**——v1.0 的可区分性缺陷修正（F4：对齐 256 MiB 池内 VPN[23:16] 恒定，H3≡H1⊕常数、H4≡H2⊕常数，仅为 set 标签重命名）：
@@ -165,6 +165,14 @@ Q-A/Q-B/Q-C/Q-D 判据同 §1.2 各问；另冻结（F8/F9）：
 | C5 报告/图表 None 回归 | **已修**（markdown 汇总与逐样本 None 安全、bimodal=None→n/a；**main 侧图表防护 = main `dd4e46a`**，复核脚本 TypeError 清零、overlay 19 项 0 error） |
 | C6 OI-13 口径 | 交付范围收紧（本项上方 M0-2 改写）；余量转 §11 |
 | C7 B1/B2 定型 / offset 策略 | 预注册补入 §1.2（pilot 定型 + 节点地址策略 + 校验规则） |
+| MB-01 GROUP 读长误判 | **已修**（按实际返回字节判定；命名失败原因 last_error_） |
+| MB-02 名称错位/越界 | **已修**（names_ 全程按 spec 身份占位 + value_index_ 映射；契约注释不再宣称按内核 ID 解码） |
+| MB-03 planner 丢语义参数 | **已修**（_PASSTHROUGH 直通 case_params=证据通道；leftover plan 期拒绝；非 ptr_chase 通用 case_id；两条回归测试） |
+| MB-04 二次聚合合并 K 条件 | **已修**（m0b cohort 拒绝非 legacy 身份；main seed_medians 同步拒绝——评审允许方案之一；seams 脚本第 87 行未包该异常属脚本预期旧行为） |
+| MB-05 窗口完整性/所有权契约 | **部分修**（复制删除 + 转移语义已实现；窗口差分/有效性 API 转 §11-7） |
+| MB-06 descriptor 最小契约 | 转 §11-8（按两层评审 §4 表格落地 requested→canonical→realized 链；Phase B 前核验） |
+| MB-07 图表静默删点 | **已修**（main：跳点审计清单 + stderr 披露 + 报告局限段；空系列错误点名 run/buffer/seed/field） |
+| MB-08 B1→B2 切换 OR 条件 | **已修**（合格门三条件，见 §1.2 Q-B 定型预注册） |
 | R1–R3 ROB 骨架确定性缺陷 | **属实（已复核）**；ROB 项目文件（main `9a2642c`，r2 基线之外），**不代修**——已由评审登记 REV-TLB-R2-20260930，ROB 项目关闭条件前置 |
 | R4 INST_SPEC/RETIRED 口径 | §1.3 非目标预登记 + 执行端设计文档约束 |
 
@@ -178,4 +186,6 @@ Q-A/Q-B/Q-C/Q-D 判据同 §1.2 各问；另冻结（F8/F9）：
 4. H1–H4 全拒后的 H5+ 假设族：超预算，另立项。
 5. open-items 双 OI-12 唯一化重编号（main 侧维护）。
 6. 冒烟未关闭项（若有）。
-7. OI-13 余量（REV-M0-BATCH C6）：extras 事件的派生字段与消费语义；overlay 测试 `test_missing_metric_fails` 的旧契约期望在 r2 合并时更新（缺指标从"受控退出 1"变为"命名降级"，1 failure 为预期口径差异）。
+7. **PerfWindow 窗口完整性 API（MB-05 余量）**：snapshot 解码与 window validity 分离、前后差分（enabled/running 不随 RESET 清零）、正式窗口有效运行检查——Phase B 短窗 pilot 前完成。
+8. **descriptor 最小证据契约（MB-06）**：按两层评审 §4 表格落地 requested → canonical plan → adapter/kernel → realized observation → identity-aware analysis 链；params 类型规范化与 canonical identity；schema README 登记 probe_shape 与身份维度。
+9. OI-13 余量（REV-M0-BATCH C6）：extras 事件的派生字段与消费语义；overlay 测试 `test_missing_metric_fails` 的旧契约期望在 r2 合并时更新（缺指标从"受控退出 1"变为"命名降级"，1 failure 为预期口径差异）。
