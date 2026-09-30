@@ -360,6 +360,7 @@ class TestPlan(unittest.TestCase):
                     "ptr-chase-sm8650-x4-tlb-anchor.json": 2,
                     "ptr-chase-sm8650-x4-tlb-ctrl.json": 2,
                     "ptr-chase-sm8650-x4-tlb-coarse.json": 26,
+                    "ptr-chase-sm8650-x4-tlb-dense.json": 32,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g1.json": 2,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g2.json": 2,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g4.json": 4,
@@ -393,6 +394,13 @@ class TestPlan(unittest.TestCase):
                         "buffer_set": {128, 256, 384, 512, 768, 1024, 1536, 2048,
                                        3072, 4096, 8192, 16384, 32768},
                         "seeds": {42, 7},
+                    },
+                    # §6.2.4 生成器产出（tlb_dense_gen + 三哈希锚定）：点位随
+                    # Phase A 候选变化，钉集合——生成器输出块是唯一事实源
+                    "ptr-chase-sm8650-x4-tlb-dense.json": {
+                        "buffers": None,
+                        "buffer_set": {192, 416, 448, 480, 4096, 10240, 12288, 14336},
+                        "seeds": {42, 7, 1337, 20260928},
                     },
                     # Gate 1 正控（§5.1 ①②③ / §5.2 事件组）：各组事件三元组按 §3.1 表钉死
                     "ptr-chase-sm8650-x4-tlb-ctrl-g1.json": {

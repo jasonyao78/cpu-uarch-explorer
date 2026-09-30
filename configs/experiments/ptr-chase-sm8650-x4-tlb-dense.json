@@ -1,0 +1,304 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-sm8650-x4-tlb-dense",
+  "title": "SM8650 X4 TLB Phase B 致密扫描（§6.2.4a/4b 确定性生成器产出）",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    {
+      "name": "buffer",
+      "type": "size",
+      "range": "致密点 48..3584 页共 8 档（§6.2.4a/4b 生成，pages × 4KiB 映射）"
+    },
+    {
+      "name": "stride",
+      "type": "size",
+      "default": "64B"
+    },
+    {
+      "name": "warmup_passes",
+      "type": "int",
+      "default": 2
+    },
+    {
+      "name": "loads_per_slot",
+      "type": "int",
+      "default": 8
+    },
+    {
+      "name": "min_loads",
+      "type": "int",
+      "default": 4096
+    },
+    {
+      "name": "repetitions",
+      "type": "int",
+      "default": 10
+    },
+    {
+      "name": "base_pages",
+      "type": "int",
+      "default": 1
+    },
+    {
+      "name": "seed",
+      "type": "int",
+      "default": 42
+    },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        {
+          "name": "cycles",
+          "type": 8,
+          "config": "0x11"
+        },
+        {
+          "name": "mem_access_rd",
+          "type": 8,
+          "config": "0x66"
+        },
+        {
+          "name": "l1d_tlb_refill",
+          "type": 8,
+          "config": "0x05"
+        },
+        {
+          "name": "dtlb_walk",
+          "type": 8,
+          "config": "0x34"
+        }
+      ]
+    }
+  ],
+  "preconditions": [
+    "redmi-k70pro-01 controlled-baseline profile 前后门禁通过",
+    "CPU7 Cortex-X4；四个 core PMU event 同窗且 time_running == time_enabled（拒绝复用）",
+    "每个 repetition 为新进程/新匿名映射；actual backing 必须为 base；逐样本 seed 入档",
+    "输入 = 通过质量门槛的 Phase A 数据（§6.2.4）；点位由生成器确定性产出，禁止看图后人工改点/改阈值/删 seed"
+  ],
+  "metrics": [
+    {
+      "name": "latency_ns",
+      "unit": "ns",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.cycles.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.mem_access_rd.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l1d_tlb_refill.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.dtlb_walk.count",
+      "unit": "events",
+      "statistic": "median"
+    }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "controls": [
+      "x4-prime"
+    ],
+    "params": {
+      "repetitions": 10
+    },
+    "sweep": {
+      "buffer": [
+        "192KiB",
+        "416KiB",
+        "448KiB",
+        "480KiB",
+        "4MiB",
+        "10MiB",
+        "12MiB",
+        "14MiB"
+      ],
+      "seed": [
+        42,
+        7,
+        1337,
+        20260928
+      ]
+    },
+    "fixed_params": [
+      "stride",
+      "warmup_passes",
+      "loads_per_slot",
+      "min_loads",
+      "base_pages",
+      "pmu_events"
+    ]
+  },
+  "notes": "Phase B 致密扫描（任务书 §6.2.4a/4b 生成器产出）：8 个致密点 × order_seed [42, 7, 1337, 20260928] × 短训练（loads_per_slot=8）× G0 = 32 case（§6.2.7 主体额度 ≤50；预算核算口径 32 case，见 generator.quota）；长训练对照（≤12 case）与 G1（≤12 case）为独立额度/独立配置，不在本文件。点位来源路径（knee/onset）逐点标注于 generator.dense_points；输入 run/规则块/输出配置三 SHA-256 锚定见 generator 块。",
+  "generator": {
+    "input_run_sha256": "7ca8f4fd21b8ab5656cca308b08e654610c08a9c236830e4a40dff776928696c",
+    "rules_sha256": "80641cdaa36a0555bbbf4417056de3915717ef833ddb4930a2cfe68205ef612a",
+    "output_sha256": "ecb1759d5048bfcbf1bbb514b7a09e070628e242a0758f2b2966207dcc446fd9",
+    "rules_version": "v4.4",
+    "dense_points": [
+      {
+        "pages": 48,
+        "buffer": "192KiB",
+        "sources": [
+          {
+            "path": "knee",
+            "interval_pages": [
+              96,
+              128
+            ]
+          }
+        ]
+      },
+      {
+        "pages": 104,
+        "buffer": "416KiB",
+        "sources": [
+          {
+            "path": "knee",
+            "interval_pages": [
+              96,
+              128
+            ]
+          }
+        ]
+      },
+      {
+        "pages": 112,
+        "buffer": "448KiB",
+        "sources": [
+          {
+            "path": "knee",
+            "interval_pages": [
+              96,
+              128
+            ]
+          }
+        ]
+      },
+      {
+        "pages": 120,
+        "buffer": "480KiB",
+        "sources": [
+          {
+            "path": "knee",
+            "interval_pages": [
+              96,
+              128
+            ]
+          }
+        ]
+      },
+      {
+        "pages": 1024,
+        "buffer": "4MiB",
+        "sources": [
+          {
+            "path": "onset",
+            "interval_pages": [
+              2048,
+              4096
+            ]
+          }
+        ]
+      },
+      {
+        "pages": 2560,
+        "buffer": "10MiB",
+        "sources": [
+          {
+            "path": "onset",
+            "interval_pages": [
+              2048,
+              4096
+            ]
+          }
+        ]
+      },
+      {
+        "pages": 3072,
+        "buffer": "12MiB",
+        "sources": [
+          {
+            "path": "onset",
+            "interval_pages": [
+              2048,
+              4096
+            ]
+          }
+        ]
+      },
+      {
+        "pages": 3584,
+        "buffer": "14MiB",
+        "sources": [
+          {
+            "path": "onset",
+            "interval_pages": [
+              2048,
+              4096
+            ]
+          }
+        ]
+      }
+    ],
+    "quota": {
+      "unit": "runner case = buffer × order_seed × 训练量 × 事件组 × policy（§6.2.7）；锚点 2 run 为独立额度，不在此计数",
+      "budget_main_cases": 50,
+      "seeds": [
+        42,
+        7,
+        1337,
+        20260928
+      ],
+      "quota_cases": 32,
+      "main_cases": 32,
+      "point_quota_total": 8,
+      "per_interval": [
+        {
+          "path": "knee",
+          "interval_pages": [
+            96,
+            128
+          ],
+          "refill_ratio": 82.11304377927345,
+          "inserted_pages": [
+            48,
+            104,
+            112,
+            120
+          ],
+          "dropped_pages": [],
+          "quota_points": 4
+        },
+        {
+          "path": "onset",
+          "interval_pages": [
+            2048,
+            4096
+          ],
+          "refill_ratio": 0.7823782414835243,
+          "inserted_pages": [
+            1024,
+            2560,
+            3072,
+            3584
+          ],
+          "dropped_pages": [],
+          "quota_points": 4
+        }
+      ],
+      "clipped_intervals": []
+    }
+  }
+}
