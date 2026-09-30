@@ -678,6 +678,89 @@ class TestMetricContract(unittest.TestCase):
             detect_walk_onset({42: [row]})
 
 
+_LEFT_PAGES = 32
+
+
+class TestRevM0BatchRegression(unittest.TestCase):
+    """REV-M0-BATCH C2–C5 回归（评审要求：完整缺失 + 部分覆盖两种输入）。"""
+
+    @staticmethod
+    def _strip(run, name):
+        for rec in (*run.ok_records, *run.failed_records):
+            rec["metrics"] = [m for m in rec["metrics"] if m["name"] != name]
+        return run
+
+    def test_c2_mixed_contract_same_identity_separates_groups(self):
+        # 同几何同 seed，契约不同 → 不同组；组内各指标样本集合恒一致
+        full = _record(latencies=(100.0, 110.0), cycles=(100.0, 110.0))
+        partial = _record(latencies=(1.0, 2.0))
+        partial["metrics"] = [m for m in partial["metrics"]
+                              if m["name"] != "pmu.cycles.count"]
+        result = analyze_records([full, partial], "run-a")
+        self.assertEqual(len(result.groups), 2)
+        for group in result.groups:
+            n = len(group["samples"])
+            for field in ("latency_ns", "cyc_per_load", "l1d_tlb_refill_per_1k"):
+                self.assertEqual(
+                    len([s[field] for s in group["samples"]]), n,
+                    f"per-field sample divergence at {field}",
+                )
+
+    def test_c3_knee_public_entry_incomputable_before_floor(self):
+        # 公开裁定入口（adjudicate_knee）先于 32 页 floor 比较被守卫
+        record = _record()
+        record["metrics"] = [m for m in record["metrics"]
+                             if m["name"] != "pmu.l1d_tlb_refill.count"]
+        result = analyze_records([record], "run-a")
+        group = result.groups[0]
+        row = {"pages": _LEFT_PAGES,
+               "l1d_tlb_refill_per_1k": group["l1d_tlb_refill_per_1k"],
+               "cyc_per_load": group["cyc_per_load"]}
+        with self.assertRaisesRegex(TlbError, "INCOMPUTABLE"):
+            adjudicate_knee({42: [row]})
+
+    def test_c3_walk_samples_none_incomputable(self):
+        # 中位数可用但逐样本含 None（部分覆盖）→ INCOMPUTABLE，非 TypeError
+        rows = _walk_rows([(2048, 1.2, [0.6] * 10)])
+        rows[0]["walk_samples"] = [0.6, None, 0.7]
+        with self.assertRaisesRegex(TlbError, "INCOMPUTABLE"):
+            detect_walk_onset({42: rows})
+
+    def test_c4_anchor_missing_required_event_fails_closed(self):
+        before = self._strip(_anchor_run("before", _T0), "pmu.cycles.count")
+        verdict = validate_anchors(_block(
+            before=before, after=_anchor_run("after", _T2)))
+        self.assertEqual(verdict.status, "BLOCK_FAILED")
+        checks = verdict.evidence["checks"]
+        self.assertTrue(any(c["check"] == "anchor_metric_contract"
+                            and not c["ok"] for c in checks))
+
+    def test_c4_anchor_missing_mem_rd_still_ok(self):
+        # mem_access_rd 不在锚点必需集（评审裁定：不把 G0 重新硬编码）
+        before = self._strip(_anchor_run("before", _T0),
+                             "pmu.mem_access_rd.count")
+        verdict = validate_anchors(_block(
+            before=before, after=_anchor_run("after", _T2)))
+        self.assertEqual(verdict.status, "ANCHORS_OK")
+
+    def test_c5_markdown_degraded_fields_and_bimodal_na(self):
+        record = _record()
+        record["metrics"] = [m for m in record["metrics"]
+                             if m["name"] != "pmu.mem_access_rd.count"]
+        no_refill = _record()
+        no_refill["params"]["buffer_kb"] = 1024
+        no_refill["metrics"] = [m for m in no_refill["metrics"]
+                                if m["name"] != "pmu.l1d_tlb_refill.count"]
+        result = analyze_records([record, no_refill], "run-a")
+        markdown = build_markdown([result])
+        self.assertIn("| n/a |", markdown)          # 降级单元格
+        # bimodal=None（缺 refill 的 1024 组）显示 n/a；可计算的 512 组仍显示 no
+        row1024 = next(line for line in markdown.splitlines()
+                       if line.startswith("| run-a | 1024"))
+        cells = [c.strip() for c in row1024.strip("|").split("|")]
+        self.assertEqual(cells[-2], "n/a")          # bimodal 列
+
+
 class TestContractErrors(unittest.TestCase):
     def test_missing_seed_is_hard_error(self):
         with self.assertRaises(TlbError):

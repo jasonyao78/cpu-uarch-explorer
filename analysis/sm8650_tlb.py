@@ -127,6 +127,13 @@ _PMU_EVENTS = {
     "pmu.dtlb_walk.count": (8, 0x34, "dtlb_walk_per_1k", 1000.0),
 }
 _REQUIRED_METRICS = {_LATENCY, *_PMU_EVENTS}
+# REV-M0-BATCH C4：锚点判据的必要事件（band/refill 密度、walk 计数、
+# cycles 派生率）。mem_access_rd 有意不在列（锚点不消费——评审裁定）。
+_ANCHOR_REQUIRED_EVENTS = (
+    "pmu.cycles.count",
+    "pmu.l1d_tlb_refill.count",
+    "pmu.dtlb_walk.count",
+)
 _BACKING_ORDER = {"base": 0, "mixed": 1, "thp": 2, "hugetlb-2m": 3,
                   "platform-default": 4}
 # 与 runner/adapters/ptr_chase.py 同款：vma_base 只认小写 hex 地址形态。
@@ -597,6 +604,12 @@ def adjudicate_knee(rows_by_seed: dict[int, list[dict]], *,
                 "evidence": {"unqualified_events": sorted(str(event) for event in unqualified_events)}}
     per_seed: dict[int, dict] = {}
     empty_seeds: list[int] = []
+    # REV-M0-BATCH C3：公开裁定入口先行守卫——floor 比较（32 页）在
+    # detect_knee_candidates 之前消费 refill，None 会在这里 TypeError
+    # 而非命名 INCOMPUTABLE。
+    for rows in rows_by_seed.values():
+        _require_row_fields(rows, ("l1d_tlb_refill_per_1k", "cyc_per_load"),
+                            "adjudicate_knee")
     for seed, rows in sorted(rows_by_seed.items()):
         ordered = sorted(rows, key=lambda row: row["pages"])
         if not ordered:
@@ -705,6 +718,15 @@ def detect_walk_onset(rows_by_seed: dict[int, list[dict]], *,
     for seed, rows in sorted(rows_by_seed.items()):
         _require_row_fields(rows, ("dtlb_walk_per_1k",),
                             "detect_walk_onset")
+        # REV-M0-BATCH C3：逐样本集合同守卫（_walk_point_qualifies 消费
+        # walk_samples；中位数非 None 不代表逐样本无 None）
+        for row in rows:
+            for value in row.get("walk_samples", []):
+                if value is None:
+                    raise TlbError(
+                        "detect_walk_onset: INCOMPUTABLE — walk_samples "
+                        f"contains None (pages={row.get('pages')!r})"
+                    )
         ordered = sorted(rows, key=lambda row: row["pages"])
         if not ordered:
             empty_seeds.append(seed)  # 数据空的 seed 按缺失处理
@@ -779,19 +801,25 @@ def analyze_records(records: Iterable[dict], run_label: str,
             )
             continue
         for sample in _samples_from_record(record, run_label, result.rejected):
+            # REV-M0-BATCH C2：缺失集也是身份维度——同契约才同组，组内各
+            # 指标的可用样本集合恒一致（无逐字段样本分裂/选择偏差）。
             key = (
                 sample["buffer_kb"],
                 sample["seed"],
                 sample["page_policy_actual"],
                 sample["ring_passes"],
+                tuple(sample["_metric_missing"]),
             )
             grouped[key].append(sample)
     if not seen:
         raise TlbError(f"{run_label}: no records")
 
-    for (buffer_kb, seed, backing, passes), samples in sorted(
+    # REV-M0-BATCH C2：键含缺失集维度（变长）；排序与解包只取前 4 元，
+    # metric_contract 取自组内样本（同组契约恒一致）。
+    for _key, samples in sorted(
         grouped.items(), key=lambda item: (item[0][0], item[0][1], _BACKING_ORDER[item[0][2]], item[0][3])
     ):
+        buffer_kb, seed, backing, passes = _key[:4]
         contract_missing = sorted({m for s in samples for m in s["_metric_missing"]})
         contract_extras = sorted({m for s in samples for m in s["_metric_extras"]})
         stored = []
@@ -1123,7 +1151,7 @@ def adjudicate_q3(*, g3_executed: bool = False,
     - association_points：关联数据占位（逐点 {pages, dtlb_walk_per_1k,
       cyc_per_load}），校验后按页数排序原样回显；
     - evidence 明示：data_miss_collinearity_checked 恒 False——本函数
-      不消费 G3 数据（G3 五事件组不满足本模块 G0 metric 集合契约），
+      不消费 G3 数据——历史原因：G3 五事件组超出冻结期 G0 精确集合契约；M0-2 起超集已被接纳（extras 按名保留、per-observation 在原始件），本函数不消费 extras 是**判据选择**而非契约拒绝（REV-M0-BATCH C6），
       G3 未执行时不得声称"已检验 data-miss 共线性"（§5.2/§9.3 ⑬）；
       mmutc_confound_unresolved 恒 True——walk 服务时间受 MMUTC（2048
       项 walk 缓存）命中状态影响，任何成本型估计必须声明该混杂未分离
@@ -1752,6 +1780,29 @@ def validate_anchors(block: BlockResult,
         ("anchor_after", "after", block.anchor_after),
     ):
         groups[role], anchor_rejected[key] = _anchor_groups(run)
+    # REV-M0-BATCH C4：锚点下游（band / walk count / baseline）假定统计
+    # 数值完整。锚点必需事件缺失 = 显式不可判定并阻止主体晋升。注意
+    # mem_access_rd 不在锚点必需集（锚点判据不依赖它——评审裁定，不
+    # 把 G0 全量重新硬编码为锚点集合）。
+    contract_failures = []
+    for role in ("anchor_before", "anchor_after"):
+        for buffer_kb, grp in groups[role].items():
+            missing = grp.get("metric_contract", {}).get("missing", [])
+            hit = [m for m in missing if m in _ANCHOR_REQUIRED_EVENTS]
+            checks.append({
+                "check": "anchor_metric_contract",
+                "run": role, "buffer": buffer_kb,
+                "missing": missing, "ok": not hit,
+            })
+            if hit:
+                contract_failures.append({"run": role, "buffer": buffer_kb,
+                                          "missing": hit})
+    if contract_failures:
+        return AnchorVerdict(
+            status=_BLOCK_FAILED,
+            evidence={"checks": checks,
+                      "failures": contract_failures},
+        )
     for role in ("anchor_before", "anchor_after"):
         for buffer_kb in _ANCHOR_BUFFERS:
             group = groups[role][buffer_kb]
@@ -1930,22 +1981,34 @@ def build_markdown(results: list[AnalysisResult], show_samples: bool = False) ->
             for field_name in ("latency_ns", "cyc_per_load", "mem_rd_per_1k",
                                "l1d_tlb_refill_per_1k", "dtlb_walk_per_1k"):
                 stats = group[field_name]
-                cells.append(f"{_fmt(stats['median'])} [{_fmt(stats['p25'])}, {_fmt(stats['p75'])}]")
-            cells.append("YES" if group["bimodal"] else "no")
+                # REV-M0-BATCH C5：stats 为 None（降级字段）时整个单元格
+                # n/a——先判 None 再取 median（原实现先解引用后 _fmt）。
+                cells.append(
+                    "n/a" if stats is None
+                    else f"{_fmt(stats['median'])} [{_fmt(stats['p25'])}, {_fmt(stats['p75'])}]"
+                )
+            # bimodal=None 是"不可计算"不是"未发现双峰"（原布尔分支误显 no）
+            cells.append("YES" if group["bimodal"] else
+                         ("n/a" if group["bimodal"] is None else "no"))
             cells.append(
                 ", ".join(_short_name(name) for name in group["unqualified_events"])
                 or "-"
             )
             lines.append("| " + " | ".join(cells) + " |")
             if show_samples:
+                # REV-M0-BATCH C5：逐样本字段同为可降级（None）——None 打印
+                # n/a，不做浮点格式化（TypeError 通道关闭）。
+                def _sf(value, fmt):
+                    return "n/a" if value is None else format(value, fmt)
                 for sample in group["samples"]:
                     lines.append(
                         f"<!-- sample {result.run_label} b{group['buffer_kb']}K "
                         f"seed={sample['seed']} s{sample['sample_index']}: "
-                        f"lat={sample['latency_ns']:.4f} cyc={sample['cyc_per_load']:.3f} "
-                        f"mem_rd={sample['mem_rd_per_1k']:.2f} "
-                        f"refill={sample['l1d_tlb_refill_per_1k']:.2f} "
-                        f"walk={sample['dtlb_walk_per_1k']:.3f} "
+                        f"lat={_sf(sample['latency_ns'], '.4f')} "
+                        f"cyc={_sf(sample['cyc_per_load'], '.3f')} "
+                        f"mem_rd={_sf(sample['mem_rd_per_1k'], '.2f')} "
+                        f"refill={_sf(sample['l1d_tlb_refill_per_1k'], '.2f')} "
+                        f"walk={_sf(sample['dtlb_walk_per_1k'], '.3f')} "
                         f"vma={sample.get('vma_base', '-')} -->"
                     )
     rejected = [line for result in results for line in result.rejected]

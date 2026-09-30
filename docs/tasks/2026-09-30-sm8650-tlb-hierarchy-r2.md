@@ -1,6 +1,6 @@
 # SM8650 Cortex-X4 TLB 层级探测 · 第二次战役（r2）任务书 v1.1
 
-> 版本：v1.1（2026-09-30；修订基线 v1.0 = `a104dbf`）
+> 版本：v1.2（2026-09-30；v1.0 = `a104dbf` → v1.1 按 REV-TLB-R2 → v1.2 按 **REV-M0-BATCH**，处置见 §10.3）
 > 修订依据：外部评审 REV-TLB-R2-20260930（第一性原理评审，13 项发现 F1–F9/R1–R4；归档于本分支 `docs/reviews/2026-09-30-sm8650-tlb-r2-first-principles.md`，合成复核脚本 `scripts/review_sm8650_tlb_r2.py`）。**逐条处置见 §10.3 修订映射**。
 > 基线：`main @ 9316853`（第一次战役集成终点；main 此后已推进 `459b135..bc96ff1` 图表报告工作，Phase D 前须同步）。
 > 方法资产：`docs/cpu-uarch-deep-analysis/`（TLB 报告 v1.6、矩阵 v0.2、原型 v2.3——角色见 §2.3）
@@ -23,7 +23,7 @@
 |---|---|---|
 | page set | 实际访问的 N 个 VPN 集合 | 连续 / 大步距 / 稀疏随机**集合**分别构造；禁止用打乱顺序冒充随机集合 |
 | visit order | 同集合上的遍历顺序 | 各集合统一随机环协议；顺序/逆序为独立对照 |
-| in-page offset | 页内指针所在 cache line | 页首固定 vs 页内 line 分散（如 `offset=64×(i mod 64)`）至少一组对照——`-s 4096` 全在页首的 cache 索引共振不受控（F1） |
+| in-page offset | 页内指针所在 cache line | **节点地址策略独立实现**（REV-M0-BATCH C7）：`node[i] = base + page_id[i]×page_size + offset(i)`，offset 是**页 ID 的函数**（同页跨访问保持一致），按 permutation 建链；**禁止改 stride 模拟**（同时改变页集合与几何）。校验：指针对齐、不跨页、每页恰一节点、无重复地址；record 记 requested/realized offset policy + distinct pages + VA span + cache-line footprint。归属 M0-4/Phase A，**正式测量前必须完成** |
 | mapping span | 保留 VA 范围与页表覆盖 | 与 N/驻留字节**分字段**记录；大步距扩大的是地址跨度不只是 TLB 压力 |
 | allocation epoch | 重新分配/进程实例 | seed 重复与重分配导致的 PFN 布局变化分别留存 |
 
@@ -36,6 +36,7 @@
 - **B2 单 victim 驱逐概率**：victim v 填入 → m 个候选同 set aggressor（须验证其实际进入 L2 查找）→ 经验证的 L1 驱逐 → 测 v；估计量 `P(v 被驱逐 | m, H, 协议)`，负控 = aggressor 置于其它候选 set。
 - 协议纪律：先以**不依赖 H 的经验驱逐集**取得正控，再测候选 H（否则循环论证）；AB/BA 或随机配对次序（v1.0 固定先 T 后 T2 无次序平衡）；filler 避目标 leaf set **不保证**中间描述符不占目标 set——**先报告冲突曲线/概率，再有条件解释为"混合条目有效相联度"**；"8→9"仅适用于总竞争条目数口径，B2 的 victim 是否计入横轴须明示。
 - 门控不依赖 0x2f：`0x05` 差分 + `probe_ns` 上界双门控。
+- **定型预注册（REV-M0-BATCH C7，Phase B 正式采样前冻结）**：默认主估计量 = **B1 自冲突曲线**；切换 B2 的条件 = pilot 证明 B1 的"目标访问实际暴露 L2 查找"不成立（仅驻留 L1）或 B2 的 victim 二值分类器误判率完成校准；决策时点 = Phase B pilot 之后、正式矩阵之前；pilot 与正式验证样本隔离（同 REV 批次纪律）。
 - 终态：`CONFLICT_CURVE_IDENTIFIED` / `EVICTION_PROB_IDENTIFIED` / `CONTROL_ONLY` / `GATE_FAILED` / `H_NOT_FOUND`。
 
 **Q-C（L2 索引哈希假设族，探索性）**——v1.0 的可区分性缺陷修正（F4：对齐 256 MiB 池内 VPN[23:16] 恒定，H3≡H1⊕常数、H4≡H2⊕常数，仅为 set 标签重命名）：
@@ -87,7 +88,7 @@
 > M0 未完成不得进入 Gate 0 之后的采数。每项独立提交 + 双评审。
 
 - **M0-1 共享运行支撑层**（F6/评审 §3）：从 ptr_chase 抬升 `probes/common/`——RAII 映射与守卫、**合法地址池**、页 backing 审计（smaps 端点）、timer、CPU/MIDR 身份；与既有 `perf_counter.h` 同级。页策略不再随探头复制。
-- **M0-2 关闭 OI-13**：同 v1.0（超集放行 + 锚点/主体解耦 + 缺失项命名降级语义）；**保留** per-observation 事件编码/窗口/页审计/分母契约（F6：宽容读字段 ≠ 宽容合并实验条件）。
+- **M0-2 部分关闭 OI-13（REV-M0-BATCH C6 口径收紧）**：超集放行仅保留事件**名字**（per-observation 编码仍在 records.jsonl 原始件可审计，AnalysisResult 不派生 extras 字段）；"锚点/主体解耦 + 缺失项命名降级 + 契约进分组键"已完成；**OI-13 保持未闭环**（余量：extras 派生字段与消费语义，转 §11 跟踪）。**保留** per-observation 事件编码/窗口/页审计/分母契约（F6：宽容读字段 ≠ 宽容合并实验条件）。
 - **M0-3 PerfWindow 短窗能力**（F5）：perf **GROUP 原子启停/组读**，`read_format = nr, time_enabled, time_running, values[]`（**按实际布局解码，按事件 ID 映射**——Linux 布局非 nr,values[],ena,run；ROB 骨架 R2 即此错）；显式 privilege scope（排除内核或显式记录）；阶段标记；窗口 delta 的 enabled/running；读数失败逐轮失效；CPU 归属。长链旧模式并存。
 - **M0-4 planner 解耦与判据身份**（F6）：probe descriptor/adapter 提供参数规范化与**实际几何派生**（page count / VA span / node offset policy / chains / allocation-round-phase-pair / realized geometry vs requested params 分字段入 record）；planner 退化为通用控制（sweep 展开、随机化/配对次序、预算）；**消除 ptr_chase 专属参数派生**（现 planner 对任意 probe 名派生 buffer/stride/slots/loads/warmup）。分析器分组键扩展（buffer/seed/backing/ring_passes → +分布/offset/K/span），**禁止跨条件合并**；每问声明事件依赖（缺无关事件不阻止计算，缺必要事件输出显式不可计算）。
 - **M0-5 锚点参照池**（顺序修正，F8）：**先 pilot 后池**——安全性修正（原型 v2.3 同款缺陷扫描）→ 能力/窗口 pilot（标 `CALIBRATION/PILOT`，raw 留存）→ 独立校准样本冻结阈值 → 正式矩阵。新统计量池**不得**用旧长链率代替短窗 delta。
@@ -157,6 +158,13 @@ Q-A/Q-B/Q-C/Q-D 判据同 §1.2 各问；另冻结（F8/F9）：
 | F7 Q-D 排除对照 | §1.2 Q-D 四曲线/两条件/负控/显式寄存器链 |
 | F8 校准顺序 | M0-5 先 pilot 后池；§6.2 冻结顺序 |
 | F9 合同漂移 | §3.1 继承资格；§2.2 OI-12 消歧；§6.2 3% 澄清/配对规则/事件率口径 |
+| C1 Android/Linux 编译失败（PageBackingClass 未限定） | **已修**（两处 `probe_common::`；评审同款 NDK 27.2 语法检查通过） |
+| C2 逐字段样本分裂 | **已修**（缺失集进分组键；组内样本集合恒一致；回归测试钉住） |
+| C3 判据守卫绕过（knee floor / walk 逐样本） | **已修**（`adjudicate_knee` 入口守卫先于 floor；`walk_samples` 逐样本守卫；两种输入覆盖） |
+| C4 锚点下游守卫 | **已修**（`_ANCHOR_REQUIRED_EVENTS` 不含 mem_rd——按评审裁定；锚点契约缺失 → BLOCK_FAILED 命名） |
+| C5 报告/图表 None 回归 | **已修**（markdown 汇总与逐样本 None 安全、bimodal=None→n/a；**main 侧图表防护 = main `dd4e46a`**，复核脚本 TypeError 清零、overlay 19 项 0 error） |
+| C6 OI-13 口径 | 交付范围收紧（本项上方 M0-2 改写）；余量转 §11 |
+| C7 B1/B2 定型 / offset 策略 | 预注册补入 §1.2（pilot 定型 + 节点地址策略 + 校验规则） |
 | R1–R3 ROB 骨架确定性缺陷 | **属实（已复核）**；ROB 项目文件（main `9a2642c`，r2 基线之外），**不代修**——已由评审登记 REV-TLB-R2-20260930，ROB 项目关闭条件前置 |
 | R4 INST_SPEC/RETIRED 口径 | §1.3 非目标预登记 + 执行端设计文档约束 |
 
@@ -170,3 +178,4 @@ Q-A/Q-B/Q-C/Q-D 判据同 §1.2 各问；另冻结（F8/F9）：
 4. H1–H4 全拒后的 H5+ 假设族：超预算，另立项。
 5. open-items 双 OI-12 唯一化重编号（main 侧维护）。
 6. 冒烟未关闭项（若有）。
+7. OI-13 余量（REV-M0-BATCH C6）：extras 事件的派生字段与消费语义；overlay 测试 `test_missing_metric_fails` 的旧契约期望在 r2 合并时更新（缺指标从"受控退出 1"变为"命名降级"，1 failure 为预期口径差异）。

@@ -406,7 +406,7 @@ int main(int argc, char** argv) {
             munmap(mapping_base, mapping_bytes);
             return 1;
         }
-        const PageBackingClass before =
+        const probe_common::PageBackingClass before =
             probe_common::classify_page_backing(anon_huge_kb_before, normal_map_bytes);
         page_policy_actual_before = before.actual;
         page_kb = before.page_kb;
@@ -481,7 +481,7 @@ int main(int argc, char** argv) {
             munmap(mapping_base, mapping_bytes);
             return 1;
         }
-        const PageBackingClass after =
+        const probe_common::PageBackingClass after =
             probe_common::classify_page_backing(anon_huge_kb_after, normal_map_bytes);
         page_policy_actual_after = after.actual;
     }
