@@ -11,11 +11,10 @@ knee（§6.2.2 三条件不全满足时无候选）、`0x05` density >1000/1k �
 （detect_walk_onset）、双峰标记（§9.2 复用 p0prime 预注册规则）；
 以及块机制：§6.4 三块归组（group_block，experiment_id 定角色 +
 probe SHA-256/target/时序关联证据）与 §6.2.5 锚点判据
-（validate_anchors：环境门禁、latency/cyc 对照 short-base 参照 ≤3%、
-512 KiB R_0x05 落 Gate 0 制度匹配参照 [p25,p75]（v4.2）、512 KiB
-R_0x34 计数容差判据（v4.3：地板量化指标，|median−参照| ≤
-max(3, 0.5×参照) walks/窗，含前后互判）、3072 KiB 首块自校准、前后
-锚点互判）；
+（validate_anchors：环境门禁；判据 2 池带 C±1.5W（v4.4 方差表征池
+现算，latency/cyc/R 密度两 buffer）+ 互判 |before−after| ≤ 1.5W；
+判据 3 512 KiB R_0x34 计数容差（v4.3 形式沿用、v4.4 参照改自池）；
+判据 4 3072 KiB 首块自校准、后续块落基线 median ± 1.5W）；
 以及 §7 Phase D THP cohort（分级：比较级 ≥5 有效样本出 median / 描述级
 3–4 只报原始观测 / <3 与未达比较级终态 INSUFFICIENT_COHORT；跨 seed
 同制度合并、异制度分列；mixed 不并入 thp；40 进程次/(buffer×policy)
@@ -705,21 +704,35 @@ class TestAllFailedRun(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
-# §6.4/§6.2.5 块归组与锚点判定 fixture
+# §6.4/§6.2.5 块归组与锚点判定 fixture（任务书 v4.4 池化参照）
 #
-# 参照期望值现场从真实 evidence run 独立重算（本文件自己的 JSON 解析路
-# 径 + runner.statistics.summarize 口径），不写死数字——冻结规则要求参
-# 照现读现算（仓内数据修正走 revision history，硬编码会静默过期）。测
-# 试钉的是模块计算的正确性（两路独立计算逐位一致），不是常量值；参照
-# run 修正后期望值自动跟踪。
+# 参照期望值现场从方差表征池（6 个 anchor run）独立重算（本文件自己的
+# JSON 解析路径 + runner.statistics.summarize 口径），不写死数字——冻
+# 结规则要求参照现读现算（仓内数据修正走 revision history，硬编码会
+# 静默过期）。测试钉的是模块计算的正确性（两路独立计算逐位一致），不
+# 是常量值；池数据修正后期望值自动跟踪。池成员名单独立写死（防单向
+# 漂移），并与模块 _ANCHOR_REF_POOL_RUNS 互钉。
 # ---------------------------------------------------------------------------
 
-_SHORT_BASE_RUN = "20260928T024022Z-ptr-chase-sm8650-x4-p0prime-short-base"
-# 512 KiB R 值参照（任务书 v4.2）：Gate 0 tlb-ctrl run——制度匹配
-# （loads_per_slot=8、warmup 2、G0、base、seed 42，Gate 0 八项契约全
-# 过）；v4.1 的旧正控 run 20260927T182613Z 其 512 KiB 组实为 2048
-# ring passes，制度不匹配，仅保留 floor/scale 方向性正控角色。
-_GATE0_CTRL_RUN = "20260929T143631Z-ptr-chase-sm8650-x4-tlb-ctrl"
+# 方差表征池（任务书 v4.4 §6.2.5；6 个 ptr-chase-sm8650-x4-tlb-anchor
+# run 当夜连跑，入库 beb63ef）。
+_POOL_RUNS = [
+    "20260929T235909Z-ptr-chase-sm8650-x4-tlb-anchor",
+    "20260929T235918Z-ptr-chase-sm8650-x4-tlb-anchor",
+    "20260929T235927Z-ptr-chase-sm8650-x4-tlb-anchor",
+    "20260929T235938Z-ptr-chase-sm8650-x4-tlb-anchor",
+    "20260929T235948Z-ptr-chase-sm8650-x4-tlb-anchor",
+    "20260929T235957Z-ptr-chase-sm8650-x4-tlb-anchor",
+]
+
+# (派生字段, 记录 metric 名, per-loads 归一系数)——与判据 2 的消费面对齐。
+_POOL_METRICS = (
+    ("latency_ns", "latency_ns", None),
+    ("cyc_per_load", "pmu.cycles.count", 1.0),
+    ("l1d_tlb_refill_per_1k", "pmu.l1d_tlb_refill.count", 1000.0),
+    ("dtlb_walk_per_1k", "pmu.dtlb_walk.count", 1000.0),
+)
+_ANCHOR_BUFFERS = (512, 3072)
 
 
 def _evidence_group_stats(run_label, buffer_kb, metric, per_loads_scale):
@@ -744,28 +757,31 @@ def _evidence_group_stats(run_label, buffer_kb, metric, per_loads_scale):
 
 
 def _reference_expectations():
-    """§6.2.5 参照期望值：short-base 512/3072 KiB 组 median（latency 与
-    cyc/load）+ Gate 0 参照 512 KiB 组 R 值 [p25, p75] 与 median +
-    512 KiB 组逐样本 walk 原始计数（walks/窗）median（v4.3 计数容差
-    判据的参照）。"""
-    expectations = {"medians": {}, "r512_p25_p75": {}, "r512_median": {}}
-    for buffer_kb in (512, 3072):
-        expectations["medians"][buffer_kb] = {
-            "latency_ns": _evidence_group_stats(
-                _SHORT_BASE_RUN, buffer_kb, "latency_ns", None)["median"],
-            "cyc_per_load": _evidence_group_stats(
-                _SHORT_BASE_RUN, buffer_kb, "pmu.cycles.count", 1.0)["median"],
-        }
-    for metric, field in (
-        ("pmu.l1d_tlb_refill.count", "l1d_tlb_refill_per_1k"),
-        ("pmu.dtlb_walk.count", "dtlb_walk_per_1k"),
-    ):
-        stats = _evidence_group_stats(_GATE0_CTRL_RUN, 512, metric, 1000.0)
-        expectations["r512_p25_p75"][field] = (stats["p25"], stats["p75"])
-        expectations["r512_median"][field] = stats["median"]
-    expectations["walk512_median_count"] = _evidence_group_stats(
-        _GATE0_CTRL_RUN, 512, "pmu.dtlb_walk.count", None)["median"]
-    return expectations
+    """§6.2.5 v4.4 池化参照期望值：per (metric, buffer) 的 C（逐 run
+    median 的 median）/ W（逐 run median 的 max−min）/ band（C±1.5W）
+    + 512 KiB walk 池参照计数 median（同一 C 聚合于逐样本原始计数）。"""
+    bands = {}
+    for buffer_kb in _ANCHOR_BUFFERS:
+        for field, metric, scale in _POOL_METRICS:
+            medians = [
+                _evidence_group_stats(run, buffer_kb, metric, scale)["median"]
+                for run in _POOL_RUNS
+            ]
+            center = summarize(medians)["median"]
+            spread = max(medians) - min(medians)
+            bands[(field, buffer_kb)] = {
+                "center": center,
+                "spread": spread,
+                "band": (center - 1.5 * spread, center + 1.5 * spread),
+            }
+    walk_medians = [
+        _evidence_group_stats(run, 512, "pmu.dtlb_walk.count", None)["median"]
+        for run in _POOL_RUNS
+    ]
+    return {
+        "bands": bands,
+        "walk512_median_count": summarize(walk_medians)["median"],
+    }
 
 
 _REF = _reference_expectations()  # import 时现读现算一次
@@ -885,34 +901,36 @@ def _loaded_run(label, experiment_id, ok_records, *, failed_records=(),
 
 def _anchor_run(label, timestamp, *, lat_512=None, cyc_512=None,
                 r05_512=None, r34_512=None, walks_512=None,
-                lat_3072=None, cyc_3072=None, r05_3072=500.0, r34_3072=0.02,
+                lat_3072=None, cyc_3072=None, r05_3072=None, r34_3072=None,
                 sha=_PROBE_SHA, failed_records=(), summary_failed=None):
     """锚点 run：固定 512/3072 KiB 两个 base case（§6.2.5），缺省值 =
-    现场重算的参照中位（偏差 0、落在 Gate 0 参照区间内）。walks_512
-    以 walks/窗计数直接钉 512 KiB R_0x34（v4.3 计数容差判据），优先
-    于 r34_512 的密度指定。3072 KiB R 值无历史参照，fixture 任取恒定
-    值。"""
+    现场重算的池参照中心 C（落带中央，全部判据偏差 0）。walks_512 以
+    walks/窗计数直接钉 512 KiB R_0x34（v4.3 计数容差判据，v4.4 参照
+    改自池），优先于 r34_512 的密度指定。"""
+    bands = _REF["bands"]
+
+    def _center(field, buffer_kb, override):
+        return bands[(field, buffer_kb)]["center"] if override is None else override
+
     records = [
         _case_record(
             buffer_kb=512,
-            latency_ns=(_REF["medians"][512]["latency_ns"]
-                        if lat_512 is None else lat_512),
-            cyc_per_load=(_REF["medians"][512]["cyc_per_load"]
-                          if cyc_512 is None else cyc_512),
-            refill_per_1k=(_REF["r512_median"]["l1d_tlb_refill_per_1k"]
-                           if r05_512 is None else r05_512),
-            walk_per_1k=(_REF["r512_median"]["dtlb_walk_per_1k"]
-                         if r34_512 is None else r34_512),
-            walk_count=walks_512,
+            latency_ns=_center("latency_ns", 512, lat_512),
+            cyc_per_load=_center("cyc_per_load", 512, cyc_512),
+            refill_per_1k=_center("l1d_tlb_refill_per_1k", 512, r05_512),
+            walk_per_1k=_center("dtlb_walk_per_1k", 512, r34_512),
+            walk_count=(
+                _REF["walk512_median_count"]
+                if walks_512 is None and r34_512 is None else walks_512
+            ),
             timestamp=timestamp, sha=sha,
         ),
         _case_record(
             buffer_kb=3072,
-            latency_ns=(_REF["medians"][3072]["latency_ns"]
-                        if lat_3072 is None else lat_3072),
-            cyc_per_load=(_REF["medians"][3072]["cyc_per_load"]
-                          if cyc_3072 is None else cyc_3072),
-            refill_per_1k=r05_3072, walk_per_1k=r34_3072,
+            latency_ns=_center("latency_ns", 3072, lat_3072),
+            cyc_per_load=_center("cyc_per_load", 3072, cyc_3072),
+            refill_per_1k=_center("l1d_tlb_refill_per_1k", 3072, r05_3072),
+            walk_per_1k=_center("dtlb_walk_per_1k", 3072, r34_3072),
             timestamp=timestamp, sha=sha,
         ),
     ]
@@ -1033,33 +1051,42 @@ class TestValidateAnchors(unittest.TestCase):
     """§6.2.5 锚点判据：ANCHORS_OK / BLOCK_FAILED / BLOCK_INCOMPLETE
     是块级终态（与 §10.2 的 Q 级终态不同层）。"""
 
-    def test_latency_deviation_within_threshold_passes(self):
-        # ①latency 偏差 2%（≤3%）通过；主体 case 进入判定（main_result
-        # 产出主体分组）；首块 3072 KiB 自校准建立基线。
-        block = _block(
-            before=_anchor_run("before", _T0,
-                               lat_512=_REF["medians"][512]["latency_ns"] * 1.02),
-            after=_anchor_run("after", _T2,
-                              lat_512=_REF["medians"][512]["latency_ns"] * 1.02),
-        )
-        self.assertEqual(block.status, "BLOCK_GROUPED")
-        verdict = validate_anchors(block)
-        self.assertEqual(verdict.status, "ANCHORS_OK")
-        self.assertIsNotNone(verdict.main_result)
-        self.assertEqual(
-            sorted(group["buffer_kb"] for group in verdict.main_result.groups),
-            [128, 256],
-        )
-        self.assertIsNotNone(verdict.baseline_3072)
+    def test_latency_within_pool_band_passes(self):
+        # ①判据 2（v4.4）：前/后锚点 latency median 落池带 C±1.5W 内
+        # （含带边，inclusive——latency 无 loads 换算，带边 double 精确）
+        # → 通过；主体 case 进入判定；首块 3072 KiB 自校准建立基线。
+        band = _REF["bands"][("latency_ns", 512)]["band"]
+        with self.subTest(edge="centers"):
+            block = _block(after=_anchor_run("after", _T2))
+            self.assertEqual(block.status, "BLOCK_GROUPED")
+            verdict = validate_anchors(block)
+            self.assertEqual(verdict.status, "ANCHORS_OK")
+            self.assertIsNotNone(verdict.main_result)
+            self.assertEqual(
+                sorted(g["buffer_kb"] for g in verdict.main_result.groups),
+                [128, 256],
+            )
+            self.assertIsNotNone(verdict.baseline_3072)
+        with self.subTest(edge="both at lower band edge"):
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, lat_512=band[0]),
+                after=_anchor_run("after", _T2, lat_512=band[0]),
+            ))
+            self.assertEqual(verdict.status, "ANCHORS_OK")
+        with self.subTest(edge="both at upper band edge"):
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, lat_512=band[1]),
+                after=_anchor_run("after", _T2, lat_512=band[1]),
+            ))
+            self.assertEqual(verdict.status, "ANCHORS_OK")
 
-    def test_latency_deviation_beyond_threshold_fails_block(self):
-        # ②latency 偏差 5%（>3%）→ BLOCK_FAILED；主体 case 不入判定
-        # （fail-closed：main_result 不产出，无对象可消费）。
+    def test_latency_outside_pool_band_fails_block(self):
+        # ②判据 2（v4.4）：latency median 出池带 → BLOCK_FAILED；主体
+        # case 不入判定（fail-closed：main_result 不产出）。
+        band = _REF["bands"][("latency_ns", 512)]["band"]
         block = _block(
-            before=_anchor_run("before", _T0,
-                               lat_512=_REF["medians"][512]["latency_ns"] * 1.05),
-            after=_anchor_run("after", _T2,
-                              lat_512=_REF["medians"][512]["latency_ns"] * 1.05),
+            before=_anchor_run("before", _T0, lat_512=band[1] + 0.01),
+            after=_anchor_run("after", _T2, lat_512=band[1] + 0.01),
         )
         verdict = validate_anchors(block)
         self.assertEqual(verdict.status, "BLOCK_FAILED")
@@ -1067,62 +1094,70 @@ class TestValidateAnchors(unittest.TestCase):
         self.assertIsNone(verdict.baseline_3072)  # 失败块分布不晋升基线
         failures = verdict.evidence["failures"]
         self.assertTrue(any(
-            failure["check"] == "latency_ns_vs_short_base"
+            failure["check"] == "latency_ns_band_512"
             and failure["run"] == "anchor_before"
             and failure["buffer_kb"] == 512
             for failure in failures
         ))
 
-    def test_512_r05_outside_positive_control_interval_fails(self):
-        # ③512 KiB R_0x05 median 落在 Gate 0 参照 [p25, p75] 外 → 失败
-        # （v4.3 区间判据回归不变；缺省 fixture 取参照 median，在区间
-        # 内——①即反向对照）。512 KiB R_0x34 自 v4.3 起走计数容差判
-        # 据，见 test_512_walk_count_tolerance_boundaries。
-        r05_p25, r05_p75 = _REF["r512_p25_p75"]["l1d_tlb_refill_per_1k"]
-        with self.subTest(metric="R_0x05 above p75"):
-            block = _block(
-                before=_anchor_run("before", _T0, r05_512=r05_p75 + 1.0),
-                after=_anchor_run("after", _T2, r05_512=r05_p75 + 1.0),
-            )
-            verdict = validate_anchors(block)
+    def test_r05_outside_pool_band_fails(self):
+        # ③判据 2（v4.4）：R_0x05 密度两 buffer 都走池带（R 值经 loads
+        # 往返有浮点末位噪声，带外用 ≥1.0 余量钉，不夹 ulps 边界；带内
+        # 由①的缺省 fixture 反向对照）。
+        band_512 = _REF["bands"][("l1d_tlb_refill_per_1k", 512)]["band"]
+        band_3072 = _REF["bands"][("l1d_tlb_refill_per_1k", 3072)]["band"]
+        with self.subTest(case="512 R_0x05 above band"):
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, r05_512=band_512[1] + 1.0),
+                after=_anchor_run("after", _T2, r05_512=band_512[1] + 1.0),
+            ))
             self.assertEqual(verdict.status, "BLOCK_FAILED")
             self.assertIsNone(verdict.main_result)
             self.assertTrue(any(
-                failure["check"]
-                == "l1d_tlb_refill_per_1k_within_positive_control_512"
+                failure["check"] == "l1d_tlb_refill_per_1k_band_512"
                 for failure in verdict.evidence["failures"]
             ))
-        with self.subTest(metric="R_0x05 below p25"):
-            block = _block(
-                before=_anchor_run("before", _T0, r05_512=r05_p25 - 1.0),
-                after=_anchor_run("after", _T2, r05_512=r05_p25 - 1.0),
-            )
-            verdict = validate_anchors(block)
+        with self.subTest(case="512 R_0x05 below band"):
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, r05_512=band_512[0] - 1.0),
+                after=_anchor_run("after", _T2, r05_512=band_512[0] - 1.0),
+            ))
             self.assertEqual(verdict.status, "BLOCK_FAILED")
-            self.assertIsNone(verdict.main_result)
+        with self.subTest(case="3072 R_0x05 above band (首块同样适用)"):
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, r05_3072=band_3072[1] + 1.0),
+                after=_anchor_run("after", _T2, r05_3072=band_3072[1] + 1.0),
+            ))
+            self.assertEqual(verdict.status, "BLOCK_FAILED")
+            self.assertTrue(any(
+                failure["check"] == "l1d_tlb_refill_per_1k_band_3072"
+                for failure in verdict.evidence["failures"]
+            ))
 
     def test_512_walk_count_tolerance_boundaries(self):
-        # ③′512 KiB R_0x34 计数容差判据（v4.3）：|median − 参照 median|
-        # ≤ max(3, 0.5×参照 median)。参照 median 现算 = 11 walks/窗 →
-        # 容差 5.5 → 容差带 [5.5, 16.5]。边界值 5.5/16.5 为半整数，在
-        # loads=65536=2^16 下计数往返 double 精确（fixture 注释），可
-        # 钉恰在带边通过、带外 0.1 失败。
-        with self.subTest(edge="lower bound 5.5 passes"):
+        # ③′判据 3（v4.3 形式沿用，v4.4 参照改自池）：|median − 池参照
+        # median| ≤ max(3, 0.5×池参照 median) walks/窗。池参照 median
+        # 现算 = 7.75 walks/窗 → 容差 3.875 → 容差带 [3.875, 11.625]
+        # （任务书括号备查值 7.5/[3.75,11.25] 与规范聚合现算差 0.25
+        # walks——备查值以现算为准，见 TestAnchorReferences 的回归钉）。
+        # 边界值 3.875/11.625 为 dyadic 分数，loads=65536=2^16 下计数往
+        # 返 double 精确，可钉恰在带边通过、带外失败。
+        with self.subTest(edge="lower bound 3.875 passes"):
             verdict = validate_anchors(_block(
-                before=_anchor_run("before", _T0, walks_512=5.5),
-                after=_anchor_run("after", _T2, walks_512=5.5),
+                before=_anchor_run("before", _T0, walks_512=3.875),
+                after=_anchor_run("after", _T2, walks_512=3.875),
             ))
             self.assertEqual(verdict.status, "ANCHORS_OK")
-        with self.subTest(edge="upper bound 16.5 passes"):
+        with self.subTest(edge="upper bound 11.625 passes"):
             verdict = validate_anchors(_block(
-                before=_anchor_run("before", _T0, walks_512=16.5),
-                after=_anchor_run("after", _T2, walks_512=16.5),
+                before=_anchor_run("before", _T0, walks_512=11.625),
+                after=_anchor_run("after", _T2, walks_512=11.625),
             ))
             self.assertEqual(verdict.status, "ANCHORS_OK")
-        with self.subTest(edge="below band 5.4 fails"):
+        with self.subTest(edge="below band 3.5 fails"):
             verdict = validate_anchors(_block(
-                before=_anchor_run("before", _T0, walks_512=5.4),
-                after=_anchor_run("after", _T2, walks_512=5.4),
+                before=_anchor_run("before", _T0, walks_512=3.5),
+                after=_anchor_run("after", _T2, walks_512=3.5),
             ))
             self.assertEqual(verdict.status, "BLOCK_FAILED")
             self.assertIsNone(verdict.main_result)
@@ -1132,14 +1167,14 @@ class TestValidateAnchors(unittest.TestCase):
             ]
             self.assertTrue(walk_failures)
             failure = walk_failures[0]
-            self.assertEqual(failure["reference_median_count"], 11.0)
-            self.assertEqual(failure["tolerance_band"], [5.5, 16.5])
-            self.assertAlmostEqual(failure["median_count"], 5.4)
-            self.assertAlmostEqual(failure["deviation_count"], 5.6)
-        with self.subTest(edge="above band 16.6 fails"):
+            self.assertEqual(failure["reference_median_count"], 7.75)
+            self.assertEqual(failure["tolerance_band"], [3.875, 11.625])
+            self.assertAlmostEqual(failure["median_count"], 3.5)
+            self.assertAlmostEqual(failure["deviation_count"], 4.25)
+        with self.subTest(edge="above band 12.0 fails"):
             verdict = validate_anchors(_block(
-                before=_anchor_run("before", _T0, walks_512=16.6),
-                after=_anchor_run("after", _T2, walks_512=16.6),
+                before=_anchor_run("before", _T0, walks_512=12.0),
+                after=_anchor_run("after", _T2, walks_512=12.0),
             ))
             self.assertEqual(verdict.status, "BLOCK_FAILED")
             self.assertTrue(any(
@@ -1148,21 +1183,21 @@ class TestValidateAnchors(unittest.TestCase):
             ))
 
     def test_512_walk_mutual_count_tolerance(self):
-        # v4.3：前后锚点 512 KiB R_0x34 互判同用计数容差——
-        # |before − after| ≤ max(3, 0.5×参照 median) = 5.5 walks/窗。
-        with self.subTest(edge="mutual deviation 5.5 passes"):
-            # before=5.5（带边，参照检查过）与 after=11.0 差恰 5.5。
+        # 判据 3 互判（v4.4）：|before − after| ≤ max(3, 0.5×池参照
+        # median) = 3.875 walks/窗（同一量化结构）。
+        with self.subTest(edge="mutual deviation 3.875 passes"):
+            # before=3.875（带边，参照检查过）与 after=7.75 差恰 3.875。
             verdict = validate_anchors(_block(
-                before=_anchor_run("before", _T0, walks_512=5.5),
-                after=_anchor_run("after", _T2, walks_512=11.0),
+                before=_anchor_run("before", _T0, walks_512=3.875),
+                after=_anchor_run("after", _T2, walks_512=7.75),
             ))
             self.assertEqual(verdict.status, "ANCHORS_OK")
-        with self.subTest(edge="mutual deviation 5.6 fails"):
-            # 两者各自在容差带内（参照检查过），互判差 5.6 >5.5 → 仅互
-            # 判失败（隔离验证互判独立生效）。
+        with self.subTest(edge="mutual deviation 4.0 fails"):
+            # 两者各自在容差带内（参照检查过），互判差 4.0 >3.875 → 仅
+            # 互判失败（隔离验证互判独立生效）。
             verdict = validate_anchors(_block(
-                before=_anchor_run("before", _T0, walks_512=5.5),
-                after=_anchor_run("after", _T2, walks_512=11.1),
+                before=_anchor_run("before", _T0, walks_512=3.875),
+                after=_anchor_run("after", _T2, walks_512=7.875),
             ))
             self.assertEqual(verdict.status, "BLOCK_FAILED")
             failures = verdict.evidence["failures"]
@@ -1171,21 +1206,23 @@ class TestValidateAnchors(unittest.TestCase):
                 ["dtlb_walk_count_before_after_mutual"],
             )
             mutual = failures[0]
-            self.assertAlmostEqual(mutual["median_count_before"], 5.5)
-            self.assertAlmostEqual(mutual["median_count_after"], 11.1)
-            self.assertAlmostEqual(mutual["deviation_count"], 5.6)
-            self.assertEqual(mutual["tolerance"], 5.5)
+            self.assertAlmostEqual(mutual["median_count_before"], 3.875)
+            self.assertAlmostEqual(mutual["median_count_after"], 7.875)
+            self.assertAlmostEqual(mutual["deviation_count"], 4.0)
+            self.assertEqual(mutual["tolerance"], 3.875)
 
     def test_3072_first_block_self_calibrates_later_blocks_compare(self):
-        # ④3072 KiB 无 G0 历史数据：首块只记录不判失，以 anchor-before
-        # 的 3072 分布建基线；后续块与之比较（同一规则）。
+        # ④判据 4（v4.4）：首块自校准保留——基线 = 首块 anchor-before
+        # 的 3072 组 median；后续块 median ∈ 基线 median ± 1.5×W(m,3072)
+        # （W 取自池）。判据 2 的池带对首块照常适用。
         first = validate_anchors(_block(after=_anchor_run("after", _T2)))
         self.assertEqual(first.status, "ANCHORS_OK")
         baseline = first.baseline_3072
-        self.assertEqual(baseline["l1d_tlb_refill_per_1k"]["median"], 500.0)
-        self.assertEqual(baseline["l1d_tlb_refill_per_1k"]["p25"], 500.0)
-        # 逐样本值经 ×loads/1000 → /loads×1000 往返，浮点末位有漂移。
-        self.assertAlmostEqual(baseline["dtlb_walk_per_1k"]["p75"], 0.02)
+        center_05 = _REF["bands"][("l1d_tlb_refill_per_1k", 3072)]["center"]
+        # 缺省 fixture 取池中心 → 基线 median 即池中心（±loads 往返末位）。
+        self.assertAlmostEqual(
+            baseline["l1d_tlb_refill_per_1k"]["median"], center_05
+        )
         # 第二块与基线一致 → 通过且回显同一基线。
         same = validate_anchors(
             _block(after=_anchor_run("after2", _T2)),
@@ -1193,18 +1230,36 @@ class TestValidateAnchors(unittest.TestCase):
         )
         self.assertEqual(same.status, "ANCHORS_OK")
         self.assertIs(same.baseline_3072, baseline)
-        # 第二块 3072 KiB median 落在基线 [p25, p75] 外 → 失败。
+        # 判据 4 隔离：基线 median = C−W（在池带内），第二块 = C+W（也
+        # 在池带内、判据 2 过）——与基线差 2W > 1.5W → 仅判据 4 失败。
+        entry = _REF["bands"][("l1d_tlb_refill_per_1k", 3072)]
+        walk_3072 = _REF["bands"][("dtlb_walk_per_1k", 3072)]["center"]
+        prior = {
+            "l1d_tlb_refill_per_1k": {
+                "median": entry["center"] - entry["spread"],
+            },
+            "dtlb_walk_per_1k": {"median": walk_3072},
+        }
         drifted = validate_anchors(
             _block(
-                before=_anchor_run("before2", _T0, r05_3072=600.0),
-                after=_anchor_run("after2", _T2, r05_3072=600.0),
+                before=_anchor_run(
+                    "before2", _T0,
+                    r05_3072=entry["center"] + entry["spread"]),
+                after=_anchor_run(
+                    "after2", _T2,
+                    r05_3072=entry["center"] + entry["spread"]),
             ),
-            prior_3072_baseline=baseline,
+            prior_3072_baseline=prior,
         )
         self.assertEqual(drifted.status, "BLOCK_FAILED")
         self.assertIsNone(drifted.main_result)
         self.assertTrue(any(
-            failure["check"] == "l1d_tlb_refill_per_1k_within_3072_baseline"
+            failure["check"]
+            == "l1d_tlb_refill_per_1k_within_3072_baseline_band"
+            for failure in drifted.evidence["failures"]
+        ))
+        self.assertFalse(any(
+            failure["check"] == "l1d_tlb_refill_per_1k_band_3072"
             for failure in drifted.evidence["failures"]
         ))
 
@@ -1230,41 +1285,38 @@ class TestValidateAnchors(unittest.TestCase):
             self.assertEqual(verdict.status, "BLOCK_FAILED")
 
     def test_before_after_mutual_judgment(self):
-        # 前后两次锚点 run 同指标互判（同一规则）：各自对照参照都合格、
+        # 判据 2 互判（v4.4）：|before − after| ≤ 1.5W——各自都在池带内、
         # 但彼此之间漂移超阈也判失。
         with self.subTest(mode="latency drift"):
-            # ×0.99 与 ×1.02 各自偏差 ≤3%，互判偏差 3.03% >3%。
-            block = _block(
+            # before 在下带边、after 在上带边：各自参照检查过（带边
+            # inclusive），互判差 3W > 1.5W → 仅互判失败。
+            band = _REF["bands"][("latency_ns", 512)]["band"]
+            verdict = validate_anchors(_block(
+                before=_anchor_run("before", _T0, lat_512=band[0]),
+                after=_anchor_run("after", _T2, lat_512=band[1]),
+            ))
+            self.assertEqual(verdict.status, "BLOCK_FAILED")
+            self.assertEqual(
+                [failure["check"] for failure in verdict.evidence["failures"]],
+                ["latency_ns_before_after_band_512"],
+            )
+        with self.subTest(mode="R value drift"):
+            # 两者各自在池带内（C∓W，距带边 0.5W），互判差 2W > 1.5W
+            # → 仅互判失败。
+            entry = _REF["bands"][("l1d_tlb_refill_per_1k", 512)]
+            verdict = validate_anchors(_block(
                 before=_anchor_run(
                     "before", _T0,
-                    lat_512=_REF["medians"][512]["latency_ns"] * 0.99),
+                    r05_512=entry["center"] - entry["spread"]),
                 after=_anchor_run(
                     "after", _T2,
-                    lat_512=_REF["medians"][512]["latency_ns"] * 1.02),
-            )
-            verdict = validate_anchors(block)
-            self.assertEqual(verdict.status, "BLOCK_FAILED")
-            self.assertTrue(any(
-                failure["check"] == "latency_ns_before_after_mutual"
-                for failure in verdict.evidence["failures"]
+                    r05_512=entry["center"] + entry["spread"]),
             ))
-        with self.subTest(mode="R value drift"):
-            # 两者各自落在 Gate 0 参照 [p25, p75] 内（取 p25/p75 与
-            # median 的中点，严格在区间内），但 median 互不落对方
-            # [p25, p75]（恒定分布区间退化）→ 互判失败。
-            r05_p25, r05_p75 = _REF["r512_p25_p75"]["l1d_tlb_refill_per_1k"]
-            r05_median = _REF["r512_median"]["l1d_tlb_refill_per_1k"]
-            low, high = (r05_p25 + r05_median) / 2, (r05_p75 + r05_median) / 2
-            block = _block(
-                before=_anchor_run("before", _T0, r05_512=low),
-                after=_anchor_run("after", _T2, r05_512=high),
-            )
-            verdict = validate_anchors(block)
             self.assertEqual(verdict.status, "BLOCK_FAILED")
-            self.assertTrue(any(
-                failure["check"] == "l1d_tlb_refill_per_1k_before_after_mutual"
-                for failure in verdict.evidence["failures"]
-            ))
+            self.assertEqual(
+                [failure["check"] for failure in verdict.evidence["failures"]],
+                ["l1d_tlb_refill_per_1k_before_after_band_512"],
+            )
 
     def test_anchor_group_shape_is_validated(self):
         # 锚点 run 组形契约：恰为 {512: 一组, 3072: 一组}——缺 buffer
@@ -1307,13 +1359,10 @@ class TestValidateAnchors(unittest.TestCase):
         self.assertEqual(verdict.evidence["anchor_rejected"],
                          {"before": 1, "after": 0})
         # 判失路径同样带计数（此处两锚点无 rejected → 全 0）。
+        band = _REF["bands"][("latency_ns", 512)]["band"]
         drifted = validate_anchors(_block(
-            before=_anchor_run(
-                "before2", _T0,
-                lat_512=_REF["medians"][512]["latency_ns"] * 1.05),
-            after=_anchor_run(
-                "after2", _T2,
-                lat_512=_REF["medians"][512]["latency_ns"] * 1.05),
+            before=_anchor_run("before2", _T0, lat_512=band[1] + 0.5),
+            after=_anchor_run("after2", _T2, lat_512=band[1] + 0.5),
         ))
         self.assertEqual(drifted.status, "BLOCK_FAILED")
         self.assertEqual(drifted.evidence["anchor_rejected"],
@@ -1321,119 +1370,217 @@ class TestValidateAnchors(unittest.TestCase):
 
 
 class TestAnchorReferences(unittest.TestCase):
-    """§6.2.5 参照分布的运行时现读现算（冻结规则：不写死数字——仓内
-    数据修正走 revision history，参照系自动跟踪修正）。512 KiB R 值
-    参照自任务书 v4.2 起为制度匹配的 Gate 0 run 20260929T143631Z。"""
+    """§6.2.5 参照分布的运行时现读现算（v4.4 池化：方差表征 6 run；
+    C = 逐 run median 的 median、W = 逐 run median 的 max−min、带 =
+    C±1.5W，不写死数字——仓内数据修正走 revision history，参照系自
+    动跟踪修正）。"""
 
-    def test_r_reference_run_is_regime_matched(self):
-        # 制度匹配硬钉（v4.2 回归）：512 KiB R 参照来源 run 的 512 KiB
-        # 组必须是 8 环协议（loads == 8 × slots）——防止未来再次锚定
-        # 2048 环参照（旧正控 run 20260927T182613Z 的失配教训，Gate 0
-        # 实证 10/10 样本系统性越界）。
-        path = (_REPO_ROOT / "data" / "public" / "runs"
-                / sm8650_tlb._ANCHOR_REF_CTRL_RUN / "records.jsonl")
-        seen = False
-        for line in path.read_text(encoding="utf-8").splitlines():
-            record = json.loads(line)
-            params = record.get("params", {})
-            if record.get("status") != "ok" or params.get("buffer_kb") != 512:
-                continue
-            seen = True
-            slots = params["buffer_kb"] * 1024 // params.get("stride", 64)
-            self.assertEqual(params["loads"], 8 * slots)
-        self.assertTrue(seen, "参照 run 缺少 512 KiB ok 组")
+    def test_pool_membership_is_pinned(self):
+        # 池成员与制度硬钉（v4.4）：模块池名单 = 任务书 6 run；每 run
+        # 的每条 ok 记录都是 8 环锚点制度（loads == 8 × slots）——防
+        # 止再次锚定制度不匹配的参照（v4.1 旧正控 2048 环的教训）。
+        self.assertEqual(list(sm8650_tlb._ANCHOR_REF_POOL_RUNS), _POOL_RUNS)
+        for run in sm8650_tlb._ANCHOR_REF_POOL_RUNS:
+            path = (_REPO_ROOT / "data" / "public" / "runs" / run
+                    / "records.jsonl")
+            seen = 0
+            for line in path.read_text(encoding="utf-8").splitlines():
+                record = json.loads(line)
+                params = record.get("params", {})
+                if record.get("status") != "ok":
+                    continue
+                seen += 1
+                slots = params["buffer_kb"] * 1024 // params.get("stride", 64)
+                self.assertEqual(params["loads"], 8 * slots)
+            self.assertEqual(seen, 2, f"{run}: 应为 512+3072 两个 base case")
+
+    def test_pool_references_from_synthetic_pool(self):
+        # 合成 6-run 池喂 _pool_references：C/W/band 与 walk 池参照计
+        # 数按定义计算（逐 run median → median / max−min / C±1.5W）。
+        runs = [
+            _anchor_run(f"pool-{index}", _T0,
+                        lat_512=2.5 + 0.1 * index, walks_512=5.0 + index)
+            for index in range(6)
+        ]
+        references = sm8650_tlb._pool_references(runs)
+        entry = references["bands"][("latency_ns", 512)]
+        self.assertAlmostEqual(entry["center"], 2.75)   # (2.7+2.8)/2
+        self.assertAlmostEqual(entry["spread"], 0.5)    # 3.0−2.5
+        self.assertAlmostEqual(entry["band"][0], 2.75 - 0.75)
+        self.assertAlmostEqual(entry["band"][1], 2.75 + 0.75)
+        # walk 池参照 = median([5,6,7,8,9,10]) = 7.5 → max(3, 0.5×7.5)。
+        self.assertEqual(references["walk512_median_count"], 7.5)
+        with self.subTest(guard="pool must be anchor experiment runs"):
+            rogue = _loaded_run("rogue", _MAIN_ID,
+                                _anchor_run("x", _T0).ok_records)
+            with self.assertRaises(TlbError):
+                sm8650_tlb._pool_references([*runs[:5], rogue])
+        with self.subTest(guard="pool size pinned at 6"):
+            with self.assertRaises(TlbError):
+                sm8650_tlb._pool_references(runs[:5])
 
     def test_references_match_independent_recomputation(self):
-        # 模块参照（经 validate_anchors 判定证据暴露）与本测试独立重算
-        # 的期望值逐位一致；_anchor_references() 进程内只算一次（lazy
-        # 缓存，重复调用返回同一对象）。
+        # 真实池回归钉：模块现算与本测试独立重算逐位一致（全表）；任务
+        # 书 v4.4 §6.2.5 备查值核对防数据错读；_anchor_references() 进
+        # 程内只算一次（lazy 缓存，重复调用返回同一对象）。
+        self.assertIs(sm8650_tlb._anchor_references(),
+                      sm8650_tlb._anchor_references())
+        references = sm8650_tlb._compute_anchor_references(
+            _REPO_ROOT / "data" / "public" / "runs"
+        )
+        self.assertEqual(len(references["bands"]), len(_REF["bands"]))
+        for key, entry in _REF["bands"].items():
+            module_entry = references["bands"][key]
+            self.assertEqual(module_entry["center"], entry["center"])
+            self.assertEqual(module_entry["spread"], entry["spread"])
+            self.assertEqual(module_entry["band"], entry["band"])
+        self.assertEqual(references["walk512_median_count"],
+                         _REF["walk512_median_count"])
+        # 任务书 v4.4 §6.2.5 括号备查值（"判定以现算为准"，此处核对防
+        # 数据错读）。
+        self.assertAlmostEqual(
+            _REF["bands"][("latency_ns", 512)]["center"], 2.69, places=2)
+        self.assertAlmostEqual(
+            _REF["bands"][("latency_ns", 512)]["spread"], 0.086, places=2)
+        self.assertAlmostEqual(
+            _REF["bands"][("latency_ns", 3072)]["center"], 8.01, places=2)
+        self.assertAlmostEqual(
+            _REF["bands"][("latency_ns", 3072)]["spread"], 0.70, places=2)
+        self.assertAlmostEqual(
+            _REF["bands"][("l1d_tlb_refill_per_1k", 512)]["center"],
+            285.5, places=1)
+        self.assertAlmostEqual(
+            _REF["bands"][("l1d_tlb_refill_per_1k", 3072)]["center"],
+            1301.1, places=1)
+        # walk 池参照 median 现算 = 7.75 walks/窗（容差带
+        # [3.875, 11.625]）。任务书括号值"池 = 7.5 → [3.75, 11.25]"与
+        # 规范聚合（C = 逐 run median 的 median，statistics.median 口
+        # 径）现算差 0.25 walks——7.5 只能由 median_low 得到，与其余
+        # 备查值的口径不一致；任务书自注"判定以现算为准"，按现算钉
+        # 7.75（任务书勘误候选，修订后回改本钉）。
+        self.assertEqual(_REF["walk512_median_count"], 7.75)
+
+    def test_verdict_evidence_carries_band_details(self):
+        # 判定证据带 band 明细（center/spread/band），与独立重算逐位一
+        # 致；判据 2 覆盖面 = 全部 (metric, buffer) 减去 512 R_0x34
+        # （走判据 3）。
         verdict = validate_anchors(_block(after=_anchor_run("after", _T2)))
         self.assertEqual(verdict.status, "ANCHORS_OK")
         seen = set()
         for check in verdict.evidence["checks"]:
-            if check["check"].endswith("_vs_short_base"):
-                field = check["check"].removesuffix("_vs_short_base")
-                self.assertEqual(
-                    check["reference"],
-                    _REF["medians"][check["buffer_kb"]][field],
-                )
-                seen.add(("median", check["buffer_kb"], field))
-            elif check["check"].endswith("_within_positive_control_512"):
-                field = check["check"].removesuffix("_within_positive_control_512")
-                self.assertEqual(
-                    tuple(check["interval"]), _REF["r512_p25_p75"][field]
-                )
-                seen.add(("r512", field))
-            elif check["check"] == "dtlb_walk_count_tolerance_512":
-                # v4.3：walk 计数参照同样独立重算核对。
+            name = check["check"]
+            if "_before_after_" in name:
+                continue
+            if name.endswith("_band_512") or name.endswith("_band_3072"):
+                field, _, buffer = name.rpartition("_band_")
+                entry = _REF["bands"][(field, int(buffer))]
+                self.assertEqual(check["center"], entry["center"])
+                self.assertEqual(check["spread"], entry["spread"])
+                self.assertEqual(check["band"], list(entry["band"]))
+                seen.add((field, int(buffer)))
+            elif name == "dtlb_walk_count_tolerance_512":
                 self.assertEqual(check["reference_median_count"],
                                  _REF["walk512_median_count"])
                 seen.add(("walk512",))
-        # 防空心化：参照面全覆盖（2 buffer × 2 median 字段 + R_0x05 区
-        # 间 + walk 计数参照）。
         self.assertEqual(
             seen,
-            {("median", buffer, field)
-             for buffer in (512, 3072)
-             for field in ("latency_ns", "cyc_per_load")}
-            | {("r512", "l1d_tlb_refill_per_1k"), ("walk512",)},
+            {key for key in _REF["bands"] if key != ("dtlb_walk_per_1k", 512)}
+            | {("walk512",)},
         )
-        self.assertIs(sm8650_tlb._anchor_references(),
-                      sm8650_tlb._anchor_references())
 
-    def test_walk_reference_median_count_matches_evidence_run(self):
-        # v4.3 回归钉：512 KiB walk 计数参照 median 现算自 Gate 0 run
-        # = 11 walks/窗（容差带 [5.5, 16.5] 的锚点；任务书 §6.2.5"判据
-        # 形式（v4.3 修订）"段明示值），并与本测试独立重算一致。
-        references = sm8650_tlb._compute_anchor_references(
-            _REPO_ROOT / "data" / "public" / "runs"
-        )
-        self.assertEqual(references["walk512_median_count"], 11.0)
-        self.assertEqual(references["walk512_median_count"],
-                         _REF["walk512_median_count"])
-
-    def test_missing_or_incomplete_reference_runs_are_hard_errors(self):
-        # fail-closed：参照 run 缺失、带失败记录或 buffer 组不全 →
-        # TlbError，不静默降级为跳过判定。
+    def test_missing_or_incomplete_pool_runs_are_hard_errors(self):
+        # fail-closed：池 run 缺失、带失败记录、buffer 组不全或损坏
+        # JSON → TlbError，不静默降级为跳过判定。
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "runs"
-            with self.subTest(case="runs root missing"):
+            with self.subTest(case="pool missing"):
                 with self.assertRaises(TlbError):
                     sm8650_tlb._compute_anchor_references(root)
-            run_dir = root / sm8650_tlb._ANCHOR_REF_SHORT_BASE_RUN
-            run_dir.mkdir(parents=True)
-            record = {
-                "schema_version": "2.0",
-                "status": "ok",
-                "params": {"buffer_kb": 512, "loads": 65536},
-                "metrics": [
-                    {"name": "latency_ns",
-                     "observations": [{"sample_index": 0, "value": 2.6}]},
-                    {"name": "pmu.cycles.count",
-                     "observations": [{"sample_index": 0, "value": 490000}]},
-                ],
-            }
-            (run_dir / "records.jsonl").write_text(
-                json.dumps(record) + "\n", encoding="utf-8"
-            )
-            with self.subTest(case="buffer group missing"):
-                with self.assertRaises(TlbError):
-                    sm8650_tlb._compute_anchor_references(root)
-            with self.subTest(case="reference run with failed records"):
-                record["status"] = "failed"
-                (run_dir / "records.jsonl").write_text(
-                    json.dumps(record) + "\n", encoding="utf-8"
+            _write_pool(root)
+            with self.subTest(case="complete synthetic pool computes"):
+                references = sm8650_tlb._compute_anchor_references(root)
+                self.assertEqual(len(references["bands"]), 8)
+            with self.subTest(case="pool run with failed records"):
+                run_dir = root / _POOL_RUNS[0]
+                record = json.loads(
+                    (run_dir / "records.jsonl").read_text(encoding="utf-8")
+                    .splitlines()[0]
                 )
+                record["status"] = "failed"
+                record["metrics"] = []
+                with open(run_dir / "records.jsonl", "a",
+                          encoding="utf-8") as handle:
+                    handle.write(json.dumps(record) + "\n")
                 with self.assertRaises(TlbError):
                     sm8650_tlb._compute_anchor_references(root)
             with self.subTest(case="corrupt records.jsonl"):
                 # 损坏 JSON 同样 fail-closed 为 TlbError（JSONDecodeError
-                # 不外泄）。
+                # 不外泄）。先重建干净池再损坏其一。
+                _write_pool(root)
+                run_dir = root / _POOL_RUNS[1]
                 (run_dir / "records.jsonl").write_text(
                     '{"schema_version": "2.0", corrupt\n', encoding="utf-8"
                 )
                 with self.assertRaises(TlbError):
                     sm8650_tlb._compute_anchor_references(root)
+            with self.subTest(case="buffer group missing"):
+                _write_pool(root)
+                run_dir = root / _POOL_RUNS[2]
+                lines = (run_dir / "records.jsonl").read_text(
+                    encoding="utf-8").splitlines()
+                kept = [
+                    line for line in lines
+                    if json.loads(line)["params"]["buffer_kb"] == 512
+                ]
+                (run_dir / "records.jsonl").write_text(
+                    "\n".join(kept) + "\n", encoding="utf-8"
+                )
+                with self.assertRaises(TlbError):
+                    sm8650_tlb._compute_anchor_references(root)
+
+
+def _pool_record(buffer_kb, loads, walk_count=8.0):
+    """池 fail-closed fixture 的最小 ok 记录（_reference_values 的消费
+    面：params + 四个被读 metric 的 observations）。"""
+    def _observations(value):
+        return [{"sample_index": index, "value": value} for index in range(2)]
+
+    return {
+        "schema_version": "2.0",
+        "status": "ok",
+        "params": {"buffer_kb": buffer_kb, "loads": loads},
+        "metrics": [
+            {"name": "latency_ns", "observations": _observations(2.7)},
+            {"name": "pmu.cycles.count",
+             "observations": _observations(7.5 * loads)},
+            {"name": "pmu.l1d_tlb_refill.count",
+             "observations": _observations(285.0 * loads / 1000.0)},
+            {"name": "pmu.dtlb_walk.count",
+             "observations": _observations(walk_count)},
+        ],
+    }
+
+
+def _write_pool(root):
+    """在 root 下落 6 个最小合法池 run（records + manifest）。"""
+    root.mkdir(parents=True, exist_ok=True)
+    for name in _POOL_RUNS:
+        run_dir = root / name
+        run_dir.mkdir(parents=True, exist_ok=True)
+        records = [
+            _pool_record(512, 65536),
+            _pool_record(3072, 393216),
+        ]
+        (run_dir / "records.jsonl").write_text(
+            "".join(json.dumps(record) + "\n" for record in records),
+            encoding="utf-8",
+        )
+        (run_dir / "run-manifest.json").write_text(json.dumps({
+            "schema_version": "1.0",
+            "experiment_id": _ANCHOR_ID,
+            "summary": {"total": 2, "ok": 2, "failed": 0,
+                        "skipped": 0, "unsupported": 0},
+        }), encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
