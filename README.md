@@ -14,8 +14,20 @@ L2 容量信号按预注册规则判定不容许**（跨 seed/训练量不稳）
 决，几何/着色/预取残差见 `docs/reviews/2026-09-28-sm8650-x4-p0prime.md`。
 THP 对照段因动态 ceiling drift 推迟（根因 OPEN，恢复门禁见 OI-11）；外
 层 L3/LLCC 的容量定案在私有 L2 可识别前继续封锁，但该局部门禁不阻塞
-分支预测、TLB、前端、执行端口、MLP、跨核迁移等正交微架构探索。gem5
-微架构建模继续后置到探针校准闭环和 D9300 实机就位之后（见 OI-1/OI-6）。
+分支预测、TLB、前端、执行端口、MLP、跨核迁移等正交微架构探索。**2026-
+09-30 SM8650 TLB 层级探测战役完成**（任务书 v4.4，分支
+`codex/sm8650-tlb-hierarchy`）：Q1 L1 dTLB refill 第一有效转折
+**INTERVAL_IDENTIFIED [120, 1024] 页**（480 KiB–4 MiB 宽饱和区，4
+seed × 双训练量一致）、Q2a walk-onset **INTERVAL_IDENTIFIED [2560,
+3072] 页**（10–12 MiB，下沿在 MMUTC 2048 项之上）、Q3 walk 暴露成本
+**MODEL_UNIDENTIFIABLE**（实测 walk 与延迟反相关，单调性不成立）、
+Q4 mixed-THP 机制方向一致（受限比较级，3072 KiB mixed lat -12.4% /
+R_0x05 -82%）+ 两处 INSUFFICIENT_COHORT；新增 4 事件 QUALIFIED
+（`0x2d`/`0x8136`/`0x8128`/`0x813a`）、2 事件 SEMANTICS_UNVERIFIED
+（`0x2f`/`0x8138`）。终审 `docs/reviews/2026-09-28-sm8650-tlb-hierarchy.md`；
+TLB 的 Q1/Q2a 区间不主张 TLB 物理项数，L2 容量门禁与 TLB 判定相互独
+立。gem5 微架构建模继续后置到探针校准闭环和 D9300 实机就位之后（见
+OI-1/OI-6）。
 
 ## 平台矩阵
 

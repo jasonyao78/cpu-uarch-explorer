@@ -145,3 +145,22 @@
 - **扩展方向（立项时评审，不在 TLB 战役内改判据/改分析器）**：①`analyze_records` 对超集 metric 集（多出 PMU 指标）放行并派生对应字段（required ⊆ present）；②`validate_anchors` 增加"主体非 G0 时 main_result 跳过或降级"的显式模式（锚点判定与主体分析解耦）；③G2 类缺失 mem_access_rd 的集合是另一层问题（契约有意缺失，不应简单放行——分析器对缺失每一项都要有命名的降级语义）。
 - **触发条件**：下一个需要非 G0 事件组做正式块级判定的实验任务立项时（如 LLCC/cache 阶段的异构事件组），必须先关闭本项，禁止再用"直接提取复刻"绕行。
 - **状态**：⬜ 待办（不阻塞 TLB 战役：Phase C 已按披露的方法学结案）。
+
+## OI-14 SM8650 TLB 战役后置项（2026-09-30 登记，任务书 §11 落位 + 战役衍生）
+
+> 战役终审：`docs/reviews/2026-09-28-sm8650-tlb-hierarchy.md`。分支
+> `codex/sm8650-tlb-hierarchy` 退役后本表为唯一跟踪面。
+
+| 项 | 内容 | 归属/触发条件 | 状态 |
+|---|---|---|---|
+| TRM r0p3 vs Issue 05 逐字核对 | 任务书事件文本/MMU 结构逐字核自 Issue 05 PDF（`102484_0002_05_en`）；在线 r0p3 未核对——有差异以 r0p3 为准出修订 | 触发：下次可访问 Arm 文档站时；新引用 X4 事件文本前 | ⬜ 待办 |
+| Explore 遍历模板细节 | `Probes.h` TestTraversal 模板与 warmup 处理未读；§6.5 对照仅以 `ProbeLatency.cpp` 已读段落为准 | 触发：需引用其遍历/warmup 细节时先读源码 | ⬜ 待办 |
+| Arm PDF 物理位置 | `x4trm.pdf`（Issue 05）与 Software Optimization Guide（Issue 3.0）+ 提取文本在仓外 `cpu-uarch-ref/arm-docs/`；Arm 版权禁止复制 | 永久不迁移入库；引用只写文档号/修订/章节 | ✅ 已落位（持续遵守） |
+| 运行时 CPU 证据 | 探针无 `sched_getcpu()` 字段；affinity 请求 ≠ 测量期执行位置（Gate 0 契约 #2 的登记缺口） | 触发：需要执行位置证据时另立小项（probe ABI 小改 + 契约测试 + 重新部署） | ⬜ 待办 |
+| 路线 B（可控 VA 布局） | Q1 宽饱和区的布局排歧（PFN 着色 vs 渐进饱和）；Explore `kRandomTLBOffset` 族为参考实现 | 触发：Q1 区间解释需要布局排歧时立项（probe + schema + 契约测试全链） | ⬜ 条件后置 |
+| 线性/逆序遍历建链 | 随机环结果的顺序依赖嫌疑排查手段；probe ABI 变更 | 触发：出现顺序依赖嫌疑时立项 | ⬜ 条件后置 |
+| perf/simpleperf 同窗差分 | CLI 窗 ≠ 探针内窗，需专门同窗机制；可选交叉验证 | 触发：探针内计数链出现可疑证据时 | ⬜ 可选 |
+| perf 二进制谱系 | 设备手工部署的静态 perf 未入 artifact manifest | 触发：使用前先 `sha256sum` 登记 | ⬜ 使用时执行 |
+| Q2b 可选增强 | `0x2d`（QUALIFIED）在 onset 区间 [2560,3072] 的 unified refill 曲线未采（Phase C 只用了 G2/G3） | 触发：Q2c 授权议程重启时（任务书 §3.3 门槛满足后） | ⬜ 条件后置 |
+| 固定开销标签 | cycles 与 dtlb_walk 的绝对密度"含固定开销"（§5.3 判定：512K 冷启动 ≈8 walks/窗、cycles ≈55k cycles/窗） | 触发：任何复用本战役密度数据的分析须先读 Gate 1 评审 §4；转折判定用跨长度斜率 | ✅ 持续约束（Gate 1 评审已载） |
+| Q4 达成率方法学 | mixed 达成率 2304=12.5%、3072=37.5%（16 MiB=87.5% 覆盖）；比较级证据需预设更大尝试预算或更强达成手段 | 触发：未来 THP 类对照设计时引用为预期达成率 | ✅ 已登记（本行即参照） |
