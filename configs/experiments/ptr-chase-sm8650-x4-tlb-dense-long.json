@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-sm8650-x4-tlb-dense-long",
+  "title": "SM8650 X4 TLB Phase B 长训练对照（512 ring passes）",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    { "name": "buffer", "type": "size", "range": "knee/onset 候选括点 120/1024/2560/3072 页（§6.2.6 双训练量同制度判定）" },
+    { "name": "stride", "type": "size", "default": "64B" },
+    { "name": "warmup_passes", "type": "int", "default": 2 },
+    { "name": "loads_per_slot", "type": "int", "default": 512 },
+    { "name": "min_loads", "type": "int", "default": 4096 },
+    { "name": "repetitions", "type": "int", "default": 10 },
+    { "name": "base_pages", "type": "int", "default": 1 },
+    { "name": "seed", "type": "int", "default": 42 },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        { "name": "cycles", "type": 8, "config": "0x11" },
+        { "name": "mem_access_rd", "type": 8, "config": "0x66" },
+        { "name": "l1d_tlb_refill", "type": 8, "config": "0x05" },
+        { "name": "dtlb_walk", "type": 8, "config": "0x34" }
+      ]
+    }
+  ],
+  "preconditions": [
+    "redmi-k70pro-01 controlled-baseline profile 前后门禁通过",
+    "CPU7 Cortex-X4；四个 core PMU event 同窗且 time_running == time_enabled（拒绝复用）",
+    "每个 repetition 为新进程/新匿名映射；actual backing 必须为 base；逐样本 seed 入档"
+  ],
+  "metrics": [
+    { "name": "latency_ns", "unit": "ns", "statistic": "median" },
+    { "name": "pmu.cycles.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.mem_access_rd.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l1d_tlb_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.dtlb_walk.count", "unit": "events", "statistic": "median" }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "controls": ["x4-prime"],
+    "params": { "repetitions": 10 },
+    "sweep": {
+      "buffer": ["480KiB", "4096KiB", "10240KiB", "12288KiB"],
+      "seed": [42, 7, 1337]
+    },
+    "fixed_params": [
+      "stride", "warmup_passes", "loads_per_slot", "min_loads",
+      "base_pages", "pmu_events"
+    ]
+  },
+  "notes": "§7 Phase B 长训练行（§6.2.6 稳定条件双训练量腿）：timed loads = slots×512、warmup 恒 slots×2；点位 = 短训练候选括点（knee [120,1024]、onset [2560,3072]）× 3 seed（≥3/4 稳定规则下限）= 12 case，恰在 ≤12 额度内。执行量逐点核算（§7 M4/P0-6）：480KiB=3.9M、4096KiB=33.6M、10240KiB=83.9M、12288KiB=100.7M loads/进程 ×10 进程，onset 两大点主导热预算；长/短训练分块，热中止或锚点失真 → 冷却静置后整块重试一次，再败记 failed 按已获数据结案。"
+}

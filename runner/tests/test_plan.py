@@ -361,6 +361,7 @@ class TestPlan(unittest.TestCase):
                     "ptr-chase-sm8650-x4-tlb-ctrl.json": 2,
                     "ptr-chase-sm8650-x4-tlb-coarse.json": 26,
                     "ptr-chase-sm8650-x4-tlb-dense.json": 32,
+                    "ptr-chase-sm8650-x4-tlb-dense-long.json": 12,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g1.json": 2,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g2.json": 2,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g4.json": 4,
@@ -401,6 +402,14 @@ class TestPlan(unittest.TestCase):
                         "buffers": None,
                         "buffer_set": {192, 416, 448, 480, 4096, 10240, 12288, 14336},
                         "seeds": {42, 7, 1337, 20260928},
+                    },
+                    # §7 Phase B 长训练对照（§6.2.6 双训练量腿）：候选括点 × 3 seed，
+                    # loads_per_slot=512 固定派生钉（timed=slots×512，§7 M4/P0-6）
+                    "ptr-chase-sm8650-x4-tlb-dense-long.json": {
+                        "buffers": None,
+                        "buffer_set": {480, 4096, 10240, 12288},
+                        "seeds": {42, 7, 1337},
+                        "loads_per_slot_default": 512,
                     },
                     # Gate 1 正控（§5.1 ①②③ / §5.2 事件组）：各组事件三元组按 §3.1 表钉死
                     "ptr-chase-sm8650-x4-tlb-ctrl-g1.json": {
@@ -485,11 +494,13 @@ class TestPlan(unittest.TestCase):
                     page_policy = expected.get("page_policy", "base")
                     # loads_per_slot 是派生中间量、不进 case.params：声明默认值与
                     # 派生 loads 两头钉（min_loads=4096 在最小 128KiB 档也不生效）；
-                    # §5.3 开销扫描把它移进 sweep——改钉 sweep 声明与逐 case 反推
+                    # §5.3 开销扫描把它移进 sweep——改钉 sweep 声明与逐 case 反推；
+                    # dense-long 固定 512（§7 长训练）走 loads_per_slot_default 钉
                     swept_lps = expected.get("loads_per_slot_sweep")
+                    fixed_lps = expected.get("loads_per_slot_default", 8)
                     if swept_lps is None:
                         defaults = {p["name"]: p.get("default") for p in spec["parameters"]}
-                        self.assertEqual(defaults["loads_per_slot"], 8)
+                        self.assertEqual(defaults["loads_per_slot"], fixed_lps)
                         self.assertIn("loads_per_slot", spec["execution"]["fixed_params"])
                     else:
                         self.assertEqual(spec["execution"]["sweep"]["loads_per_slot"],
@@ -508,7 +519,7 @@ class TestPlan(unittest.TestCase):
                             self.assertEqual(case.param_value("thp"), 1)
                             self.assertNotIn("base_pages", dict(case.params))
                         if swept_lps is None:
-                            self.assertEqual(case.param_value("loads"), 8 * slots)
+                            self.assertEqual(case.param_value("loads"), fixed_lps * slots)
                         else:
                             # 逐 case 反推：loads == loads_per_slot × slots（min_loads 不生效）
                             self.assertEqual(case.param_value("loads") % slots, 0)
