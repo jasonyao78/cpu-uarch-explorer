@@ -75,4 +75,4 @@ adb push <binaries> /data/local/tmp/ && adb shell -> su
 
 **门控定型拍板（预注册 S1 判据，本清单内裁决）**：S1 三条件（方向不反降 / set 间一致 / 精确复现）全部满足——**批准 0x2f 门控升级三事件版**（0x05 + 0x2d + 0x2f 同窗）。0x2d 的 w=8 跳变提前不改变本裁决，但 pilot 的 Q-B 判据按总竞争条目数口径写、锚点参照池只用 pilot 数据（任务书 M0-5 顺序不变）。
 
-**纪律确认**：`data/public/runs/` 零写入；产物 `/tmp/sm8650-smoke/`（本机）与 `/data/local/tmp/tlb2_smoke/`（设备侧，pilot 前可复用）；仓内文件零改动（他人会话的 open-items.md 未暂存修改原样未碰）。
+**纪律确认**：`data/public/runs/` 零写入；产物 `/tmp/sm8650-smoke/`（本机）与 `/data/local/tmp/tlb_r2_smoke/`（设备侧，pilot 前可复用）；仓内文件零改动（他人会话的 open-items.md 未暂存修改原样未碰）。
