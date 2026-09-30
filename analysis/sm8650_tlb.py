@@ -969,8 +969,9 @@ def grade_thp_cohorts(rows: Iterable[dict]) -> dict:
 
     跨 seed 汇总合法性（§7 Phase D）：同一（buffer × cohort）的各 seed
     仅当同制度才合并计样本数——逐 seed 对的 latency_ns 中位数相对偏差
-    ≤10%（双向，同 validate_anchors 互判口径）且 [p25, p75] 两两相交；
-    否则按 seed 分列报告（每 seed 自成报告单元、各自分级）。
+    ≤10%（双向）且 [p25, p75] 两两相交（§7 Phase D 预注册口径，独立
+    于锚点判据形式）；否则按 seed 分列报告（每 seed 自成报告单元、
+    各自分级）。
     regime_failures 登记未通过的 seed 对（审计用）。任务书未指明同制度
     判定的指标字段：取 latency_ns（Q4 首要观测 = mixed-THP 降延迟）——
     近地板的 R 值相对偏差由噪声主导，三指标全判会令合并事实上不可用；
@@ -1452,8 +1453,9 @@ def _load_reference_run(run_dir: Path) -> RunData:
     context = f"anchor reference run {run_dir.name}"
     try:
         return load_run(run_dir)
-    except (OSError, json.JSONDecodeError) as exc:
-        # 缺失/不可读/损坏 JSON 一律 fail-closed 为 TlbError。
+    except (OSError, ValueError) as exc:
+        # 缺失/不可读/损坏 JSON/非 UTF-8 一律 fail-closed 为 TlbError
+        # （JSONDecodeError 与 UnicodeDecodeError 同属 ValueError）。
         raise TlbError(f"{context}: unreadable ({exc})") from exc
 
 
@@ -1634,8 +1636,9 @@ def validate_anchors(block: BlockResult,
     4. 3072 R 值跨块一致性：首块自校准——prior_3072_baseline 缺省
        （首块）时只记录不判失，以 anchor-before 的 3072 组分布建基
        线随 verdict 输出；有基线时前/后锚点 median 均须落入 基线
-       median ± 1.5×W(m,3072)（W 取自池）。判据 2 的池带对首块照
-       常适用；
+       median ± 1.5×W(m,3072)（W 取自池）。**首块豁免只针对判据
+       4**——判据 2 池带与前后互判对首块照常执行（任务书沉默处
+       取保守分支：块内漂移可独立于历史检出）；
 
     判据演化简史（check 名随语义变化更名，防静默语义漂移）：
     - v4.1：short-base 单点 ≤3% 门（*_vs_short_base）+ 旧正控
@@ -1701,7 +1704,7 @@ def validate_anchors(block: BlockResult,
             # 判据 2（v4.4）：median 落池带 C±1.5W（512 R_0x34 除外，
             # 走判据 3）。check 名由 v4.1–v4.3 的 *_vs_short_base /
             # *_within_positive_control_512 统一改为 *_band_<buffer>
-            # （第二次语义变化：单点门/区间隶属 → 池带）。
+            # （判据 2 的首次语义变化：单点门/区间隶属 → 池带）。
             for metric in _ANCHOR_BAND_FIELDS:
                 if buffer_kb == 512 and metric == "dtlb_walk_per_1k":
                     continue

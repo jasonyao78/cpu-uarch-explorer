@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""SM8650 X4 TLB 层级探测分析器测试（任务书 v4.3 §9.3）。
+"""SM8650 X4 TLB 层级探测分析器测试（任务书 v4.4 §9.3）。
 
 合成记录仿 `test_sm8650_x4_p0prime` 的 `_record` 模式（G0 事件组 + 逐
 样本 seed/vma_base/backing 入档）。覆盖骨架契约：正控点对不被误报为
@@ -1138,10 +1138,9 @@ class TestValidateAnchors(unittest.TestCase):
         # ③′判据 3（v4.3 形式沿用，v4.4 参照改自池）：|median − 池参照
         # median| ≤ max(3, 0.5×池参照 median) walks/窗。池参照 median
         # 现算 = 7.75 walks/窗 → 容差 3.875 → 容差带 [3.875, 11.625]
-        # （任务书括号备查值 7.5/[3.75,11.25] 与规范聚合现算差 0.25
-        # walks——备查值以现算为准，见 TestAnchorReferences 的回归钉）。
-        # 边界值 3.875/11.625 为 dyadic 分数，loads=65536=2^16 下计数往
-        # 返 double 精确，可钉恰在带边通过、带外失败。
+        # （任务书括号备查值经 v4.4 勘误与本现算值一致，d1243a3；
+        # 边界值 3.875/11.625 为 dyadic 分数，loads=65536=2^16 下计数
+        # 往返 double 精确，可钉恰在带边通过、带外失败。
         with self.subTest(edge="lower bound 3.875 passes"):
             verdict = validate_anchors(_block(
                 before=_anchor_run("before", _T0, walks_512=3.875),
@@ -1453,11 +1452,9 @@ class TestAnchorReferences(unittest.TestCase):
             _REF["bands"][("l1d_tlb_refill_per_1k", 3072)]["center"],
             1301.1, places=1)
         # walk 池参照 median 现算 = 7.75 walks/窗（容差带
-        # [3.875, 11.625]）。任务书括号值"池 = 7.5 → [3.75, 11.25]"与
-        # 规范聚合（C = 逐 run median 的 median，statistics.median 口
-        # 径）现算差 0.25 walks——7.5 只能由 median_low 得到，与其余
-        # 备查值的口径不一致；任务书自注"判定以现算为准"，按现算钉
-        # 7.75（任务书勘误候选，修订后回改本钉）。
+        # [3.875, 11.625]），与任务书 v4.4 勘误后括号备查值一致
+        # （d1243a3：7.5 只能由 median_low 得到，与规范聚合
+        # statistics.median 口径不符，勘误已落）；本钉独立重算钉现算。
         self.assertEqual(_REF["walk512_median_count"], 7.75)
 
     def test_verdict_evidence_carries_band_details(self):
