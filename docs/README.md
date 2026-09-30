@@ -40,4 +40,7 @@
 | GB10 借鉴迁移评审 | — | `reviews/2026-09-24-gb10-borrow-review.md` | — |
 
 新增战役/主题时在本表加一行；裁定文档进 `reviews/`、传播报告进
-`reports/`，两者通过本表互相可达。
+`reports/`，两者通过本表互相可达。机制层（系统怎么工作、为什么
+这样设计）的快照式分析进 `design/`——TLB 战役的管线增量分析：
+`design/2026-09-30-sm8650-tlb-pipeline.md`（基础管线见
+`design/ptr-chase-pipeline-analysis.md`，2026-09-25 快照）。
