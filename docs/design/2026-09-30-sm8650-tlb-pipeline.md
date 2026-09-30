@@ -21,8 +21,9 @@ configs/experiments/ptr-chase-sm8650-x4-tlb-*.json（15 份）
   └─ 阶段化配置族（锚点/正控/粗扫/致密/长训练/开销扫描/关联/THP） §2.3
 runner/plan.py
   └─ ＋case id 通用段 + 唯一性硬断言 + 段值白名单           §2.4
-runner/engine.py + runner/environment/（既有，首次实战接线）
-  └─ 每 case 前后环境门禁（quiet-state，fail-closed）       §2.5
+runner/engine.py + runner/environment/（P0″ 首战接线；本战役为第二
+  └─ 每 case 前后环境门禁（quiet-state，fail-closed）          §2.5
+     次实战、最大规模验证）
 analysis/sm8650_tlb.py（新）
   └─ 判定分析器：分组/拒绝 → knee/onset 终态机 → 锚点块判定
      → cohort 分级/转化表/预算审计 → Q3/固定开销判定        §2.6–2.9
@@ -140,8 +141,8 @@ time_running<time_enabled 的样本拒绝并登记、同记录其余样本保留
 全失败 run 进 rejected 不抛错）；分组键 (run_label, buffer_kb,
 seed, page_policy_actual, ring_passes)。
 
-**为什么"判定全部落在入库分析器"**：P0″（见 §2.5 注）的 P0 翻车
-（预注册门禁事后改写）证明**ad-hoc 看图判定不可信**。TLB 战役的
+**为什么"判定全部落在入库分析器"**：cache 战役的 P0 翻车（预注
+册门禁事后改写）证明**ad-hoc 看图判定不可信**。TLB 战役的
 所有"结论"（knee/onset/锚点/cohort/Q3）都是可复算的函数输出——
 评审就是逐数字重放这些函数。模块刻意与 P0″ 分析器并列复制契约链
 而不共享实现（两任务的冻结规则各自演化，共享会把一方的规则漂
