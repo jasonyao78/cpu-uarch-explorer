@@ -362,6 +362,8 @@ class TestPlan(unittest.TestCase):
                     "ptr-chase-sm8650-x4-tlb-coarse.json": 26,
                     "ptr-chase-sm8650-x4-tlb-dense.json": 32,
                     "ptr-chase-sm8650-x4-tlb-dense-long.json": 12,
+                    "ptr-chase-sm8650-x4-tlb-assoc-g2.json": 6,
+                    "ptr-chase-sm8650-x4-tlb-assoc-g3.json": 6,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g1.json": 2,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g2.json": 2,
                     "ptr-chase-sm8650-x4-tlb-ctrl-g4.json": 4,
@@ -410,6 +412,24 @@ class TestPlan(unittest.TestCase):
                         "buffer_set": {480, 4096, 10240, 12288},
                         "seeds": {42, 7, 1337},
                         "loads_per_slot_default": 512,
+                    },
+                    # §7 Phase C 关联曲线（§5.2 组）：walk-floor/onset/active 三点 × 2 seed
+                    "ptr-chase-sm8650-x4-tlb-assoc-g2.json": {
+                        "buffers": None,
+                        "buffer_set": {4096, 10240, 14336},
+                        "seeds": {42, 7},
+                        "events": {("cycles", 8, 0x11), ("l1d_tlb_refill", 8, 0x05),
+                                   ("dtlb_walk", 8, 0x34), ("dtlb_step", 8, 0x8136),
+                                   ("dtlb_walk_percyc", 8, 0x8128)},
+                    },
+                    "ptr-chase-sm8650-x4-tlb-assoc-g3.json": {
+                        "buffers": None,
+                        "buffer_set": {4096, 10240, 14336},
+                        "seeds": {42, 7},
+                        "events": {("cycles", 8, 0x11), ("mem_access_rd", 8, 0x66),
+                                   ("l1d_tlb_refill", 8, 0x05),
+                                   ("dtlb_walk", 8, 0x34),
+                                   ("l1d_cache_miss", 8, 0x8144)},
                     },
                     # Gate 1 正控（§5.1 ①②③ / §5.2 事件组）：各组事件三元组按 §3.1 表钉死
                     "ptr-chase-sm8650-x4-tlb-ctrl-g1.json": {
