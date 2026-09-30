@@ -3,8 +3,14 @@
 1. failed 记录被隔离、不混入图表；
 2. 报告含测量纪律 §7 的全部强制元信息项；
 3. SVG 是良构 XML 且含全部控制组系列。
+
+TestChartAnnotations 钉 chart.py 泛化（2026-09-30，TLB 战役图表需求）：
+默认参数输出与泛化前逐字节一致（sha256 钉 + 显式默认零差异）、
+shaded/vlines 几何与分层（画在数据线之下）、注解文本 XML 转义、
+越界注解 fail-closed。
 """
 
+import hashlib
 import json
 import tempfile
 import unittest
@@ -103,6 +109,83 @@ class TestChart(unittest.TestCase):
         svg = latency_svg({"<script>": [(32, 1.0), (64, 2.0)]}, "t")
         self.assertNotIn("<script>", svg)
         ET.fromstring(svg)
+
+
+class TestChartAnnotations(unittest.TestCase):
+    SERIES = {"qos=default": [(32, 0.8), (256, 7.0)],
+              "qos=background": [(32, 1.4), (256, 9.2)]}
+
+    def test_default_output_byte_pin(self):
+        # 泛化前现状输出的 sha256（2026-09-30 捕获于 main 9316853）；默认
+        # 参数下必须与现状逐字节一致——改动默认渲染须显式更新本钉。
+        svg = latency_svg(self.SERIES, "测试标题")
+        self.assertEqual(
+            hashlib.sha256(svg.encode("utf-8")).hexdigest(),
+            "77851a709b0ff9c3951c07b1e54301336239a065b1d4d86d510ed3caf0041681")
+
+    def test_explicit_defaults_zero_diff(self):
+        base = latency_svg(self.SERIES, "测试标题")
+        explicit = latency_svg(self.SERIES, "测试标题",
+                               x_label="buffer size（log2，每格一倍）",
+                               y_label="latency_ns（log2）",
+                               shaded=[], vlines=[])
+        self.assertEqual(base, explicit)
+
+    def test_custom_axis_labels(self):
+        svg = latency_svg({"s": [(128, 1.0), (256, 2.0)]}, "t",
+                          x_label="buffer（log2）", y_label="R/1k（log2）")
+        self.assertIn("buffer（log2）", svg)
+        self.assertIn("R/1k（log2）", svg)
+        self.assertNotIn("latency_ns（log2）", svg)
+
+    def test_shaded_band_geometry_and_layering(self):
+        svg = latency_svg({"s": [(128, 1.0), (32768, 100.0)]}, "t",
+                          shaded=[(256, 4096, "Q1 转折区 [120,1024] 页")])
+        # X 映射钉：80 + (log2(kb)-7)/8×750 → X(256)=173.75、X(4096)=548.75
+        self.assertIn('<rect x="173.8" y="40" width="375.0" height="390" '
+                      'fill="#2563eb" fill-opacity="0.08"/>', svg)
+        self.assertIn("Q1 转折区 [120,1024] 页", svg)
+        # 底色块与标注都画在数据线之下
+        self.assertLess(svg.index("fill-opacity"), svg.index("<polyline"))
+        ET.fromstring(svg)
+
+    def test_vline_geometry_right_side(self):
+        svg = latency_svg({"s": [(128, 1.0), (32768, 100.0)]}, "t",
+                          vlines=[(8192, "MMUTC 2048 项")])
+        # X(8192)=642.5 > 绘图区中线 455 → 标注 anchor=end 在线左侧（避开图例）
+        self.assertIn('<line x1="642.5" y1="40" x2="642.5" y2="430" '
+                      'stroke="#dc2626" stroke-width="1" stroke-dasharray="4 3"/>', svg)
+        self.assertIn('x="637.5" y="54" text-anchor="end"', svg)
+        self.assertIn("MMUTC 2048 项", svg)
+        self.assertLess(svg.index("stroke-dasharray"), svg.index("<polyline"))
+        ET.fromstring(svg)
+
+    def test_vline_geometry_left_side(self):
+        svg = latency_svg({"s": [(128, 1.0), (32768, 100.0)]}, "t",
+                          vlines=[(256, "L")])
+        # X(256)=173.75 ≤ 中线 → 标注 anchor=start 在线右侧
+        self.assertIn('x="178.8" y="54" text-anchor="start"', svg)
+
+    def test_annotation_text_xml_escaped(self):
+        svg = latency_svg({"s": [(128, 1.0), (256, 2.0)]}, "t",
+                          x_label="<x>", y_label="&y",
+                          shaded=[(128, 256, "a<b")], vlines=[(192, "c&d")])
+        self.assertNotIn("<x>", svg)
+        ET.fromstring(svg)
+
+    def test_empty_series_rejected_with_annotations(self):
+        with self.assertRaises(ValueError):
+            latency_svg({}, "t", shaded=[(1, 2, "x")], vlines=[(1, "y")])
+
+    def test_shaded_outside_range_rejected(self):
+        with self.assertRaises(ValueError):
+            latency_svg({"s": [(128, 1.0), (256, 2.0)]}, "t",
+                        shaded=[(1024, 2048, "外")])
+
+    def test_vline_outside_range_rejected(self):
+        with self.assertRaises(ValueError):
+            latency_svg({"s": [(128, 1.0), (256, 2.0)]}, "t",
+                        vlines=[(4096, "外")])
 
 
 class TestCli(unittest.TestCase):
