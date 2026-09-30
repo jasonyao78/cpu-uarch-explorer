@@ -102,6 +102,21 @@ class TestPlan(unittest.TestCase):
         self.assertEqual(prov["stride"].source, "spec-default")
         self.assertEqual(prov["loads"].source, "derived")
 
+    def test_unknown_probe_shape_fails_at_plan_time(self):
+        # M0-4：probe_shape 扩展缝——未注册形状在 plan 期拒绝（不静默按
+        # ptr_chase 派生几何，防新探头参数被旧公式曲解）
+        bad = {**SPEC,
+               "execution": {**SPEC["execution"], "probe_shape": "tlb-set"}}
+        with self.assertRaisesRegex(RunnerError, "probe_shape"):
+            build_plan(bad, PLATFORM)
+
+    def test_default_shape_is_ptr_chase_unchanged(self):
+        # M0-4 回归：未声明 probe_shape → ptr_chase 派生，数值与战役版一致
+        plan = build_plan(SPEC, PLATFORM)
+        case = plan.cases[0]
+        self.assertEqual(case.param_value("loads") % 8, 0)
+        self.assertGreater(case.param_value("loads"), 0)
+
     def test_unknown_unit_fails_at_plan_time(self):
         bad = {**SPEC, "execution": {**SPEC["execution"], "sweep": {"buffer": ["64M"]}}}
         with self.assertRaises(RunnerError):

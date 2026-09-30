@@ -134,6 +134,15 @@ _ANCHOR_REQUIRED_EVENTS = (
     "pmu.l1d_tlb_refill.count",
     "pmu.dtlb_walk.count",
 )
+# M0-4 分析身份键（F6：宽容读字段 ≠ 宽容合并实验条件）：实验条件的
+# 身份维度来自 record params；旧记录无这些键 → 恒 None → 分组行为与
+# 战役版完全一致，新维度只在显式出现时分离组。
+_IDENTITY_PARAM_KEYS = (
+    "chain_distribution",   # 连续/大步距/随机集合/随机序（Q-A 变量表）
+    "node_offset_policy",   # 页内 line 分布（页首固定 vs 64×(i mod 64)）
+    "chains",               # K 独立链数（Q-D）
+    "mapping_span_kb",      # 保留 VA 跨度（与驻留字节分字段）
+)
 _BACKING_ORDER = {"base": 0, "mixed": 1, "thp": 2, "hugetlb-2m": 3,
                   "platform-default": 4}
 # 与 runner/adapters/ptr_chase.py 同款：vma_base 只认小写 hex 地址形态。
@@ -789,7 +798,7 @@ def analyze_records(records: Iterable[dict], run_label: str,
     registry 缺省按无注册处理（fail-closed：全部 PMU 事件资格不足）——
     SEMANTICS_UNVERIFIED 只降级结论，不阻断样本入表。
     """
-    grouped: dict[tuple[int, int, str, float], list[dict]] = defaultdict(list)
+    grouped: dict[tuple, list[dict]] = defaultdict(list)
     result = AnalysisResult(run_label=run_label)
     seen = False
     for record in records:
@@ -800,7 +809,11 @@ def analyze_records(records: Iterable[dict], run_label: str,
                 f": record status={record.get('status')}"
             )
             continue
+        # M0-4：身份维度取自 params（显式才参与分组；缺省 None 保持旧分组）
+        record_params = record.get("params", {})
+        identity = tuple(record_params.get(k) for k in _IDENTITY_PARAM_KEYS)
         for sample in _samples_from_record(record, run_label, result.rejected):
+            sample["_identity"] = identity
             # REV-M0-BATCH C2：缺失集也是身份维度——同契约才同组，组内各
             # 指标的可用样本集合恒一致（无逐字段样本分裂/选择偏差）。
             key = (
@@ -808,25 +821,28 @@ def analyze_records(records: Iterable[dict], run_label: str,
                 sample["seed"],
                 sample["page_policy_actual"],
                 sample["ring_passes"],
+                *identity,
                 tuple(sample["_metric_missing"]),
             )
             grouped[key].append(sample)
     if not seen:
         raise TlbError(f"{run_label}: no records")
 
-    # REV-M0-BATCH C2：键含缺失集维度（变长）；排序与解包只取前 4 元，
-    # metric_contract 取自组内样本（同组契约恒一致）。
+    # 键含身份维度与缺失集维度（变长）；排序与解包只取前 4 元（旧语义），
+    # identity / metric_contract 取自组内样本（同组恒一致）。
     for _key, samples in sorted(
         grouped.items(), key=lambda item: (item[0][0], item[0][1], _BACKING_ORDER[item[0][2]], item[0][3])
     ):
         buffer_kb, seed, backing, passes = _key[:4]
         contract_missing = sorted({m for s in samples for m in s["_metric_missing"]})
         contract_extras = sorted({m for s in samples for m in s["_metric_extras"]})
+        identity = samples[0]["_identity"]
         stored = []
         for smp in samples:
             smp = dict(smp)
             smp.pop("_metric_missing")
             smp.pop("_metric_extras")
+            smp.pop("_identity")
             stored.append(smp)
         group = {
             "run_label": run_label,
@@ -840,6 +856,8 @@ def analyze_records(records: Iterable[dict], run_label: str,
             # 派生字段为 None，判据消费入口给 INCOMPUTABLE。
             "metric_contract": {"missing": contract_missing,
                                 "extras": contract_extras},
+            # M0-4：实验身份维度（None = 该维度未声明，同战役语义）
+            "identity": dict(zip(_IDENTITY_PARAM_KEYS, identity)),
             # §9.2 复用契约：双峰字段钉为 l1d_tlb_refill_per_1k（knee 判
             # 据的消费字段、逐进程布局/着色方差的主要暴露面）。
             "bimodal": _is_bimodal(

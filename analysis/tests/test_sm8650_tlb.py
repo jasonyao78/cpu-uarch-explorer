@@ -609,6 +609,29 @@ class TestBimodalFlag(unittest.TestCase):
         self.assertFalse(result.groups[0]["bimodal"])
 
 
+class TestIdentityParamKeys(unittest.TestCase):
+    """M0-4 分析身份键（F6）：实验条件维度进分组键——同几何同 seed 但
+    chain_distribution 不同的记录必须分成两组；旧记录（无这些 params）
+    分组行为与战役版一致（回归保证）。"""
+
+    def test_distribution_param_separates_groups(self):
+        a = _record()
+        a["params"]["chain_distribution"] = "random-set"
+        b = _record()
+        b["params"]["chain_distribution"] = "strided-set"
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+        dists = {g["identity"]["chain_distribution"] for g in result.groups}
+        self.assertEqual(dists, {"random-set", "strided-set"})
+
+    def test_legacy_records_group_as_before(self):
+        # 无身份 params：全部归一组（旧 4 元组行为）
+        result = analyze_records([_record(), _record()], "run-a")
+        self.assertEqual(len(result.groups), 1)
+        self.assertIsNone(result.groups[0]["identity"]["chains"])
+        self.assertIsNone(result.groups[0]["identity"]["chain_distribution"])
+
+
 class TestMetricContract(unittest.TestCase):
     """M0-2 命名降级契约（OI-13 关闭）：
 

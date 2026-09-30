@@ -152,6 +152,91 @@ def _normalize_pmu_events(rv: ResolvedValue | None) -> list[dict[str, int | str]
     return normalized
 
 
+
+
+def _derive_ptr_chase_case_params(params: dict[str, ResolvedValue]) -> dict[str, ResolvedValue]:
+    """ptr_chase 形状的语义参数派生（M0-4 从 planner 主循环抽出，逻辑逐字不变）。
+
+    buffer/stride/loads/warmup 在 plan 期完成并可审计；warmup 双语义
+    （精确 loads vs ring passes）硬拒绝共存；loads 对齐展开因子 8。
+    """
+    buffer_kb = parse_size_kb(str(params["buffer"].value))
+    stride_b = parse_size_bytes(str(params["stride"].value))
+    slots = (buffer_kb * 1024) // stride_b
+    if slots < 2:
+        raise RunnerError("plan-error", f"buffer {buffer_kb}KB too small for stride {stride_b}B")
+    loads_per_slot = int(params.get("loads_per_slot", ResolvedValue(8, "spec-default")).value)
+    min_loads = int(params.get("min_loads", ResolvedValue(1 << 22, "spec-default")).value)
+    loads = max(min_loads, loads_per_slot * slots)
+    loads -= loads % 8  # 对齐展开因子（Probe ABI：loads >= 8 且为 8 的倍数）
+
+    # 新协议按完整 ring pass 表达预热；Probe ABI 仍接收精确 load 数。
+    # legacy warmup 仅用于历史配置重放。两种语义同时出现会使记录无法
+    # 判定操作者意图，因此在 plan 期硬拒绝。
+    warmup_rv = params.get("warmup")
+    passes_rv = params.get("warmup_passes")
+    if warmup_rv is not None and passes_rv is not None:
+        raise RunnerError(
+            "plan-error",
+            "ptr_chase cannot declare both warmup and warmup_passes",
+        )
+    if passes_rv is not None:
+        if type(passes_rv.value) is not int:  # bool 也不得冒充 int
+            raise RunnerError(
+                "plan-error",
+                f"warmup_passes must be an integer, got {passes_rv.value!r}",
+            )
+        warmup_passes = passes_rv.value
+        if warmup_passes < 1:
+            raise RunnerError(
+                "plan-error",
+                f"warmup_passes must be >= 1, got {warmup_passes}",
+            )
+        warmup = warmup_passes * slots
+        if warmup > MAX_PROBE_LOADS:
+            raise RunnerError(
+                "plan-error",
+                f"derived warmup loads exceed signed 64-bit limit: {warmup}",
+            )
+    elif warmup_rv is not None:
+        if type(warmup_rv.value) is not int:
+            raise RunnerError(
+                "plan-error",
+                f"legacy warmup must be an integer, got {warmup_rv.value!r}",
+            )
+        warmup = warmup_rv.value
+        if warmup < 0:
+            raise RunnerError(
+                "plan-error", f"legacy warmup must be >= 0, got {warmup}",
+            )
+    else:
+        raise RunnerError(
+            "plan-error",
+            "ptr_chase requires warmup_passes (current) or warmup (legacy)",
+        )
+
+    case_params = {
+        "buffer_kb": ResolvedValue(buffer_kb, params["buffer"].source),
+        "stride": ResolvedValue(stride_b, params["stride"].source),
+        "loads": ResolvedValue(loads, "derived"),
+        "warmup": ResolvedValue(
+            warmup, "derived" if passes_rv is not None else warmup_rv.source,
+        ),
+    }
+    if passes_rv is not None:
+        case_params["warmup_passes"] = ResolvedValue(
+            warmup_passes, passes_rv.source,
+        )
+    return case_params
+
+
+# M0-4 扩展缝：probe_shape → 语义参数派生函数。新探头形状在此注册；
+# planner 主循环只负责 sweep 展开/fixed_params/通用旗标（页策略/PMU/seed）/case 组装。
+_CASE_DERIVERS = {
+    "ptr_chase": _derive_ptr_chase_case_params,
+}
+
+
 def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) -> Plan:
     """展开确定性 case 集合：controls × sweep 笛卡尔积，每 case 携带
     repetitions 与参数溯源。所有单位解析/派生计算在此完成——plan 期报错，
@@ -189,61 +274,17 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                                              platform_defaults=platform_defaults,
                                              spec_defaults=spec_defaults)
 
-            # ptr_chase 语义参数计算（buffer/stride/loads）：在 plan 期完成并可审计
-            buffer_kb = parse_size_kb(str(params["buffer"].value))
-            stride_b = parse_size_bytes(str(params["stride"].value))
-            slots = (buffer_kb * 1024) // stride_b
-            if slots < 2:
-                raise RunnerError("plan-error", f"buffer {buffer_kb}KB too small for stride {stride_b}B")
-            loads_per_slot = int(params.get("loads_per_slot", ResolvedValue(8, "spec-default")).value)
-            min_loads = int(params.get("min_loads", ResolvedValue(1 << 22, "spec-default")).value)
-            loads = max(min_loads, loads_per_slot * slots)
-            loads -= loads % 8  # 对齐展开因子（Probe ABI：loads >= 8 且为 8 的倍数）
-
-            # 新协议按完整 ring pass 表达预热；Probe ABI 仍接收精确 load 数。
-            # legacy warmup 仅用于历史配置重放。两种语义同时出现会使记录无法
-            # 判定操作者意图，因此在 plan 期硬拒绝。
-            warmup_rv = params.get("warmup")
-            passes_rv = params.get("warmup_passes")
-            if warmup_rv is not None and passes_rv is not None:
+            # M0-4：probe_shape 派分——descriptor 扩展缝。默认 ptr_chase 保持
+            # 战役行为逐字不变；新形状在 _CASE_DERIVERS 注册派生函数。
+            shape = exe.get("probe_shape", "ptr_chase")
+            deriver = _CASE_DERIVERS.get(shape)
+            if deriver is None:
                 raise RunnerError(
                     "plan-error",
-                    "ptr_chase cannot declare both warmup and warmup_passes",
+                    f"unknown probe_shape {shape!r} (supported: "
+                    f"{sorted(_CASE_DERIVERS)})",
                 )
-            if passes_rv is not None:
-                if type(passes_rv.value) is not int:  # bool 也不得冒充 int
-                    raise RunnerError(
-                        "plan-error",
-                        f"warmup_passes must be an integer, got {passes_rv.value!r}",
-                    )
-                warmup_passes = passes_rv.value
-                if warmup_passes < 1:
-                    raise RunnerError(
-                        "plan-error",
-                        f"warmup_passes must be >= 1, got {warmup_passes}",
-                    )
-                warmup = warmup_passes * slots
-                if warmup > MAX_PROBE_LOADS:
-                    raise RunnerError(
-                        "plan-error",
-                        f"derived warmup loads exceed signed 64-bit limit: {warmup}",
-                    )
-            elif warmup_rv is not None:
-                if type(warmup_rv.value) is not int:
-                    raise RunnerError(
-                        "plan-error",
-                        f"legacy warmup must be an integer, got {warmup_rv.value!r}",
-                    )
-                warmup = warmup_rv.value
-                if warmup < 0:
-                    raise RunnerError(
-                        "plan-error", f"legacy warmup must be >= 0, got {warmup}",
-                    )
-            else:
-                raise RunnerError(
-                    "plan-error",
-                    "ptr_chase requires warmup_passes (current) or warmup (legacy)",
-                )
+            case_params = deriver(params)
 
             # hugepage：实验声明时才进入 case（测量语义参数，measurement-discipline
             # §2）；未声明的实验完全不出现该键——旧配置零影响。
@@ -271,18 +312,8 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                     )
                 seed = seed_rv.value
 
-            case_params = {
-                "buffer_kb": ResolvedValue(buffer_kb, params["buffer"].source),
-                "stride": ResolvedValue(stride_b, params["stride"].source),
-                "loads": ResolvedValue(loads, "derived"),
-                "warmup": ResolvedValue(
-                    warmup, "derived" if passes_rv is not None else warmup_rv.source,
-                ),
-            }
-            if passes_rv is not None:
-                case_params["warmup_passes"] = ResolvedValue(
-                    warmup_passes, passes_rv.source,
-                )
+            buffer_kb = case_params["buffer_kb"].value
+            stride_b = int(case_params["stride"].value)
             if hp_rv is not None:
                 case_params["hugepage"] = ResolvedValue(hugepage, hp_rv.source)
             if thp_rv is not None:
