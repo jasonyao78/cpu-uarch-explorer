@@ -2,6 +2,22 @@
 
 > 本地快照（2026-09-23，tag `req-v0.3`）。仓库接入 GitHub 后同步为 Issues（标签 `open-item`）。每项注明：阻塞什么、如何回填、当前证据等级。
 
+## OI-12 ROB 微架构深度分析项目（2026-09-30 登记，第二个部件探测项目）
+
+- **交付物（v0.1 已入库）**：`docs/cpu-uarch-deep-analysis/rob-deep-analysis/`——报告 v0.1（采数前版本：估计量定义/混淆清单/判据预注册 J1–J8/协议三要素）、探针骨架 `probes/rob_window_probe.c`（mini-JIT，7 类别 × 2 锚点，本机编译冒烟 + 生成码 capstone 核验通过）、probes README；方法迁移矩阵相应升级 v0.3。
+- **与 TLB 项目最大差异**：ROB 无 TRM 真值（已全文核验 TRM+优化指南零披露），走"估计量优先 + 第三方候选区间 + 交叉约束"（矩阵 C1 ✏️ 档）。
+- **不做工程对接**（项目边界，2026-09-29 拍板）：不挂 runner/analysis/probes-CMake；采数数据按 B3 逐轮落盘但不进 runner 数据模型；数据分层/quarantine 纪律仍适用。
+- **跟踪面**（逐项状态见报告附录待办表，此处登记归属与触发）：
+
+| 项 | 内容 | 状态 |
+|---|---|---|
+| 采数前置 | Phase 0（0a 事件导出集 / 0b 锚点延迟标定 / 0c X4 核确认）→ §5.8 判据表冻结 | ⬜ 待办（触发：首次目标板采数） |
+| E0 附带验证 | 6 项（MOV 消除 ×2、NOP/分支发射、拆分因子基线、fsqrt 标定）；**E0-3 是主协议最大单点风险**（NOP 若不占窗口则 stuffedcow 前提在 X4 不成立），预案已预注册 | ⬜ 待办 |
+| 候选区间表扩充 | Geekerwan / Chips and Cheese / AnandTech 等第三方实测值渠道调研 | ⬜ 待办（采数前） |
+| 探针 v2 | xbyak_aarch64 替代手写发射器评估；Microarchitecturometer（支持 Arm）/rob.rs 适配部件评估；E0 依赖链模式；混合类别；进程内扫描（免每点 chase 初始化）；黄金汇编回归 | ⬜ 待办（E0 之后） |
+| CPUSUIT 代码复用范围 | 作者已确认为仓库所有者本人（Apache-2.0 头注，reference-materials.md 已更正）；当前保守策略 = 方法学借鉴不搬代码，**直接复用范围待所有者拍板** | ⏸ 待决策 |
+| 判据闭环 | E1→E2→E3 后按 J1–J8 评定，允许/禁止归因命名；通过后报告升 v0.2（含实测），矩阵 ROB 列证据状态升级【目标机】 | ⬜ 待办 |
+
 ## OI-1 gem5 D9300 模型源码接入（2026-09-24：主体完成，剩余验证与梳理）
 
 - **✅ 模型工作定位**：用户提供的 gem5-d9300-patch 增量树——`configs/example/arm/arm_multicore_d9300.py`（D9300 全系统配置）+ CoralNPU/NDP/Gemmini 资产 + `run_multicore.sh` 全流程（checkpoint/NPU 后端切换）。原始 drop 只读归档于 `../cpu-uarch-ref/gem5-d9300-patch/`（MANIFEST.sha256）。
@@ -80,9 +96,10 @@
 ## OI-7 外部参考材料处置（新增，2026-09-23；2026-09-23 二次更新：已迁至仓库外）
 
 - **位置**：`../cpu-uarch-ref/`（workspace 级，仓库外，已加只读约束）。含两个子目录：`cpu-cache-demo-code/`（历史 demo）与 `cpu微架构材料/`。
-- **内容**：第三方 CPUSUIT Benchmark 探针工程（无 LICENSE，含 xbyak_aarch64 第三方库）+ Michael 自己的 gem5 DDR 时延分析 + DDR 时序分析 + 未知作者 PPTX。
-- **初步评估**（详见 req-v0.3 置信度注记）：CPUSUIT 覆盖度（ROB 探测、port 分析等）对 probes/ 规划有 HIGH 参考价值，但**无 LICENSE 不可搬代码**，仅限方法学借鉴；gem5 DDR 分析为本人作品，可评估后移入 `docs/`（注意其绑定 gem5 commit 3dc9dcc）。
+- **内容**：CPUSUIT 探针工程（含 xbyak_aarch64 第三方库）+ Michael 自己的 gem5 DDR 时延分析 + DDR 时序分析 + 未知作者 PPTX。
+- **初步评估**（详见 req-v0.3 置信度注记）：CPUSUIT 覆盖度（ROB 探测、port 分析等）对 probes/ 规划有 HIGH 参考价值；gem5 DDR 分析为本人作品，可评估后移入 `docs/`（注意其绑定 gem5 commit 3dc9dcc）。
 - **处置待决策**：逐文件确认作者与许可证 → 决定 移入 docs / 登记为方法学参考 / 忽略。
+- **状态更新（2026-09-30，ROB 项目源码通读）**：CPUSUIT 作者身份确认 = **仓库所有者本人**（`include/probe_type.h` 等头文件署名 Copyright(c) Michael Yao + Apache-2.0 头注；src 多数文件无头注、根目录无 LICENSE）——reference-materials.md 已更正。ROB 深析项目已按方法学借鉴执行（报告 §0 + probes README 借鉴登记）；代码复用范围待所有者拍板。PPTX 作者仍未知，维持原处置。
 
 ## OI-10 改进项登记（2026-09-26，源自 ptr-chase-pipeline-analysis §7.2）
 
