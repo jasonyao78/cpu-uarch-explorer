@@ -88,18 +88,9 @@
 #include <unistd.h>
 #include <sys/mman.h>
 
-#if defined(CPU_UARCH_HAVE_LINUX_PERF)
-#include "perf_counter.h"
-#endif
+#include "page_policy.h"   // M0-1：共享页策略支撑（probe_common）
 
-// MAP_HUGETLB 为 Linux 专有（2MB 默认大页）；macOS 等平台无此能力，
-// 请求 hugepage 时以退出码 2（能力不支持）回应（Probe ABI，原理"附加"节）。
-#ifndef MAP_HUGETLB
-#define CPU_UARCH_NO_HUGEPAGE 1
-#else
-#define CPU_UARCH_NO_HUGEPAGE 0
-#endif
-
+// 平台能力宏（页策略抬升后保留在调用方；语义同 v1 战役版）
 #if defined(__linux__) && defined(MADV_HUGEPAGE)
 #define CPU_UARCH_NO_THP 0
 #else
@@ -110,6 +101,10 @@
 #define CPU_UARCH_NO_BASE_PAGE_ADVICE 0
 #else
 #define CPU_UARCH_NO_BASE_PAGE_ADVICE 1
+#endif
+
+#if defined(CPU_UARCH_HAVE_LINUX_PERF)
+#include "perf_counter.h"
 #endif
 
 namespace {
@@ -198,106 +193,8 @@ void usage(const char* prog) {
     std::exit(1);
 }
 
-// hugetlb 分配：尺寸向上取整到 2MB 对齐 + MAP_HUGETLB；缺页池时 strict
-// 退出 2、非 strict 回退普通匿名映射（实际 backing 稍后独立观测）。
-char* map_hugetlb_buffer(size_t bytes, bool want_hp, bool strict_hp) {
-#if CPU_UARCH_NO_HUGEPAGE
-    (void)bytes; (void)strict_hp;
-    if (want_hp) {
-        std::fprintf(stderr, "unsupported: MAP_HUGETLB not available on this platform\n");
-        std::exit(2);
-    }
-    return nullptr;  // 未触发，下行统一走默认 mmap
-#else
-    if (!want_hp)
-        return nullptr;
-    constexpr size_t kHp = 2 * 1024 * 1024;
-    const size_t hp_bytes = (bytes + kHp - 1) / kHp * kHp;
-    char* buf = static_cast<char*>(mmap(nullptr, hp_bytes, PROT_READ | PROT_WRITE,
-                                        MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0));
-    if (buf != MAP_FAILED) {
-        return buf;
-    }
-    if (strict_hp) {
-        std::fprintf(stderr, "unsupported: hugepage pool unavailable (strict mode)\n");
-        std::exit(2);
-    }
-    std::fprintf(stderr, "warning: hugepage pool unavailable, falling back to a "
-                         "default anonymous mapping; actual backing will be inspected\n");
-    return nullptr;
-#endif
-}
-
-unsigned base_page_kb() {
-    const long bytes = sysconf(_SC_PAGESIZE);
-    return bytes > 0 ? static_cast<unsigned>(bytes / 1024) : 0;
-}
-
-[[maybe_unused]] bool read_anon_huge_kb(
-        const char* buf, size_t bytes, size_t* anon_huge_kb) {
-    std::ifstream smaps("/proc/self/smaps");
-    if (!smaps)
-        return false;
-
-    const uintptr_t target_begin = reinterpret_cast<uintptr_t>(buf);
-    const uintptr_t target_end = target_begin + bytes;
-    bool overlaps = false;
-    bool saw_target_vma = false;
-    bool attribution_exact = true;
-    size_t covered_bytes = 0;
-    size_t total = 0;
-    std::string line;
-    while (std::getline(smaps, line)) {
-        unsigned long long begin = 0, end = 0;
-        if (std::sscanf(line.c_str(), "%llx-%llx", &begin, &end) == 2) {
-            overlaps = static_cast<uintptr_t>(end) > target_begin
-                    && static_cast<uintptr_t>(begin) < target_end;
-            if (overlaps) {
-                // AnonHugePages 是 VMA 级汇总。若 VMA 超出目标映射，不能把
-                // 邻接匿名区的大页归到本 buffer；只有整段 AnonHugePages=0
-                // 时，仍可无歧义地判成 base backing。
-                if (static_cast<uintptr_t>(begin) < target_begin
-                        || static_cast<uintptr_t>(end) > target_end)
-                    attribution_exact = false;
-                saw_target_vma = true;
-                const uintptr_t overlap_begin =
-                    std::max(static_cast<uintptr_t>(begin), target_begin);
-                const uintptr_t overlap_end =
-                    std::min(static_cast<uintptr_t>(end), target_end);
-                covered_bytes += static_cast<size_t>(overlap_end - overlap_begin);
-            }
-            continue;
-        }
-        if (overlaps) {
-            size_t value = 0;
-            if (std::sscanf(line.c_str(), "AnonHugePages: %zu kB", &value) == 1)
-                total += value;
-        }
-    }
-    if (!saw_target_vma || covered_bytes < bytes)
-        return false;
-    if (total > 0 && !attribution_exact)
-        return false;
-    *anon_huge_kb = total;
-    return true;
-}
-
-struct PageBackingClass {
-    const char* actual;
-    unsigned page_kb;
-};
-
-[[maybe_unused]] PageBackingClass classify_page_backing(
-        size_t anon_huge_kb, size_t mapping_bytes) {
-    if (anon_huge_kb == 0)
-        return {"base", base_page_kb()};
-    const size_t fully_backed_kb = (mapping_bytes + 1023) / 1024;
-    if (anon_huge_kb >= fully_backed_kb)
-        return {"thp", 2048};
-    return {"mixed", 0};
-}
-
 } // namespace
+
 
 int main(int argc, char** argv) {
     size_t buffer_kb = 8192;
@@ -404,10 +301,10 @@ int main(int argc, char** argv) {
 
     // hugetlb 成功时返回显式大页映射；nullptr 表示走普通匿名映射。THP 只
     // 能作用于后者，且最终状态必须由 smaps 观测，不能由请求结果推断。
-    char* hp_buf = map_hugetlb_buffer(bytes, want_hp, strict_hp);
+    char* hp_buf = probe_common::map_hugetlb_buffer(bytes, want_hp, strict_hp);
     char* mapping_base = hp_buf;
     size_t mapping_bytes = bytes;
-#if !CPU_UARCH_NO_HUGEPAGE
+#if !PROBE_COMMON_NO_HUGEPAGE
     if (hp_buf != nullptr) {
         constexpr size_t kHp = 2 * 1024 * 1024;
         mapping_bytes = (bytes + kHp - 1) / kHp * kHp;
@@ -420,20 +317,15 @@ int main(int argc, char** argv) {
         // 无法把 VMA 级 AnonHugePages 精确归到目标 buffer。两侧 PROT_NONE
         // guard page 强制目标 RW 段成为边界精确的独立 VMA，不改变中间页的
         // default/THP policy，也不放宽 smaps 的保守归属规则。
-        mapping_bytes = normal_map_bytes + 2 * base_page_bytes;
-        mapping_base = static_cast<char*>(mmap(
-            nullptr, mapping_bytes, PROT_NONE,
-            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
-        if (mapping_base == MAP_FAILED) {
+        const probe_common::GuardedMap guarded =
+            probe_common::map_guarded_anonymous(bytes, base_page_bytes);
+        if (guarded.buf == nullptr) {
             std::perror("mmap guarded buffer");
             return 1;
         }
-        buf = mapping_base + base_page_bytes;
-        if (mprotect(buf, normal_map_bytes, PROT_READ | PROT_WRITE) != 0) {
-            std::perror("mprotect guarded buffer");
-            munmap(mapping_base, mapping_bytes);
-            return 1;
-        }
+        mapping_base = guarded.mapping_base;
+        mapping_bytes = guarded.mapping_bytes;
+        buf = guarded.buf;
 #else
         mapping_base = static_cast<char*>(mmap(
             nullptr, bytes, PROT_READ | PROT_WRITE,
@@ -490,7 +382,7 @@ int main(int argc, char** argv) {
     std::string page_policy = "platform-default";
     size_t anon_huge_kb_before = 0;
     size_t anon_huge_kb_after = 0;
-    unsigned page_kb = base_page_kb();
+    unsigned page_kb = probe_common::base_page_kb();
     if (hp_buf != nullptr) {
         page_policy_actual_before = "hugetlb-2m";
         page_policy_actual_after = "hugetlb-2m";
@@ -507,7 +399,7 @@ int main(int argc, char** argv) {
     if (hp_buf == nullptr) {
         // 第一次 smaps 观测必须在 warmup 后：初始化写入和 warmup 都可能
         // 触发 khugepaged；只有这里才是 timed/PMU 窗入口的 backing。
-        if (!read_anon_huge_kb(buf, normal_map_bytes, &anon_huge_kb_before)) {
+        if (!probe_common::read_anon_huge_kb(buf, normal_map_bytes, &anon_huge_kb_before)) {
             std::fprintf(stderr,
                          "error: cannot inspect target mapping before measurement\n");
             free(perm);
@@ -515,7 +407,7 @@ int main(int argc, char** argv) {
             return 1;
         }
         const PageBackingClass before =
-            classify_page_backing(anon_huge_kb_before, normal_map_bytes);
+            probe_common::classify_page_backing(anon_huge_kb_before, normal_map_bytes);
         page_policy_actual_before = before.actual;
         page_kb = before.page_kb;
     }
@@ -582,7 +474,7 @@ int main(int argc, char** argv) {
 #if defined(__linux__)
     if (hp_buf == nullptr) {
         // PMU 已停止、计时已结束；smaps I/O 不进入任何测量窗口。
-        if (!read_anon_huge_kb(buf, normal_map_bytes, &anon_huge_kb_after)) {
+        if (!probe_common::read_anon_huge_kb(buf, normal_map_bytes, &anon_huge_kb_after)) {
             std::fprintf(stderr,
                          "error: cannot inspect target mapping after measurement\n");
             free(perm);
@@ -590,7 +482,7 @@ int main(int argc, char** argv) {
             return 1;
         }
         const PageBackingClass after =
-            classify_page_backing(anon_huge_kb_after, normal_map_bytes);
+            probe_common::classify_page_backing(anon_huge_kb_after, normal_map_bytes);
         page_policy_actual_after = after.actual;
     }
 #endif

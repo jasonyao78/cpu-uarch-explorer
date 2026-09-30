@@ -11,6 +11,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_subdirectory(probes/platform)
+add_subdirectory(probes/common)
 add_subdirectory(probes/cache-mem)
 
 option(ENABLE_UBSAN "Build probes with UndefinedBehaviorSanitizer" OFF)
