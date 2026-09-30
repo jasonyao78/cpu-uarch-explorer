@@ -138,3 +138,10 @@
 - **触发条件（何时回填/升级）**：①后续 Phase 块若再现跨日/跨 session 基线移动 >3%（锚点池带连续触发、或 main 数据跨日断档），升级为 regime 根因调查（候选路径：ftrace `cpu_frequency_limits` 确认限额、THP 状态审计、short-base 同点复测）；②任何新实验任务书拟设跨日参照门时，必须先引用本条方差数据校准，禁止直接照搬 ≤1.2%/≤3% 级经验阈值。
 - **证据**：方差表征 6 run（`20260929T235909Z`–`235957Z`，`beb63ef`）；两块 fail-closed 留档（`f93b319`）；任务书 v4.4 §6.2.5；分析器池参照现算（`af3455b`）。
 - **状态**：⬜ 观察中（不阻塞 TLB 战役；Phase A 块 3 起按 v4.4 池带执行）。
+
+## OI-13 分析器对非 G0 metric 集主体 run 的适用性扩展（2026-09-30 登记，TLB 战役 Phase C 执行衍生）
+
+- **背景**：`analyze_records` 要求精确 G0 metric 集合（latency + cycles + mem_access_rd + `0x05` + `0x34`），而任务书 §5.2 冻结的 G2 组（不含 mem_access_rd）与 G3 组（含额外 `0x8144`）均不满足——`validate_anchors` 在 ANCHORS_OK 路径上无条件对主体 run 调 `analyze_records`，导致 Phase C 这类非 G0 主体块的锚点判定无法走入库函数路径（Phase C 实际以 §6.2.5 同一规则直接提取复刻执行，见 `docs/reviews/2026-09-30-sm8650-tlb-phase-c.md` §3）。同样受限的还有 `adjudicate_q3` 的 G3 数据消费（其 evidence `data_miss_collinearity_checked` 设计为恒 False）。
+- **扩展方向（立项时评审，不在 TLB 战役内改判据/改分析器）**：①`analyze_records` 对超集 metric 集（多出 PMU 指标）放行并派生对应字段（required ⊆ present）；②`validate_anchors` 增加"主体非 G0 时 main_result 跳过或降级"的显式模式（锚点判定与主体分析解耦）；③G2 类缺失 mem_access_rd 的集合是另一层问题（契约有意缺失，不应简单放行——分析器对缺失每一项都要有命名的降级语义）。
+- **触发条件**：下一个需要非 G0 事件组做正式块级判定的实验任务立项时（如 LLCC/cache 阶段的异构事件组），必须先关闭本项，禁止再用"直接提取复刻"绕行。
+- **状态**：⬜ 待办（不阻塞 TLB 战役：Phase C 已按披露的方法学结案）。
