@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "experiment_id": "ptr-chase-sm8650-x4-tlb-anchor",
+  "protocol_version": "1.2",
+  "target": {
+    "os": "android",
+    "isa": "aarch64",
+    "abi": "android-bionic-aarch64",
+    "target_id": "redmi-k70pro-01",
+    "cpu_profile": "sm8650-8gen3",
+    "execution_kind": "native",
+    "executor": "native",
+    "transport": "adb",
+    "adb_workdir": "/data/local/tmp/cpu-uarch"
+  },
+  "records": "/Users/michaelyao/workspace/cpu-uarch-explorer/.worktrees/sm8650-tlb-hierarchy/data/public/runs/20260930T051715Z-ptr-chase-sm8650-x4-tlb-anchor/records.jsonl",
+  "summary": {
+    "total": 2,
+    "ok": 2,
+    "failed": 0,
+    "skipped": 0,
+    "unsupported": 0
+  }
+}
