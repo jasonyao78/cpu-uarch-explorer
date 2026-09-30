@@ -7,8 +7,8 @@
    中位数）、cohort 展示值只取比较级单元 median（描述级/不足级不出点，
    遵守 §7 Phase D 分级纪律）；
 2. CLI 合成数据端到端：四图 + report.md 产出、曲线点数钉、幂等（同输
-   入必同输出）、fail-closed（缺 run / 缺 metric / 网格缺口 / 无比较级
-   mixed → 非零退出 + stderr）；
+   入必同输出）、fail-closed（缺 run / 缺 metric / 网格缺口 / 失败记录 /
+   ring passes ≠ 8 / 无比较级 mixed → 非零退出 + stderr）；
 3. 真实数据集形状钉（读仓内 data/public/runs，同 test_sm8650_tlb 池互
    钉先例）：20 点合并曲线、图 4 系列形状与 -82% 方向。数据修正走
    revision history 时本类随数据集一起更新。
@@ -26,7 +26,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from analysis import tlb_figures
-from analysis.sm8650_tlb import grade_thp_cohorts
+from analysis.sm8650_tlb import TlbError, grade_thp_cohorts
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _RUNS_ROOT = _REPO_ROOT / "data" / "public" / "runs"
@@ -79,6 +79,9 @@ class TestSeedMedians(unittest.TestCase):
     def test_single_group_passthrough(self):
         self.assertEqual(tlb_figures.seed_medians([_group(128, 7, _FIELD, 4.5)], _FIELD),
                          {(128, 7): 4.5})
+        # P3-6：扫描曲线只消费 base 组——混入其他 backing 即 fail-closed
+        with self.assertRaises(TlbError):
+            tlb_figures.seed_medians([_group(128, 7, _FIELD, 4.5, backing="mixed")], _FIELD)
 
 
 class TestMergeSeedMedians(unittest.TestCase):
@@ -155,13 +158,13 @@ _PMU_SPECS = (("pmu.cycles.count", 8, 0x11), ("pmu.mem_access_rd.count", 8, 0x66
 
 def _record(buffer_kb: int, seed: int, latencies, *, backings=None,
             refill_per_1k=300.0, walk_per_1k=1.0, cyc_per_load=16.0,
-            mem_rd_per_1k=1000.0, drop_metrics=()) -> dict:
+            mem_rd_per_1k=1000.0, drop_metrics=(), passes=8) -> dict:
     """满足 G0 证据契约的最小合成记录（仿 test_sm8650_tlb._record 模式）。
 
-    loads = slots × 8（8 ring passes 正式窗口）；PMU 观测值按目标密度反推
-    计数（派生口径 R = count/loads×1000、cyc/load = count/loads）。
+    loads = slots × passes（默认 8 ring passes 正式窗口）；PMU 观测值按目标
+    密度反推计数（派生口径 R = count/loads×1000、cyc/load = count/loads）。
     """
-    loads = buffer_kb * 128
+    loads = buffer_kb * 16 * passes
     n = len(latencies)
     backings = backings or ["base"] * n
     observations = [{"sample_index": i, "value": latencies[i], "seed": seed,
@@ -197,7 +200,8 @@ def _write_run(run_dir: Path, records: list[dict]) -> None:
 
 
 def _make_dataset(root: Path, *, drop_one_metric=False, skip_one_record=False,
-                  thp_all_base=False) -> None:
+                  thp_all_base=False, append_failed_record=False,
+                  long_training=False) -> None:
     for name, buffers, seeds in (
         (tlb_figures.RUN_COARSE, tlb_figures.COARSE_BUFFERS, tlb_figures.COARSE_SEEDS),
         (tlb_figures.RUN_DENSE, tlb_figures.DENSE_BUFFERS, tlb_figures.DENSE_SEEDS),
@@ -207,10 +211,17 @@ def _make_dataset(root: Path, *, drop_one_metric=False, skip_one_record=False,
             for s in seeds:
                 if skip_one_record and (b, s) == (buffers[0], seeds[0]):
                     continue
+                # long_training：一个 case 用 512 环（ring_passes != 8 钉）
+                passes = 512 if long_training and (b, s) == (buffers[0], seeds[0]) else 8
                 records.append(_record(
                     b, s, [2.0 + b / 4096.0] * 6, refill_per_1k=b / 4.0,
-                    walk_per_1k=b / 8192.0,
+                    walk_per_1k=b / 8192.0, passes=passes,
                     drop_metrics=("pmu.dtlb_walk.count",) if drop_one_metric else ()))
+        # append_failed_record：钉死数据集应为全 ok 判定 run（失败记录钉）
+        if append_failed_record and name == tlb_figures.RUN_COARSE:
+            records.append({"schema_version": "2.0", "timestamp": "2026-09-30T01:00:00Z",
+                            "status": "failed", "params": {"buffer_kb": 128},
+                            "failure": {"reason": "probe-exit-1"}})
         _write_run(root / name, records)
     _write_run(root / tlb_figures.RUN_THP_BASE, [
         _record(b, s, [8.0] * 6, refill_per_1k=1300.0)
@@ -308,6 +319,25 @@ class TestCli(unittest.TestCase):
             rc, _, err = _run_cli(root, Path(d) / "out")
             self.assertEqual(rc, 1)
             self.assertIn("mixed", err)
+
+    def test_failed_record_fails(self):
+        # 钉死数据集应为全 ok 判定 run：出现失败记录即 fail-closed
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "runs"
+            _make_dataset(root, append_failed_record=True)
+            rc, _, err = _run_cli(root, Path(d) / "out")
+            self.assertEqual(rc, 1)
+            self.assertIn(tlb_figures.RUN_COARSE, err)
+            self.assertIn("failed records", err)
+
+    def test_ring_passes_not_formal_fails(self):
+        # 非 8 环（正式窗口）的 case 不入图：512 环训练量即 fail-closed
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "runs"
+            _make_dataset(root, long_training=True)
+            rc, _, err = _run_cli(root, Path(d) / "out")
+            self.assertEqual(rc, 1)
+            self.assertIn("ring_passes", err)
 
 
 class TestRealDatasetShape(unittest.TestCase):

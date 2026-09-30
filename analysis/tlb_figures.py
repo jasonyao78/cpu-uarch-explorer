@@ -66,9 +66,20 @@ _F_WALK = "dtlb_walk_per_1k"
 
 def seed_medians(groups: list[dict], field: str) -> dict[tuple[int, int], float]:
     """{(buffer_kb, seed): 该点组中位数}；同 (buffer, seed) 跨 run 重合时
-    合并为各 run 组中位数的中位数（summarize，确定性）。"""
+    合并为各 run 组中位数的中位数（summarize，确定性）。
+
+    只消费 base backing 组：扫描曲线合并不同 backing 会静默混淆页策略
+    制度（mixed/thp 的 refill 形态与 base 完全不同），非 base 组即
+    TlbError fail-closed。
+    """
     by_point: dict[tuple[int, int], list[float]] = defaultdict(list)
     for group in groups:
+        if group["page_policy_actual"] != "base":
+            raise TlbError(
+                f"{group.get('run_label', '?')}: 扫描曲线只消费 base backing 组，"
+                f"got {group['page_policy_actual']!r}（buffer={group['buffer_kb']}KiB，"
+                f"防静默合并不同 backing）"
+            )
         by_point[(group["buffer_kb"], group["seed"])].append(group[field]["median"])
     return {point: summarize(medians)["median"]
             for point, medians in sorted(by_point.items())}
@@ -227,17 +238,19 @@ _BACKGROUND = (
 
 _FIG1_READING = (
     "**怎么读**：TLB 是页表翻译的缓存；横轴是程序正在用的内存量（换算成页数 = KiB ÷ 4），"
-    "纵轴是每 1000 次访问里有多少次要重填 L1 TLB。在 480 KiB 到 4 MiB 之间（灰蓝区，对应"
-    " 120–1024 页），重填从几乎为零一路爬到超过每次访问一次——这一片宽区间就是「L1 TLB "
-    "开始不够用」的区域。注意两点：它不是悬崖而是缓坡；纵轴超过 1000/1k 并不矛盾——它是"
+    "纵轴是每 1000 次访问里有多少次要重填 L1 TLB。灰蓝区（480 KiB–4 MiB，对应 120–1024 页）"
+    "是终审判定的转折区：进入灰蓝区前已开始陡升（384→480 KiB "
+    "从 ~4 到 ~235/1k），区内继续爬升到超过每次访问一次——这一片宽区间就是「L1 TLB 开始"
+    "不够用」的区域。注意两点：它不是悬崖而是缓坡；纵轴超过 1000/1k 并不矛盾——它是"
     "事件密度而不是概率（一次访问可能触发多次重填事件）。"
 )
 
 _FIG2_READING = (
     "**怎么读**：这条曲线回答「什么时候连片上缓存都救不了、必须走内存里的页表」——这个动作"
-    "叫 page table walk。10 MiB 以下几乎没有 walk，10–12 MiB（灰蓝区）突然开始。竖虚线是"
-    "芯片手册（TRM）写的 MMUTC 2048 项参考位置（2048 页 × 4 KiB = 8 MiB）：walk onset 落在"
-    "它右边，这件事目前只是机制联想，不是证明。"
+    "叫 page table walk。4 MiB 以下几乎为零；8 MiB 已明显抬升（≈10/1k，约地板的 65 倍）；"
+    "10–12 MiB 全开（≈50/1k）——onset 判定区间 [2560,3072] 页是全开段，抬升从它左边已经"
+    "开始。竖虚线是芯片手册（TRM）写的 MMUTC 2048 项参考位置（2048 页 × 4 KiB = 8 MiB）："
+    "walk onset 落在它右边，这件事目前只是机制联想，不是证明。"
 )
 
 _FIG3_READING = (
@@ -247,6 +260,9 @@ _FIG3_READING = (
     "「看延迟猜 TLB」会误判。"
 )
 
+# 注意：本段含静态数字（-82%、-12.4%、转化表 base 25 + mixed 15、n=5）——
+# 数据集修订（revision history）时需与 grade_thp_cohorts 产出手动同步；
+# report.md 里的分级明细行是生成的（自动跟踪），本段读法文本是常量。
 _FIG4_READING = (
     "**怎么读**：进程内部分页拿到大页（THP，2 MiB 一页）的 cohort，TLB 压力掉到约 1/5"
     "（3072 KiB 处 R_0x05 **-82%**），延迟 **-12.4%**。但只有一部分进程真的拿到了大页"
@@ -273,8 +289,8 @@ _FINAL_STATES = (
 
 _NOT_MEASURED = (
     "- **TLB 物理项数没有测出来**，也不能由本协议报出：固定随机环访问分不清容量、预取与"
-    "页布局各自的贡献（同一条曲线三种解释都兼容）。要测需要可控布局探针——已立项登记"
-    "（`docs/open-items.md` OI-14）。\n"
+    "页布局各自的贡献（同一条曲线三种解释都兼容）。要测需要可控布局探针——已登记备选"
+    "（`docs/open-items.md` OI-14，条件后置）。\n"
     "- **Q2c（L2 TLB 容量 / effective reach）未授权**：`0x2f` 事件语义未核实 + 授权门槛"
     "未满足，保持 OPEN，不由 walk-onset 区间外推。\n"
     "- 图上的「页数」全部按 4 KiB base 页换算；TRM 的 MMUTC 2048 项只是参考线（假设级联想），"

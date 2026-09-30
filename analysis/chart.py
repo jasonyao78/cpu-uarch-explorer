@@ -103,6 +103,10 @@ def latency_svg(series: dict[str, list[tuple[float, float]]], title: str, *,
         parts.append(f'<text x="{x:.1f}" y="{H-MARGIN["bottom"]+16}" text-anchor="middle">{_fmt_size(kb)}</text>')
     for ns in _nice_ticks(y_lo, y_hi):
         y = Y(ns)
+        # 裁剪到绘图区：_nice_ticks 覆盖数据域 ±0.5 档余量，越界刻度不画
+        # （2026-09-30 修复：极端刻度曾横穿 x 刻度文字/标题区）。
+        if not MARGIN["top"] <= y <= H - MARGIN["bottom"]:
+            continue
         parts.append(f'<line x1="{MARGIN["left"]}" y1="{y:.1f}" x2="{W-MARGIN["right"]}" y2="{y:.1f}" stroke="#e5e7eb"/>')
         parts.append(f'<text x="{MARGIN["left"]-8}" y="{y+4:.1f}" text-anchor="end">{_fmt_ns(ns)}</text>')
     parts.append(f'<text x="{W/2}" y="{H-8}" text-anchor="middle">{e(x_label)}</text>')

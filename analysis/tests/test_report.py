@@ -116,12 +116,14 @@ class TestChartAnnotations(unittest.TestCase):
               "qos=background": [(32, 1.4), (256, 9.2)]}
 
     def test_default_output_byte_pin(self):
-        # 泛化前现状输出的 sha256（2026-09-30 捕获于 main 9316853）；默认
-        # 参数下必须与现状逐字节一致——改动默认渲染须显式更新本钉。
+        # 默认渲染输出的 sha256。沿革：77851a70… = 泛化前现状（2026-09-30
+        # 捕获于 main 9316853）；3d611254… = 2026-09-30 网格线越界裁剪修复
+        # （_nice_ticks ±0.5 档余量的极端刻度不再画出绘图区）后的有意重钉。
+        # 改动默认渲染须显式更新本钉并在此登记。
         svg = latency_svg(self.SERIES, "测试标题")
         self.assertEqual(
             hashlib.sha256(svg.encode("utf-8")).hexdigest(),
-            "77851a709b0ff9c3951c07b1e54301336239a065b1d4d86d510ed3caf0041681")
+            "3d61125495ed38754c6dca0fdb6c4759c4ce70303031e0bea6af0e1b3896b204")
 
     def test_explicit_defaults_zero_diff(self):
         base = latency_svg(self.SERIES, "测试标题")
