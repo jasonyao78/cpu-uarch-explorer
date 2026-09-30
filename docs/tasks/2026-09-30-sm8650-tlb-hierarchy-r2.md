@@ -1,7 +1,7 @@
 # SM8650 Cortex-X4 TLB 层级探测 · 第二次战役（r2）任务书 v1.1
 
 > 版本：v1.1（2026-09-30；修订基线 v1.0 = `a104dbf`）
-> 修订依据：外部评审 REV-TLB-R2-20260930（第一性原理评审，13 项发现 F1–F9/R1–R4；归档于 main `docs/reviews/2026-09-30-sm8650-tlb-r2-first-principles.md`）。**逐条处置见 §10.3 修订映射**。
+> 修订依据：外部评审 REV-TLB-R2-20260930（第一性原理评审，13 项发现 F1–F9/R1–R4；归档于本分支 `docs/reviews/2026-09-30-sm8650-tlb-r2-first-principles.md`，合成复核脚本 `scripts/review_sm8650_tlb_r2.py`）。**逐条处置见 §10.3 修订映射**。
 > 基线：`main @ 9316853`（第一次战役集成终点；main 此后已推进 `459b135..bc96ff1` 图表报告工作，Phase D 前须同步）。
 > 方法资产：`docs/cpu-uarch-deep-analysis/`（TLB 报告 v1.6、矩阵 v0.2、原型 v2.3——角色见 §2.3）
 > 分支：`codex/sm8650-tlb-hierarchy-r2`；有限终点与退役严格按铁律 7 与 §10.4
