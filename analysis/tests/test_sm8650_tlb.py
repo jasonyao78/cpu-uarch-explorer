@@ -609,6 +609,75 @@ class TestBimodalFlag(unittest.TestCase):
         self.assertFalse(result.groups[0]["bimodal"])
 
 
+class TestMetricContract(unittest.TestCase):
+    """M0-2 命名降级契约（OI-13 关闭）：
+
+    - 超集放行：多出 PMU 指标按名忽略、per-observation 保留；
+    - 缺失项命名降级：派生字段 None + group.metric_contract 登记；
+    - 判据入口守卫：消费字段缺失给 INCOMPUTABLE（不静默跳过）；
+    - latency 缺失 = 硬错误（无样本帧）。
+    """
+
+    def _extra_metric(self):
+        return {
+            "name": "pmu.data_miss_collinearity.count",
+            "value": 1.0, "unit": "count", "repetitions": 2,
+            "observations": [{
+                "sample_index": i, "value": 7.0,
+                "raw_sample_ref": f"raw:x{i}",
+                "pmu_type": 8, "pmu_config": 0x8144,
+                "time_enabled_ns": 1000, "time_running_ns": 1000,
+                "page_policy_requested": "base-madvise",
+                "page_policy_actual": "base", "anon_huge_kb": 0,
+                "seed": 42,
+            } for i in range(2)],
+        }
+
+    def test_superset_metric_set_accepted(self):
+        record = _record()
+        record["metrics"].append(self._extra_metric())
+        result = analyze_records([record], "run-a")
+        group = result.groups[0]
+        self.assertIn("pmu.data_miss_collinearity.count",
+                      group["metric_contract"]["extras"])
+        self.assertEqual(group["metric_contract"]["missing"], [])
+        # G0 派生字段不受影响
+        self.assertIsNotNone(group["dtlb_walk_per_1k"])
+
+    def test_missing_pmu_event_degrades_named_fields(self):
+        record = _record()
+        record["metrics"] = [m for m in record["metrics"]
+                             if m["name"] != "pmu.mem_access_rd.count"]
+        result = analyze_records([record], "run-a")
+        group = result.groups[0]
+        self.assertEqual(group["metric_contract"]["missing"],
+                         ["pmu.mem_access_rd.count"])
+        self.assertIsNone(group["mem_rd_per_1k"])
+        self.assertIsNotNone(group["l1d_tlb_refill_per_1k"])
+
+    def test_knee_incomputable_when_refill_missing(self):
+        record = _record()
+        record["metrics"] = [m for m in record["metrics"]
+                             if m["name"] != "pmu.l1d_tlb_refill.count"]
+        result = analyze_records([record], "run-a")
+        row = {"pages": 512,
+               "l1d_tlb_refill_per_1k":
+                   result.groups[0]["l1d_tlb_refill_per_1k"],
+               "cyc_per_load": result.groups[0]["cyc_per_load"]}
+        with self.assertRaisesRegex(TlbError, "INCOMPUTABLE"):
+            detect_knee_candidates([row])
+
+    def test_walk_onset_incomputable_when_walk_missing(self):
+        record = _record()
+        record["metrics"] = [m for m in record["metrics"]
+                             if m["name"] != "pmu.dtlb_walk.count"]
+        result = analyze_records([record], "run-a")
+        row = {"pages": 512,
+               "dtlb_walk_per_1k": result.groups[0]["dtlb_walk_per_1k"]}
+        with self.assertRaisesRegex(TlbError, "INCOMPUTABLE"):
+            detect_walk_onset({42: [row]})
+
+
 class TestContractErrors(unittest.TestCase):
     def test_missing_seed_is_hard_error(self):
         with self.assertRaises(TlbError):
@@ -617,8 +686,14 @@ class TestContractErrors(unittest.TestCase):
     def test_incoherent_contract_fields_are_hard_errors(self):
         cases = {}
         record = _record()
-        record["metrics"] = record["metrics"][:-1]  # metric 集合缺 dtlb_walk
-        cases["metric set mismatch"] = record
+        # M0-2（OI-13③）：单 PMU 事件缺失 = 命名降级（新契约测试见
+        # TestMetricContract）；latency 缺失仍是硬错误（无样本帧）。
+        record["metrics"] = [m for m in record["metrics"]
+                             if m["name"] != "latency_ns"]
+        cases["latency missing"] = record
+        record = _record()
+        record["metrics"] = record["metrics"] + [dict(record["metrics"][0])]
+        cases["duplicate metric names"] = record
         record = _record()
         record["metrics"][1]["observations"][0]["pmu_config"] = 0x12
         cases["pmu encoding mismatch"] = record

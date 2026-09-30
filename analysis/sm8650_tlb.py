@@ -411,14 +411,26 @@ def _samples_from_record(record: dict, run_label: str,
 
     metrics = record.get("metrics", [])
     by_name = {metric.get("name"): metric for metric in metrics}
-    if len(by_name) != len(metrics) or set(by_name) != _REQUIRED_METRICS:
+    if len(by_name) != len(metrics):
+        raise TlbError(f"{context}: duplicate metric names")
+    # M0-2（关闭 OI-13）metric 契约修订：
+    #   超集放行（多出 PMU 指标按名忽略、per-observation 原样保留——
+    #   宽容读字段 ≠ 宽容合并实验条件）；缺失项命名降级（每项有 named
+    #   语义，见 AnalysisResult.group.metric_contract 与各判据入口守卫）。
+    present = set(by_name)
+    missing = sorted(_REQUIRED_METRICS - present)
+    extras = sorted(present - _REQUIRED_METRICS)
+    if _LATENCY in missing:
+        # latency 是逐样本帧锚点：缺失即无可分析对象（fail-closed，命名）。
         raise TlbError(
-            f"{context}: metric set {sorted(str(name) for name in by_name)} "
-            f"!= {sorted(_REQUIRED_METRICS)}"
+            f"{context}: metric_contract: latency_ns missing — no sample "
+            f"frame (missing={missing})"
         )
+    missing_pm = [m for m in missing if m in _PMU_EVENTS]
     indexed = {
         name: _observations_by_index(metric, context)
         for name, metric in by_name.items()
+        if name in _REQUIRED_METRICS
     }
     latency_indexes = set(indexed[_LATENCY])
     for name, observations in indexed.items():
@@ -458,8 +470,15 @@ def _samples_from_record(record: dict, run_label: str,
             # 建链缓冲区起始 VA（任务书路线 A 布局观测）；旧记录无此字
             # 段，保持可选，不升级为硬错误。
             sample["vma_base"] = vma_base
+        sample["_metric_missing"] = missing_pm
+        sample["_metric_extras"] = extras
         multiplexed = False
         for name, (expected_type, expected_config, derived_name, scale) in _PMU_EVENTS.items():
+            if name in missing_pm:
+                # 命名降级：该事件缺失 → 派生字段 None（消费方入口守卫
+                # 给 INCOMPUTABLE，见 detect_knee_candidates/detect_walk_onset）
+                sample[derived_name] = None
+                continue
             observation = indexed[name][sample_index]
             if (observation.get("pmu_type"), observation.get("pmu_config")) != (
                 expected_type,
@@ -500,6 +519,8 @@ def detect_knee_candidates(rows: list[dict],
     """
     if unqualified_events:
         return []
+    _require_row_fields(rows, ("l1d_tlb_refill_per_1k", "cyc_per_load"),
+                        "detect_knee_candidates")
     ordered = sorted(rows, key=lambda row: row["pages"])
     candidates = []
     for left, right in zip(ordered, ordered[1:]):
@@ -514,6 +535,20 @@ def detect_knee_candidates(rows: list[dict],
                 and cyc_high / cyc_low >= _KNEE_CYC_RATIO):
             candidates.append((left["pages"], right["pages"]))
     return candidates
+
+
+def _require_row_fields(rows: Iterable[dict], fields: tuple[str, ...],
+                        context: str) -> None:
+    """M0-2 命名降级守卫（OI-13③）：判据消费字段在任一行缺失（None）
+    时给命名 INCOMPUTABLE——fail-closed，不静默跳过、不在判据内部
+    以 TypeError 暴死。"""
+    for row in rows:
+        for field in fields:
+            if row.get(field) is None:
+                raise TlbError(
+                    f"{context}: INCOMPUTABLE — field {field} degraded "
+                    f"(metric_contract missing; row pages={row.get('pages')!r})"
+                )
 
 
 def _intervals_overlap(left: tuple[float, float],
@@ -668,6 +703,8 @@ def detect_walk_onset(rows_by_seed: dict[int, list[dict]], *,
     per_seed: dict[int, dict] = {}
     empty_seeds: list[int] = []
     for seed, rows in sorted(rows_by_seed.items()):
+        _require_row_fields(rows, ("dtlb_walk_per_1k",),
+                            "detect_walk_onset")
         ordered = sorted(rows, key=lambda row: row["pages"])
         if not ordered:
             empty_seeds.append(seed)  # 数据空的 seed 按缺失处理
@@ -755,20 +792,37 @@ def analyze_records(records: Iterable[dict], run_label: str,
     for (buffer_kb, seed, backing, passes), samples in sorted(
         grouped.items(), key=lambda item: (item[0][0], item[0][1], _BACKING_ORDER[item[0][2]], item[0][3])
     ):
+        contract_missing = sorted({m for s in samples for m in s["_metric_missing"]})
+        contract_extras = sorted({m for s in samples for m in s["_metric_extras"]})
+        stored = []
+        for smp in samples:
+            smp = dict(smp)
+            smp.pop("_metric_missing")
+            smp.pop("_metric_extras")
+            stored.append(smp)
         group = {
             "run_label": run_label,
             "buffer_kb": buffer_kb,
             "seed": seed,
             "page_policy_actual": backing,
             "ring_passes": int(passes) if passes == int(passes) else passes,
-            "samples": samples,
+            "samples": stored,
             "unqualified_events": _unqualified_events(registry),
+            # M0-2 命名降级契约（OI-13③）：缺失/额外项逐名登记；缺失项的
+            # 派生字段为 None，判据消费入口给 INCOMPUTABLE。
+            "metric_contract": {"missing": contract_missing,
+                                "extras": contract_extras},
             # §9.2 复用契约：双峰字段钉为 l1d_tlb_refill_per_1k（knee 判
             # 据的消费字段、逐进程布局/着色方差的主要暴露面）。
-            "bimodal": _is_bimodal([s["l1d_tlb_refill_per_1k"] for s in samples]),
+            "bimodal": _is_bimodal(
+                [s["l1d_tlb_refill_per_1k"] for s in stored
+                 if s["l1d_tlb_refill_per_1k"] is not None]
+            ) if any(s["l1d_tlb_refill_per_1k"] is not None for s in stored)
+               else None,
         }
         for field_name in ("latency_ns", *_DERIVED_FIELDS):
-            group[field_name] = summarize([s[field_name] for s in samples])
+            vals = [s[field_name] for s in stored if s[field_name] is not None]
+            group[field_name] = summarize(vals) if vals else None
         result.groups.append(group)
     return result
 
@@ -1811,6 +1865,18 @@ def validate_anchors(block: BlockResult,
     established = {
         metric: dict(before[3072][metric]) for metric in _ANCHOR_RATE_FIELDS
     }
+    # M0-2（OI-13②）：主体分析的 metric 契约随 verdict 留档——锚点判定
+    # 与主体分析解耦（锚点只看 anchor runs），主体非 G0 时 main_result
+    # 带命名降级照常产出（缺必要判据字段者由消费入口给 INCOMPUTABLE）。
+    main_result = analyze_records(
+        (*block.main.ok_records, *block.main.failed_records),
+        block.main.run_dir.name,
+        registry,
+    )
+    main_contracts = sorted({
+        repr(tuple(g["metric_contract"]["missing"]))
+        for g in main_result.groups
+    })
     return AnchorVerdict(
         status=_ANCHORS_OK,
         evidence={
@@ -1820,20 +1886,18 @@ def validate_anchors(block: BlockResult,
             "baseline_3072_source": (
                 "prior" if prior_3072_baseline is not None else "established"
             ),
+            "main_metric_contract": main_contracts,
         },
         baseline_3072=(
             prior_3072_baseline if prior_3072_baseline is not None else established
         ),
-        main_result=analyze_records(
-            (*block.main.ok_records, *block.main.failed_records),
-            block.main.run_dir.name,
-            registry,
-        ),
+        main_result=main_result,
     )
 
 
-def _fmt(value: float) -> str:
-    return f"{value:.3f}"
+def _fmt(value) -> str:
+    # M0-2：降级字段（None）打印 n/a，不打印 "None"
+    return "n/a" if value is None else f"{value:.3f}"
 
 
 def _short_name(metric: str) -> str:
