@@ -712,6 +712,23 @@ class TestAllFailedRun(unittest.TestCase):
 # 静默过期）。测试钉的是模块计算的正确性（两路独立计算逐位一致），不
 # 是常量值；池数据修正后期望值自动跟踪。池成员名单独立写死（防单向
 # 漂移），并与模块 _ANCHOR_REF_POOL_RUNS 互钉。
+#
+# 【池数据修订时字面钉更新步骤】方差池 run 数据若经 revision history
+# 修正（同池修订入库，非换新池）：
+# ① 先重算期望值——直接跑
+#    test_references_match_independent_recomputation：模块侧现算与本
+#    文件 _REF 独立重算都自动跟踪新数据，两路仍应逐位一致（不一致先
+#    查是否错读记录，而不是先改断言）；
+# ② 再更新本文件的字面钉——walk 池参照（当前 7.75）、C/W 备查值
+#    （2.69/0.086、8.01/0.70、285.5、1301.1）、派生容差带边界
+#    （3.875/11.625 等，见 TestValidateAnchors 的边界用例）——按新
+#    现算值改写，并在断言注释注明出处 revision（数据提交哈希）；
+# ③ 任务书 §6.2.5 括号备查值与"池 = …walks/窗 → 容差带"表述有同
+#    步义务：走任务书修订（升版本号 + 修订映射行），与本文件字面钉
+#    同批闭合，禁止只改一侧；
+# ④ 若是池成员变更（新方差研究池），还需同步 _POOL_RUNS 与模块
+#    _ANCHOR_REF_POOL_RUNS（两者互钉，test_pool_membership_is_pinned
+#    会红）。
 # ---------------------------------------------------------------------------
 
 # 方差表征池（任务书 v4.4 §6.2.5；6 个 ptr-chase-sm8650-x4-tlb-anchor
@@ -1534,6 +1551,71 @@ class TestAnchorReferences(unittest.TestCase):
                 )
                 with self.assertRaises(TlbError):
                     sm8650_tlb._compute_anchor_references(root)
+
+    def test_reference_value_fail_closed_branches(self):
+        # _reference_values 三条 fail-closed 分支直测（v4.4 质量评审遗
+        # 留 Minor）：ok 记录缺 metric/observations、observation 无数
+        # 值、per_loads_scale 非 None 时 loads 非正整数——各自
+        # TlbError 且消息可定位（带 run/buffer 上下文）。
+        def _run(records):
+            return _loaded_run("ref-x", _ANCHOR_ID, records)
+
+        with self.subTest(branch="metric has no observations"):
+            for metrics in (
+                [],  # 整条 metric 缺失
+                [{"name": "pmu.cycles.count", "observations": []}],  # 空
+            ):
+                run = _run([{
+                    "schema_version": "2.0", "status": "ok",
+                    "params": {"buffer_kb": 512, "loads": 65536},
+                    "metrics": metrics,
+                }])
+                with self.assertRaises(TlbError) as ctx:
+                    sm8650_tlb._reference_values(
+                        run, 512, "pmu.cycles.count", 1.0
+                    )
+                self.assertIn("has no observations", str(ctx.exception))
+                self.assertIn("ref-x/buffer=512KiB", str(ctx.exception))
+        with self.subTest(branch="observation missing numeric value"):
+            run = _run([{
+                "schema_version": "2.0", "status": "ok",
+                "params": {"buffer_kb": 512, "loads": 65536},
+                "metrics": [{"name": "pmu.cycles.count",
+                             "observations": [{"sample_index": 0,
+                                               "value": "abc"}]}],
+            }])
+            with self.assertRaises(TlbError) as ctx:
+                sm8650_tlb._reference_values(run, 512, "pmu.cycles.count", 1.0)
+            self.assertIn("missing numeric value", str(ctx.exception))
+            self.assertIn("ref-x/buffer=512KiB", str(ctx.exception))
+        with self.subTest(branch="loads not positive integer"):
+            for bad_loads in (0, -1, "65536"):
+                run = _run([{
+                    "schema_version": "2.0", "status": "ok",
+                    "params": {"buffer_kb": 512, "loads": bad_loads},
+                    "metrics": [{"name": "pmu.cycles.count",
+                                 "observations": [{"sample_index": 0,
+                                                   "value": 100}]}],
+                }])
+                with self.assertRaises(TlbError) as ctx:
+                    sm8650_tlb._reference_values(
+                        run, 512, "pmu.cycles.count", 1.0
+                    )
+                self.assertIn("positive integer loads", str(ctx.exception))
+        with self.subTest(branch="loads unchecked for raw values"):
+            # 反向对照（防过校验）：per_loads_scale=None（latency/计数
+            # 原值）不读 loads——坏 loads 不报错。
+            run = _run([{
+                "schema_version": "2.0", "status": "ok",
+                "params": {"buffer_kb": 512, "loads": 0},
+                "metrics": [{"name": "latency_ns",
+                             "observations": [{"sample_index": 0,
+                                               "value": 2.7}]}],
+            }])
+            self.assertEqual(
+                sm8650_tlb._reference_values(run, 512, "latency_ns", None),
+                [2.7],
+            )
 
 
 def _pool_record(buffer_kb, loads, walk_count=8.0):
