@@ -227,6 +227,7 @@ JSON 配置、Arm TRM（Issue 05）+ `cortex-x4.json`（事件语义，已冻结
 - [ ] 块结构执行：anchor-before → `tlb-coarse` → anchor-after；锚点判据（Task 6 实现的分析器）先行。
 - [ ] 块 fail-closed 时按 §6.2.5 处置（查明+重跑占额）。
 - [ ] `sm8650_tlb.py` 输出候选区（§6.2.2/6.2.3）；提交 run 数据 + 分析快照：`data(sm8650): record TLB Phase A coarse scan`。
+- [ ] **follow-ups 落点**（v4.4 评审 Minor，随本任务的 Phase A 分析文档一并闭合）：①`_reference_values` 三条 fail-closed 分支（缺 metric/空观测/非数值 observation）补直测；②fixture 头补"池数据修订时字面钉更新步骤"说明。
 
 ### Task 13: Phase B 致密扫描（含长训练行）
 

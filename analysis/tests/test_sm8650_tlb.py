@@ -1140,7 +1140,7 @@ class TestValidateAnchors(unittest.TestCase):
         # 现算 = 7.75 walks/窗 → 容差 3.875 → 容差带 [3.875, 11.625]
         # （任务书括号备查值经 v4.4 勘误与本现算值一致，d1243a3；
         # 边界值 3.875/11.625 为 dyadic 分数，loads=65536=2^16 下计数
-        # 往返 double 精确，可钉恰在带边通过、带外失败。
+        # 往返 double 精确，可钉恰在带边通过、带外失败）。
         with self.subTest(edge="lower bound 3.875 passes"):
             verdict = validate_anchors(_block(
                 before=_anchor_run("before", _T0, walks_512=3.875),
