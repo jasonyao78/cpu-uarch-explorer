@@ -80,7 +80,12 @@ def seed_medians(groups: list[dict], field: str) -> dict[tuple[int, int], float]
                 f"got {group['page_policy_actual']!r}（buffer={group['buffer_kb']}KiB，"
                 f"防静默合并不同 backing）"
             )
-        by_point[(group["buffer_kb"], group["seed"])].append(group[field]["median"])
+        # REV-M0-BATCH C5（r2 合并前置）：r2 分析器降级字段为 None——
+        # None 点显式跳过（不进曲线），不 TypeError。
+        stats = group.get(field)
+        if stats is None:
+            continue
+        by_point[(group["buffer_kb"], group["seed"])].append(stats["median"])
     return {point: summarize(medians)["median"]
             for point, medians in sorted(by_point.items())}
 
@@ -111,8 +116,10 @@ def cohort_series(graded: dict, buffers: tuple[int, ...] = THP_FIGURE_BUFFERS,
     for entry in graded["cohorts"]:
         if entry["buffer_kb"] not in buffers:
             continue
+        # REV-M0-BATCH C5：同上，降级单位的该字段为 None 时跳过
         medians = [unit["stats"][field]["median"]
-                   for unit in entry["units"] if unit["grade"] == "comparative"]
+                   for unit in entry["units"] if unit["grade"] == "comparative"
+                   and unit["stats"].get(field) is not None]
         if medians:
             series[entry["cohort"]].append(
                 (float(entry["buffer_kb"]), summarize(medians)["median"]))
@@ -382,7 +389,7 @@ def main(argv: list[str] | None = None) -> int:
         graded = grade_thp_cohorts(thp_groups)
         figures = build_figures(scan_groups, graded)
         report = build_report(graded)
-    except (TlbError, FileNotFoundError, ValueError) as exc:
+    except (TlbError, FileNotFoundError, ValueError, TypeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
     out = Path(args.out)
