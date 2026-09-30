@@ -27,6 +27,7 @@ from pathlib import Path
 
 from analysis import tlb_figures
 from analysis.sm8650_tlb import TlbError, grade_thp_cohorts
+from analysis.tlb_figures import build_report, seed_medians
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _RUNS_ROOT = _REPO_ROOT / "data" / "public" / "runs"
@@ -51,6 +52,31 @@ def _unit(seeds, n, grade, median=None, terminal=None):
 class TestRunRosterPinned(unittest.TestCase):
     """run 名单与网格钉死战役数据集（出处：任务书 v4.4 §7 + 终审 §2）。"""
 
+
+    def test_partial_missing_metric_discloses_skipped_points(self):
+        """MB-07：部分缺点 = 可用点照算 + skipped 审计清单（不静默删点）。"""
+        groups = [_group(buffer_kb=512, seed=7, field="dtlb_walk_per_1k",
+                         median=1.0),
+                  _group(buffer_kb=1024, seed=7, field="dtlb_walk_per_1k",
+                         median=2.0)]
+        groups[1]["dtlb_walk_per_1k"] = None   # 部分覆盖：1024 点降级
+        skipped: list = []
+        points = seed_medians(groups, "dtlb_walk_per_1k", skipped=skipped)
+        self.assertEqual(list(points), [(512, 7)])          # 可用点保留
+        self.assertEqual(
+            [(e["buffer_kb"], e["field"]) for e in skipped],
+            [(1024, "dtlb_walk_per_1k")],
+        )
+        report = build_report({"cohorts": []}, skipped_points=skipped)
+        self.assertIn("数据局限", report)
+
+    def test_nonlegacy_identity_rejected_on_scan_curve(self):
+        """MB-04：非 legacy 身份拒绝进扫描曲线（不跨条件合并）。"""
+        group = _group(buffer_kb=512, seed=7, field="cyc_per_load",
+                       median=1.0)
+        group["identity"] = {"chains": 2}
+        with self.assertRaisesRegex(TlbError, "MB-04"):
+            seed_medians([group], "cyc_per_load")
     def test_roster(self):
         self.assertEqual(tlb_figures.RUN_COARSE,
                          "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse")

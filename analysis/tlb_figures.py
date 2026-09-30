@@ -64,26 +64,41 @@ _F_REFILL = "l1d_tlb_refill_per_1k"
 _F_WALK = "dtlb_walk_per_1k"
 
 
-def seed_medians(groups: list[dict], field: str) -> dict[tuple[int, int], float]:
+def seed_medians(groups: list[dict], field: str,
+                 skipped: list[dict] | None = None) -> dict[tuple[int, int], float]:
     """{(buffer_kb, seed): 该点组中位数}；同 (buffer, seed) 跨 run 重合时
     合并为各 run 组中位数的中位数（summarize，确定性）。
 
     只消费 base backing 组：扫描曲线合并不同 backing 会静默混淆页策略
     制度（mixed/thp 的 refill 形态与 base 完全不同），非 base 组即
     TlbError fail-closed。
+    REV-M0-BATCH MB-04：非 legacy 身份（chains/分布/offset 等实验条件）
+    拒绝进入扫描曲线（禁止跨条件无声合并），需显式分系列规则。
+    REV-M0-BATCH MB-07：None（降级字段）点不进曲线但必须进 skipped
+    审计清单（run/buffer/seed/field），由调用方披露——禁止静默删点。
     """
     by_point: dict[tuple[int, int], list[float]] = defaultdict(list)
     for group in groups:
+        label = group.get('run_label', '?')
         if group["page_policy_actual"] != "base":
             raise TlbError(
-                f"{group.get('run_label', '?')}: 扫描曲线只消费 base backing 组，"
+                f"{label}: 扫描曲线只消费 base backing 组，"
                 f"got {group['page_policy_actual']!r}（buffer={group['buffer_kb']}KiB，"
                 f"防静默合并不同 backing）"
             )
-        # REV-M0-BATCH C5（r2 合并前置）：r2 分析器降级字段为 None——
-        # None 点显式跳过（不进曲线），不 TypeError。
+        identity = group.get("identity")
+        if identity and any(value is not None for value in identity.values()):
+            raise TlbError(
+                f"{label}: 非 legacy identity {identity}（MB-04：扫描曲线"
+                f"禁止跨条件合并；buffer={group['buffer_kb']}KiB）"
+            )
         stats = group.get(field)
         if stats is None:
+            if skipped is not None:
+                skipped.append({
+                    "run": label, "buffer_kb": group["buffer_kb"],
+                    "seed": group["seed"], "field": field,
+                })
             continue
         by_point[(group["buffer_kb"], group["seed"])].append(stats["median"])
     return {point: summarize(medians)["median"]
@@ -99,9 +114,10 @@ def merge_seed_medians(per_seed: dict[tuple[int, int], float]) -> list[tuple[int
             for buffer_kb in sorted(by_buffer)]
 
 
-def curve_from_groups(groups: list[dict], field: str) -> list[tuple[int, float]]:
+def curve_from_groups(groups: list[dict], field: str,
+                      skipped: list[dict] | None = None) -> list[tuple[int, float]]:
     """analyze_records 分组 → 合并曲线 [(buffer_kb, 中位数)]（两步合并的组合）。"""
-    return merge_seed_medians(seed_medians(groups, field))
+    return merge_seed_medians(seed_medians(groups, field, skipped=skipped))
 
 
 def cohort_series(graded: dict, buffers: tuple[int, ...] = THP_FIGURE_BUFFERS,
@@ -182,17 +198,30 @@ def load_campaign(runs_root: Path) -> tuple[list[dict], list[dict]]:
     return scan, thp
 
 
-def build_figures(scan_groups: list[dict], graded: dict) -> dict[str, str]:
-    """扫描分组 + cohort 分级 → {文件名: SVG}（四图；空系列 fail-closed）。"""
+def build_figures(scan_groups: list[dict], graded: dict,
+                  audit: dict | None = None) -> dict[str, str]:
+    """扫描分组 + cohort 分级 → {文件名: SVG}（四图；空系列 fail-closed）。
+
+    audit（可选 out 参数）收集 {"skipped_points": [...]}——MB-07 披露通道：
+    部分缺点时曲线照画但缺点清单必须随报告/审计走。
+    """
+    skipped: list[dict] = []
     curves = {
-        _F_REFILL: curve_from_groups(scan_groups, _F_REFILL),
-        _F_WALK: curve_from_groups(scan_groups, _F_WALK),
-        "latency_ns": curve_from_groups(scan_groups, "latency_ns"),
-        "cyc_per_load": curve_from_groups(scan_groups, "cyc_per_load"),
+        _F_REFILL: curve_from_groups(scan_groups, _F_REFILL, skipped=skipped),
+        _F_WALK: curve_from_groups(scan_groups, _F_WALK, skipped=skipped),
+        "latency_ns": curve_from_groups(scan_groups, "latency_ns", skipped=skipped),
+        "cyc_per_load": curve_from_groups(scan_groups, "cyc_per_load", skipped=skipped),
     }
+    if audit is not None:
+        audit["skipped_points"] = skipped
     for field, points in curves.items():
         if not points:
-            raise TlbError(f"scan curve {field}: 空系列（fail-closed）")
+            # MB-07：空系列错误必须点名跳过点（run/buffer/seed/field）
+            raise TlbError(
+                f"scan curve {field}: 空系列（fail-closed）；"
+                f"降级跳过点 {skipped[:8]}"
+                + (" …" if len(skipped) > 8 else "")
+            )
     cohorts = cohort_series(graded)
     for cohort in _THP_FIGURE_COHORTS:
         if not cohorts.get(cohort):
@@ -313,8 +342,11 @@ _REPRODUCE = (
 )
 
 
-def build_report(graded: dict) -> str:
-    """生成同事版 report.md：四图嵌入 + 读法 + 终态表 + 边界 + 复算指引。"""
+def build_report(graded: dict, skipped_points: list[dict] | None = None) -> str:
+    """生成同事版 report.md：四图嵌入 + 读法 + 终态表 + 边界 + 复算指引。
+
+    skipped_points（MB-07 披露）：非空时附"数据局限"段，逐点列出被降级
+    跳过、未进曲线的 (run, buffer, seed, field)。"""
     lines = [
         "# SM8650 X4 TLB 战役：同事版图表与读法",
         "",
@@ -374,6 +406,19 @@ def build_report(graded: dict) -> str:
         _REPRODUCE,
         "",
     ]
+    if skipped_points:
+        lines += [
+            "",
+            "## 数据局限（降级跳过点，MB-07 披露）",
+            "",
+            "以下 (run, buffer, seed, field) 因 metric 契约降级未进曲线；"
+            "相关区间的科学结论按可用点重判，不沿用完整网格读法。",
+            "",
+        ]
+        lines += [
+            f"- {entry['run']} b{entry['buffer_kb']}K seed={entry['seed']} "
+            f"{entry['field']}" for entry in skipped_points
+        ]
     return "\n".join(lines)
 
 
@@ -387,8 +432,17 @@ def main(argv: list[str] | None = None) -> int:
     try:
         scan_groups, thp_groups = load_campaign(Path(args.runs_root))
         graded = grade_thp_cohorts(thp_groups)
-        figures = build_figures(scan_groups, graded)
-        report = build_report(graded)
+        audit: dict = {}
+        figures = build_figures(scan_groups, graded, audit=audit)
+        skipped = audit.get("skipped_points", [])
+        if skipped:
+            # MB-07：部分缺点 = CLI 成功 + 显式披露（stderr 结构化 + 报告段）
+            print(
+                f"note: {len(skipped)} degraded point(s) skipped from "
+                f"curves: {skipped}",
+                file=sys.stderr,
+            )
+        report = build_report(graded, skipped_points=skipped)
     except (TlbError, FileNotFoundError, ValueError, TypeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
