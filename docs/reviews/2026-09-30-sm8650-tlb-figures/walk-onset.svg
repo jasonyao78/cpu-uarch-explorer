@@ -43,8 +43,6 @@
 <text x="736.2" y="446" text-anchor="middle">16M</text>
 <line x1="830.0" y1="40" x2="830.0" y2="430" stroke="#e5e7eb"/>
 <text x="830.0" y="446" text-anchor="middle">32M</text>
-<line x1="80" y1="442.2" x2="830" y2="442.2" stroke="#e5e7eb"/>
-<text x="72" y="446.2" text-anchor="end">0.03125</text>
 <line x1="80" y1="406.3" x2="830" y2="406.3" stroke="#e5e7eb"/>
 <text x="72" y="410.3" text-anchor="end">0.0625</text>
 <line x1="80" y1="370.5" x2="830" y2="370.5" stroke="#e5e7eb"/>
