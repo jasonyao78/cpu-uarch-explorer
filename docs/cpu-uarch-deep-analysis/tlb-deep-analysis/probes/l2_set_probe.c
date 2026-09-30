@@ -29,6 +29,25 @@
 //                     - [P0-5] 页大小 != 4K 直接拒绝（set_index 固定 4K 粒度）；
 //                       mmap 后尽力 MADV_NOHUGEPAGE（pagemap 查不了 PTE_CONT，
 //                       THP 是唯一可从用户态控制的合组来源）
+//   v2.3 (2026-09-30) 外部评审 REV-TLB-R2-20260930（第一性原理评审）修订：
+//                     - [F3a] filler 选址越界修复：映射池按 filler_pages+256 页
+//                       头程分配，候选 i 有 < fmap_pages 硬上界，选不足结构化
+//                       失败（v2.2 无界 i 可越过映射尾 → SIGSEGV 或误写邻接 VMA）
+//                     - [F3b] -w 0 除零修复：ways==0 为空窗模式——跳过地址收集
+//                       与建链，probe 段 0 次访问，仅测窗口底噪（v2.2 在
+//                       total_pages/need 处 UBSan division by zero）
+//                     - [F3 尾] 统计逐轮失效：均值只统计 != UINT64_MAX 的保留轮，
+//                       全失败报 n/a（v2.2 只查第 1 个保留轮，哨兵被累加大计数）
+//   已知设计限制（本原型不修，由 r2 移植版按任务书 v1.1 承担）：
+//                     - [F2] T2=另一候选 set 不构成无冲突对照（两组各自同 set
+//                       自冲突）；有效对照 = 同数页分散多 set 的负控，或
+//                       victim/aggressor 驱逐概率实验
+//                     - [F4] 对齐 256 MiB 池内 VPN[23:16] 恒定 → H3≡H1⊕常数、
+//                       H4≡H2⊕常数（set 标签重命名，不可区分）；需多稀疏 VA
+//                       区域激励，移植版须报 HYPOTHESES_EQUIVALENT_ON_TEST_DOMAIN
+//                     - [F5] 逐事件 read/计时系统调用不保证短窗口严格同窗；
+//                       移植版必须用 perf GROUP 原子读
+//                       （read_format = nr, time_enabled, time_running, values[]）
 //
 // 对应报告：《TLB微架构深度分析报告》§5.5。
 // 背景（X4 TRM 地面真值）：L2 TLB = 8-way × 256 sets = 2048 条（Table 5-1,
@@ -88,6 +107,9 @@ static uint32_t set_index(int H, uintptr_t va) {
 // （连续取前 16 个匹配会使高位恒定，H1/H3 与 H2/H4 在样本上不可区分——评审 R3）。
 static int collect_set_addrs(int H, uint32_t target, int need, char *base,
                              size_t total_pages, uintptr_t *vas /*out*/) {
+    // v2.3 [F3b] 防御性守卫：need<=0（空窗模式/异常调用）直接返回——
+    // 除零在函数内部也被消除，不只依赖调用点跳过
+    if (need <= 0 || total_pages < 2) return 0;
     int found = 0;
     uint64_t bucket = (uint64_t)total_pages / (uint64_t)need;
     if (bucket == 0) bucket = 1;
@@ -187,6 +209,8 @@ int main(int argc, char **argv) {
         fprintf(stderr, "T/T2 must be < %d\n", NSETS); return 2;
     }
     if (rounds < 2) { fprintf(stderr, "-R >= 2 (round 0 = warmup)\n"); return 2; }
+    if (is_gen && need < 1) { fprintf(stderr, "gen mode requires -c >= 1\n"); return 2; }
+    // run 模式允许 -w 0（v2.3 [F3b] 空窗模式：0 次目标访问，测窗口底噪）
     g_pagesz = sysconf(_SC_PAGESIZE);
     // v2.2（评审3-P0-5）：set_index 固定按 4K 粒度计算，页大小不符直接拒绝，
     // 并尽力禁用 THP（匿名大页会破坏"每页一条 4K 翻译"的前提）。
@@ -204,11 +228,17 @@ int main(int argc, char **argv) {
 #endif
 
     int want = is_gen ? need : ways;
-    uintptr_t *vas = malloc(sizeof(uintptr_t) * (size_t)want);
-    int got = collect_set_addrs(H, target, want, base, total_pages, vas);
-    if (got < want) {
-        fprintf(stderr, "only %d addrs for set %u under H%d (increase -P)\n", got, target, H);
-        return 1;
+    // v2.3 [F3b] ways==0 = 空窗模式：不收集地址、不建链（仅 filler prime + 0 次
+    // probe 访问，测窗口底噪）；want>0 才走 collect（除零路径消除）
+    uintptr_t *vas = NULL;
+    int got = 0;
+    if (want > 0) {
+        vas = malloc(sizeof(uintptr_t) * (size_t)want);
+        got = collect_set_addrs(H, target, want, base, total_pages, vas);
+        if (got < want) {
+            fprintf(stderr, "only %d addrs for set %u under H%d (increase -P)\n", got, target, H);
+            return 1;
+        }
     }
 
     // 最终 VA 落盘（含重算 set 列，供事后审计）
@@ -223,11 +253,12 @@ int main(int argc, char **argv) {
                          H, target, got, NSETS, NWAYS_TRUTH); return 0; }
 
     // ---- run 模式：prime+probe ----
-    // 目标链
-    build_chain(vas, ways, (char **)vas);
-    // 对照组 T2（评审3-P0-3：v2.1 只解析未运行，本版实现真实第二组）
+    // 目标链（v2.3：ways==0 空窗模式不建链）
+    if (ways > 0) build_chain(vas, ways, (char **)vas);
+    // 对照组 T2（评审3-P0-3：v2.1 只解析未运行，本版实现真实第二组；
+    // v2.3：ways==0 时跳过）
     uintptr_t *vas2 = NULL;
-    if (have_T2) {
+    if (have_T2 && ways > 0) {
         vas2 = malloc(sizeof(uintptr_t) * (size_t)ways);
         if (collect_set_addrs(H, target2, ways, base, total_pages, vas2) < ways) {
             fprintf(stderr, "cannot collect T2 set %u under H%d\n", target2, H);
@@ -244,20 +275,30 @@ int main(int argc, char **argv) {
     uintptr_t *fvas_holder = NULL;
     uintptr_t fvas_first = 0;
     {
-        char *fmap = mmap(NULL, (size_t)filler_pages * (size_t)g_pagesz,
+        // v2.3 [F3a] 映射池 = filler_pages + 256 页头程（补偿 set 过滤的跳过页），
+        // 候选 i 有 < fmap_pages 硬上界；选不足结构化失败——v2.2 的 i 无界增长
+        // 可越过映射尾（SIGSEGV 或误写邻接 VMA）
+        const size_t fmap_pages = (size_t)filler_pages + 256;
+        char *fmap = mmap(NULL, fmap_pages * (size_t)g_pagesz,
                           PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         if (fmap == MAP_FAILED) { perror("mmap filler"); return 1; }
 #ifdef MADV_NOHUGEPAGE
-        madvise(fmap, (size_t)filler_pages * (size_t)g_pagesz, MADV_NOHUGEPAGE);
+        madvise(fmap, fmap_pages * (size_t)g_pagesz, MADV_NOHUGEPAGE);
 #endif
         // 选 filler 页：跳过 set_index == target（有 T2 时也跳过 target2）的页
         uintptr_t *tmp = malloc(sizeof(uintptr_t) * (size_t)filler_pages);
         int got_f = 0;
-        for (uint64_t i = 1; got_f < filler_pages; i++) {
+        const uintptr_t fmap_end = (uintptr_t)fmap + fmap_pages * (size_t)g_pagesz;
+        for (uint64_t i = 1; i < (uint64_t)fmap_pages && got_f < filler_pages; i++) {
             uintptr_t va = (uintptr_t)fmap + i * (uint64_t)g_pagesz;
+            if (va < (uintptr_t)fmap || va >= fmap_end) break; // 双保险边界
             if (set_index(H, va) == target) continue;
             if (have_T2 && set_index(H, va) == target2) continue;
             tmp[got_f++] = va;
+        }
+        if (got_f < filler_pages) {
+            fprintf(stderr, "FATAL: filler pool exhausted (%d/%d pages)\n", got_f, filler_pages);
+            return 1;
         }
         // 随机序 + 建链
         srand(99991);
@@ -282,8 +323,8 @@ int main(int argc, char **argv) {
     uint64_t (*probe_delta)[4] = malloc(sizeof(uint64_t[4]) * rounds);  // T probe 段
     uint64_t (*probe2_delta)[4] = calloc(rounds, sizeof(uint64_t[4]));  // T2 对照段
     double *probe_ns = malloc(sizeof(double) * rounds);
-    char *tp  = (char *)vas[0];
-    char *tp2 = have_T2 ? (char *)vas2[0] : NULL;
+    char *tp  = ways > 0 ? (char *)vas[0] : NULL;   // v2.3：空窗模式无目标链
+    char *tp2 = (have_T2 && ways > 0) ? (char *)vas2[0] : NULL;
     asm volatile("" ::: "memory");
     for (int r = 0; r < rounds; r++) {
         // s 数组零初始化：snap 失败时 mux 检查不读未初始化值（评审3-P0-4）
@@ -326,25 +367,29 @@ int main(int argc, char **argv) {
         fclose(out);
     }
 
-    // 统计：剔除 round 0（含冷启动），对剩余轮取均值；报告每次目标访问的 refill 率
+    // 统计：剔除 round 0（含冷启动）；v2.3 [F3 尾] 逐轮失效——均值只统计
+    // != UINT64_MAX 的保留轮，全失败报 n/a（不累计哨兵）
     printf("H%d set=%u w=%d rounds=%d filler=%d%s", H, target, ways, rounds,
            filler_pages, have_T2 ? " +T2ctrl" : "");
     for (int i = 0; i < n_events; i++) {
-        if (probe_delta[1][i] == UINT64_MAX) { printf(" ev0x%x=n/a", events[i]); continue; }
-        double sum = 0;
-        for (int r = 1; r < rounds; r++) sum += (double)probe_delta[r][i];
-        double per_round = sum / (rounds - 1);
-        printf(" ev0x%x=%.1f(/round)/%.3f(/access)", events[i], per_round,
-               ways > 0 ? per_round / ways : 0.0);
+        double sum = 0; int valid = 0;
+        for (int r = 1; r < rounds; r++)
+            if (probe_delta[r][i] != UINT64_MAX) { sum += (double)probe_delta[r][i]; valid++; }
+        if (valid == 0) { printf(" ev0x%x=n/a", events[i]); continue; }
+        double per_round = sum / valid;
+        printf(" ev0x%x=%.1f(/round)%s", events[i], per_round,
+               ways > 0 ? "" : "");
+        if (ways > 0) printf("/%.3f(/access)", per_round / ways);
         if (mux_bad[i]) printf("(mux!)");
     }
     if (have_T2) {
         printf(" | T2:");
         for (int i = 0; i < n_events; i++) {
-            if (probe2_delta[1][i] == UINT64_MAX) { printf(" ev0x%x=n/a", events[i]); continue; }
-            double sum = 0;
-            for (int r = 1; r < rounds; r++) sum += (double)probe2_delta[r][i];
-            printf(" ev0x%x=%.1f", events[i], sum / (rounds - 1));
+            double sum = 0; int valid = 0;
+            for (int r = 1; r < rounds; r++)
+                if (probe2_delta[r][i] != UINT64_MAX) { sum += (double)probe2_delta[r][i]; valid++; }
+            if (valid == 0) { printf(" ev0x%x=n/a", events[i]); continue; }
+            printf(" ev0x%x=%.1f", events[i], sum / valid);
         }
     }
     { double sum = 0; for (int r = 1; r < rounds; r++) sum += probe_ns[r];
