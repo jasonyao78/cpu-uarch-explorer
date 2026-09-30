@@ -202,3 +202,14 @@
 - **最新证据**：m0b analysis 149、runner 158、preset build/CTest 19；main analysis 167；main/r2 图表 overlay 21/21；NDK 两源码目标语法检查通过。生产 PerfWindow 头文件 syscall 注入通过读长/错误拒绝/映射/move 检查，无内核执行。m0b 对3e539c6：49 runs/291 records 的规范化分析输出与 cohort 结果一致；r2 对a104dbf：42原可处理 runs 不变、7预期接纳扩展；完整旧数据四图+报告为5/5文件字节一致。
 - **出口裁定**：当前代码侧未通过；原回执保留，复核文档列出最小修复与集成验证。MB-03/07清零后再做两层合并/main组合验证；M0-3/4仅组件/扩展缝子项不能代替完整能力验收。
 - **完整 M0 前置**：Linux/SM8650执行证据、短窗能力/窗口有效性、M0-5 pilot→独立校准冻结→锚点池。OI-13仍部分关闭；所有新条件在正式采样前完成最小证据契约。
+
+## SMOKE-20261001 冒烟执行衍生（2026-10-01 登记，runbook §6）
+
+- **背景**：上板前清单首板执行完毕（环境 1.1–1.9 全过，S1–S5 全过，S6 跳过；细节见 `docs/runbooks/2026-10-01-sm8650-tlb-r2-preboard.md` §6）。门控定型：预注册 S1 判据满足，**0x2f 批准升级三事件版**（0x05+0x2d+0x2f 同窗）。
+
+| 项 | 内容 | 归属/触发条件 | 状态 |
+|---|---|---|---|
+| android-arm64-cross CMake preset 缺失 | r2 `CMakePresets.json` 无 android 项，证据管道探针（主线纪律）无标准构建路径；冒烟已绕开 cmake 直编 | 触发：Phase A 正式采数前（建 preset，或拍板长期直编 + runbook 登记） | ⬜ 待办 |
+| 0x2d 判据口径（总竞争条目数） | 冒烟实测 0x2d 跳变点提前至 w=8（filler 512 下总竞争条目 ≠ w）；naive "w≤≈0 才跳" 预期不成立，Q-B 判据须按总竞争条目数口径写 | 触发：M0-5 pilot 判据冻结前（与 MB-08 阈值冻结联动） | ⬜ 待办 |
+| PerfWindow 真机 GROUP read 首验 | S6 按 runbook 跳过；生产 PerfWindow 的 nr/ena/run/values 布局真机复核未做 | 触发：M0-3/4 代码侧出口验收证据（评审方闭环清单） | ⬜ 待办 |
+| runbook §2 与现状不符 | ① .c 须用 clang（clang++ 触发 -Werror=deprecated）；② android-arm64 preset 不存在 | — | ✅ 已关闭（runbook 本次修订） |
