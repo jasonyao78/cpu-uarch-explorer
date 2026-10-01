@@ -1,6 +1,6 @@
 # SM8650 Cortex-X4 TLB 层级探测 · 第二次战役（r2）任务书 v1.1
 
-> 版本：v1.3（2026-09-30；v1.0 → v1.1（REV-TLB-R2）→ v1.2（REV-M0-BATCH 首层）→ **v1.3（REV-M0-BATCH 两层回执 2026-10-01）**，处置见 §10.3）
+> 版本：v1.4（2026-10-01；v1.0 → v1.1（REV-TLB-R2）→ v1.2（REV-M0-BATCH 首层）→ v1.3（REV-M0-BATCH 两层回执 2026-10-01）→ **v1.4（收口复核 MB-03/07 再修 2026-10-01）**，处置见 §10.3）
 > 修订依据：外部评审 REV-TLB-R2-20260930（第一性原理评审，13 项发现 F1–F9/R1–R4；归档于本分支 `docs/reviews/2026-09-30-sm8650-tlb-r2-first-principles.md`，合成复核脚本 `scripts/review_sm8650_tlb_r2.py`）。**逐条处置见 §10.3 修订映射**。
 > 基线：`main @ 9316853`（第一次战役集成终点；main 此后已推进 `459b135..bc96ff1` 图表报告工作，Phase D 前须同步）。
 > 方法资产：`docs/cpu-uarch-deep-analysis/`（TLB 报告 v1.6、矩阵 v0.2、原型 v2.3——角色见 §2.3）
@@ -167,11 +167,11 @@ Q-A/Q-B/Q-C/Q-D 判据同 §1.2 各问；另冻结（F8/F9）：
 | C7 B1/B2 定型 / offset 策略 | 预注册补入 §1.2（pilot 定型 + 节点地址策略 + 校验规则） |
 | MB-01 GROUP 读长误判 | **已修**（按实际返回字节判定；命名失败原因 last_error_） |
 | MB-02 名称错位/越界 | **已修**（names_ 全程按 spec 身份占位 + value_index_ 映射；契约注释不再宣称按内核 ID 解码） |
-| MB-03 planner 丢语义参数 | **已修**（_PASSTHROUGH 直通 case_params=证据通道；leftover plan 期拒绝；非 ptr_chase 通用 case_id；两条回归测试） |
+| MB-03 planner 丢语义参数 | **已修**（_PASSTHROUGH 直通 case_params=证据通道；leftover plan 期拒绝；非 ptr_chase 通用 case_id；两条回归测试）→ **收口复核再修**（2026-10-01 m0b `ee736ed`：撤 _PASSTHROUGH——chains 等未实现语义维度 plan 期受控拒绝，不再"记录成条件、argv 相同"；chase 几何读法移入 ptr_chase 分支，通用形状不再 KeyError；通用 case_id 支持结构化参数 sha256 段、bool fail-closed；swept 参数消费白名单 = deriver 真实输入；4 反例 + 4 钉桩测试） |
 | MB-04 二次聚合合并 K 条件 | **已修**（m0b cohort 拒绝非 legacy 身份；main seed_medians 同步拒绝——评审允许方案之一；seams 脚本第 87 行未包该异常属脚本预期旧行为） |
 | MB-05 窗口完整性/所有权契约 | **部分修**（复制删除 + 转移语义已实现；窗口差分/有效性 API 转 §11-7） |
 | MB-06 descriptor 最小契约 | 转 §11-8（按两层评审 §4 表格落地 requested→canonical→realized 链；Phase B 前核验） |
-| MB-07 图表静默删点 | **已修**（main：跳点审计清单 + stderr 披露 + 报告局限段；空系列错误点名 run/buffer/seed/field） |
+| MB-07 图表静默删点 | **已修**（main：跳点审计清单 + stderr 披露 + 报告局限段；空系列错误点名 run/buffer/seed/field）→ **收口复核再修**（2026-10-01 main `9093f4a`：缺点数据模式撤除虚假"按可用点重判"声明——终态表改标"历史终审引用（非本数据集重判）" + 顶部警示横幅；冻结判定区间（knee [480,4096] KiB / onset [10240,12288] KiB）按当前曲线覆盖就地标注〔当前曲线不支持〕；claim_support 缺省保守全标；完整数据路径逐字不变） |
 | MB-08 B1→B2 切换 OR 条件 | **已修**（合格门三条件，见 §1.2 Q-B 定型预注册） |
 | R1–R3 ROB 骨架确定性缺陷 | **属实（已复核）**；ROB 项目文件（main `9a2642c`，r2 基线之外），**不代修**——已由评审登记 REV-TLB-R2-20260930，ROB 项目关闭条件前置 |
 | R4 INST_SPEC/RETIRED 口径 | §1.3 非目标预登记 + 执行端设计文档约束 |
