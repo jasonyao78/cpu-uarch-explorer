@@ -313,6 +313,47 @@ class TestCli(unittest.TestCase):
             for name in names + ["report.md"]:
                 self.assertEqual((out / name).read_bytes(), (out2 / name).read_bytes())
 
+    def test_degraded_report_marks_unsupported_claims(self):
+        """MB-07 收口复核：onset 区间不受当前曲线支持时，终态/读法为
+        历史引用并就地标注，不得原样输出有效区间或"已重判"声明。"""
+        skipped = [{"run": "R", "buffer_kb": 10240, "seed": 7,
+                    "field": "dtlb_walk_per_1k"}]
+        report = build_report(
+            {"cohorts": []}, skipped_points=skipped,
+            claim_support={"refill_knee": True, "walk_onset": False})
+        self.assertIn("缺点数据再生成", report)
+        self.assertIn("非本数据集重判", report)
+        self.assertNotIn("按可用点重判", report)
+        # walk onset 区间标注不支持、终态行不得原样出现有效区间
+        self.assertIn("〔当前曲线不支持〕[2560, 3072] 页（10–12 MiB）", report)
+        self.assertIn("〔当前曲线不支持〕[2560,3072]", report)
+        self.assertNotIn(
+            "| Q2a `0x34` walk-onset | INTERVAL_IDENTIFIED | [2560, 3072] 页",
+            report)
+        # knee 判定受支持：不得误标
+        self.assertNotIn("〔当前曲线不支持〕[120, 1024]", report)
+        self.assertIn("[120, 1024] 页（480 KiB–4 MiB）", report)
+
+    def test_degraded_report_default_support_is_conservative(self):
+        """缺点数据但未提供 claim_support 评估时：全部判定保守标注
+        （历史引用宁可多标，不可冒充有效区间）。"""
+        report = build_report(
+            {"cohorts": []},
+            skipped_points=[{"run": "R", "buffer_kb": 512, "seed": 7,
+                             "field": "l1d_tlb_refill_per_1k"}])
+        self.assertIn("非本数据集重判", report)
+        self.assertIn("〔当前曲线不支持〕[120, 1024]", report)
+        self.assertIn("〔当前曲线不支持〕[2560, 3072]", report)
+
+    def test_full_data_report_unchanged_by_claim_support(self):
+        """完整数据路径逐字保持原口径：无横幅、无标注、终态表原标题。"""
+        report = build_report({"cohorts": []})
+        self.assertNotIn("缺点数据再生成", report)
+        self.assertNotIn("〔当前曲线不支持〕", report)
+        self.assertIn("## 终态表（终审 §1，每 Q 独立）", report)
+        self.assertIn("| Q2a `0x34` walk-onset | INTERVAL_IDENTIFIED | "
+                      "[2560, 3072] 页（10–12 MiB）", report)
+
     def test_missing_run_fails(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d) / "runs"

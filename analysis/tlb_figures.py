@@ -342,16 +342,77 @@ _REPRODUCE = (
 )
 
 
-def build_report(graded: dict, skipped_points: list[dict] | None = None) -> str:
+# 缺点数据再生成时的顶部警示（MB-07 收口复核）：终态表与图读法是冻结
+# 历史终态的引用，不是对当前缺点曲线的重判结果。
+_DEGRADED_BANNER = (
+    "> ⚠️ **缺点数据再生成**：输入数据集不完整（见末节「数据局限」）。"
+    "本报告未对缺点数据执行重判：终态表与图读法均为 2026-09-28 冻结历史"
+    "终态的引用；凡当前曲线不再支撑的区间/读法，已就地标注"
+    "「当前曲线不支持」，完整网格恢复前不应引用被标注内容。"
+)
+
+
+def _mask_claim(text: str, interval: str, supported: bool) -> str:
+    """缺点数据下就地标注当前曲线不支持的判定区间/读法（MB-07 收口复核）。
+
+    supported=True（或 interval 不在文本中）时原文返回——完整数据路径
+    逐字不变；supported=False 时区间前加「当前曲线不支持〕」标注，禁止
+    把历史结论当作本次生成结果。"""
+    if supported or interval not in text:
+        return text
+    return text.replace(interval, f"〔当前曲线不支持〕{interval}")
+
+
+# 冻结判定区间（终审 §1）对应的曲线覆盖范围，单位 KiB：缺点数据下
+# 区间内无可用点即视为该判定不受当前曲线支持。
+_KNEE_REGION_KB = (480, 4096)        # Q1 [120, 1024] 页
+_WALK_ONSET_REGION_KB = (10240, 12288)  # Q2a [2560, 3072] 页（10–12 MiB）
+
+
+def _final_states_for(claim_support: dict[str, bool] | None) -> str:
+    """终态表文本：按当前曲线支持度就地标注不受支持的判定区间。
+
+    仅在缺点数据模式下被调用；claim_support=None（未评估）按全不支持
+    保守标注——历史引用宁可多标，不可把无支撑判定当有效区间输出。"""
+    support = claim_support or {}
+    text = _mask_claim(
+        _FINAL_STATES, "[120, 1024] 页（480 KiB–4 MiB）",
+        support.get("refill_knee", False))
+    text = _mask_claim(
+        text, "[2560, 3072] 页（10–12 MiB）",
+        support.get("walk_onset", False))
+    return text
+
+
+def build_report(graded: dict, skipped_points: list[dict] | None = None,
+                 claim_support: dict[str, bool] | None = None) -> str:
     """生成同事版 report.md：四图嵌入 + 读法 + 终态表 + 边界 + 复算指引。
 
     skipped_points（MB-07 披露）：非空时附"数据局限"段，逐点列出被降级
-    跳过、未进曲线的 (run, buffer, seed, field)。"""
+    跳过、未进曲线的 (run, buffer, seed, field)；同时进入缺点数据模式——
+    顶部加警示横幅，终态表标题改为"历史终审引用（非本数据集重判）"，
+    图读法/终态区间按 claim_support 就地标注支持度（缺省 = 全部不支持，
+    保守 fail-closed）。claim_support 键：refill_knee / walk_onset。"""
+    degraded = bool(skipped_points)
+    fig1_reading = _mask_claim(
+        _FIG1_READING, "（480 KiB–4 MiB，对应 120–1024 页）",
+        True if not degraded
+        else (claim_support or {}).get("refill_knee", False))
+    fig2_reading = _mask_claim(
+        _FIG2_READING, "[2560,3072]",
+        True if not degraded
+        else (claim_support or {}).get("walk_onset", False))
+    final_states = (_final_states_for(claim_support) if degraded
+                    else _FINAL_STATES)
+    final_heading = ("## 终态表（历史终审引用：2026-09-28 冻结；非本数据集重判）"
+                     if degraded
+                     else "## 终态表（终审 §1，每 Q 独立）")
     lines = [
         "# SM8650 X4 TLB 战役：同事版图表与读法",
         "",
         _INTRO,
         "",
+        *([_DEGRADED_BANNER, ""] if degraded else []),
         "## 一分钟背景",
         "",
         _BACKGROUND,
@@ -369,13 +430,13 @@ def build_report(graded: dict, skipped_points: list[dict] | None = None) -> str:
         "",
         "![L1 dTLB refill 密度](refill-density.svg)",
         "",
-        _FIG1_READING,
+        fig1_reading,
         "",
         "## 图 2：page table walk onset（walk-onset.svg）",
         "",
         "![dtlb walk 密度](walk-onset.svg)",
         "",
-        _FIG2_READING,
+        fig2_reading,
         "",
         "## 图 3：延迟对照（latency-cycles.svg）",
         "",
@@ -393,9 +454,9 @@ def build_report(graded: dict, skipped_points: list[dict] | None = None) -> str:
         "",
         *cohort_grading_lines(graded),
         "",
-        "## 终态表（终审 §1，每 Q 独立）",
+        final_heading,
         "",
-        _FINAL_STATES,
+        final_states,
         "",
         "## 没测到什么（边界）",
         "",
@@ -411,8 +472,10 @@ def build_report(graded: dict, skipped_points: list[dict] | None = None) -> str:
             "",
             "## 数据局限（降级跳过点，MB-07 披露）",
             "",
-            "以下 (run, buffer, seed, field) 因 metric 契约降级未进曲线；"
-            "相关区间的科学结论按可用点重判，不沿用完整网格读法。",
+            "以下 (run, buffer, seed, field) 因 metric 契约降级未进曲线。"
+            "本报告**未对缺点数据执行重判**：终态表与图读法均为 2026-09-28 "
+            "冻结历史终态的引用；被标注「当前曲线不支持」的区间与读法，"
+            "在完整网格恢复前不应引用。",
             "",
         ]
         lines += [
@@ -442,7 +505,23 @@ def main(argv: list[str] | None = None) -> int:
                 f"curves: {skipped}",
                 file=sys.stderr,
             )
-        report = build_report(graded, skipped_points=skipped)
+        # MB-07 收口复核：缺点数据下按当前曲线实际覆盖评估冻结判定区间的
+        # 支持度（knee [480,4096] KiB / walk onset [10240,12288] KiB），
+        # 报告内不受支持的区间/读法就地标注，禁止历史终态冒充本次重判。
+        claim_support = None
+        if skipped:
+            refill_pts = curve_from_groups(scan_groups, _F_REFILL)
+            walk_pts = curve_from_groups(scan_groups, _F_WALK)
+            claim_support = {
+                "refill_knee": any(
+                    _KNEE_REGION_KB[0] <= kb <= _KNEE_REGION_KB[1]
+                    for kb, _ in refill_pts),
+                "walk_onset": any(
+                    _WALK_ONSET_REGION_KB[0] <= kb <= _WALK_ONSET_REGION_KB[1]
+                    for kb, _ in walk_pts),
+            }
+        report = build_report(graded, skipped_points=skipped,
+                              claim_support=claim_support)
     except (TlbError, FileNotFoundError, ValueError, TypeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
