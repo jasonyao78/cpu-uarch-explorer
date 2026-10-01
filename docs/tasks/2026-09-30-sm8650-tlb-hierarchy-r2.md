@@ -186,6 +186,6 @@ Q-A/Q-B/Q-C/Q-D 判据同 §1.2 各问；另冻结（F8/F9）：
 4. H1–H4 全拒后的 H5+ 假设族：超预算，另立项。
 5. open-items 双 OI-12 唯一化重编号（main 侧维护）。
 6. 冒烟未关闭项（若有）。
-7. **PerfWindow 窗口完整性 API（MB-05 余量）**：snapshot 解码与 window validity 分离、前后差分（enabled/running 不随 RESET 清零）、正式窗口有效运行检查——Phase B 短窗 pilot 前完成。
+7. **PerfWindow 窗口完整性 API（MB-05 余量）**：~~snapshot 解码与 window validity 分离、前后差分（enabled/running 不随 RESET 清零）、正式窗口有效运行检查——Phase B 短窗 pilot 前完成~~ **API 层已交付（2026-10-01 m0b `44e3e3f`）**：`read_snapshot` 解码与解释分离、`window_delta` 纯函数（enabled/running 累计值跨 RESET 差分有效；命名否决 enabled-zero/mux-detected/enabled-regressed/nr-mismatch；RESET 值非单调标记 values_monotonic），6 个合成场景入黄金测试。剩余 = 真机窗口有效性证据（首个短窗 pilot 的 S6 类 case 随采数取得）。
 8. **descriptor 最小证据契约（MB-06）**：按两层评审 §4 表格落地 requested → canonical plan → adapter/kernel → realized observation → identity-aware analysis 链；params 类型规范化与 canonical identity；schema README 登记 probe_shape 与身份维度。
 9. OI-13 余量（REV-M0-BATCH C6）：extras 事件的派生字段与消费语义；overlay 测试 `test_missing_metric_fails` 的旧契约期望在 r2 合并时更新（缺指标从"受控退出 1"变为"命名降级"，1 failure 为预期口径差异）。
