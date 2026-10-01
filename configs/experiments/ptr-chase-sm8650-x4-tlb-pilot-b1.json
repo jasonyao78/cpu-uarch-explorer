@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-sm8650-x4-tlb-pilot-b1",
+  "title": "SM8650 X4 TLB M0-5 pilot：B1 自冲突曲线（Q-B 主估计量，CALIBRATION/PILOT 标定块）",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    { "name": "set_hypothesis", "type": "int", "default": 1 },
+    { "name": "set_target", "type": "int", "default": 7 },
+    { "name": "set_window", "type": "int", "range": "1..16，覆盖跳变点 8→9" },
+    { "name": "set_rounds", "type": "int", "default": 20 },
+    { "name": "set_pool_pages", "type": "int", "default": 65536 },
+    { "name": "set_filler_pages", "type": "int", "default": 512 },
+    { "name": "set_regions", "type": "int", "default": 4 },
+    { "name": "repetitions", "type": "int", "default": 10 },
+    { "name": "base_pages", "type": "int", "default": 1 },
+    { "name": "seed", "type": "int", "default": 42 },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        { "name": "cycles", "type": 8, "config": "0x11" },
+        { "name": "l1d_tlb_refill", "type": 8, "config": "0x05" },
+        { "name": "l2d_tlb_refill", "type": 8, "config": "0x2d" },
+        { "name": "l2d_tlb", "type": 8, "config": "0x2f" }
+      ]
+    }
+  ],
+  "preconditions": [
+    "redmi-k70pro-01 controlled-baseline profile 前后门禁通过（quiet-state，runbook §1.7 口径）",
+    "CPU7 Cortex-X4（taskset 80 绑核）；4K base 页（探针硬门）",
+    "三事件组（0x05/0x2d/0x2f）+ cycles 同窗，GROUP 原子读窗口有效性入档",
+    "标定块标记 CALIBRATION/PILOT：raw 全量留存，锚点参照池只用 pilot 数据建（任务书 M0-5 顺序）；pilot 与正式验证样本隔离"
+  ],
+  "metrics": [
+    { "name": "pmu.cycles.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l1d_tlb_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l2d_tlb_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l2d_tlb.count", "unit": "events", "statistic": "median" },
+    { "name": "window_valid_rounds", "unit": "rounds", "statistic": "median" },
+    { "name": "window_mux_rounds", "unit": "rounds", "statistic": "median" },
+    { "name": "probe_latency_ns", "unit": "ns", "statistic": "median" }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "probe_shape": "tlb_set",
+    "controls": ["x4-prime"],
+    "params": { "repetitions": 10 },
+    "sweep": {
+      "set_window": [1, 2, 4, 6, 8, 9, 10, 12, 16]
+    },
+    "fixed_params": [
+      "set_hypothesis", "set_target", "set_rounds", "set_pool_pages",
+      "set_filler_pages", "set_regions", "base_pages", "seed", "pmu_events"
+    ]
+  },
+  "notes": "M0-5 pilot B1 自冲突曲线：每轮 prime（512 filler 页驱逐 L1）后访问同 set W 页；判读门 = 0x05≈W 且 0x2f≈W（协议有效），0x2d 在 W=8→9 跳变（总竞争条目数口径——filler 过滤目标 set 后竞争 = W，判据按任务书 SMOKE-20261001 登记写）。0x2d 跳变提前（冒烟实测 W=8 已达 1.0/access）不改变 B1 主估计量形式，pilot 数据用于校准冻结与锚点池，不用于假设裁决。F4 多区域激励默认 4 区域；若输出 set_domain=single-region-fallback，H 假设区分性不在本块判定。"
+}
