@@ -17,6 +17,15 @@
 |---|---|---|---|
 | `execution.controls` | non-empty unique string array | 按 id 选择 platform `controls` 子集；保持控制定义归平台所有，实验只声明需要哪些控制，未知 id 在 plan 期失败 | 2026-09-28 |
 | `execution.params.repetitions` | positive integer | 实验级显式重复数，优先于平台默认；用于 ≥10 次等方法学门禁，计划预览必须显示实际值 | 2026-09-28 |
+| `execution.probe_shape` | string | 语义参数派生形状注册键（`_CASE_DERIVERS`）；`ptr_chase`（默认）/ `tlb_set`（M0-4b TLB set prime+probe，同一 ptr_chase 二进制 `--tlb-set-mode` 模式分发）。未注册形状 plan 期拒绝 | 2026-10-01 |
+| `execution.params.set_hypothesis` | integer 1..4 | tlb_set 形状：候选 VPN→set 索引假设 H1 位选 / H2 相邻 XOR / H3 高位折叠 / H4 三字段 XOR | 2026-10-01 |
+| `execution.params.set_target` / `set_target2` | integer 0..255 | tlb_set 形状：目标 set / T2 对照组 set（可选） | 2026-10-01 |
+| `execution.params.set_window` | integer ≥0 | tlb_set 形状：每轮 probe 访问数 W；**0 = 空窗底噪 case（G0-3 标定）** | 2026-10-01 |
+| `execution.params.set_rounds` | integer ≥2（默认 20） | tlb_set 形状：轮数；round 0 冷启动剔除 | 2026-10-01 |
+| `execution.params.set_pool_pages` | integer ≥1024（默认 65536） | tlb_set 形状：目标地址池总页数（多区域共享） | 2026-10-01 |
+| `execution.params.set_filler_pages` | integer ≥0（默认 512） | tlb_set 形状：prime 驱逐链页数（独立映射，按候选 H 过滤目标 set） | 2026-10-01 |
+| `execution.params.set_regions` | integer 1..16（默认 4） | tlb_set 形状：F4 多稀疏 VA 区域数（跨 256MiB 边界使 VPN[23:16] 各异）；预约失败回退单区域并输出 `set_domain=single-region-fallback` 命名降级 | 2026-10-01 |
+| `execution.params.set_scatter` | 0/1 | tlb_set 形状：无冲突负控（G0-3）——W 页各落不同 set；要求 1≤W≤256 | 2026-10-01 |
 | `generator` | object | 致密配置生成器审计块（input_run_sha256/rules_sha256/output_sha256 三锚定 + dense_points 来源标注 + quota 核算）；仅由 `analysis/tlb_dense_gen.py` 产出，非手写 | 2026-09-29 |
 
 ### 已登记的 target 扩展字段

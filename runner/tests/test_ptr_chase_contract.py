@@ -356,6 +356,105 @@ class TestPtrChaseContract(unittest.TestCase):
         for metric in metrics:
             self.assertNotIn("vma_base", metric)
 
+    def test_tlb_set_mode_is_unsupported_on_macos(self):
+        # M0-4b：set 模式与 legacy PMU 同口径——非 Linux exit 2（能力不支持），
+        # 不伪装成可执行
+        argv = self.adapter.build_argv({
+            "set_hypothesis": 1, "set_target": 7, "set_window": 8,
+            "set_rounds": 20, "set_pool_pages": 65536,
+            "set_filler_pages": 512, "set_regions": 4,
+            "pmu_events": [{"name": "l1d_tlb_refill", "type": 8,
+                            "config": 0x5}],
+        })
+        self.assertIn("--tlb-set-mode", argv)
+        proc = self._run(argv)
+        self.assertEqual(proc.returncode, 2, f"stderr={proc.stderr}")
+        self.assertIn("unsupported", proc.stderr)
+
+
+class TestTlbSetAdapterContract(unittest.TestCase):
+    """M0-4b：tlb_set 形状的 adapter 契约（合成输出级；真机执行归上板）。
+
+    不依赖编译产物——argv 构造与输出解析在任何平台可测。"""
+    def setUp(self):
+        self.adapter = PtrChaseAdapter()
+
+    def _params(self, **over):
+        params = {
+            "set_hypothesis": 1, "set_target": 7, "set_window": 8,
+            "set_rounds": 20, "set_pool_pages": 65536,
+            "set_filler_pages": 512, "set_regions": 4,
+            "pmu_events": [
+                {"name": "l1d_tlb_refill", "type": 8, "config": 0x5},
+                {"name": "l2d_tlb_refill", "type": 8, "config": 0x2d},
+                {"name": "l2d_tlb", "type": 8, "config": 0x2f},
+            ],
+        }
+        params.update(over)
+        return params
+
+    def test_build_argv_consumes_all_set_params(self):
+        argv = self.adapter.build_argv(
+            self._params(set_target2=100, seed=42))
+        joined = " ".join(argv)
+        self.assertIn("--tlb-set-mode", joined)
+        for flag in ("--set-hypothesis 1", "--set-target 7", "--set-window 8",
+                     "--set-rounds 20", "--set-pool-pages 65536",
+                     "--set-filler 512", "--set-regions 4",
+                     "--set-target2 100", "-S 42", "-B"):
+            self.assertIn(flag, joined)
+        for event in ("l1d_tlb_refill:8:5", "l2d_tlb_refill:8:45",
+                      "l2d_tlb:8:47"):
+            self.assertIn(f"--pmu-event {event}", joined)
+
+    def test_scatter_flag_emitted_only_when_set(self):
+        argv = self.adapter.build_argv(self._params(set_scatter=1))
+        self.assertIn("--set-scatter", " ".join(argv))
+        argv = self.adapter.build_argv(self._params(set_scatter=0))
+        self.assertNotIn("--set-scatter", " ".join(argv))
+
+    def test_missing_required_param_fails_closed(self):
+        for missing in ("set_window", "set_hypothesis", "set_target"):
+            params = self._params()
+            del params[missing]
+            with self.assertRaisesRegex(ParseError, missing):
+                self.adapter.build_argv(params)
+
+    def test_legacy_params_never_take_set_branch(self):
+        argv = self.adapter.build_argv(
+            {"buffer_kb": 64, "stride": 64, "loads": 8000, "warmup": 1000})
+        self.assertNotIn("--tlb-set-mode", " ".join(argv))
+
+    def test_parse_tlbset_output_roundtrip(self):
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 set_rounds=20 "
+            "set_filler=512 set_regions=4 set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 window_mux_rounds=0 "
+            "valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19 "
+            "pmu_l2d_tlb_refill_count=0.2 pmu_l2d_tlb_refill_valid_rounds=19 "
+            "pmu_l2d_tlb_count=8.1 pmu_l2d_tlb_valid_rounds=19"
+        )
+        metrics = self.adapter.parse_output(stdout, "")
+        by_name = {m["name"]: m["value"] for m in metrics}
+        self.assertEqual(by_name["pmu.l1d_tlb_refill.count"], 8.0)
+        self.assertEqual(by_name["pmu.l2d_tlb_refill.count"], 0.2)
+        self.assertEqual(by_name["window_valid_rounds"], 19)
+        self.assertEqual(by_name["window_mux_rounds"], 0)
+        self.assertEqual(by_name["probe_latency_ns"], 1500)
+
+    def test_parse_tlbset_output_without_events_fails_closed(self):
+        stdout = ("mode=tlbset set_domain=multi-region "
+                  "window_valid_rounds=19 window_invalid_rounds=0 "
+                  "window_mux_rounds=0 valid_rounds=19 probe_ns=1")
+        with self.assertRaisesRegex(ParseError, "no pmu"):
+            self.adapter.parse_output(stdout, "")
+
+    def test_parse_legacy_output_stays_on_chase_branch(self):
+        # 回归：legacy 输出（无 mode=tlbset）不因 parser 分支改变语义
+        metrics = self.adapter.parse_output("latency_ns=1.25", "")
+        self.assertEqual(metrics[0]["name"], "latency_ns")
+
 
 if __name__ == "__main__":
     unittest.main()

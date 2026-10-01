@@ -84,10 +84,73 @@ class PtrChaseAdapter:
     protocol_version = "1.2"
     implementation_id = "portable"
 
+    # M0-4b：tlb_set 形状的必需参数（探针 argv 真实消费；缺一即 ParseError，
+    # fail-closed——不让半套参数悄悄退化成别的模式）
+    _SET_MODE_REQUIRED = ("set_hypothesis", "set_target", "set_window")
+    _SET_MODE_OPTIONAL = ("set_target2", "set_rounds", "set_pool_pages",
+                          "set_filler_pages", "set_regions")
+
     def build_argv(self, params: dict[str, Any]) -> list[str]:
         """参数 dict → probe argv。缺参数/类型错误抛 ParseError（plan 期已校验，
         此处是最后一道防线）。hugepage 非 0 时加 -h（fallback 允许）；
-        thp 非 0 时加 -T；base_pages 非 0 时加 -B；三类页请求互斥。"""
+        thp 非 0 时加 -T；base_pages 非 0 时加 -B；三类页请求互斥。
+        M0-4b：含 set_window 参数 → tlb_set 模式 argv（--tlb-set-mode 族），
+        与 legacy chase argv 互斥（探针侧同样硬拒）。"""
+        if "set_window" in params or "set_hypothesis" in params:
+            return self._build_tlb_set_argv(params)
+        return self._build_chase_argv(params)
+
+    def _build_tlb_set_argv(self, params: dict[str, Any]) -> list[str]:
+        for key in self._SET_MODE_REQUIRED:
+            if key not in params:
+                raise ParseError(
+                    f"tlb-set mode requires param {key!r} "
+                    f"(got {sorted(params)})")
+        try:
+            hypothesis = int(params["set_hypothesis"])
+            target = int(params["set_target"])
+            window = int(params["set_window"])
+        except (TypeError, ValueError) as e:
+            raise ParseError(f"tlb-set argv build failed: {e}")
+        if not 1 <= hypothesis <= 4:
+            raise ParseError(f"set_hypothesis must be 1..4: {hypothesis}")
+        if not 0 <= target <= 255:
+            raise ParseError(f"set_target must be 0..255: {target}")
+        if window < 0:
+            raise ParseError(f"set_window must be >= 0: {window}")
+        argv = ["--tlb-set-mode",
+                "--set-hypothesis", str(hypothesis),
+                "--set-target", str(target),
+                "--set-window", str(window)]
+        if "set_target2" in params:
+            target2 = int(params["set_target2"])
+            if not 0 <= target2 <= 255:
+                raise ParseError(f"set_target2 must be 0..255: {target2}")
+            argv += ["--set-target2", str(target2)]
+        for key, flag in (("set_rounds", "--set-rounds"),
+                          ("set_pool_pages", "--set-pool-pages"),
+                          ("set_filler_pages", "--set-filler"),
+                          ("set_regions", "--set-regions")):
+            if key in params:
+                argv += [flag, str(int(params[key]))]
+        if _binary_flag(params, "set_scatter"):
+            argv.append("--set-scatter")
+        if "seed" in params:
+            raw_seed = params["seed"]
+            if type(raw_seed) is not int or raw_seed < 0 \
+                    or raw_seed > (1 << 64) - 1:
+                raise ParseError(f"seed must be a uint64 integer: {raw_seed!r}")
+            argv.extend(["-S", str(raw_seed)])
+        # tlb_set 强制 4K base 页：显式带 -B 与探针内部 madvise 口径一致
+        argv.append("-B")
+        for event in _pmu_events(params):
+            argv.extend([
+                "--pmu-event",
+                f"{event['name']}:{event['type']}:{event['config']}",
+            ])
+        return argv
+
+    def _build_chase_argv(self, params: dict[str, Any]) -> list[str]:
         try:
             buffer_kb = int(params["buffer_kb"])
             stride = int(params["stride"])
@@ -124,10 +187,65 @@ class PtrChaseAdapter:
     def parse_output(self, stdout: str, stderr: str) -> list[dict[str, Any]]:
         """stdout key=value → metrics 列表。缺 latency_ns、非数值、nan/inf
         一律抛 ParseError（绝不编造数值，空 metrics + failure 是合法出路）。
-        page_policy 存在时随 metric 入档（§2 显式标注纪律）。"""
+        page_policy 存在时随 metric 入档（§2 显式标注纪律）。
+        M0-4b：mode=tlbset 输出 → tlb_set 分支（无 latency_ns；metrics 为
+        pmu.<label>.count 窗口差分均值 + 窗口有效性计数，事件集自描述）。"""
         fields = parse_key_value_lines(stdout)
         if not fields:
             raise ParseError(f"no key=value lines in probe output; stderr={stderr.strip()!r}")
+        if fields.get("mode") == "tlbset":
+            return self._parse_tlb_set_output(fields, stderr)
+        return self._parse_chase_output(fields, stderr)
+
+    def _parse_tlb_set_output(self, fields: dict[str, str],
+                              stderr: str) -> list[dict[str, Any]]:
+        """tlb_set 模式：probe 段窗口差分均值（events/round）+ 有效性证据。
+
+        事件集自描述（pmu_<label>_count 键）；至少一个事件必填，否则该
+        窗口没有任何可判读的计数（fail-closed）。"""
+        required = ("set_domain", "window_valid_rounds", "window_invalid_rounds",
+                    "window_mux_rounds", "valid_rounds", "probe_ns")
+        for key in required:
+            if key not in fields:
+                raise ParseError(f"tlb-set output missing {key!r}; stderr={stderr.strip()!r}")
+        metrics: list[dict[str, Any]] = [
+            {"name": "window_valid_rounds",
+             "value": require_finite_number(fields, "window_valid_rounds"),
+             "unit": "rounds"},
+            {"name": "window_invalid_rounds",
+             "value": require_finite_number(fields, "window_invalid_rounds"),
+             "unit": "rounds"},
+            {"name": "window_mux_rounds",
+             "value": require_finite_number(fields, "window_mux_rounds"),
+             "unit": "rounds"},
+            {"name": "probe_latency_ns",
+             "value": require_finite_number(fields, "probe_ns"),
+             "unit": "ns"},
+        ]
+        n_events = 0
+        for key, raw in fields.items():
+            if not key.startswith("pmu_") or not key.endswith("_count"):
+                continue
+            label = key[len("pmu_"):-len("_count")]
+            if not label:
+                raise ParseError(f"tlb-set event label empty in key {key!r}")
+            metrics.append({"name": f"pmu.{label}.count",
+                            "value": require_finite_number(fields, key),
+                            "unit": "events"})
+            valid_key = f"pmu_{label}_valid_rounds"
+            if valid_key in fields:
+                metrics.append({
+                    "name": f"pmu.{label}.valid_rounds",
+                    "value": require_finite_number(fields, valid_key),
+                    "unit": "rounds"})
+            n_events += 1
+        if n_events == 0:
+            raise ParseError(
+                f"tlb-set output has no pmu_<label>_count events; stderr={stderr.strip()!r}")
+        return metrics
+
+    def _parse_chase_output(self, fields: dict[str, str],
+                            stderr: str) -> list[dict[str, Any]]:
         latency = require_finite_number(fields, "latency_ns")
         metric: dict[str, Any] = {"name": "latency_ns", "value": latency, "unit": "ns"}
         warmup_keys = {"warmup_loads", "warmup_passes_effective", "warmup_state"}

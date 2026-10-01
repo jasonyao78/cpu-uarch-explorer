@@ -180,6 +180,80 @@ class TestPlan(unittest.TestCase):
             built2 = build_plan(spec2, {**platform, "controls": []})
         self.assertNotEqual(built2.cases[0].id, case.id)
 
+    def test_tlb_set_shape_registered_deriver_end_to_end(self):
+        # M0-4b：注册 deriver 的 tlb_set 形状——MB-03 收口复核要求"两条不同
+        # 新形状条件走到不同执行入参"；这里 window 4/12 两 case 的 argv 不同。
+        from runner.adapters.ptr_chase import PtrChaseAdapter
+        spec = {
+            **SPEC,
+            "parameters": [{"name": "repetitions", "type": "int", "default": 3}],
+            "execution": {
+                "probe": "ptr_chase",
+                "probe_shape": "tlb_set",
+                "sweep": {"set_window": [4, 12]},
+                "fixed_params": ["set_hypothesis", "set_target", "pmu_events"],
+                "params": {
+                    "set_hypothesis": 1,
+                    "set_target": 7,
+                    "pmu_events": [{"name": "l1d_tlb_refill", "type": 8,
+                                    "config": "0x5"}],
+                },
+            },
+        }
+        built = build_plan(spec, {**PLATFORM, "controls": []})
+        self.assertEqual(len(built.cases), 2)
+        self.assertEqual(len({c.id for c in built.cases}), 2)
+        argvs = [PtrChaseAdapter().build_argv({k: rv.value for k, rv in c.params})
+                 for c in built.cases]
+        windows = {a[a.index("--set-window") + 1] for a in argvs}
+        self.assertEqual(windows, {"4", "12"})
+
+    def test_tlb_set_shape_rejects_missing_foreign_and_bad_range(self):
+        base = {
+            **SPEC,
+            "parameters": [{"name": "repetitions", "type": "int", "default": 3}],
+            "execution": {
+                "probe": "ptr_chase",
+                "probe_shape": "tlb_set",
+                "sweep": {"set_window": [4]},
+                "fixed_params": ["set_hypothesis", "set_target"],
+                "params": {"set_hypothesis": 1, "set_target": 7},
+            },
+        }
+        missing = {**base,
+                   "execution": {**base["execution"],
+                                 "fixed_params": ["set_hypothesis"]}}
+        with self.assertRaisesRegex(RunnerError, "set_target"):
+            build_plan(missing, {**PLATFORM, "controls": []})
+        foreign = {**base,
+                   "execution": {**base["execution"],
+                                 "sweep": {"set_window": [4],
+                                           "buffer": ["64KiB"]}}}
+        with self.assertRaisesRegex(RunnerError, "does not consume"):
+            build_plan(foreign, {**PLATFORM, "controls": []})
+        bad_range = {**base,
+                     "execution": {**base["execution"],
+                                   "params": {"set_hypothesis": 9,
+                                              "set_target": 7}}}
+        with self.assertRaisesRegex(RunnerError, "set_hypothesis"):
+            build_plan(bad_range, {**PLATFORM, "controls": []})
+
+    def test_tlb_set_shape_rejects_hugepage_requests(self):
+        spec = {
+            **SPEC,
+            "parameters": [{"name": "repetitions", "type": "int", "default": 3}],
+            "execution": {
+                "probe": "ptr_chase",
+                "probe_shape": "tlb_set",
+                "sweep": {"set_window": [4]},
+                "fixed_params": ["set_hypothesis", "set_target", "hugepage"],
+                "params": {"set_hypothesis": 1, "set_target": 7,
+                           "hugepage": 1},
+            },
+        }
+        with self.assertRaisesRegex(RunnerError, "4K base pages"):
+            build_plan(spec, {**PLATFORM, "controls": []})
+
     def test_unconsumed_fixed_param_rejected_at_plan_time(self):
         # MB-03：不被形状消费、也不进 ID 段的参数 = plan 期显式拒绝
         spec = {

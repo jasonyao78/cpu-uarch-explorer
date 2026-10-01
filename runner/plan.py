@@ -232,6 +232,81 @@ def _derive_ptr_chase_case_params(params: dict[str, ResolvedValue]) -> dict[str,
     return case_params
 
 
+# M0-4b：TLB set prime+probe 形状的语义参数派生（ptr_chase --tlb-set-mode
+# 的证据探针版；方法蓝本 = 原型 l2_set_probe v2.3，差异见探针文件头注释：
+# F5 GROUP 原子读 + window_delta 有效性、F4 多区域、G0-3 空窗/scatter 负控）。
+# 所有参数被探针 argv 真实消费（MB-03 消费契约），无一仅为身份。
+def _derive_tlb_set_case_params(params: dict[str, ResolvedValue]) -> dict[str, ResolvedValue]:
+    def _int_param(name: str, default: int | None) -> ResolvedValue:
+        rv = params.get(name)
+        if rv is None:
+            if default is None:
+                raise RunnerError("plan-error", f"tlb_set shape requires param {name!r}")
+            return ResolvedValue(default, "spec-default")
+        if type(rv.value) is not int:
+            raise RunnerError(
+                "plan-error", f"{name} must be an integer, got {rv.value!r}")
+        return rv
+
+    hypothesis_rv = _int_param("set_hypothesis", None)
+    hypothesis = hypothesis_rv.value
+    if not 1 <= hypothesis <= 4:
+        raise RunnerError(
+            "plan-error", f"set_hypothesis must be 1..4, got {hypothesis}")
+    target_rv = _int_param("set_target", None)
+    target = target_rv.value
+    if not 0 <= target <= 255:
+        raise RunnerError(
+            "plan-error", f"set_target must be 0..255, got {target}")
+    window_rv = _int_param("set_window", None)
+    window = window_rv.value
+    if window < 0:
+        raise RunnerError(
+            "plan-error", f"set_window must be >= 0 (0 = empty window), got {window}")
+    rounds_rv = _int_param("set_rounds", 20)
+    if rounds_rv.value < 2:
+        raise RunnerError(
+            "plan-error",
+            f"set_rounds must be >= 2 (round 0 cold-start), got {rounds_rv.value}")
+    pool_rv = _int_param("set_pool_pages", 65536)
+    if pool_rv.value < 1024:
+        raise RunnerError(
+            "plan-error", f"set_pool_pages must be >= 1024, got {pool_rv.value}")
+    filler_rv = _int_param("set_filler_pages", 512)
+    if filler_rv.value < 0:
+        raise RunnerError(
+            "plan-error", f"set_filler_pages must be >= 0, got {filler_rv.value}")
+    regions_rv = _int_param("set_regions", 4)
+    if not 1 <= regions_rv.value <= 16:
+        raise RunnerError(
+            "plan-error", f"set_regions must be 1..16, got {regions_rv.value}")
+    scatter = params.get("set_scatter")
+    scatter_flag = _binary_flag("set_scatter", scatter) if scatter else 0
+    if scatter_flag and not 1 <= window <= 256:
+        raise RunnerError(
+            "plan-error",
+            f"set_scatter requires 1 <= set_window <= 256, got {window}")
+
+    case_params = {
+        "set_hypothesis": hypothesis_rv,
+        "set_target": target_rv,
+        "set_window": window_rv,
+        "set_rounds": rounds_rv,
+        "set_pool_pages": pool_rv,
+        "set_filler_pages": filler_rv,
+        "set_regions": regions_rv,
+    }
+    target2 = params.get("set_target2")
+    if target2 is not None:
+        if type(target2.value) is not int or not 0 <= target2.value <= 255:
+            raise RunnerError(
+                "plan-error", f"set_target2 must be 0..255, got {target2.value!r}")
+        case_params["set_target2"] = ResolvedValue(target2.value, target2.source)
+    if scatter is not None:
+        case_params["set_scatter"] = ResolvedValue(scatter_flag, scatter.source)
+    return case_params
+
+
 # MB-03（收口复核修订）：允许进通用 case_id 段的 swept 参数必须是
 # deriver 真实消费的输入（见 _derive_ptr_chase_case_params）。"仅进 ID
 # 不进执行"= 命名不同实验、证据无该维度，一律 leftover 拒绝。
@@ -243,8 +318,19 @@ _CHASE_ID_SEGMENT_PARAMS = frozenset(
 
 # M0-4 扩展缝：probe_shape → 语义参数派生函数。新探头形状在此注册；
 # planner 主循环只负责 sweep 展开/fixed_params/通用旗标（页策略/PMU/seed）/case 组装。
+# tlb_set 与 ptr_chase 共用同一二进制（ptr_chase --tlb-set-mode 模式分发）。
 _CASE_DERIVERS = {
     "ptr_chase": _derive_ptr_chase_case_params,
+    "tlb_set": _derive_tlb_set_case_params,
+}
+
+# 各形状的真实输入契约（MB-03 收口复核：leftover 拒绝按形状判定消费）。
+_SHAPE_INPUT_PARAMS = {
+    "ptr_chase": {"buffer", "stride", "loads_per_slot", "min_loads",
+                  "warmup", "warmup_passes"},
+    "tlb_set": {"set_hypothesis", "set_target", "set_target2", "set_window",
+                "set_rounds", "set_pool_pages", "set_filler_pages",
+                "set_regions", "set_scatter"},
 }
 
 
@@ -309,6 +395,14 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                 raise RunnerError(
                     "plan-error",
                     "ptr_chase cannot request both; page policies are mutually exclusive",
+                )
+            if shape == "tlb_set" and (hp_rv is not None or thp_rv is not None):
+                # set 索引按 4K 粒度计算：tlb_set 形状强制 base 页，大页请求
+                # 在 plan 期命名拒绝（探针侧 -h/-H/-T 同样拒绝，双保险）
+                raise RunnerError(
+                    "plan-error",
+                    "tlb_set shape forces 4K base pages (set index assumes "
+                    "4K granule); hugepage/thp requests are not allowed",
                 )
             pmu_events_rv = params.get("pmu_events")
             pmu_events = _normalize_pmu_events(pmu_events_rv)
@@ -439,12 +533,9 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                     case_id += f"-{name}{value}"
             # MB-03：未被当前形状真实消费的参数在 plan 期显式拒绝。"消费"
             # = 进入 case_params（deriver 产出或通用旗标处理，证据通道）或
-            # 是 deriver 已声明的派生输入（chase 几何族）。任何只换名字的
+            # 是该形状声明的真实输入（_SHAPE_INPUT_PARAMS）。任何只换名字的
             # 参数（语义未实现/探针无协议）在此受控失败，不得靠进 ID 段放行。
-            _consumed = set(case_params) | {
-                "buffer", "stride", "loads_per_slot", "min_loads",
-                "warmup", "warmup_passes",
-            }
+            _consumed = set(case_params) | _SHAPE_INPUT_PARAMS.get(shape, frozenset())
             leftover = sorted(set(params) - _consumed)
             if leftover:
                 raise RunnerError(

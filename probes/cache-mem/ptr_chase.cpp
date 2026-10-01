@@ -90,6 +90,10 @@
 
 #include "page_policy.h"   // M0-1：共享页策略支撑（probe_common）
 
+#if defined(__linux__)
+#include "perf_window.h"  // M0-4b：TLB set 模式 GROUP 原子读（F5）
+#endif
+
 // 平台能力宏（页策略抬升后保留在调用方；语义同 v1 战役版）
 #if defined(__linux__) && defined(MADV_HUGEPAGE)
 #define CPU_UARCH_NO_THP 0
@@ -174,6 +178,10 @@ void usage(const char* prog) {
     std::fprintf(stderr,
         "usage: %s -b KB -s stride_bytes [-n loads] [-w warmup_loads] "
         "[-S seed] [-B|-h|-H|-T] [--pmu-event label:type:config]...\n"
+        "       %s --tlb-set-mode --set-hypothesis H --set-target T "
+        "--set-window W [--set-target2 T2] [--set-rounds R]\n"
+        "       [--set-pool-pages P] [--set-filler F] [--set-regions K] "
+        "[--set-scatter] [-S seed] [--pmu-event label:type:config]...\n"
         "  -b  buffer size in KB            (default 8192)\n"
         "  -s  stride between chain slots, must be a multiple of %zu (default 64)\n"
         "  -n  total dependent loads, >= %d (default 268435456)\n"
@@ -183,8 +191,18 @@ void usage(const char* prog) {
         "  -H  2MB hugepage strict (exit 2 if pool unavailable)\n"
         "  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps\n"
         "  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps\n"
-        "  --pmu-event label:type:config  Linux per-thread counting event (repeatable)\n",
-        prog, sizeof(char*), kUnroll);
+        "  --pmu-event label:type:config  Linux per-thread counting event (repeatable)\n"
+        "  --tlb-set-mode                 M0-4b TLB set prime+probe 模式"
+        "（与 -b/-s/-n/-w 互斥；Linux + 4K 页 + PMU 事件必填）\n"
+        "  --set-hypothesis 1..4          候选 VPN→set 索引假设 H1..H4\n"
+        "  --set-target N                 目标 set（<256）；--set-target2 = T2 对照组\n"
+        "  --set-window W                 每轮 probe 访问数（0=空窗底噪 case）\n"
+        "  --set-scatter                  无冲突负控：W 页各落不同 set（G0-3）\n"
+        "  --set-rounds R                 轮数（默认 20，>=2；round 0 冷启动剔除）\n"
+        "  --set-pool-pages P             目标地址池总页数（默认 65536）\n"
+        "  --set-filler F                 prime 驱逐链页数（默认 512）\n"
+        "  --set-regions K                F4 多稀疏 VA 区域数（默认 4；1=单区域）\n",
+        prog, prog, sizeof(char*), kUnroll);
 }
 
 [[noreturn]] void die(const char* prog, const char* msg) {
@@ -192,6 +210,439 @@ void usage(const char* prog) {
     usage(prog);
     std::exit(1);
 }
+
+// ---- M0-4b：TLB set prime+probe 模式（工程路径 A——原型 l2_set_probe v2.3
+// 方法移植的证据探针版）----
+// 与原型版的三个决定性差异（任务书 v1.3 §5 口径）：
+//   F5：PMU 走 PerfWindow GROUP 原子读 + window_delta 有效性（原型逐事件
+//       read 不保证同窗）；任一事件打开失败 = 协议无效，exit 1（fail-closed），
+//       不做原型式的逐事件 n/a（三事件门控缺一角即不可判读）。
+//   F4：多稀疏 VA 区域激励——单一对齐 256MiB 池内 VPN[23:16] 恒定，H3≡H1⊕
+//       常数、H4≡H2⊕常数（假设在域上不可区分）；默认 4 个区域跨 256MiB
+//       边界（VPN[23:16] 各异）。预约失败回退单区域并输出
+//       set_domain=single-region（命名降级，分析器不得据此区分 H 假设）。
+//   G0-3：--set-window 0 = 空窗底噪 case；--set-scatter = 无冲突同长度窗
+//       负控（W 页各落不同 set，无自冲突）。
+// 4K 硬门：set 索引按 4K 粒度计算（原型 P0-5 同款），页大小不符直接拒绝。
+constexpr uint32_t kTlbSets = 256;     // X4 TRM Table 9-32（探测目标 set 空间）
+constexpr uint32_t kTlbWaysTruth = 8;  // X4 TRM Table 5-1（判读参考线，非探针假设）
+constexpr size_t kRegionStridePages = 65536;  // 2^28 B = 256MiB：相邻区域 VPN[23:16] 不同
+
+struct SetModeOptions {
+    int hypothesis = 0;        // 1..4（必填）
+    uint32_t target = 0;       // 目标 set（必填，< kTlbSets）
+    bool have_target2 = false; // T2 对照组（原型 P0-3：真实第二组）
+    uint32_t target2 = 0;
+    long long window = -1;     // 每轮 probe 访问数 W（必填，>=0；0=空窗）
+    long long rounds = 20;     // >=2（round 0 冷启动剔除）
+    size_t pool_pages = 65536; // 目标地址池总页数（多区域共享）
+    long long filler_pages = 512; // prime 驱逐链页数（原型 P0-1/P0-2 语义）
+    int regions = 4;           // F4 多区域数（1 = 显式单区域）
+    bool scatter = false;      // 无冲突负控：W 页各落不同 set
+};
+
+// 候选索引假设 H1~H4：一律对最终虚拟地址计算（原型评审 R1/R3 修复口径）
+uint32_t tlb_set_index(int hypothesis, uintptr_t va) {
+    const uint64_t vpn = static_cast<uint64_t>(va) >> 12;  // 4K 粒度
+    switch (hypothesis) {
+    case 1:  return static_cast<uint32_t>(vpn & 0xFF);                       // H1 位选
+    case 2:  return static_cast<uint32_t>((vpn ^ (vpn >> 8)) & 0xFF);        // H2 相邻 XOR
+    case 3:  return static_cast<uint32_t>((vpn ^ (vpn >> 16)) & 0xFF);       // H3 高位折叠
+    case 4:  return static_cast<uint32_t>((vpn ^ (vpn >> 8) ^ (vpn >> 16)) & 0xFF); // H4 三字段
+    }
+    return 0;  // 不可达：parse 期已校验 1..4
+}
+
+struct TlbRegion { char* base; size_t pages; };
+
+// 跨多区域收集同 set 地址：区域内按桶取样保留高字段多样性（原型 R3 修复），
+// 区域间天然跨越 VPN 高字段（F4）。need<=0 由调用点守卫（空窗模式不收集）。
+int collect_set_addrs(int H, uint32_t target, int need,
+                      const std::vector<TlbRegion>& regions,
+                      std::vector<uintptr_t>* vas) {
+    if (need <= 0) return 0;
+    int found = 0;
+    for (const TlbRegion& region : regions) {
+        const uint64_t total = region.pages;
+        uint64_t bucket = total / static_cast<uint64_t>(need);
+        if (bucket == 0) bucket = 1;
+        int region_found = 0;
+        for (uint64_t i = 1; i < total && found < need; ++i) {
+            if (i < static_cast<uint64_t>(region_found) * bucket) continue;
+            const uintptr_t va = reinterpret_cast<uintptr_t>(region.base)
+                               + i * 4096u;
+            if (tlb_set_index(H, va) != target) continue;
+            int dup = 0;
+            for (int k = 0; k < found; ++k)
+                if ((*vas)[k] == va) { dup = 1; break; }
+            if (!dup) { vas->push_back(va); ++found; ++region_found; }
+        }
+        if (found >= need) break;
+    }
+    return found;
+}
+
+// 无冲突负控（G0-3）：每页落不同 set——W 次访问无自冲突，同长度窗口的
+// I 侧底噪/置换参照。
+int collect_scatter_addrs(int H, int need,
+                          const std::vector<TlbRegion>& regions,
+                          std::vector<uintptr_t>* vas) {
+    if (need <= 0) return 0;
+    bool used[kTlbSets] = {};
+    int found = 0;
+    for (const TlbRegion& region : regions) {
+        for (uint64_t i = 1; i < region.pages && found < need; ++i) {
+            const uintptr_t va = reinterpret_cast<uintptr_t>(region.base)
+                               + i * 4096u;
+            const uint32_t s = tlb_set_index(H, va);
+            if (used[s]) continue;
+            used[s] = true;
+            vas->push_back(va);
+            ++found;
+        }
+        if (found >= need) break;
+    }
+    return found;
+}
+
+void build_chain(const std::vector<uintptr_t>& vas) {
+    for (size_t i = 0; i < vas.size(); ++i)
+        *reinterpret_cast<char**>(vas[i]) =
+            reinterpret_cast<char*>(vas[(i + 1) % vas.size()]);
+}
+
+// set 模式主体。实现仅 Linux 编译（perf_window 的 GROUP 原子读是协议
+// 必需）；非 Linux 走下方桩（main 分发处已先 exit 2，桩只保证可编译）。
+#if defined(__linux__)
+int run_tlb_set_mode(const char* prog, const SetModeOptions& opt,
+                     const std::vector<PmuEventRequest>& pmu_requests,
+                     uint64_t seed) {
+    if (opt.hypothesis < 1 || opt.hypothesis > 4)
+        die(prog, "tlb-set mode requires --set-hypothesis 1..4");
+    if (opt.window < 0)
+        die(prog, "tlb-set mode requires --set-window >= 0 (0 = empty window)");
+    if (opt.rounds < 2)
+        die(prog, "--set-rounds >= 2 (round 0 = cold-start warmup, excluded)");
+    if (opt.target >= kTlbSets || (opt.have_target2 && opt.target2 >= kTlbSets))
+        die(prog, "set target must be < 256");
+    if (opt.scatter && (opt.window < 1 || opt.window > (long long)kTlbSets))
+        die(prog, "--set-scatter requires 1 <= --set-window <= 256");
+    if (pmu_requests.empty())
+        die(prog, "tlb-set mode requires --pmu-event (0x05/0x2d/0x2f triple gate)");
+    const long long base_page_bytes = sysconf(_SC_PAGESIZE);
+    if (base_page_bytes != 4096) {
+        std::fprintf(stderr,
+                     "error: tlb-set mode assumes 4K granule, got %lld\n",
+                     base_page_bytes);
+        return 1;
+    }
+
+    // ---- 目标池：多区域 VA 预约（F4）----
+    // 区域 k 起点 = k*256MiB + k*8 页（奇数页偏移打破对齐）。预约 PROT_NONE
+    // 不提交内存，mprotect 逐区域 RW 只提交实际池页。
+    std::vector<TlbRegion> regions;
+    char* reservation = nullptr;
+    size_t reservation_pages = 0;
+    const char* set_domain = "single-region";
+    if (opt.regions > 1) {
+        reservation_pages = static_cast<size_t>(opt.regions - 1)
+                                * kRegionStridePages
+                            + opt.pool_pages + 64;
+        reservation = static_cast<char*>(mmap(
+            nullptr, reservation_pages * 4096u, PROT_NONE,
+            MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0));
+        if (reservation != MAP_FAILED) {
+            const size_t per = opt.pool_pages / static_cast<size_t>(opt.regions);
+            bool ok = per >= 2;
+            for (int k = 0; ok && k < opt.regions; ++k) {
+                const size_t off = static_cast<size_t>(k) * kRegionStridePages
+                                   + static_cast<size_t>(k) * 8;
+                const size_t sz = (k == opt.regions - 1)
+                    ? opt.pool_pages - per * static_cast<size_t>(opt.regions - 1)
+                    : per;
+                if (off + sz > reservation_pages) { ok = false; break; }
+                char* base = reservation + off * 4096u;
+                if (mprotect(base, sz * 4096u, PROT_READ | PROT_WRITE) != 0) {
+                    ok = false; break;
+                }
+#ifdef MADV_NOHUGEPAGE
+                madvise(base, sz * 4096u, MADV_NOHUGEPAGE);
+#endif
+                regions.push_back({base, sz});
+            }
+            if (!ok) {
+                munmap(reservation, reservation_pages * 4096u);
+                reservation = nullptr;
+                regions.clear();
+            } else {
+                set_domain = "multi-region";
+            }
+        }
+    }
+    if (regions.empty()) {
+        if (reservation != nullptr) {
+            munmap(reservation, reservation_pages * 4096u);
+            reservation = nullptr;
+        }
+        const size_t total = opt.pool_pages + 256;  // 原型 F3a 头程补偿
+        char* base = static_cast<char*>(mmap(
+            nullptr, total * 4096u, PROT_READ | PROT_WRITE,
+            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
+        if (base == MAP_FAILED) {
+            std::perror("mmap tlb-set pool");
+            return 1;
+        }
+#ifdef MADV_NOHUGEPAGE
+        madvise(base, total * 4096u, MADV_NOHUGEPAGE);
+#endif
+        reservation = base;
+        reservation_pages = total;
+        regions.push_back({base, total});
+        set_domain = opt.regions > 1 ? "single-region-fallback" : "single-region";
+    }
+
+    // ---- 目标地址收集（W=0 空窗不收集不建链）----
+    std::vector<uintptr_t> vas, vas2;
+    int got = 0, got2 = 0;
+    if (opt.window > 0) {
+        const int need = static_cast<int>(opt.window);
+        if (opt.scatter) {
+            got = collect_scatter_addrs(opt.hypothesis, need, regions, &vas);
+        } else {
+            got = collect_set_addrs(opt.hypothesis, opt.target, need,
+                                    regions, &vas);
+        }
+        if (got < need) {
+            std::fprintf(stderr,
+                         "error: only %d addrs for window %lld under H%d "
+                         "(increase --set-pool-pages)\n",
+                         got, opt.window, opt.hypothesis);
+            munmap(reservation, reservation_pages * 4096u);
+            return 1;
+        }
+        build_chain(vas);
+        if (opt.have_target2) {
+            got2 = collect_set_addrs(opt.hypothesis, opt.target2, need,
+                                     regions, &vas2);
+            if (got2 < need) {
+                std::fprintf(stderr, "error: cannot collect T2 set %u under H%d\n",
+                             opt.target2, opt.hypothesis);
+                munmap(reservation, reservation_pages * 4096u);
+                return 1;
+            }
+            for (int i = 0; i < need; ++i)   // 原型 P0-1：T/T2 无交集断言
+                for (int j = 0; j < need; ++j)
+                    if (vas[i] == vas2[j]) {
+                        std::fprintf(stderr, "error: T/T2 overlap\n");
+                        munmap(reservation, reservation_pages * 4096u);
+                        return 1;
+                    }
+            build_chain(vas2);
+        }
+    }
+
+    // ---- filler：独立映射（与池天然不相交，P0-1），按候选 H 过滤目标 set ----
+    std::vector<uintptr_t> fvas;
+    char* filler_map = nullptr;
+    size_t filler_map_pages = 0;
+    if (opt.filler_pages > 0) {
+        filler_map_pages = static_cast<size_t>(opt.filler_pages) + 256;
+        filler_map = static_cast<char*>(mmap(
+            nullptr, filler_map_pages * 4096u, PROT_READ | PROT_WRITE,
+            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
+        if (filler_map == MAP_FAILED) {
+            std::perror("mmap filler");
+            munmap(reservation, reservation_pages * 4096u);
+            return 1;
+        }
+#ifdef MADV_NOHUGEPAGE
+        madvise(filler_map, filler_map_pages * 4096u, MADV_NOHUGEPAGE);
+#endif
+        const uintptr_t fmap_end = reinterpret_cast<uintptr_t>(filler_map)
+                                   + filler_map_pages * 4096u;
+        for (uint64_t i = 1; i < filler_map_pages
+                 && static_cast<long long>(fvas.size()) < opt.filler_pages; ++i) {
+            const uintptr_t va = reinterpret_cast<uintptr_t>(filler_map)
+                                 + i * 4096u;
+            if (va < reinterpret_cast<uintptr_t>(filler_map) || va >= fmap_end)
+                break;  // 双保险边界（原型 F3a）
+            if (!opt.scatter && tlb_set_index(opt.hypothesis, va) == opt.target)
+                continue;   // P0-2：filler 不占目标 set
+            if (opt.have_target2
+                    && tlb_set_index(opt.hypothesis, va) == opt.target2)
+                continue;
+            fvas.push_back(va);
+        }
+        if (static_cast<long long>(fvas.size()) < opt.filler_pages) {
+            std::fprintf(stderr, "error: filler pool exhausted (%zu/%lld pages)\n",
+                         fvas.size(), opt.filler_pages);
+            munmap(filler_map, filler_map_pages * 4096u);
+            munmap(reservation, reservation_pages * 4096u);
+            return 1;
+        }
+        std::mt19937_64 fshuf(seed ^ 0x9e3779b97f4a7c15ULL);
+        for (size_t i = fvas.size() - 1; i > 0; --i) {
+            std::uniform_int_distribution<size_t> dist(0, i);
+            const size_t j = dist(fshuf);
+            const uintptr_t t = fvas[i]; fvas[i] = fvas[j]; fvas[j] = t;
+        }
+        build_chain(fvas);
+    }
+
+    // ---- PMU：PerfWindow GROUP 原子读（F5）+ window_delta 有效性（MB-05）----
+    probe_common::PerfWindow window;
+    {
+        std::vector<probe_common::TypedEventSpec> specs;
+        specs.reserve(pmu_requests.size());
+        for (const auto& r : pmu_requests)
+            specs.push_back({r.label.c_str(), r.type, r.config});
+        if (!window.open_typed(specs.data(), specs.size(),
+                               /*exclude_kernel*/ true, /*exclude_hv*/ true)) {
+            std::fprintf(stderr, "error: PerfWindow open failed\n");
+            munmap(filler_map, filler_map_pages * 4096u);
+            munmap(reservation, reservation_pages * 4096u);
+            return 1;
+        }
+        for (size_t i = 0; i < pmu_requests.size(); ++i) {
+            if (window.failed(i)) {  // 三事件门控缺一角即协议无效（fail-closed）
+                std::fprintf(stderr,
+                             "error: tlb-set mode requires all events open; "
+                             "event %s failed\n", window.name(i).c_str());
+                munmap(filler_map, filler_map_pages * 4096u);
+                munmap(reservation, reservation_pages * 4096u);
+                return 1;
+            }
+        }
+    }
+    if (!window.enable()) {
+        std::fprintf(stderr, "error: PerfWindow enable failed\n");
+        munmap(filler_map, filler_map_pages * 4096u);
+        munmap(reservation, reservation_pages * 4096u);
+        return 1;
+    }
+
+    const size_t n_events = pmu_requests.size();
+    std::vector<double> sum(n_events, 0.0);
+    std::vector<long long> event_valid_rounds(n_events, 0);
+    long long valid_rounds = 0, mux_rounds = 0, invalid_rounds = 0;
+    double probe_ns_sum = 0.0;
+    char* tp = opt.window > 0 ? reinterpret_cast<char*>(vas[0]) : nullptr;
+    char* tp2 = (opt.have_target2 && opt.window > 0)
+        ? reinterpret_cast<char*>(vas2[0]) : nullptr;
+    char* fp = fvas.empty() ? nullptr : reinterpret_cast<char*>(fvas[0]);
+    volatile char* sink = nullptr;
+    asm volatile("" ::: "memory");
+    for (long long r = 0; r < opt.rounds; ++r) {
+        // 三段快照（原型 v2.3 协议）：s1 prime 前 / s2 prime 后（probe 段
+        // 起点）/ s3 probe 后。估计量 = s3-s2（probe 段），s1 仅作整轮
+        // mux 审计背景。s2/s3 任一读取失败 = 该轮无效（哨兵，不进均值）。
+        // round 0 = 冷启动热身：跑但不进任何统计（原型口径，OI-14 固定
+        // 开销登记的前因）。
+        const bool count_stats = (r >= 1);
+        probe_common::GroupSample s1{}, s2{}, s3{};
+        bool ok = window.read_snapshot(&s1);
+        if (fp != nullptr) {   // prime：驱逐 L1 驻留
+            char* p = fp;
+            for (size_t i = 0; i < fvas.size(); ++i)
+                p = *reinterpret_cast<char* volatile*>(p);
+            fp = p;
+        }
+        ok = window.read_snapshot(&s2) && ok;
+        const double t0 = now_ns();
+        if (opt.window > 0) {
+            for (long long i = 0; i < opt.window; ++i)
+                tp = *reinterpret_cast<char* volatile*>(tp);
+        }
+        const double seg_ns = now_ns() - t0;
+        ok = window.read_snapshot(&s3) && ok;
+        if (!ok) { if (count_stats) ++invalid_rounds; continue; }
+        probe_common::WindowDelta delta{};
+        if (!window_delta(s2, s3, n_events, &delta)) {
+            if (count_stats) ++invalid_rounds;
+            continue;
+        }
+        if (!count_stats) continue;   // round 0：热身，计时也不入统计
+        if (delta.valid) {
+            for (size_t i = 0; i < n_events; ++i) {
+                const int pos = window.value_index(i);
+                if (pos < 0 || static_cast<uint64_t>(pos) >= s3.nr) continue;
+                sum[i] += static_cast<double>(delta.value_deltas[pos]);
+                ++event_valid_rounds[i];
+            }
+            ++valid_rounds;
+        } else if (std::strcmp(delta.reason, "mux-detected") == 0) {
+            ++mux_rounds;   // F5：mux 轮计数披露，不进均值（减法后被污染的窗）
+        } else {
+            ++invalid_rounds;
+        }
+        probe_ns_sum += seg_ns;
+        if (opt.have_target2 && opt.window > 0) {
+            // T2 对照段（原型 P0-3：每轮交替）——独立 prime + 独立窗口差分
+            probe_common::GroupSample u2{}, v2{};
+            if (fp != nullptr) {
+                char* p = fp;
+                for (size_t i = 0; i < fvas.size(); ++i)
+                    p = *reinterpret_cast<char* volatile*>(p);
+                fp = p;
+            }
+            bool ok2 = window.read_snapshot(&u2);
+            for (long long i = 0; i < opt.window; ++i)
+                tp2 = *reinterpret_cast<char* volatile*>(tp2);
+            ok2 = window.read_snapshot(&v2) && ok2;
+            (void)ok2;  // T2 失败只丢该轮对照段，不影响 T 主体（不进均值池）
+        }
+    }
+    asm volatile("" ::: "memory");
+    sink = opt.have_target2 ? tp2 : tp;
+    (void)sink;
+    window.disable();
+
+    // round 0 已在循环内跳过统计（count_stats = r>=1，冷启动剔除）；
+    // 全部保留轮无效 = 无统计可报（fail-closed，不产出记录）。
+    if (valid_rounds == 0) {
+        std::fprintf(stderr, "error: no valid rounds (window=%lld rounds=%lld)\n",
+                     opt.window, opt.rounds);
+        munmap(filler_map, filler_map_pages * 4096u);
+        munmap(reservation, reservation_pages * 4096u);
+        return 1;
+    }
+
+    std::printf("mode=tlbset set_hypothesis=%d set_target=%u set_window=%lld "
+                "set_rounds=%lld set_filler=%lld set_regions=%d%s "
+                "set_domain=%s page_kb=4 seed=%llu "
+                "window_valid_rounds=%lld window_invalid_rounds=%lld "
+                "window_mux_rounds=%lld valid_rounds=%lld probe_ns=%.0f",
+                opt.hypothesis, opt.target,
+                opt.window, opt.rounds, opt.filler_pages, opt.regions,
+                opt.scatter ? " scatter=1" : "",
+                set_domain, static_cast<unsigned long long>(seed),
+                valid_rounds, invalid_rounds, mux_rounds,
+                valid_rounds, probe_ns_sum / (opt.rounds - 1));
+    if (opt.have_target2) std::printf(" set_target2=%u", opt.target2);
+    for (size_t i = 0; i < n_events; ++i) {
+        const double mean = event_valid_rounds[i] > 0
+            ? sum[i] / static_cast<double>(event_valid_rounds[i]) : 0.0;
+        std::printf(" pmu_%s_count=%.1f pmu_%s_valid_rounds=%lld",
+                    pmu_requests[i].label.c_str(), mean,
+                    pmu_requests[i].label.c_str(), event_valid_rounds[i]);
+    }
+    std::putchar('\n');
+    std::fprintf(stderr, "gate: L1D_TLB_REFILL(0x5) 应≈w=%lld 且 L2D_TLB(0x2f) 应≈w；"
+                 "w≤%u 时 L2D_TLB_REFILL(0x2d) 应≈0，w≥%u 时应跳变\n",
+                 opt.window, kTlbWaysTruth, kTlbWaysTruth + 1);
+
+    munmap(filler_map, filler_map_pages * 4096u);
+    munmap(reservation, reservation_pages * 4096u);
+    return 0;
+}
+#else
+int run_tlb_set_mode(const char*, const SetModeOptions&,
+                     const std::vector<PmuEventRequest>&, uint64_t) {
+    std::fprintf(stderr,
+                 "unsupported: tlb-set mode requires Linux perf_event_open\n");
+    return 2;
+}
+#endif
 
 } // namespace
 
@@ -205,20 +656,40 @@ int main(int argc, char** argv) {
     bool want_hp = false, strict_hp = false, want_thp = false, want_base = false;
     uint64_t seed = 42; // 历史默认；访问序列是实验变量，随输出入档（原理 §2）
     std::vector<PmuEventRequest> pmu_requests;
+    // M0-4b：TLB set prime+probe 模式参数（--tlb-set-mode 触发）
+    SetModeOptions set_opt;
+    bool set_mode = false;
+    bool legacy_geometry_set = false;  // -b/-s/-n/-w 显式给出（与 set 模式互斥）
 
-    enum : int { kPmuEvent = 1000 };
+    enum : int { kPmuEvent = 1000, kTlbSetMode, kSetHypothesis, kSetTarget,
+                 kSetTarget2, kSetWindow, kSetRounds, kSetPoolPages,
+                 kSetFiller, kSetRegions, kSetScatter };
     const option long_options[] = {
         {"pmu-event", required_argument, nullptr, kPmuEvent},
+        {"tlb-set-mode", no_argument, nullptr, kTlbSetMode},
+        {"set-hypothesis", required_argument, nullptr, kSetHypothesis},
+        {"set-target", required_argument, nullptr, kSetTarget},
+        {"set-target2", required_argument, nullptr, kSetTarget2},
+        {"set-window", required_argument, nullptr, kSetWindow},
+        {"set-rounds", required_argument, nullptr, kSetRounds},
+        {"set-pool-pages", required_argument, nullptr, kSetPoolPages},
+        {"set-filler", required_argument, nullptr, kSetFiller},
+        {"set-regions", required_argument, nullptr, kSetRegions},
+        {"set-scatter", no_argument, nullptr, kSetScatter},
         {nullptr, 0, nullptr, 0},
     };
     int opt;
     while ((opt = getopt_long(argc, argv, "b:s:n:w:hHTBS:",
                               long_options, nullptr)) != -1) {
         switch (opt) {
-        case 'b': buffer_kb = std::strtoull(optarg, nullptr, 10); break;
-        case 's': stride = std::strtoull(optarg, nullptr, 10); break;
-        case 'n': loads = std::strtoll(optarg, nullptr, 10); break;
-        case 'w': warmup = std::strtoll(optarg, nullptr, 10); warmup_set = true; break;
+        case 'b': buffer_kb = std::strtoull(optarg, nullptr, 10);
+            legacy_geometry_set = true; break;
+        case 's': stride = std::strtoull(optarg, nullptr, 10);
+            legacy_geometry_set = true; break;
+        case 'n': loads = std::strtoll(optarg, nullptr, 10);
+            legacy_geometry_set = true; break;
+        case 'w': warmup = std::strtoll(optarg, nullptr, 10); warmup_set = true;
+            legacy_geometry_set = true; break;
         case 'h': want_hp = true; break;
         case 'H': want_hp = true; strict_hp = true; break;
         case 'T': want_thp = true; break;
@@ -234,11 +705,49 @@ int main(int argc, char** argv) {
             pmu_requests.push_back(std::move(request));
             break;
         }
+        case kTlbSetMode: set_mode = true; break;
+        case kSetHypothesis:
+            set_opt.hypothesis = std::atoi(optarg); break;
+        case kSetTarget:
+            set_opt.target = static_cast<uint32_t>(
+                std::strtoul(optarg, nullptr, 0)); break;
+        case kSetTarget2:
+            set_opt.target2 = static_cast<uint32_t>(
+                std::strtoul(optarg, nullptr, 0));
+            set_opt.have_target2 = true; break;
+        case kSetWindow:
+            set_opt.window = std::strtoll(optarg, nullptr, 10); break;
+        case kSetRounds:
+            set_opt.rounds = std::strtoll(optarg, nullptr, 10); break;
+        case kSetPoolPages:
+            set_opt.pool_pages = std::strtoull(optarg, nullptr, 10); break;
+        case kSetFiller:
+            set_opt.filler_pages = std::strtoll(optarg, nullptr, 10); break;
+        case kSetRegions:
+            set_opt.regions = std::atoi(optarg); break;
+        case kSetScatter: set_opt.scatter = true; break;
         default: usage(argv[0]); return 1;
         }
     }
     if (optind != argc)
         die(argv[0], "unexpected positional argument");
+
+    // M0-4b：set 模式分发（与 legacy 几何互斥；混合语义 = 证据危害）
+    if (set_mode) {
+        if (legacy_geometry_set)
+            die(argv[0], "--tlb-set-mode is mutually exclusive with "
+                         "legacy -b/-s/-n/-w geometry");
+        if (want_hp || strict_hp || want_thp)
+            die(argv[0], "--tlb-set-mode forces 4K base pages "
+                         "(set index assumes 4K granule); -h/-H/-T not allowed");
+#if defined(__linux__)
+        return run_tlb_set_mode(argv[0], set_opt, pmu_requests, seed);
+#else
+        std::fprintf(stderr,
+                     "unsupported: tlb-set mode requires Linux perf_event_open\n");
+        return 2;
+#endif
+    }
 
     // 输入校验（原理 §6）：任何一项不过即非零退出，不产出记录
     if (buffer_kb == 0)

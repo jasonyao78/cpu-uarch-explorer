@@ -133,6 +133,14 @@ struct EventSpec {
     const char* name;         // 身份标签（record/输出用）
 };
 
+// M0-4b（TLB set 移植版）：ARM 平台 PMU type 动态（SM8650 实测 type=8），
+// 非 PERF_TYPE_RAW 事件走此结构；open_typed() 与 open() 共享同一实现。
+struct TypedEventSpec {
+    const char* name;
+    uint64_t type;            // perf_event_attr.type（如 ARM core PMU = 8）
+    uint64_t config;          // RAW 事件号
+};
+
 class PerfWindow {
 public:
     PerfWindow() = default;
@@ -152,6 +160,18 @@ public:
               bool exclude_kernel = true, bool exclude_hv = true) {
         if (n == 0 || n > kMaxEvents || opened_)
             return false;
+        TypedEventSpec typed[kMaxEvents];
+        for (size_t i = 0; i < n; ++i)
+            typed[i] = {specs[i].name, PERF_TYPE_RAW, specs[i].config};
+        return open_typed(typed, n, exclude_kernel, exclude_hv);
+    }
+
+    // M0-4b：带显式 PMU type 的打开（ARM 平台 type 动态，SM8650 core PMU = 8）。
+    // 实现本体：open() 仅是把 RAW 事件转译后落入此处。
+    bool open_typed(const TypedEventSpec* specs, size_t n,
+                    bool exclude_kernel = true, bool exclude_hv = true) {
+        if (n == 0 || n > kMaxEvents || opened_)
+            return false;
         exclude_kernel_ = exclude_kernel;
         exclude_hv_ = exclude_hv;
         names_.assign(n, "?");        // MB-02：名称按原始 spec 身份全程占位
@@ -165,7 +185,7 @@ public:
             perf_event_attr pe;
             memset(&pe, 0, sizeof(pe));
             pe.size = sizeof(pe);
-            pe.type = PERF_TYPE_RAW;
+            pe.type = static_cast<uint32_t>(specs[i].type);
             pe.config = specs[i].config;
             pe.disabled = (leader < 0);
             pe.exclude_kernel = exclude_kernel_ ? 1 : 0;
