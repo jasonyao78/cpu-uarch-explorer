@@ -11,8 +11,10 @@
 // 契约：
 //   - 任一成员事件打开失败 → 该事件 n/a（event_mask 置位），绝不按位置
 //     顶替（R2：失败字段 n/a，不按位置替代 cycles）；
-//   - 组读返回 time_enabled/time_running；mux 判定（running != enabled）
-//     已具现，窗口时间差分/有效性 API 尚未交付（MB-05 窗口有效性后置）；
+//   - 组读返回 time_enabled/time_running；mux 判定与窗口差分/有效性已具现
+//     （window_delta 纯函数：enabled/running 为累计值、IOC_RESET 不清零，
+//     差分跨 RESET 有效；running 差分 < enabled 差分 → mux-detected 命名
+//     否决，不静默采信不完整窗口）；
 //   - 显式特权级 scope（exclude_kernel/exclude_hv 可配，默认排除内核，
 //     短窗协议 F5 要求内核访问不污染或少污染并显式记录）；
 //   - decode_group_read 与平台无关（合成输入可测）；syscall 部分仅 Linux。
@@ -69,6 +71,58 @@ inline bool decode_group_read(const uint64_t* buf, size_t buf_words,
     // 布局 sanity：caller 期望的事件数与组内事件数一致才可信
     // （组构成在打开时固定，read 只是采样——不一致 = 结构性错误）
     return nr == expect_events;
+}
+
+// ---- MB-05：窗口差分与有效性（纯函数，平台无关；合成黄金测试直接对象） ----
+//
+// Linux 语义锚点：time_enabled/time_running 自打开起累计，PERF_EVENT_IOC_RESET
+// 只清零 values[] 不动时间累计——因此"前后 snapshot 差分"跨 RESET 仍成立，
+// 这是窗口有效性判定的基础（差分 running < 差分 enabled = 窗口内被 mux
+// 抢占，计数不完整，按 F5 纪律标记无效而不是静默采信）。
+struct WindowDelta {
+    uint64_t enabled_delta = 0;              // after - before（累计值单调）
+    uint64_t running_delta = 0;
+    uint64_t value_deltas[kMaxEvents] = {0}; // 随 RESET 清零的事件值差分
+    bool valid = false;      // 正式窗口有效运行：enabled_delta > 0 且未被 mux
+    bool values_monotonic = true;  // false = 窗口内发生过 RESET/重开（值差分不可靠）
+    const char* reason = "ok";     // 命名否决原因（enabled-zero/mux-detected/
+                                   // enabled-regressed/nr-mismatch）
+};
+
+// 两次 snapshot 差分 + 有效性判定。expect_events 与组构成一致性是结构
+// 前提（nr 不符 → false，不猜）；enabled 回退（after < before）→ false
+//（snapshot 不来自同一组）。值非单调不否决窗口本身（RESET 是合法操作），
+// 但 values_monotonic=false 时调用方不得把 value_deltas 当窗口计数用。
+inline bool window_delta(const GroupSample& before, const GroupSample& after,
+                         size_t expect_events, WindowDelta* out) {
+    if (out == nullptr || before.nr != after.nr || before.nr != expect_events) {
+        if (out != nullptr) out->reason = "nr-mismatch";
+        return false;
+    }
+    if (after.time_enabled < before.time_enabled) {
+        out->reason = "enabled-regressed";
+        return false;
+    }
+    out->enabled_delta = after.time_enabled - before.time_enabled;
+    out->running_delta = after.time_running - before.time_running;
+    for (uint64_t i = 0; i < before.nr; ++i) {
+        if (after.values[i] < before.values[i])
+            out->values_monotonic = false;
+        out->value_deltas[i] = after.values[i] - before.values[i];
+    }
+    if (out->enabled_delta == 0) {
+        out->valid = false;
+        out->reason = "enabled-zero";
+        return true;   // 结构成立但窗口没有有效运行时间
+    }
+    if (out->running_delta != out->enabled_delta) {
+        out->valid = false;
+        out->reason = "mux-detected";
+        return true;   // 窗口在跑，但被多路复用抢占——计数不完整
+    }
+    out->valid = true;
+    out->reason = "ok";
+    return true;
 }
 
 // ---- Linux 原子窗口 ----
@@ -140,11 +194,9 @@ public:
         return opened_ && ioctl(leader_, PERF_EVENT_IOC_DISABLE, 0) == 0;
     }
 
-    // 组读 + 按身份解码。成员打开失败的位在 ok_mask 中置 false。
-    // MB-01：read 有效载荷 = (3 + 实际组内事件数)×8 字节，随成功打开的
-    // 事件数变化——按实际返回字节判定（最低长度/8 对齐/nr/组构成），
-    // 不以最大容量判定完整性。
-    bool read(GroupSample* out, bool* ok_mask, bool* mux_flag) {
+    // MB-05：snapshot 解码与窗口解释分离——read_snapshot 只做结构解码；
+    // 差分/有效性判定走纯函数 window_delta()（可合成测试，不依赖内核）。
+    bool read_snapshot(GroupSample* out) {
         if (!opened_ || out == nullptr) { last_error_ = "not-opened"; return false; }
         uint64_t buf[3 + kMaxEvents] = {0};
         const ssize_t got = ::read(leader_, buf, sizeof(buf));
@@ -159,6 +211,16 @@ public:
             last_error_ = "read:nr-mismatch-or-truncated";
             return false;
         }
+        return true;
+    }
+
+    // 组读 + 按身份解码 + mux 旗标（兼容 read() = read_snapshot + 身份掩码
+    // + mux 旗标的便捷组合；窗口差分/有效性请用 read_snapshot + window_delta）。
+    // MB-01：read 有效载荷 = (3 + 实际组内事件数)×8 字节，随成功打开的
+    // 事件数变化——按实际返回字节判定（最低长度/8 对齐/nr/组构成），
+    // 不以最大容量判定完整性。
+    bool read(GroupSample* out, bool* ok_mask, bool* mux_flag) {
+        if (!read_snapshot(out)) return false;
         if (ok_mask) {
             for (size_t i = 0; i < failed_.size(); ++i)
                 ok_mask[i] = !failed_[i];
@@ -226,6 +288,7 @@ public:
     }
     bool enable() { return false; }
     bool disable() { return false; }
+    bool read_snapshot(GroupSample*) { return false; }
     bool read(GroupSample*, bool*, bool*) { return false; }
 };
 

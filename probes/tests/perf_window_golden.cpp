@@ -55,6 +55,85 @@ int main() {
         CHECK(!pc::decode_group_read(buf, 4, 99, &s), "oversize nr rejected");
     }
 
+    // ---- MB-05：window_delta 窗口差分/有效性（纯函数，平台无关） ----
+    // 场景 6：有效窗口（enabled==running 同步增长）→ valid，差分精确
+    {
+        pc::GroupSample before{}, after{};
+        before.nr = after.nr = 2;
+        before.time_enabled = 1000; before.time_running = 1000;
+        before.values[0] = 10; before.values[1] = 20;
+        after.time_enabled = 1500; after.time_running = 1500;
+        after.values[0] = 60; after.values[1] = 45;
+        pc::WindowDelta d;
+        CHECK(pc::window_delta(before, after, 2, &d), "valid window delta ok");
+        CHECK(d.valid && std::strcmp(d.reason, "ok") == 0, "valid window flagged");
+        CHECK(d.enabled_delta == 500 && d.running_delta == 500,
+              "enabled/running deltas exact");
+        CHECK(d.value_deltas[0] == 50 && d.value_deltas[1] == 25,
+              "value deltas exact");
+        CHECK(d.values_monotonic, "monotonic values without RESET");
+    }
+    // 场景 7：mux 窗口（running 差分 < enabled 差分）→ valid=false 命名否决
+    {
+        pc::GroupSample before{}, after{};
+        before.nr = after.nr = 1;
+        before.time_enabled = 2000; before.time_running = 2000;
+        before.values[0] = 7;
+        after.time_enabled = 2600; after.time_running = 2300;
+        after.values[0] = 99;
+        pc::WindowDelta d;
+        CHECK(pc::window_delta(before, after, 1, &d), "mux window structurally ok");
+        CHECK(!d.valid && std::strcmp(d.reason, "mux-detected") == 0,
+              "mux window named rejection");
+        CHECK(d.enabled_delta == 600 && d.running_delta == 300,
+              "mux deltas exact");
+    }
+    // 场景 8：窗口内 RESET（values 回退、enabled 仍单调）→ valid 保留、
+    // values_monotonic=false（值差分不得当窗口计数用）
+    {
+        pc::GroupSample before{}, after{};
+        before.nr = after.nr = 1;
+        before.time_enabled = 3000; before.time_running = 3000;
+        before.values[0] = 500;
+        after.time_enabled = 3400; after.time_running = 3400;
+        after.values[0] = 40;   // RESET 清零后重新累计
+        pc::WindowDelta d;
+        CHECK(pc::window_delta(before, after, 1, &d), "RESET window structurally ok");
+        CHECK(d.valid && std::strcmp(d.reason, "ok") == 0,
+              "RESET does not invalidate window time basis");
+        CHECK(!d.values_monotonic, "RESET values flagged non-monotonic");
+    }
+    // 场景 9：零长窗口（enabled 差分 = 0）→ valid=false enabled-zero
+    {
+        pc::GroupSample before{}, after{};
+        before.nr = after.nr = 1;
+        before.time_enabled = 4000; before.time_running = 4000;
+        after.time_enabled = 4000; after.time_running = 4000;
+        pc::WindowDelta d;
+        CHECK(pc::window_delta(before, after, 1, &d), "zero window structural ok");
+        CHECK(!d.valid && std::strcmp(d.reason, "enabled-zero") == 0,
+              "zero-length window named rejection");
+    }
+    // 场景 10：enabled 回退（snapshot 不来自同一组）→ false 命名否决
+    {
+        pc::GroupSample before{}, after{};
+        before.nr = after.nr = 1;
+        before.time_enabled = 5000; after.time_enabled = 1000;
+        pc::WindowDelta d;
+        CHECK(!pc::window_delta(before, after, 1, &d),
+              "enabled regression rejected");
+        CHECK(std::strcmp(d.reason, "enabled-regressed") == 0,
+              "enabled regression named");
+    }
+    // 场景 11：组构成不一致（nr 不符）→ false，不猜
+    {
+        pc::GroupSample before{}, after{};
+        before.nr = 2; after.nr = 3;
+        pc::WindowDelta d;
+        CHECK(!pc::window_delta(before, after, 2, &d), "nr mismatch delta rejected");
+        CHECK(std::strcmp(d.reason, "nr-mismatch") == 0, "nr mismatch named");
+    }
+
     if (failures) {
         std::fprintf(stderr, "perf_window_golden: %d FAILURES\n", failures);
         return 1;
