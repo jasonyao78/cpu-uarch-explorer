@@ -5,12 +5,14 @@
 //   逐事件 read/enable 不保证多事件严格同窗；且 Linux GROUP read 布局为
 //   { nr, time_enabled, time_running, values[nr] }——按 { nr, values[], ena, run }
 //   解码会把时间增量误当事件值。本组件把布局解码做成纯函数（可合成黄金
-//   测试），syscall 侧做组启停与按身份（非位置）映射。
+//   测试），syscall 侧做组启停与事件→值映射（实现层次见下方"事件→值映射
+//   契约"，MB-02 收口复核：不再宣称"按身份（非位置）"）。
 //
 // 契约：
 //   - 任一成员事件打开失败 → 该事件 n/a（event_mask 置位），绝不按位置
 //     顶替（R2：失败字段 n/a，不按位置替代 cycles）；
-//   - 窗口 delta 附带完整性检查（running != enabled → mux 标记）；
+//   - 组读返回 time_enabled/time_running；mux 判定（running != enabled）
+//     已具现，窗口时间差分/有效性 API 尚未交付（MB-05 窗口有效性后置）；
 //   - 显式特权级 scope（exclude_kernel/exclude_hv 可配，默认排除内核，
 //     短窗协议 F5 要求内核访问不污染或少污染并显式记录）；
 //   - decode_group_read 与平台无关（合成输入可测）；syscall 部分仅 Linux。

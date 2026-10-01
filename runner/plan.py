@@ -10,7 +10,9 @@ plan 只做解析与展开，不产生任何副作用（不执行、不写盘）
 
 from __future__ import annotations
 
+import hashlib
 import itertools
+import json
 import re
 from dataclasses import dataclass, field
 from typing import Any
@@ -230,14 +232,14 @@ def _derive_ptr_chase_case_params(params: dict[str, ResolvedValue]) -> dict[str,
     return case_params
 
 
-# MB-03：直通参数（语义/身份维度）——与 analysis/sm8650_tlb.py 的
-# _IDENTITY_PARAM_KEYS 对齐；新增维度必须两侧同时登记（schema 演进纪律）。
-_PASSTHROUGH_PARAMS = (
-    "chain_distribution",   # 连续/大步距/随机集合/随机序
-    "node_offset_policy",   # 页内 line 分布（节点地址策略）
-    "chains",               # K 独立链数
-    "mapping_span_kb",      # 保留 VA 跨度
-)
+# MB-03（收口复核修订）：允许进通用 case_id 段的 swept 参数必须是
+# deriver 真实消费的输入（见 _derive_ptr_chase_case_params）。"仅进 ID
+# 不进执行"= 命名不同实验、证据无该维度，一律 leftover 拒绝。
+# chains/chain_distribution/node_offset_policy/mapping_span_kb 等未实现
+# 的探针语义维度不在此列——原生探针无对应 argv 协议，sweep 它们在
+# plan 期受控失败（评审反例：chains=1/2 记录成两个条件、argv 完全相同）。
+_CHASE_ID_SEGMENT_PARAMS = frozenset(
+    {"loads_per_slot", "min_loads", "warmup", "warmup_passes"})
 
 # M0-4 扩展缝：probe_shape → 语义参数派生函数。新探头形状在此注册；
 # planner 主循环只负责 sweep 展开/fixed_params/通用旗标（页策略/PMU/seed）/case 组装。
@@ -321,8 +323,8 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                     )
                 seed = seed_rv.value
 
-            buffer_kb = case_params["buffer_kb"].value
-            stride_b = int(case_params["stride"].value)
+            # chase 几何读法只在 ptr_chase 分支内使用（收口复核 MB-03：
+            # 通用形状不得隐含 chase 契约，否则新形状 plan 即 KeyError）
             if hp_rv is not None:
                 case_params["hugepage"] = ResolvedValue(hugepage, hp_rv.source)
             if thp_rv is not None:
@@ -338,84 +340,108 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
             if seed_rv is not None:
                 case_params["seed"] = ResolvedValue(seed, seed_rv.source)
 
-            # MB-03：语义/身份参数直通——analysis 身份键与 record params
-            # 以 case_params 为唯一通道（engine 只记录 case_params）；仅
-            # 进 case ID 不进执行参数 = "命名不同实验、证据无该维度"。
-            for name in _PASSTHROUGH_PARAMS:
-                rv = params.get(name)
-                if rv is not None:
-                    case_params[name] = rv
-            case_id = (f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"
-                       + (f"-seed{seed}" if seed_rv is not None else "")
-                       + ("-hp2m" if hugepage else "")
-                       + ("-thp" if thp else "")
-                       + ("-base" if base_pages else ""))
-            # 通用 id 段（触发案例：tlb-overhead 配置 sweep loads_per_slot 后
-            # 24 case 仅 8 个唯一 id，raw 样本按 case id 命名覆盖写 → 样本互覆、
-            # manifest id 重复、SHA256 锚定失效）：模板未覆盖的 swept 参数按
-            # sweep 名排序追加 -{name}{value}；未 sweep 的参数不进 id（既有配置
-            # id 逐字不变）。非 int/str 标量（如 pmu_events 列表）fail-closed——
-            # 字符串化进 id 既不可读又可能再引入碰撞。
-            if shape != "ptr_chase":
-                # MB-03：新形状 case_id = 全部 case_params 的规范化枚举
-                # （无隐含 ptr_chase 几何契约）；值须为 int/str 标量。
+            if shape == "ptr_chase":
+                buffer_kb = case_params["buffer_kb"].value
+                stride_b = int(case_params["stride"].value)
+                if pmu_events_rv is not None and "pmu_events" in sweep_names:
+                    # 结构化值进不了 chase 模板 ID：swept pmu_events 会让
+                    # 仅事件不同的 case 共享同一 id（重复 id 守卫才炸，语义
+                    # 不清）——plan 期命名拒绝，走 fixed_params 或通用形状
+                    raise RunnerError(
+                        "plan-error",
+                        "swept pmu_events is not supported for probe_shape "
+                        "'ptr_chase' (structured values cannot enter the "
+                        "legacy case id template); use fixed_params or a "
+                        "generic probe_shape",
+                    )
+                case_id = (f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"
+                           + (f"-seed{seed}" if seed_rv is not None else "")
+                           + ("-hp2m" if hugepage else "")
+                           + ("-thp" if thp else "")
+                           + ("-base" if base_pages else ""))
+            else:
+                # MB-03（收口复核）：通用形状 case_id = 全部 case_params 的
+                # 规范化枚举，无任何 chase 隐含契约。标量 int/str 直接进段；
+                # 结构化公共参数（pmu_events 列表等）用 canonical JSON 的
+                # sha256 摘要进段（明确的规范化签名，不把列表字符串化成
+                # 逐字段片段）；bool fail-closed（与 int 1 不可混淆，MB-06
+                # 精神在 ID 层先守住）。
                 segs = []
                 for name in sorted(case_params):
                     val = case_params[name].value
-                    if isinstance(val, bool) or not isinstance(val, (int, str)):
-                        raise RunnerError(
-                            "plan-error",
-                            f"param {name!r} value {val!r} cannot form a "
-                            "case id segment (int/str scalar required)",
-                        )
                     if not _CASE_ID_VALUE_RE.fullmatch(name):
                         raise RunnerError(
                             "plan-error",
                             f"param name {name!r} has unsafe characters",
                         )
-                    if not _CASE_ID_VALUE_RE.fullmatch(str(val)):
+                    if type(val) is bool:
                         raise RunnerError(
                             "plan-error",
-                            f"param {name!r} value has unsafe characters",
+                            f"param {name!r} is bool; bool must not collapse "
+                            "into an int case id segment",
                         )
-                    segs.append(f"{name}{val}")
+                    if isinstance(val, (int, str)):
+                        if not _CASE_ID_VALUE_RE.fullmatch(str(val)):
+                            raise RunnerError(
+                                "plan-error",
+                                f"param {name!r} value has unsafe characters",
+                            )
+                        segs.append(f"{name}{val}")
+                    elif isinstance(val, (list, dict)):
+                        digest = hashlib.sha256(
+                            json.dumps(val, sort_keys=True,
+                                       separators=(",", ":")).encode(),
+                        ).hexdigest()[:12]
+                        segs.append(f"{name}h{digest}")
+                    else:
+                        raise RunnerError(
+                            "plan-error",
+                            f"param {name!r} value {val!r} cannot form a "
+                            "case id segment (int/str or structured required)",
+                        )
                 case_id = f"{spec['id']}:{control.id}-" + "-".join(segs)
+            # chase 形状的通用 id 段（触发案例：tlb-overhead 配置 sweep
+            # loads_per_slot 后 24 case 仅 8 个唯一 id，raw 样本按 case id
+            # 命名覆盖写 → 样本互覆、manifest id 重复、SHA256 锚定失效）：
+            # 只允许 _CHASE_ID_SEGMENT_PARAMS（deriver 真实消费的输入）进段；
+            # 段（sweep 键名与 str 值）直接进 raw 样本文件名：artifacts.py
+            # 落盘前的 safe_case 净化是内联局部表达式（artifacts.py 中
+            # case_id.replace("/", "_").replace(":", "_")，非函数），只替换
+            # "/"与":"，唯一性断言又作用于净化前 id——含 "/"、空格等字符的
+            # 键名/值会绕过断言后仍在落盘时互覆；白名单（仿 _PMU_LABEL_RE
+            # 先例）把这一层残留风险同样 fail-closed 在 plan 期
             id_seg_names = set()
-            for name in sweep_names:
-                if shape != "ptr_chase" or name in _CASE_ID_COVERED_PARAMS:
-                    continue
-                id_seg_names.add(name)
-                # 段（sweep 键名与 str 值）直接进 raw 样本文件名：artifacts.py
-                # 落盘前的 safe_case 净化是内联局部表达式（artifacts.py 中
-                # case_id.replace("/", "_").replace(":", "_")，非函数），只替换
-                # "/"与":"，唯一性断言又作用于净化前 id——含 "/"、空格等字符的
-                # 键名/值会绕过断言后仍在落盘时互覆；白名单（仿 _PMU_LABEL_RE
-                # 先例）把这一层残留风险同样 fail-closed 在 plan 期
-                if not _CASE_ID_VALUE_RE.fullmatch(name):
-                    raise RunnerError(
-                        "plan-error",
-                        f"swept param name {name!r} has unsafe characters, "
-                        "cannot form case id segment",
-                    )
-                value = params[name].value
-                if type(value) is not int and not isinstance(value, str):
-                    raise RunnerError(
-                        "plan-error",
-                        f"swept param {name!r} has non-scalar value, "
-                        f"cannot form case id segment: {value!r}",
-                    )
-                if isinstance(value, str) and not _CASE_ID_VALUE_RE.fullmatch(value):
-                    raise RunnerError(
-                        "plan-error",
-                        f"swept param {name!r} case id segment value has unsafe "
-                        f"characters: {value!r}",
-                    )
-                case_id += f"-{name}{value}"
-            # MB-03：未被当前形状消费的参数在 plan 期显式拒绝。"消费" =
-            # case_params（证据通道）/ deriver 派生输入 / 战役 ID 段机制
-            # （既有行为，钉桩测试覆盖）。语义/身份维度必须走 _PASSTHROUGH
-            # 进 case_params——仅进 ID 不进证据即命名-执行分裂。
-            _consumed = set(case_params) | id_seg_names | {
+            if shape == "ptr_chase":
+                for name in sweep_names:
+                    if name in _CASE_ID_COVERED_PARAMS \
+                            or name not in _CHASE_ID_SEGMENT_PARAMS:
+                        continue
+                    id_seg_names.add(name)
+                    if not _CASE_ID_VALUE_RE.fullmatch(name):
+                        raise RunnerError(
+                            "plan-error",
+                            f"swept param name {name!r} has unsafe characters, "
+                            "cannot form case id segment",
+                        )
+                    value = params[name].value
+                    if type(value) is not int and not isinstance(value, str):
+                        raise RunnerError(
+                            "plan-error",
+                            f"swept param {name!r} has non-scalar value, "
+                            f"cannot form case id segment: {value!r}",
+                        )
+                    if isinstance(value, str) and not _CASE_ID_VALUE_RE.fullmatch(value):
+                        raise RunnerError(
+                            "plan-error",
+                            f"swept param {name!r} case id segment value has unsafe "
+                            f"characters: {value!r}",
+                        )
+                    case_id += f"-{name}{value}"
+            # MB-03：未被当前形状真实消费的参数在 plan 期显式拒绝。"消费"
+            # = 进入 case_params（deriver 产出或通用旗标处理，证据通道）或
+            # 是 deriver 已声明的派生输入（chase 几何族）。任何只换名字的
+            # 参数（语义未实现/探针无协议）在此受控失败，不得靠进 ID 段放行。
+            _consumed = set(case_params) | {
                 "buffer", "stride", "loads_per_slot", "min_loads",
                 "warmup", "warmup_passes",
             }
@@ -424,8 +450,8 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                 raise RunnerError(
                     "plan-error",
                     f"probe_shape {shape!r} does not consume params "
-                    f"{leftover}; register them in the shape's deriver or "
-                    "add them to _PASSTHROUGH_PARAMS with analyzer support",
+                    f"{leftover}; register them in the shape's deriver with "
+                    "real probe support or drop them",
                 )
             cases.append(Case(id=case_id, probe=probe, control=control,
                               params=tuple(sorted(case_params.items())),
