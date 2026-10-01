@@ -1,10 +1,6 @@
 # SM8650 Cortex-X4 TLB 层级探测 · 第二次战役（r2）任务书 v1.1
 
-> 版本：v1.4（2026-10-01；v1.0 → v1.1（REV-TLB-R2）→ v1.2（REV-M0-BATCH 首层）→ v1.3（REV-M0-BATCH 两层回执 2026-10-01）→ **v1.4（收口复核 MB-03/07 再修 2026-10-01）**，处置见 §10.3）
-> 修订依据：外部评审 REV-TLB-R2-20260930（第一性原理评审，13 项发现 F1–F9/R1–R4；归档于本分支 `docs/reviews/2026-09-30-sm8650-tlb-r2-first-principles.md`，合成复核脚本 `scripts/review_sm8650_tlb_r2.py`）。**逐条处置见 §10.3 修订映射**。
-> 基线：`main @ 9316853`（第一次战役集成终点；main 此后已推进 `459b135..bc96ff1` 图表报告工作，Phase D 前须同步）。
-> 方法资产：`docs/cpu-uarch-deep-analysis/`（TLB 报告 v1.6、矩阵 v0.2、原型 v2.3——角色见 §2.3）
-> 分支：`codex/sm8650-tlb-hierarchy-r2`；有限终点与退役严格按铁律 7 与 §10.4
+> 版本：v1.5（2026-10-01；v1.0 → v1.1（REV-TLB-R2）→ v1.2（REV-M0-BATCH 首层）→ v1.3（REV-M0-BATCH 两层回执 2026-10-01）→ v1.4（收口复核 MB-03/07 再修 2026-10-01）→ **v1.5（M0-4b TLB set 移植落地 + M0-5 pilot 脚手架 2026-10-01）**，处置见 §10.3）
 
 ## 1. 任务契约与有限终点
 
@@ -104,6 +100,34 @@
 ### 5.2 可行性冒烟（同 v1.0；产物为备忘录）
 
 对象含原型 v2.3 与 ROB 骨架**缺陷确认项**（R1–R3 已由评审方合成复核证实，属 ROB 项目范围，本任务只引用不修——§10.3）。
+
+## 5.3 M0-4b：TLB set prime+probe 移植版与 M0-5 pilot 脚手架（v1.5 新增）
+
+**背景**：pilot（B1 自冲突曲线 + G0-3 标定）建立在原型 l2_set_probe 的 prime+probe 窗口协议上，而原型上板合法性仅限 §5.2 冒烟（v1.3 §5 明令）——v1.5 完成工程路径 A 承诺的移植，pilot 从此"可按按钮"。
+
+**移植落点**（m0b `fb746c6` 探针/runner + `19aa529` 配置）：
+
+| 组件 | 内容 |
+|---|---|
+| ptr_chase `--tlb-set-mode` | 原型 v2.3 方法的证据探针版。**F5**：PMU 走 PerfWindow GROUP 原子读 + `window_delta` 有效性（mux 轮计数披露不进均值；任一事件打开失败 = 协议无效 exit 1，不做逐事件 n/a）；**F4**：`--set-regions`（默认 4）跨 256MiB 边界的稀疏 VA 区域激励，预约失败回退单区域并输出 `set_domain=single-region-fallback` 命名降级；**G0-3**：`--set-window 0` 空窗、`--set-scatter` 无冲突负控（W 页各落不同 set）；T/T2 无交集断言、filler 独立映射按候选 H 过滤、4K 硬门、round 0 冷启动剔除——全部继承原型评审修复口径 |
+| perf_window.h | `open_typed()`（ARM 平台 PMU type 动态，SM8650 = 8）；`open()` 保持 RAW 兼容 |
+| runner `tlb_set` 形状 | `_derive_tlb_set_case_params` 真实消费 set_* 参数族（MB-03 契约通道）；hugepage/thp 在 plan 期命名拒绝（4K 强制）；通用 case_id 规范化枚举 |
+| adapter | build_argv / parse_output 双分支：legacy 逐字不变；tlb_set 分支 fail-closed（缺必需参数/缺事件输出即 ParseError），metrics = `pmu.<label>.count`（probe 段窗口差分均值）+ `window_*_rounds` + `probe_latency_ns` |
+| schema 登记 | `runner/schema/README.md`：`execution.probe_shape` + 8 个 `set_*` 参数（2026-10-01） |
+
+**pilot 标定块**（三配置，CALIBRATION/PILOT 标签、raw 全量留存、锚点池只用 pilot 数据）：
+- `ptr-chase-sm8650-x4-tlb-pilot-b1`：B1 自冲突曲线，set_window [1,2,4,6,8,9,10,12,16] × 10 rep（9 cases）；
+- `ptr-chase-sm8650-x4-tlb-pilot-g03-empty`：空窗底噪（W=0，1 case）；
+- `ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict`：scatter [0,1] × rounds [10,40]（4 cases：无冲突同长度窗 + 重复尺度 + B1 同点对照）。
+公共：H1/target 7/rounds 20/pool 65536 页/filler 512/regions 4/seed 42/三事件组+ cycles（0x05/0x2d/0x2f/0x11）/x4-prime 绑核。三配置已过 `runner.cli plan` 真实预览（14 cases，id 唯一）。
+
+**判读口径登记**：0x2d 判据按**总竞争条目数**写（SMOKE-20261001：filler 过滤目标 set 后竞争 = W；冒烟实测跳变提前至 W=8 属预期形态，不改 B1 估计量）；F5 负值纪律适用（减法后负值保留解释，不截零）。
+
+**遗留接口**：pilot 记录 metrics 为 `pmu.*.count` 窗口语义，分析器 G0 精确集不适用——pilot 判读按 Phase C 披露的直接提取复刻执行，**OI-13 关闭前**不用 `analyze_records` 主体路径（与评审 §4 边界一致）。MB-06 descriptor 契约仍是 Phase A/K 链正式采样前的关闭项。
+> 修订依据：外部评审 REV-TLB-R2-20260930（第一性原理评审，13 项发现 F1–F9/R1–R4；归档于本分支 `docs/reviews/2026-09-30-sm8650-tlb-r2-first-principles.md`，合成复核脚本 `scripts/review_sm8650_tlb_r2.py`）。**逐条处置见 §10.3 修订映射**。
+> 基线：`main @ 9316853`（第一次战役集成终点；main 此后已推进 `459b135..bc96ff1` 图表报告工作，Phase D 前须同步）。
+> 方法资产：`docs/cpu-uarch-deep-analysis/`（TLB 报告 v1.6、矩阵 v0.2、原型 v2.3——角色见 §2.3）
+> 分支：`codex/sm8650-tlb-hierarchy-r2`；有限终点与退役严格按铁律 7 与 §10.4
 
 ## 6. 实验协议、预注册规则与统计
 
