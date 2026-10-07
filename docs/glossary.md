@@ -43,7 +43,7 @@
 
 **战役流程**：上板 = 真机执行（相对本机/模拟器）。kickoff = 给上板 agent 的一页执行包。preboard = 上板前清单。收口 = 评审缺陷的修复-回执-复核循环。
 
-**工程组件**：planner = runner 的 case 展开器（M0-4 后退化为通用控制）。deriver = 探头形状参数派生器。descriptor = 探头描述（requested→canonical→realized 链，MB-06 契约）。cohort = 分析侧同身份样本组。probe_common = 共享探头支撑层（页策略等，M0-1）。
+**工程组件**：planner = runner 的 case 展开器（M0-4 后退化为通用控制）。deriver = 探头形状参数派生器。descriptor = 探头描述（requested→canonical→realized 链，MB-06 契约）。probe_common = 共享探头支撑层（页策略等，M0-1）。
 
 **科学符号**：空窗 = W=0 测协议底噪（G0-3 强制）。正控/负控 = 制造/排除目标效应的对照（B1：同 set 集中 = 正控，打散 scatter=1 = 负控）。跳变 = refill 在阈值 W 处的抬升（实测提前至 W=8，按"总竞争条目数"口径解读）。F4/采样域等价 = 单一 256MiB 池内 H1≡H3、H2≡H4 不可区分，需多稀疏 VA 区域激励；终态 `HYPOTHESES_EQUIVALENT_ON_TEST_DOMAIN`。终态词汇：`INTERVAL_IDENTIFIED`（区间可识别）/`MODEL_UNIDENTIFIABLE`（模型不可识别）/`GATE_FAILED`（门控失败）/`QUALIFIED`/`CONFLICT_CURVE_IDENTIFIED` 等，定义见任务书各问。
 
@@ -53,7 +53,7 @@
 
 **评审治理**：REV-* = 外部评审批次；MB-01~08 = REV-M0-BATCH 缺陷编号；C1~C7 = 首层评审条件；F1~F9/R1~R4 = 第一性原理评审发现；OI-* = `docs/open-items.md` 编号（OI-12 有两个：baseline=跨日基线、rob=ROB 项目）；P0/P1/P2 = 评审严重度。双评审 = 两名独立评审方；回执 = 作者对评审的逐条处置文档。提交卫生 = 只提交本任务自己的文件（铁律 6）。
 
-**数据模型**：records.jsonl = run 的记录主文件（schema v2：experiment/capability/run-record/artifact 四类，ADR-0006）。realized geometry = 实际执行几何（与 requested 请求参数分字段入 record，M0-4）。identity/probe_shape = 样本身份维度，**禁止跨条件合并**。access_class = 数据分层（public 可入库 / private、restricted 永不入库）。
+**数据模型**：records.jsonl = run 的记录主文件（schema v2：experiment/capability/run-record/artifact 四类，ADR-0006）。realized geometry = 实际执行几何（与 requested 请求参数分字段入 record，M0-4）。identity/probe_shape = 样本身份维度，**禁止跨条件合并**。cohort（样本队列）= 分析允许合并统计的最小单位：同实验身份（buffer×实际 backing×分布/offset/K 等）的样本组；≥5 有效样本出 median[p25,p75]（比较级）、3–4 只报原始观测（描述级）、<3 终态 `INSUFFICIENT_COHORT`；跨身份合并被命名拒绝（MB-04 修复）——出处 `analysis/sm8650_tlb.py` §7 Phase D。access_class = 数据分层（public 可入库 / private、restricted 永不入库）。
 
 ## 易混对照（回来最容易搞反的）
 
