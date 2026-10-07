@@ -126,6 +126,30 @@
 **充电态热策略协议（2026-10-07 增补，用户拍板：USB 充电为必须行为）**：不等待拔充电器、不写 sysfs、不改平台期望值。平台新增 `charging-thermal` 环境 profile（m0b `31c333a`）——policy0/2/5 的 scaling_max 被 MIUI 热策略压制登记为**显式接受的非基线条件**，从违规降级为命名告警（`accepted-nonbaseline:*` 随 record 入档，实际值全量留痕）；**硬护栏**：测量核 policy7 永不降级（cap 迁移到 X4 才是有效性威胁，代码层强制：全 policy 接纳 = 配置错误），governor/温度/唤醒态等非频率项不受降级影响。判读边界：充电态 pilot 与 campaign 1（电池态）基线**不跨 regime 直接比**；锚点池只用同 regime（充电态）锚点。pilot 上板统一用 `--environment-profile charging-thermal --allow-mutation`（kickoff 已更新）。
 
 **遗留接口**：pilot 记录 metrics 为 `pmu.*.count` 窗口语义，分析器 G0 精确集不适用——pilot 判读按 Phase C 披露的直接提取复刻执行，**OI-13 关闭前**不用 `analyze_records` 主体路径（与评审 §4 边界一致）。MB-06 descriptor 契约仍是 Phase A/K 链正式采样前的关闭项。
+
+### 5.4 M0-5 pilot 判读与校准冻结（2026-10-07 执行完毕，数据 m0b `8fba5c3`）
+
+**数据**：充电态（charging-thermal profile）5 run / 18 record 零异常；块前/后锚点夹块；多区域激励全 140 raw 文件 `set_domain=multi-region` 零回退；`window_mux_rounds` 全 0；二进制 sha256 前缀 `1e03a658` 与 recipe 验证值一致。
+
+**协议门核验（扣空窗底噪后）**：0x05/W = 4.05/8.5/17（W=4/8/16）✅ ≈W；0x2f/W ≈W（W≤12）✅。**scatter 负控（F2 级对照）**：W=8 同 L1 压力下 scatter=1 的 0x2d=0.0 vs scatter=0 的 5.1–7.5——0x2d 测的是 set 冲突本身，不是 L1-miss 驱动流量 ✅。
+
+**校准冻结（Phase A 正式矩阵执行口径，取代一切旧参照）**：
+
+| 项 | 冻结值 | 来源 |
+|---|---|---|
+| 空窗底噪/有效轮 | 0x05=2.0、0x2d=0.0、0x2f=2.0 | g03-empty |
+| 无冲突上限（0x2d） | 0.0（W=8 scatter） | g03-noconflict |
+| 协议门验收带 | 扣底噪后 0x05/W ∈ [0.85, 1.15] | pilot 全域 |
+| **标准轮数** | **r20**（r10→r40 的 0x2d 5.1→5.95→7.5 轮数依赖已登记） | g03-noconflict × b1 |
+| 0x2d onset 判据 | 确定 onset = 首个 0x2d ≥ 3.0/轮的 W；边际 onset 单独记 | 预注册 |
+
+**B1 门状态**：pilot 未证伪 B1（协议门全过 + scatter 对照干净）→ B1 维持默认主估计量；正式矩阵前按 MB-08 合格门复核一次。
+
+**pilot B1 曲线（0x2d/轮）**：W=1→0、2→0、4→0.2、6→0.5、8→5.95、9→6.65、10→7.2、12→12.0、16→11.8 → onset 区间 **[6,8] 页**（总竞争条目数=W 口径）。**只登记区间，不命名有效相联度**——Phase A 判据。
+
+**锚点池登记（充电态 regime）**：b3072K 主锚 8.3535/8.3286（−0.30% 稳）；b512K 灵敏哨兵 [2.641, 2.749]（+4.09% 漂移已按 OI-12 调查：cycles 同步 +3.4% 非计时器假象，候选=network_stack 共跑干扰 + 电池状态迁移，未分离归因）。跨块可比门用 b3072K 主锚，b512K 作早期预警。**充电态锚点与 campaign 1 电池态基线不跨 regime 直接比。**
+
+**登记观察（不判读，Phase A 处理）**：① 0x2f 在 W=16 饱和 ~15/轮（<W）；② 0x2d 的轮数依赖（替换态积累）；③ 锚点小 footprint 漂移对大 footprint 不敏感（与共跑干扰假设一致）。
 > 修订依据：外部评审 REV-TLB-R2-20260930（第一性原理评审，13 项发现 F1–F9/R1–R4；归档于本分支 `docs/reviews/2026-09-30-sm8650-tlb-r2-first-principles.md`，合成复核脚本 `scripts/review_sm8650_tlb_r2.py`）。**逐条处置见 §10.3 修订映射**。
 > 基线：`main @ 9316853`（第一次战役集成终点；main 此后已推进 `459b135..bc96ff1` 图表报告工作，Phase D 前须同步）。
 > 方法资产：`docs/cpu-uarch-deep-analysis/`（TLB 报告 v1.6、矩阵 v0.2、原型 v2.3——角色见 §2.3）
