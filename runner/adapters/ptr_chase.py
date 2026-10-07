@@ -249,13 +249,14 @@ class PtrChaseAdapter:
             return {}
         realized: dict[str, Any] = {}
         for key in ("mode", "set_domain", "set_active_regions",
-                    "set_region_nodes", "page_kb"):
+                    "page_kb"):
             if key in fields:
                 realized[key] = fields[key]
-        if "set_region_nodes" in realized:
-            realized["set_region_nodes"] = [
-                int(tok) for tok in str(realized["set_region_nodes"]).split(",")
-                if tok.lstrip("-").isdigit()]
+        for key in ("set_target_region_nodes", "set_t2_region_nodes"):
+            if key in fields:
+                realized[key] = [
+                    int(tok) for tok in str(fields[key]).split(",")
+                    if tok.lstrip("-").isdigit()]
         for key in ("set_hypothesis", "set_target", "set_window", "set_rounds",
                     "set_regions", "set_region_scope", "set_nsets",
                     "set_active_regions", "seed"):

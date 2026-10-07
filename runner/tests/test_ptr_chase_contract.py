@@ -519,7 +519,7 @@ class TestTlbSetAdapterContract(unittest.TestCase):
             "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
             "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
             "set_regions=1 scatter=0 set_region_scope=-1 set_nsets=0 "
-            "set_active_regions=1 set_region_nodes=8 "
+            "set_active_regions=1 set_target_region_nodes=8 "
             "set_domain=single-region-fallback page_kb=4 seed=99 "
             "window_valid_rounds=19 window_invalid_rounds=0 "
             "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
@@ -541,7 +541,7 @@ class TestTlbSetAdapterContract(unittest.TestCase):
             "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
             "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
             "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
-            "set_active_regions=4 set_region_nodes=3,3,3,3 "
+            "set_active_regions=4 set_target_region_nodes=3,3,3,3 "
             "set_domain=multi-region page_kb=4 seed=42 "
             "window_valid_rounds=19 window_invalid_rounds=0 "
             "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
@@ -560,7 +560,7 @@ class TestTlbSetAdapterContract(unittest.TestCase):
             "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
             "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
             "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
-            "set_active_regions=4 set_region_nodes=3,3,3,3 "
+            "set_active_regions=4 set_target_region_nodes=3,3,3,3 "
             "set_domain=multi-region page_kb=4 seed=42 "
             "window_valid_rounds=19 window_invalid_rounds=0 "
             "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
@@ -569,7 +569,7 @@ class TestTlbSetAdapterContract(unittest.TestCase):
         realized = self.adapter.parse_realized(stdout)
         self.assertEqual(realized["set_domain"], "multi-region")
         self.assertEqual(realized["set_active_regions"], 4)
-        self.assertEqual(realized["set_region_nodes"], [3, 3, 3, 3])
+        self.assertEqual(realized["set_target_region_nodes"], [3, 3, 3, 3])
         self.assertEqual(realized["set_hypothesis"], 1)
         self.assertEqual(self.adapter.parse_realized("latency_ns=1.25"), {})
 
