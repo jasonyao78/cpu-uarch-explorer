@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    {
+      "name": "set_hypothesis",
+      "type": "int"
+    },
+    {
+      "name": "set_target",
+      "type": "int",
+      "default": 7
+    },
+    {
+      "name": "set_window",
+      "type": "int"
+    },
+    {
+      "name": "set_rounds",
+      "type": "int",
+      "default": 20
+    },
+    {
+      "name": "set_pool_pages",
+      "type": "int",
+      "default": 65536
+    },
+    {
+      "name": "set_filler_pages",
+      "type": "int",
+      "default": 512
+    },
+    {
+      "name": "set_regions",
+      "type": "int",
+      "default": 4
+    },
+    {
+      "name": "set_region_scope",
+      "type": "int",
+      "default": -1
+    },
+    {
+      "name": "repetitions",
+      "type": "int",
+      "default": 10
+    },
+    {
+      "name": "base_pages",
+      "type": "int",
+      "default": 1
+    },
+    {
+      "name": "seed",
+      "type": "int",
+      "default": 1337
+    },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        {
+          "name": "cycles",
+          "type": 8,
+          "config": "0x11"
+        },
+        {
+          "name": "l1d_tlb_refill",
+          "type": 8,
+          "config": "0x05"
+        },
+        {
+          "name": "l2d_tlb_refill",
+          "type": 8,
+          "config": "0x2d"
+        },
+        {
+          "name": "l2d_tlb",
+          "type": 8,
+          "config": "0x2f"
+        }
+      ]
+    }
+  ],
+  "preconditions": [
+    "charging-thermal profile；每块前 2-case 标定复测 + 锚点夹块（同 pilot 纪律）",
+    "realized 硬门：domain_consistent、set_active_regions==expected(scope)、vpn_hi_pure==1（全域折叠判别）、residual 审计不变量",
+    "B1 默认主估计量；onset 决策单元按任务书 v1.7 §5.5"
+  ],
+  "metrics": [
+    {
+      "name": "pmu.cycles.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l1d_tlb_refill.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l2d_tlb_refill.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l2d_tlb.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "window_valid_rounds",
+      "unit": "rounds",
+      "statistic": "median"
+    },
+    {
+      "name": "window_mux_rounds",
+      "unit": "rounds",
+      "statistic": "median"
+    }
+  ],
+  "id": "ptr-chase-sm8650-x4-tlb-a1-l2-repro",
+  "title": "Phase A A1-L2 复现层：同 L1 矩阵（seed1337，48 cases）",
+  "execution": {
+    "probe": "ptr_chase",
+    "probe_shape": "tlb_set",
+    "controls": [
+      "x4-prime"
+    ],
+    "params": {
+      "repetitions": 10
+    },
+    "sweep": {
+      "set_hypothesis": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "set_region_scope": [
+        -1,
+        0,
+        1
+      ],
+      "set_window": [
+        6,
+        8,
+        10,
+        12
+      ]
+    },
+    "fixed_params": [
+      "set_target",
+      "set_rounds",
+      "set_pool_pages",
+      "set_filler_pages",
+      "set_regions",
+      "base_pages",
+      "seed",
+      "pmu_events"
+    ]
+  },
+  "notes": "复现条件：两 seed onset 判定一致；不一致 → 并列表格不合并"
+}
