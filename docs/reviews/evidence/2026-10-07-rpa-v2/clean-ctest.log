@@ -1,0 +1,76 @@
+Commit 95fa2a9; git archive tracked sources only; no dirty CMake registration.
+COMMAND: cmake --preset macos-arm64-release
+-- The C compiler identification is AppleClang 17.0.0.17000013
+-- The CXX compiler identification is AppleClang 17.0.0.17000013
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (0.5s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/rpa-clean-snapshot-5rhzpuy7/build/macos-arm64/release
+
+COMMAND: cmake --build --preset macos-arm64-release
+[ 12%] Building CXX object probes/platform/macos-arm64/CMakeFiles/timer_resolution.dir/timer_resolution.cpp.o
+[ 25%] Linking CXX executable timer_resolution
+[ 25%] Built target timer_resolution
+[ 37%] Building CXX object probes/platform/macos-arm64/CMakeFiles/qos_steering.dir/qos_steering.cpp.o
+[ 50%] Linking CXX executable qos_steering
+[ 50%] Built target qos_steering
+[ 62%] Building CXX object probes/cache-mem/CMakeFiles/ptr_chase.dir/ptr_chase.cpp.o
+[ 75%] Linking CXX executable ptr_chase
+[ 75%] Built target ptr_chase
+[ 87%] Building CXX object tests/CMakeFiles/perf_window_golden.dir/__/probes/tests/perf_window_golden.cpp.o
+[100%] Linking CXX executable perf_window_golden
+[100%] Built target perf_window_golden
+
+COMMAND: ctest --preset macos-arm64-release
+Test project /private/var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/rpa-clean-snapshot-5rhzpuy7/build/macos-arm64/release
+      Start  1: perf_window_golden
+ 1/19 Test  #1: perf_window_golden ............................   Passed    0.48 sec
+      Start  2: ptr_chase_valid_small
+ 2/19 Test  #2: ptr_chase_valid_small .........................   Passed    0.42 sec
+      Start  3: ptr_chase_default_warmup_two_passes
+ 3/19 Test  #3: ptr_chase_default_warmup_two_passes ...........   Passed    0.00 sec
+      Start  4: ptr_chase_explicit_warmup_loads
+ 4/19 Test  #4: ptr_chase_explicit_warmup_loads ...............   Passed    0.00 sec
+      Start  5: ptr_chase_warmup_zero_is_not_cold
+ 5/19 Test  #5: ptr_chase_warmup_zero_is_not_cold .............   Passed    0.00 sec
+      Start  6: ptr_chase_rejects_tiny_loads
+ 6/19 Test  #6: ptr_chase_rejects_tiny_loads ..................   Passed    0.00 sec
+      Start  7: ptr_chase_rejects_misaligned_stride
+ 7/19 Test  #7: ptr_chase_rejects_misaligned_stride ...........   Passed    0.00 sec
+      Start  8: ptr_chase_rejects_stride_gt_buffer
+ 8/19 Test  #8: ptr_chase_rejects_stride_gt_buffer ............   Passed    0.00 sec
+      Start  9: ptr_chase_rejects_zero_buffer
+ 9/19 Test  #9: ptr_chase_rejects_zero_buffer .................   Passed    0.00 sec
+      Start 10: ptr_chase_hugepage_unsupported
+10/19 Test #10: ptr_chase_hugepage_unsupported ................   Passed    0.00 sec
+      Start 11: ptr_chase_thp_unsupported
+11/19 Test #11: ptr_chase_thp_unsupported .....................   Passed    0.00 sec
+      Start 12: ptr_chase_base_pages_unsupported
+12/19 Test #12: ptr_chase_base_pages_unsupported ..............   Passed    0.00 sec
+      Start 13: ptr_chase_rejects_conflicting_page_requests
+13/19 Test #13: ptr_chase_rejects_conflicting_page_requests ...   Passed    0.00 sec
+      Start 14: ptr_chase_rejects_base_and_thp
+14/19 Test #14: ptr_chase_rejects_base_and_thp ................   Passed    0.00 sec
+      Start 15: ptr_chase_rejects_malformed_pmu_event
+15/19 Test #15: ptr_chase_rejects_malformed_pmu_event .........   Passed    0.00 sec
+      Start 16: ptr_chase_seed_is_recorded
+16/19 Test #16: ptr_chase_seed_is_recorded ....................   Passed    0.00 sec
+      Start 17: ptr_chase_seed_default_42
+17/19 Test #17: ptr_chase_seed_default_42 .....................   Passed    0.00 sec
+      Start 18: ptr_chase_rejects_seed_garbage
+18/19 Test #18: ptr_chase_rejects_seed_garbage ................   Passed    0.00 sec
+      Start 19: ptr_chase_vma_base_is_recorded
+19/19 Test #19: ptr_chase_vma_base_is_recorded ................   Passed    0.00 sec
+
+100% tests passed, 0 tests failed out of 19
+
+Total Test time (real) =   0.93 sec

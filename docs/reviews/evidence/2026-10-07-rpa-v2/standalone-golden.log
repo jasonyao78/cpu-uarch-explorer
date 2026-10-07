@@ -1,0 +1,4 @@
+COMMAND: clang++ -std=c++17 -O2 -I probes/common probes/tests/tlb_set_collect_golden.cpp -o /private/tmp/tlb-rpa-v2-review-20261007/tlb_set_collect_golden
+
+COMMAND: /private/tmp/tlb-rpa-v2-review-20261007/tlb_set_collect_golden
+tlb_set_collect_golden: all scenarios pass

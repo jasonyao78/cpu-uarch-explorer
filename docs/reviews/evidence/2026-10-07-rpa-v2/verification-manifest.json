@@ -1,0 +1,74 @@
+{
+  "review_inputs": {
+    "r2": "30341d6",
+    "m0b": "95fa2a9",
+    "task_version": "v1.7",
+    "main": "9093f4a48331b262f37338d059487c557df70abd"
+  },
+  "scope": "Host software/synthetic/archived replay only; no adb or target execution",
+  "checks": {
+    "runner": {
+      "command": "python -m unittest discover -s runner/tests -t .",
+      "exit_code": 0,
+      "tests": 192
+    },
+    "analysis": {
+      "command": "python -m unittest discover -s analysis/tests -t .",
+      "exit_code": 0,
+      "tests": 158
+    },
+    "clean_ctest": {
+      "source": "git archive 95fa2a9 CMakeLists.txt CMakePresets.json probes tests",
+      "commands": [
+        "cmake --preset macos-arm64-release",
+        "cmake --build --preset macos-arm64-release",
+        "ctest --preset macos-arm64-release"
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "tests": 19
+    },
+    "ndk": {
+      "compiler": "NDK 27.2.12479018 aarch64-linux-android29-clang++",
+      "args": [
+        "-std=c++17",
+        "-fsyntax-only",
+        "-DCPU_UARCH_HAVE_LINUX_PERF=1",
+        "-I",
+        "probes/common",
+        "-I",
+        "probes/platform/linux",
+        "probes/cache-mem/ptr_chase.cpp",
+        "probes/tests/perf_window_golden.cpp",
+        "probes/tests/tlb_set_collect_golden.cpp"
+      ],
+      "exit_code": 0
+    },
+    "golden": {
+      "source": "probes/tests/tlb_set_collect_golden.cpp",
+      "compile_exit_code": 0,
+      "run_exit_code": 0
+    },
+    "main_overlay": {
+      "tests": 24,
+      "failures": 0,
+      "errors": 0
+    },
+    "diagnostics": {
+      "exit_code": 0,
+      "meaning": "diagnostics completed; review FAIL"
+    }
+  },
+  "files": {
+    "review_rpa_v2_20261007.py": "6dbe1ef7a26f033a40db909f3c1d81587a389d66995bd848ec5024273e81318c",
+    "diagnostics.json": "3f742a24101676b24f3638e5ca3281b4534fb092b2fbe235cd3baca7c4274829",
+    "runner.log": "a9a636bd022b2a48b88db060ccbd1f3e127725cc2fa82dc5ce443ae090794003",
+    "analysis.log": "69f14990135b3e2d1792065790c3291e8b377e2dd7f63cef000be9a404bff731",
+    "clean-ctest.log": "1cd217ed9888648b1ca65b1c172a2335b1cbc988a2f3a9a17654c7c9f167efe4",
+    "standalone-golden.log": "9886587e75237be1d8d8c318f814d83e1a9c9ebc4a654d16d84020242d0495c7",
+    "ndk-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
