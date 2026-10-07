@@ -489,6 +489,10 @@ class TestPlan(unittest.TestCase):
                 )
                 self.assertEqual(spec["protocol_version"], expected_protocol)
                 parameter_names = {param["name"] for param in spec["parameters"]}
+                if spec["execution"].get("probe_shape") == "tlb_set":
+                    # M0-4b：tlb_set 形状无 ring warmup 语义（round 0 冷启动
+                    # 剔除是其等价口径）——只验协议号，不验 warmup_passes
+                    continue
                 self.assertIn("warmup_passes", parameter_names)
                 self.assertNotIn("warmup", parameter_names)
                 self.assertIn("warmup_passes", spec["execution"]["fixed_params"])

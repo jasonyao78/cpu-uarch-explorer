@@ -25,7 +25,8 @@ from .adapters.ptr_chase import PtrChaseAdapter
 from .artifacts import ArtifactStore
 from .errors import ParseError, RunnerError
 from .environment.policy import (collect_environment_state,
-                                 evaluate_preconditions, evaluate_stability)
+                                 evaluate_preconditions_full,
+                                 evaluate_stability_full)
 from .executor import make_executor
 from .plan import Case, Plan
 from .records import (JsonlWriter, build_run_record, environment_block,  # noqa: F401
@@ -243,7 +244,8 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
     if environment_policy is not None:
         try:
             state_before = collect_environment_state(executor, environment_policy)
-            violations = evaluate_preconditions(state_before, environment_policy)
+            violations, env_warnings = evaluate_preconditions_full(
+                state_before, environment_policy)
         except RunnerError as error:
             env["state_snapshot"] = {
                 "policy_result": {"valid": False, "stage": "before",
@@ -257,7 +259,8 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
         env["state_snapshot"] = {
             "before": state_before,
             "policy_result": {"valid": not violations, "stage": "before",
-                              "violations": violations},
+                              "violations": violations,
+                              "accepted_nonbaseline": env_warnings},
         }
         if violations:
             return build_run_record(
@@ -324,10 +327,12 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
     if environment_policy is not None:
         try:
             state_after = collect_environment_state(executor, environment_policy)
-            post_violations = evaluate_preconditions(state_after, environment_policy)
-            post_violations.extend(
-                evaluate_stability(state_before, state_after, environment_policy))
-            post_violations = sorted(set(post_violations))
+            post_violations, post_warnings = evaluate_preconditions_full(
+                state_after, environment_policy)
+            drift_violations, drift_warnings = evaluate_stability_full(
+                state_before, state_after, environment_policy)
+            post_violations = sorted(set(post_violations) | set(drift_violations))
+            post_warnings = sorted(set(post_warnings) | set(drift_warnings))
         except RunnerError as error:
             env["state_snapshot"]["policy_result"] = {
                 "valid": False, "stage": "after", "violations": [error.code]}
@@ -339,7 +344,8 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
         env["state_snapshot"]["after"] = state_after
         env["state_snapshot"]["policy_result"] = {
             "valid": not post_violations, "stage": "after",
-            "violations": post_violations}
+            "violations": post_violations,
+            "accepted_nonbaseline": post_warnings}
         if post_violations:
             return build_run_record(
                 status="failed", target=platform["target"], probe=probe_meta,
