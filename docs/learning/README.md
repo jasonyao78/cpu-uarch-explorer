@@ -36,5 +36,6 @@
 - `01-pointer-chase.md` — 指针追逐与 MLP=1：测"单次依赖 load 的真实延迟"
 - `02-timing-and-statistics.md` — 41.67ns 的尺子量 1ns：区间平均 + median-of-5
 - `03-qos-steering.md` — QoS 分流：macOS 无绑核下的 E 核测量手段
+- `12-tlb-hierarchy.md` — TLB 层次：翻译也是一层 cache（X4 结构 × 两战役实测）
 
-（后续随实验进展添加：TLB 层次、分支预测、SMT 干扰、cache 一致性……每页一个概念，测量栏引用 data/public 与报告，模型栏待 gem5 校准启动后补。）
+（后续随实验进展添加：分支预测、SMT 干扰、cache 一致性……每页一个概念，测量栏引用 data/public 与报告，模型栏待 gem5 校准启动后补。）
