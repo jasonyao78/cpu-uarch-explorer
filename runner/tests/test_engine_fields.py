@@ -174,6 +174,78 @@ class TestEngineMetricExtraFields(unittest.TestCase):
         self.assertEqual(record["metrics"], [])
 
 
+class RealizedVaryingAdapter(MultiMetricAdapter):
+    """RPA-03 夹具：三次进程的 realized 域不同（1 次四区域 + 2 次回退）。"""
+
+    def parse_realized(self, stdout, expected=None):
+        sample = int(stdout.split("=", 1)[1])
+        if sample == 1:
+            return {"mode": "tlbset", "set_domain": "multi-region",
+                    "set_active_regions": 4,
+                    "set_target_region_nodes": [3, 3, 3, 3]}
+        return {"mode": "tlbset", "set_domain": "single-region-fallback",
+                "set_active_regions": 1,
+                "set_target_region_nodes": [12, 0, 0, 0]}
+
+
+class RealizedBadTokenAdapter(MultiMetricAdapter):
+    """RPA-03 夹具：非法审计 token（评审复现：静默删除/ValueError 逃逸）。"""
+
+    def parse_realized(self, stdout, expected=None):
+        raise ValueError("set_active_regions=oops")  # 旧实现的逃逸形态
+
+
+class TestRealizedPerSampleClosure(unittest.TestCase):
+    """RPA-03：realized 逐次闭环——混域命名状态、坏 token 结构化失败。"""
+
+    def _run(self, adapter):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = ArtifactStore(Path(tmp) / "run")
+            with mock.patch.dict(
+                "runner.engine._ADAPTERS", {"ptr_chase": adapter}
+            ):
+                return _run_case(
+                    _case(), PLATFORM, PROBE_META, "/probe",
+                    MultiMetricExec(), store, SYSINFO, PROBE_META["git"],
+                )
+
+    def test_mixed_domain_is_named_not_silently_first_sample(self):
+        record = self._run(RealizedVaryingAdapter())
+        self.assertEqual(record["status"], "ok")   # 数据保留
+        realized = record["probe"]["realized"]
+        self.assertEqual(realized["domain_consistent"], False)
+        self.assertEqual(len(realized["samples"]), 2)  # repetitions=2
+        domains = {s["realized"]["set_domain"] for s in realized["samples"]}
+        self.assertEqual(domains,
+                         {"multi-region", "single-region-fallback"})
+        # 逐样本绑定 sample_index 与 raw 引用
+        self.assertEqual({s["sample_index"] for s in realized["samples"]},
+                         {0, 1})  # runner 侧 repetition 下标
+
+    def test_consistent_domain_yields_common_realized(self):
+        class ConsistentAdapter(MultiMetricAdapter):
+            def parse_realized(self, stdout, expected=None):
+                return {"mode": "tlbset", "set_domain": "multi-region",
+                        "set_active_regions": 4,
+                        "set_target_region_nodes": [3, 3, 3, 3]}
+        record = self._run(ConsistentAdapter())
+        self.assertEqual(record["status"], "ok")
+        self.assertEqual(record["probe"]["realized"]["set_domain"],
+                         "multi-region")
+        self.assertNotIn("domain_consistent", record["probe"]["realized"])
+
+    def test_realized_parse_error_is_structured_failure(self):
+        # 旧实现 ValueError 逃出 _run_case；契约要求 ParseError 路径——
+        # 夹具直接抛 ValueError 验证 engine 不再无条件信任（见下断言注释）
+        try:
+            record = self._run(RealizedBadTokenAdapter())
+        except ValueError:
+            self.fail("ValueError 逃出 _run_case（结构化失败契约被破坏）")
+        # engine 对 parse_realized 的异常统一转结构化失败
+        self.assertEqual(record["status"], "failed")
+        self.assertEqual(record["metrics"], [])
+
+
 QUIET_POLICY = {
     "collector": "android-controlled-quiet-v2",
     "required": True,

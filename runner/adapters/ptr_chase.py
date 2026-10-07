@@ -241,28 +241,73 @@ class PtrChaseAdapter:
         ("seed", "seed"),
     )
 
-    def parse_realized(self, stdout: str) -> dict[str, Any]:
-        """探针 realized 自描述域（PA-02：随结构化记录持久化，requested 与
-        realized 分开）。非 tlbset 输出返回空 dict。region_nodes 为列表。"""
+    def parse_realized(self, stdout: str,
+                       expected: dict | None = None) -> dict[str, Any]:
+        """探针 realized 自描述域（PA-02/RPA-03：随结构化记录持久化，
+        requested 与 realized 分开；每次进程解析阶段调用）。
+
+        防御契约（评审反例驱动）：非法 token **拒绝而非丢弃**；有 expected
+        时校验维数（== set_regions）、节点总和（== window×max(nsets,1)）、
+        scope 隔离一致性、active_regions 与槽位一致性——任何违例 ParseError，
+        由 engine 既有失败路径转成结构化 failure（不逃逸 ValueError）。"""
         fields = parse_key_value_lines(stdout)
         if fields.get("mode") != "tlbset":
             return {}
         realized: dict[str, Any] = {}
-        for key in ("mode", "set_domain", "set_active_regions",
-                    "page_kb"):
+        for key in ("mode", "set_domain", "page_kb"):
             if key in fields:
                 realized[key] = fields[key]
         for key in ("set_target_region_nodes", "set_t2_region_nodes"):
-            if key in fields:
-                realized[key] = [
-                    int(tok) for tok in str(fields[key]).split(",")
-                    if tok.lstrip("-").isdigit()]
+            if key not in fields:
+                continue
+            counts: list[int] = []
+            for tok in str(fields[key]).split(","):
+                if not tok.isdigit():   # 严格非负整数；非法 token 拒绝
+                    raise ParseError(
+                        f"realized {key}: invalid token {tok!r}")
+                counts.append(int(tok))
+            realized[key] = counts
         for key in ("set_hypothesis", "set_target", "set_window", "set_rounds",
                     "set_regions", "set_region_scope", "set_nsets",
                     "set_active_regions", "seed"):
             if key in fields:
-                realized[key] = int(fields[key])
+                raw = fields[key]
+                if not str(raw).lstrip("-").isdigit():
+                    raise ParseError(f"realized {key}: not an integer: {raw!r}")
+                realized[key] = int(raw)
+        if expected is not None:
+            self._check_realized_invariants(realized, expected)
         return realized
+
+    def _check_realized_invariants(self, realized: dict[str, Any],
+                                   expected: dict) -> None:
+        regions = int(expected.get("set_regions", 4))
+        for key in ("set_target_region_nodes", "set_t2_region_nodes"):
+            if key in realized and len(realized[key]) != regions:
+                raise ParseError(
+                    f"realized {key}: dim {len(realized[key])} != "
+                    f"set_regions {regions}")
+        window = int(expected.get("set_window", 0))
+        nsets = int(expected.get("set_nsets", 0))
+        expected_sum = (window * (nsets if nsets > 0 else 1)
+                        if window > 0 else 0)
+        nodes = realized.get("set_target_region_nodes")
+        if nodes is not None and sum(nodes) != expected_sum:
+            raise ParseError(
+                f"realized target node sum {sum(nodes)} != "
+                f"window*nsets {expected_sum}")
+        scope = int(expected.get("set_region_scope", -1))
+        if nodes is not None and scope >= 0 and nodes[scope] != expected_sum:
+            raise ParseError(
+                f"realized scope isolation violated: slot[{scope}]="
+                f"{nodes[scope]} != {expected_sum}")
+        active = realized.get("set_active_regions")
+        if active is not None and nodes is not None:
+            actual = sum(1 for n in nodes if n > 0)
+            if active != actual:
+                raise ParseError(
+                    f"realized set_active_regions {active} != nonzero "
+                    f"slots {actual}")
 
     def _check_tlb_set_descriptor(self, fields: dict[str, str],
                                   expected: dict) -> None:

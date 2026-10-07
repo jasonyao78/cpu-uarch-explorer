@@ -573,6 +573,63 @@ class TestTlbSetAdapterContract(unittest.TestCase):
         self.assertEqual(realized["set_hypothesis"], 1)
         self.assertEqual(self.adapter.parse_realized("latency_ns=1.25"), {})
 
+    def test_parse_realized_rejects_invalid_tokens(self):
+        # RPA-03：非法 token 拒绝而非静默删除（评审复现："2,bad,2,2" 被
+        # 静默解析成 [2,2,2]）
+        base = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=4 set_target_region_nodes=2,bad,2,2 "
+            "set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        with self.assertRaisesRegex(ParseError, "invalid token"):
+            self.adapter.parse_realized(base)
+        clean = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=4 set_target_region_nodes=2,2,2,2 "
+            "set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        bad_active = clean.replace("set_active_regions=4",
+                                   "set_active_regions=oops")
+        with self.assertRaisesRegex(ParseError, "not an integer"):
+            self.adapter.parse_realized(bad_active)
+
+    def test_parse_realized_invariants_with_expected(self):
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=4 set_target_region_nodes=2,2,2,2 "
+            "set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        expected = {"set_window": 8, "set_regions": 4,
+                    "set_region_scope": -1, "set_nsets": 0}
+        # 一致例（sum=8==window）通过：
+        self.assertEqual(
+            self.adapter.parse_realized(stdout, expected)["set_active_regions"], 4)
+        # sum 违例：
+        bad = stdout.replace("set_target_region_nodes=2,2,2,2",
+                             "set_target_region_nodes=3,3,3,3")
+        with self.assertRaisesRegex(ParseError, "node sum"):
+            self.adapter.parse_realized(bad, expected)
+        # scope 隔离违例
+        iso_bad = stdout.replace("set_region_scope=-1", "set_region_scope=1")
+        with self.assertRaisesRegex(ParseError, "scope isolation"):
+            self.adapter.parse_realized(iso_bad,
+                                        {**expected, "set_region_scope": 1})
+
 
 if __name__ == "__main__":
     unittest.main()

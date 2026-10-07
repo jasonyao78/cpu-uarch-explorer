@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+import json
 import math
 from pathlib import Path
 
@@ -288,7 +289,7 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
             aux_before[aux["name"]] = r.stdout.strip()[:200]
 
     sample_metrics: list[tuple[int, str, list[dict]]] = []
-    first_ok_stdout: str | None = None
+    realized_per_sample: list[tuple[int, str, dict]] = []
     raw_refs: list[str] = []
     first_failure: dict | None = None
     raw_command = ""
@@ -306,8 +307,22 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
             # MB-06：requested→realized 一致性核验——plan case_params 随
             # 解析传入，探针自描述与请求不符即 ParseError（执行漂移不进证据）
             metrics = adapter.parse_output(result.stdout, result.stderr, params)
-            if first_ok_stdout is None:
-                first_ok_stdout = result.stdout
+            # RPA-03：每次进程解析阶段取 realized 并绑定 sample_index——
+            # 首样本不代表全部；跨进程域不一致 → 混域命名状态（见聚合处）。
+            # 防御：realized 解析的任何异常统一转结构化失败（评审复现的
+            # ValueError 逃逸随此消除），不信任第三方 adapter 只抛 ParseError。
+            parse_realized = getattr(adapter, "parse_realized", None)
+            if parse_realized is not None:
+                try:
+                    realized_i = parse_realized(result.stdout, params)
+                except Exception as exc:
+                    if first_failure is None:
+                        first_failure = {"reason": "realized-parse-error",
+                                         "detail": str(exc)}
+                    continue
+                if realized_i:
+                    realized_per_sample.append(
+                        (sample_index, raw_refs[-1], realized_i))
             sample_metrics.append((sample_index, raw_refs[-1], metrics))
         except ParseError as e:
             if first_failure is None:
@@ -365,14 +380,25 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
         except ParseError as error:
             first_failure = {"reason": "metric-aggregation-error", "detail": str(error)}
         else:
-            # PA-02：realized descriptor 随结构化记录持久化（requested=params
-            # 已入档；realized=探针自描述激励审计，schema 登记扩展）。
-            parse_realized = getattr(adapter, "parse_realized", None)
-            realized = parse_realized(first_ok_stdout or "") \
-                if parse_realized is not None else {}
+            # PA-02/RPA-03：realized descriptor 随结构化记录持久化（requested=
+            # params 已入档；realized=探针自描述激励审计，schema 登记扩展）。
+            # 逐样本闭环：全部一致 → 公共值；不一致 → 逐样本列表 + 混域
+            # 命名状态（数据不丢，A1 判据入口据此拒绝，不静默采纳首样本）。
             probe_block = dict(probe_meta)
-            if realized:
-                probe_block["realized"] = realized
+            if realized_per_sample:
+                canonical = [
+                    json.dumps(r, sort_keys=True)
+                    for _, _, r in realized_per_sample]
+                if len(set(canonical)) <= 1:
+                    probe_block["realized"] = realized_per_sample[0][2]
+                else:
+                    probe_block["realized"] = {
+                        "domain_consistent": False,
+                        "samples": [
+                            {"sample_index": si, "raw_sample_ref": ref,
+                             "realized": r}
+                            for si, ref, r in realized_per_sample],
+                    }
             return build_run_record(
                 status="ok", target=platform["target"], probe=probe_block,
                 environment=env, params=params, params_provenance=provenance,
