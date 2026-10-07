@@ -216,3 +216,12 @@
 | 0x2d 判据口径（总竞争条目数） | 冒烟实测 0x2d 跳变点提前至 w=8（filler 512 下总竞争条目 ≠ w）；naive "w≤≈0 才跳" 预期不成立，Q-B 判据须按总竞争条目数口径写 | 触发：M0-5 pilot 判据冻结前（与 MB-08 阈值冻结联动） | ⬜ 待办 |
 | PerfWindow 真机 GROUP read 首验 | S6 按 runbook 跳过；生产 PerfWindow 的 nr/ena/run/values 布局真机复核未做 | 触发：M0-3/4 代码侧出口验收证据（评审方闭环清单） | ⬜ 待办 |
 | runbook §2 与现状不符 | ① .c 须用 clang（clang++ 触发 -Werror=deprecated）；② android-arm64 preset 不存在 | — | ✅ 已关闭（runbook 本次修订） |
+
+## REV-MB06-PHASE-A-20261007 送审包复核遗留
+
+- **归属/输入**：SM8650 TLB r2；r2 `d086173`、m0b `0b8c8b1`、main `9093f4a`；[正式复核](reviews/2026-10-07-mb06-oi13-phase-a-review.md)。本段为评审方更新，历史作者回执保留；最新出口裁定以本段为准。
+- **可关闭**：MB-03 原消费/通用 ID 缺陷、MB-07 原缺点报告误称重判缺陷。本轮针对性路径 4/4、main+m0b 图表 24/24；缺口反例受控披露，完整历史四图+报告 5/5 字节一致。
+- **P1 / Phase A 正式采样前关闭**：PA-01 完整残差身份导出及二次聚合守卫；PA-02 请求模式核验、关键参数/事件与 realized descriptor 持久化；PA-03 实际跨区域取样与 active-domain 审计；PA-04 A1 冲突分区可识别性证明、隔离/全域配对及扫描矩阵；PA-05 A3 估计量重订、N-set 实现与阈值两侧覆盖，收紧“结构验证通过”命名。
+- **P2/口径及触发**：PA-06 OI-13 保持部分关闭，extras 派生/消费在首个正式新事件组使用前完成或正式拆分跟踪；旧“图表 1 failure”叙述移除。PA-07 递归 typed canonical identity 在结构化 descriptor 正式使用前完成。PA-08 ProbeAdapter 第三参 Protocol 在新 ROB/ALU/FPU adapter 接入前同步。PA-09 3/轮的重复汇总/边际/删失/种子计数规则在正式矩阵前冻结。
+- **出口裁定**：本包不通过，Phase A 不冻结；MB-03/07 清零不代替本轮新 P1 清零。两层集成可用于修复和软件组合验证，不能视为正式矩阵放行。MB-04 对旧显式身份的既有关闭保留，但新增残差身份已使守卫范围不足（PA-01）。
+- **新证据边界**：m0b runner182/analysis153/CTest19、main analysis170；旧战役51 runs/295 records规范化分析与cohort一致（完整AnalysisResult新增identity，不能无条件称逐字相同）；生产选址函数16/16合成布局只访问region0；pilot结构化记录0/14含set_domain。NDK仅目标语法检查，无adb/手机执行；上板验证由其他Agent负责。本次仅提交评审产物，不代修生产代码。

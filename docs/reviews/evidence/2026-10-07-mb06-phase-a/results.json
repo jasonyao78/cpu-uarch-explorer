@@ -1,0 +1,1304 @@
+{
+  "tree_head": "0b8c8b1fba60836af96f6d04dfb3507d841b93d2",
+  "main_head": "9093f4a48331b262f37338d059487c557df70abd",
+  "scope": "synthetic software checks and archived public data replay; no board/PMU execution",
+  "residual_identity": {
+    "groups": 2,
+    "exported_identity": [
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null
+      },
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null
+      }
+    ],
+    "per_group_cycles": [
+      0.031280517578125,
+      100.0
+    ],
+    "chart": {
+      "ok": true,
+      "value": [
+        [
+          512,
+          50.01564025878906
+        ]
+      ]
+    },
+    "cohort": {
+      "ok": true,
+      "value": [
+        4
+      ]
+    }
+  },
+  "bool_int_groups": 2,
+  "same_json_object_different_order_groups": 2,
+  "descriptor": {
+    "matching_but_missing_requested_event": {
+      "ok": true,
+      "value": [
+        {
+          "name": "window_valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_invalid_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_mux_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "probe_latency_ns",
+          "value": 1500.0,
+          "unit": "ns"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.count",
+          "value": 8.0,
+          "unit": "events"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        }
+      ]
+    },
+    "target_mismatch": {
+      "ok": false,
+      "exception": "ParseError",
+      "message": "tlb-set descriptor mismatch: set_target='99' != requested set_target=7"
+    },
+    "wrong_mode_legacy_latency": {
+      "ok": true,
+      "value": [
+        {
+          "name": "latency_ns",
+          "value": 1.25,
+          "unit": "ns"
+        }
+      ]
+    },
+    "wrong_regions_filler_seed_scatter": {
+      "ok": true,
+      "value": [
+        {
+          "name": "window_valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_invalid_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_mux_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "probe_latency_ns",
+          "value": 1500.0,
+          "unit": "ns"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.count",
+          "value": 8.0,
+          "unit": "events"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        }
+      ]
+    },
+    "fallback_domain": {
+      "ok": true,
+      "value": [
+        {
+          "name": "window_valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_invalid_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_mux_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "probe_latency_ns",
+          "value": 1500.0,
+          "unit": "ns"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.count",
+          "value": 8.0,
+          "unit": "events"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        }
+      ]
+    }
+  },
+  "mb03_chains": {
+    "ok": false,
+    "exception": "RunnerError",
+    "message": "probe_shape 'ptr_chase' does not consume params ['chains']; register them in the shape's deriver with real probe support or drop them"
+  },
+  "mb03_unknown": {
+    "ok": false,
+    "exception": "RunnerError",
+    "message": "probe_shape 'ptr_chase' does not consume params ['unknown']; register them in the shape's deriver with real probe support or drop them"
+  },
+  "legacy_replay": [
+    {
+      "run": "20260929T143631Z-ptr-chase-sm8650-x4-tlb-ctrl",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T144937Z-ptr-chase-sm8650-x4-tlb-ctrl-g1",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T145255Z-ptr-chase-sm8650-x4-tlb-ctrl-g2",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T145432Z-ptr-chase-sm8650-x4-tlb-ctrl-g4",
+      "records": 4,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T145551Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T145659Z-ptr-chase-sm8650-x4-tlb-overhead",
+      "records": 24,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T150212Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp-walk",
+      "records": 1,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T181512Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T181521Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T181716Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T182214Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T182223Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T182418Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T235909Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T235918Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T235927Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T235938Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T235948Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260929T235957Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T004833Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T005033Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T010800Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+      "records": 32,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T011025Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T011631Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T011639Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T011814Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T012107Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T012117Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T012253Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T012815Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T012824Z-ptr-chase-sm8650-x4-tlb-assoc-g2",
+      "records": 6,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T012852Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T012902Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T012912Z-ptr-chase-sm8650-x4-tlb-assoc-g3",
+      "records": 6,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T012939Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T013628Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T013636Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "records": 12,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T013724Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T013733Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T013743Z-ptr-chase-sm8650-x4-tlb-thp-madvise",
+      "records": 12,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T013829Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T014005Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T014014Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "records": 12,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T014103Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T051530Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T051540Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20260930T051715Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20261007T111626Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    },
+    {
+      "run": "20261007T111952Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "raw_analysis_equal": false,
+      "analysis_same_after_empty_identity_removal": true,
+      "cohort_same": true
+    }
+  ],
+  "probe_source_sha256": "d3e1228d6ab03d6831cc83ad3821d004776171bd3ab316ffecff4e92fb0dadc0",
+  "selection_compile": {
+    "rc": 0,
+    "stderr": ""
+  },
+  "region_selection_output": "H=1 T=7 selected=12 active_region_mask=1 same_as_isolated0=1\nH=1 T=42 selected=12 active_region_mask=1 same_as_isolated0=1\nH=1 T=100 selected=12 active_region_mask=1 same_as_isolated0=1\nH=1 T=200 selected=12 active_region_mask=1 same_as_isolated0=1\nH=2 T=7 selected=12 active_region_mask=1 same_as_isolated0=1\nH=2 T=42 selected=12 active_region_mask=1 same_as_isolated0=1\nH=2 T=100 selected=12 active_region_mask=1 same_as_isolated0=1\nH=2 T=200 selected=12 active_region_mask=1 same_as_isolated0=1\nH=3 T=7 selected=12 active_region_mask=1 same_as_isolated0=1\nH=3 T=42 selected=12 active_region_mask=1 same_as_isolated0=1\nH=3 T=100 selected=12 active_region_mask=1 same_as_isolated0=1\nH=3 T=200 selected=12 active_region_mask=1 same_as_isolated0=1\nH=4 T=7 selected=12 active_region_mask=1 same_as_isolated0=1\nH=4 T=42 selected=12 active_region_mask=1 same_as_isolated0=1\nH=4 T=100 selected=12 active_region_mask=1 same_as_isolated0=1\nH=4 T=200 selected=12 active_region_mask=1 same_as_isolated0=1\n",
+  "pilot_record_contract": [
+    {
+      "run": "20261007T111728Z-ptr-chase-sm8650-x4-tlb-pilot-g03-empty",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 20,
+        "set_target": 7,
+        "set_window": 0
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111748Z-ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 10,
+        "set_scatter": 0,
+        "set_target": 7,
+        "set_window": 8
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111748Z-ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 10,
+        "set_scatter": 1,
+        "set_target": 7,
+        "set_window": 8
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111748Z-ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 40,
+        "set_scatter": 0,
+        "set_target": 7,
+        "set_window": 8
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111748Z-ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 40,
+        "set_scatter": 1,
+        "set_target": 7,
+        "set_window": 8
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111824Z-ptr-chase-sm8650-x4-tlb-pilot-b1",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 20,
+        "set_target": 7,
+        "set_window": 1
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111824Z-ptr-chase-sm8650-x4-tlb-pilot-b1",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 20,
+        "set_target": 7,
+        "set_window": 2
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111824Z-ptr-chase-sm8650-x4-tlb-pilot-b1",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 20,
+        "set_target": 7,
+        "set_window": 4
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111824Z-ptr-chase-sm8650-x4-tlb-pilot-b1",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 20,
+        "set_target": 7,
+        "set_window": 6
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111824Z-ptr-chase-sm8650-x4-tlb-pilot-b1",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 20,
+        "set_target": 7,
+        "set_window": 8
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111824Z-ptr-chase-sm8650-x4-tlb-pilot-b1",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 20,
+        "set_target": 7,
+        "set_window": 9
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111824Z-ptr-chase-sm8650-x4-tlb-pilot-b1",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 20,
+        "set_target": 7,
+        "set_window": 10
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111824Z-ptr-chase-sm8650-x4-tlb-pilot-b1",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 20,
+        "set_target": 7,
+        "set_window": 12
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    },
+    {
+      "run": "20261007T111824Z-ptr-chase-sm8650-x4-tlb-pilot-b1",
+      "status": "ok",
+      "params": {
+        "base_pages": 1,
+        "pmu_events": [
+          {
+            "name": "cycles",
+            "type": 8,
+            "config": 17
+          },
+          {
+            "name": "l1d_tlb_refill",
+            "type": 8,
+            "config": 5
+          },
+          {
+            "name": "l2d_tlb_refill",
+            "type": 8,
+            "config": 45
+          },
+          {
+            "name": "l2d_tlb",
+            "type": 8,
+            "config": 47
+          }
+        ],
+        "seed": 42,
+        "set_filler_pages": 512,
+        "set_hypothesis": 1,
+        "set_pool_pages": 65536,
+        "set_regions": 4,
+        "set_rounds": 20,
+        "set_target": 7,
+        "set_window": 16
+      },
+      "serialized_realized_domain": false,
+      "metrics": [
+        "window_valid_rounds",
+        "window_invalid_rounds",
+        "window_mux_rounds",
+        "probe_latency_ns",
+        "pmu.cycles.count",
+        "pmu.cycles.valid_rounds",
+        "pmu.l1d_tlb_refill.count",
+        "pmu.l1d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb_refill.count",
+        "pmu.l2d_tlb_refill.valid_rounds",
+        "pmu.l2d_tlb.count",
+        "pmu.l2d_tlb.valid_rounds"
+      ]
+    }
+  ],
+  "main_overlay_tests": {
+    "tests": 24,
+    "failures": 0,
+    "errors": 0,
+    "log": "........................\n----------------------------------------------------------------------\nRan 24 tests in 0.071s\n\nOK\n"
+  },
+  "mb03_targeted_tests": {
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "log": "test_unknown_swept_param_rejected_at_plan_time (runner.tests.test_plan.TestPlan.test_unknown_swept_param_rejected_at_plan_time) ... ok\ntest_generic_shape_id_independent_of_chase_geometry (runner.tests.test_plan.TestPlan.test_generic_shape_id_independent_of_chase_geometry) ... ok\ntest_generic_shape_id_supports_structured_common_params (runner.tests.test_plan.TestPlan.test_generic_shape_id_supports_structured_common_params) ... ok\ntest_tlb_set_shape_registered_deriver_end_to_end (runner.tests.test_plan.TestPlan.test_tlb_set_shape_registered_deriver_end_to_end) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n"
+  },
+  "mb07_onset_gap": {
+    "rc": 0,
+    "stderr": "note: 22 degraded point(s) skipped from curves: [{'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 4096, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 4096, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 8192, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 8192, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 16384, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 16384, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}]\n",
+    "historical_disclosure": true,
+    "unsupported_interval_marked": true,
+    "false_readjudication_claim": false
+  },
+  "complete_render_replay": {
+    "old_rc": 0,
+    "new_rc": 0,
+    "files": {
+      "refill-density.svg": true,
+      "walk-onset.svg": true,
+      "latency-cycles.svg": true,
+      "thp-cohort.svg": true,
+      "report.md": true
+    }
+  }
+}

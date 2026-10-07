@@ -1,0 +1,7 @@
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/build/macos-arm64/release
+[ 25%] Built target timer_resolution
+[ 50%] Built target qos_steering
+[ 75%] Built target ptr_chase
+[100%] Built target perf_window_golden

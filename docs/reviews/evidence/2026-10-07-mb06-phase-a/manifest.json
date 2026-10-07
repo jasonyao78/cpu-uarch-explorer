@@ -1,0 +1,63 @@
+{
+  "review_date": "2026-10-07",
+  "input_commits": {
+    "r2": "d086173d844397cae9b81cbf91b6b8416f99969d",
+    "m0b": "0b8c8b1fba60836af96f6d04dfb3507d841b93d2",
+    "main": "9093f4a48331b262f37338d059487c557df70abd"
+  },
+  "scope": "Software review, synthetic fixtures and archived public data only; no adb/device/perf execution",
+  "checks": [
+    {
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "command": "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python -m unittest discover -s analysis/tests -t .",
+      "exit_code": 0,
+      "count": 153
+    },
+    {
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "command": "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python -m unittest discover -s runner/tests -t .",
+      "exit_code": 0,
+      "count": 182
+    },
+    {
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "command": "cmake --preset macos-arm64-release && cmake --build --preset macos-arm64-release",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "command": "ctest --preset macos-arm64-release",
+      "exit_code": 0,
+      "count": 19
+    },
+    {
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer",
+      "command": "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python -m unittest discover -s analysis/tests -t .",
+      "exit_code": 0,
+      "count": 170
+    },
+    {
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "command": "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android29-clang++ -std=c++17 -fsyntax-only -DCPU_UARCH_HAVE_LINUX_PERF=1 -I probes/common -I probes/platform/linux probes/cache-mem/ptr_chase.cpp probes/tests/perf_window_golden.cpp",
+      "exit_code": 0
+    },
+    {
+      "command": "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/scripts/review_mb06_phasea_20261007.py --tree /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b --main-tree /Users/michaelyao/workspace/cpu-uarch-explorer --out /private/tmp/20261007-review-results.json",
+      "exit_code": 0,
+      "meaning": "diagnostics completed; defects reproduced, package not approved"
+    }
+  ],
+  "sha256": {
+    "docs/reviews/2026-10-07-mb06-oi13-phase-a-review.md": "d0be9d6bbc0daf8713766de03f065160e6dbcff9bd770c755f5269c496bc1ea7",
+    "scripts/review_mb06_phasea_20261007.py": "11e86d6e0bcca8bc813ce098e3f993ed8a5c4a0592638327252784b4c5b6e44e",
+    "docs/reviews/evidence/2026-10-07-mb06-phase-a/README.md": "4355ae4ae74c231bf53cc31f16ad2aac8db82414faf17451968afbf2cd755054",
+    "docs/reviews/evidence/2026-10-07-mb06-phase-a/analysis.log": "49dc800f7f2c17d000e74de49a0d6a4ec1c2f4174bdcf421879c8a465e57598d",
+    "docs/reviews/evidence/2026-10-07-mb06-phase-a/build.log": "f2d8aa927047f67034eed4a0f666088171ba56b9556feabdd7ff27ff579da529",
+    "docs/reviews/evidence/2026-10-07-mb06-phase-a/ctest.log": "f174eb6b8515c73d0dee050ab754d0a673a4d40bbb9b0f457de4716490aaf7b3",
+    "docs/reviews/evidence/2026-10-07-mb06-phase-a/diagnostics.log": "72faff96aebcd8f895f2152e17d1471814b32e3b77f5283517f0c5b44994899d",
+    "docs/reviews/evidence/2026-10-07-mb06-phase-a/main-analysis.log": "7ca0fb15e63fb02d9ed418921845b605d8423916b76f5f7f1c7ed7ff328cd905",
+    "docs/reviews/evidence/2026-10-07-mb06-phase-a/ndk-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/reviews/evidence/2026-10-07-mb06-phase-a/results.json": "4b45844f804f2f55eed4cf83c7a3c87498217e50117a532fa0f0fae419beacf9",
+    "docs/reviews/evidence/2026-10-07-mb06-phase-a/runner.log": "050425f4f270ed93ab294df28d48a4fa9ebc98dd6129a33ff852b67e90d32885"
+  }
+}

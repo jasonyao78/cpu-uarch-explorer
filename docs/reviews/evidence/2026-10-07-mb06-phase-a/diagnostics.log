@@ -1,0 +1,213 @@
+{
+  "tree_head": "0b8c8b1fba60836af96f6d04dfb3507d841b93d2",
+  "main_head": "9093f4a48331b262f37338d059487c557df70abd",
+  "scope": "synthetic software checks and archived public data replay; no board/PMU execution",
+  "residual_identity": {
+    "groups": 2,
+    "exported_identity": [
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null
+      },
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null
+      }
+    ],
+    "per_group_cycles": [
+      0.031280517578125,
+      100.0
+    ],
+    "chart": {
+      "ok": true,
+      "value": [
+        [
+          512,
+          50.01564025878906
+        ]
+      ]
+    },
+    "cohort": {
+      "ok": true,
+      "value": [
+        4
+      ]
+    }
+  },
+  "bool_int_groups": 2,
+  "same_json_object_different_order_groups": 2,
+  "descriptor": {
+    "matching_but_missing_requested_event": {
+      "ok": true,
+      "value": [
+        {
+          "name": "window_valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_invalid_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_mux_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "probe_latency_ns",
+          "value": 1500.0,
+          "unit": "ns"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.count",
+          "value": 8.0,
+          "unit": "events"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        }
+      ]
+    },
+    "target_mismatch": {
+      "ok": false,
+      "exception": "ParseError",
+      "message": "tlb-set descriptor mismatch: set_target='99' != requested set_target=7"
+    },
+    "wrong_mode_legacy_latency": {
+      "ok": true,
+      "value": [
+        {
+          "name": "latency_ns",
+          "value": 1.25,
+          "unit": "ns"
+        }
+      ]
+    },
+    "wrong_regions_filler_seed_scatter": {
+      "ok": true,
+      "value": [
+        {
+          "name": "window_valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_invalid_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_mux_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "probe_latency_ns",
+          "value": 1500.0,
+          "unit": "ns"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.count",
+          "value": 8.0,
+          "unit": "events"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        }
+      ]
+    },
+    "fallback_domain": {
+      "ok": true,
+      "value": [
+        {
+          "name": "window_valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_invalid_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "window_mux_rounds",
+          "value": 0.0,
+          "unit": "rounds"
+        },
+        {
+          "name": "probe_latency_ns",
+          "value": 1500.0,
+          "unit": "ns"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.count",
+          "value": 8.0,
+          "unit": "events"
+        },
+        {
+          "name": "pmu.l1d_tlb_refill.valid_rounds",
+          "value": 19.0,
+          "unit": "rounds"
+        }
+      ]
+    }
+  },
+  "mb03_chains": {
+    "ok": false,
+    "exception": "RunnerError",
+    "message": "probe_shape 'ptr_chase' does not consume params ['chains']; register them in the shape's deriver with real probe support or drop them"
+  },
+  "mb03_unknown": {
+    "ok": false,
+    "exception": "RunnerError",
+    "message": "probe_shape 'ptr_chase' does not consume params ['unknown']; register them in the shape's deriver with real probe support or drop them"
+  },
+  "probe_source_sha256": "d3e1228d6ab03d6831cc83ad3821d004776171bd3ab316ffecff4e92fb0dadc0",
+  "selection_compile": {
+    "rc": 0,
+    "stderr": ""
+  },
+  "region_selection_output": "H=1 T=7 selected=12 active_region_mask=1 same_as_isolated0=1\nH=1 T=42 selected=12 active_region_mask=1 same_as_isolated0=1\nH=1 T=100 selected=12 active_region_mask=1 same_as_isolated0=1\nH=1 T=200 selected=12 active_region_mask=1 same_as_isolated0=1\nH=2 T=7 selected=12 active_region_mask=1 same_as_isolated0=1\nH=2 T=42 selected=12 active_region_mask=1 same_as_isolated0=1\nH=2 T=100 selected=12 active_region_mask=1 same_as_isolated0=1\nH=2 T=200 selected=12 active_region_mask=1 same_as_isolated0=1\nH=3 T=7 selected=12 active_region_mask=1 same_as_isolated0=1\nH=3 T=42 selected=12 active_region_mask=1 same_as_isolated0=1\nH=3 T=100 selected=12 active_region_mask=1 same_as_isolated0=1\nH=3 T=200 selected=12 active_region_mask=1 same_as_isolated0=1\nH=4 T=7 selected=12 active_region_mask=1 same_as_isolated0=1\nH=4 T=42 selected=12 active_region_mask=1 same_as_isolated0=1\nH=4 T=100 selected=12 active_region_mask=1 same_as_isolated0=1\nH=4 T=200 selected=12 active_region_mask=1 same_as_isolated0=1\n",
+  "main_overlay_tests": {
+    "tests": 24,
+    "failures": 0,
+    "errors": 0,
+    "log": "........................\n----------------------------------------------------------------------\nRan 24 tests in 0.071s\n\nOK\n"
+  },
+  "mb03_targeted_tests": {
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "log": "test_unknown_swept_param_rejected_at_plan_time (runner.tests.test_plan.TestPlan.test_unknown_swept_param_rejected_at_plan_time) ... ok\ntest_generic_shape_id_independent_of_chase_geometry (runner.tests.test_plan.TestPlan.test_generic_shape_id_independent_of_chase_geometry) ... ok\ntest_generic_shape_id_supports_structured_common_params (runner.tests.test_plan.TestPlan.test_generic_shape_id_supports_structured_common_params) ... ok\ntest_tlb_set_shape_registered_deriver_end_to_end (runner.tests.test_plan.TestPlan.test_tlb_set_shape_registered_deriver_end_to_end) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n"
+  },
+  "mb07_onset_gap": {
+    "rc": 0,
+    "stderr": "note: 22 degraded point(s) skipped from curves: [{'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 4096, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 4096, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 8192, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 8192, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 16384, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse', 'buffer_kb': 16384, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 4096, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 10240, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 12288, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 7, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 42, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 1337, 'field': 'dtlb_walk_per_1k'}, {'run': '20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense', 'buffer_kb': 14336, 'seed': 20260928, 'field': 'dtlb_walk_per_1k'}]\n",
+    "historical_disclosure": true,
+    "unsupported_interval_marked": true,
+    "false_readjudication_claim": false
+  },
+  "complete_render_replay": {
+    "old_rc": 0,
+    "new_rc": 0,
+    "files": {
+      "refill-density.svg": true,
+      "walk-onset.svg": true,
+      "latency-cycles.svg": true,
+      "thp-cohort.svg": true,
+      "report.md": true
+    }
+  }
+}
+legacy replay: 51 analysis same: 51 cohort same: 51
+pilot records: 14 serialized domain: 0
