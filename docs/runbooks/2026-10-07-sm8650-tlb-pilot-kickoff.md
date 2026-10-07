@@ -39,7 +39,8 @@ ENV="--environment-profile charging-thermal --allow-mutation"
 cd ~/workspace/cpu-uarch-explorer-tlb-r2-m0b
 
 # 0) 块前锚点（战役纪律：块主体 run 前后各一次；充电态锚点与主体同 regime）
-$PY -m runner.cli plan --experiment configs/experiments/ptr-chase-sm8650-x4-tlb-anchor.json --platform $PLAT $ENV   # 先预览
+#    注：--allow-mutation 只是 run 的授权门，plan 预览不要带它
+$PY -m runner.cli plan --experiment configs/experiments/ptr-chase-sm8650-x4-tlb-anchor.json --platform $PLAT   # 先预览
 $PY -m runner.cli run  --experiment configs/experiments/ptr-chase-sm8650-x4-tlb-anchor.json --platform $PLAT $ENV
 
 # 1) G0-3 空窗底噪（1 case）
