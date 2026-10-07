@@ -63,7 +63,7 @@
 ## 锚点
 
 - 概念权威：`docs/cpu-uarch-deep-analysis/tlb-deep-analysis/TLB微架构深度分析报告.md` v1.6（§1 原理、§2.6 事件语义、§3.4 结构、§2.7 walk cache）
-- 判据权威：任务书 v1.5（`docs/tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md`）§1.2/§5
+- 判据权威：任务书 v1.6（`docs/tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md`）§1.2/§5
 - 战役终审：`docs/reviews/2026-09-28-sm8650-tlb-hierarchy.md`
 - 数据：战役 run 见 `data/public/runs/202609*`；pilot 五段见 `data/public/runs/20261007T*`（m0b worktree）；冒烟记录 `docs/runbooks/2026-10-01-sm8650-tlb-r2-preboard.md` §6
 - 相邻页：`01-pointer-chase.md`（延迟测量法）、`02-timing-and-statistics.md`（计时统计）、`docs/glossary.md`（术语速查）
