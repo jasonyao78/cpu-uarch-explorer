@@ -123,6 +123,8 @@
 
 **判读口径登记**：0x2d 判据按**总竞争条目数**写（SMOKE-20261001：filler 过滤目标 set 后竞争 = W；冒烟实测跳变提前至 W=8 属预期形态，不改 B1 估计量）；F5 负值纪律适用（减法后负值保留解释，不截零）。
 
+**充电态热策略协议（2026-10-07 增补，用户拍板：USB 充电为必须行为）**：不等待拔充电器、不写 sysfs、不改平台期望值。平台新增 `charging-thermal` 环境 profile（m0b `31c333a`）——policy0/2/5 的 scaling_max 被 MIUI 热策略压制登记为**显式接受的非基线条件**，从违规降级为命名告警（`accepted-nonbaseline:*` 随 record 入档，实际值全量留痕）；**硬护栏**：测量核 policy7 永不降级（cap 迁移到 X4 才是有效性威胁，代码层强制：全 policy 接纳 = 配置错误），governor/温度/唤醒态等非频率项不受降级影响。判读边界：充电态 pilot 与 campaign 1（电池态）基线**不跨 regime 直接比**；锚点池只用同 regime（充电态）锚点。pilot 上板统一用 `--environment-profile charging-thermal --allow-mutation`（kickoff 已更新）。
+
 **遗留接口**：pilot 记录 metrics 为 `pmu.*.count` 窗口语义，分析器 G0 精确集不适用——pilot 判读按 Phase C 披露的直接提取复刻执行，**OI-13 关闭前**不用 `analyze_records` 主体路径（与评审 §4 边界一致）。MB-06 descriptor 契约仍是 Phase A/K 链正式采样前的关闭项。
 > 修订依据：外部评审 REV-TLB-R2-20260930（第一性原理评审，13 项发现 F1–F9/R1–R4；归档于本分支 `docs/reviews/2026-09-30-sm8650-tlb-r2-first-principles.md`，合成复核脚本 `scripts/review_sm8650_tlb_r2.py`）。**逐条处置见 §10.3 修订映射**。
 > 基线：`main @ 9316853`（第一次战役集成终点；main 此后已推进 `459b135..bc96ff1` 图表报告工作，Phase D 前须同步）。
