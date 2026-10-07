@@ -230,7 +230,7 @@ constexpr size_t kRegionStridePages = 65536;  // 2^28 B = 256MiB：相邻区域 
 
 struct SetModeOptions {
     int hypothesis = 0;        // 1..4（必填）
-    uint32_t target = 0;       // 目标 set（必填，< kTlbSets）
+    uint32_t target = 0;       // 目标 set（nsets=0 时必填，< kTlbSets）
     bool have_target2 = false; // T2 对照组（原型 P0-3：真实第二组）
     uint32_t target2 = 0;
     long long window = -1;     // 每轮 probe 访问数 W（必填，>=0；0=空窗）
@@ -239,6 +239,8 @@ struct SetModeOptions {
     long long filler_pages = 512; // prime 驱逐链页数（原型 P0-1/P0-2 语义）
     int regions = 4;           // F4 多区域数（1 = 显式单区域）
     bool scatter = false;      // 无冲突负控：W 页各落不同 set
+    int region_scope = -1;     // 收集范围：-1=全域配额取样；0..K-1=仅该区域
+    int nsets = 0;             // N-set 模式：>0 时收集 set 0..nsets-1 各 W 页
 };
 
 // 候选索引假设 H1~H4：一律对最终虚拟地址计算（原型评审 R1/R3 修复口径）
@@ -255,43 +257,60 @@ uint32_t tlb_set_index(int hypothesis, uintptr_t va) {
 
 struct TlbRegion { char* base; size_t pages; };
 
-// 跨多区域收集同 set 地址：区域内按桶取样保留高字段多样性（原型 R3 修复），
-// 区域间天然跨越 VPN 高字段（F4）。need<=0 由调用点守卫（空窗模式不收集）。
+// 跨多区域收集同 set 地址：PA-03 修订——**每区域配额**（need/K，余数末区），
+// 域内按桶取样保留高字段多样性；区域间天然跨越 VPN 高字段（F4）。
+// 预约成功 ≠ 激励成立：必须实际跨高字段取样，并输出每区域节点数审计。
+// need<=0 由调用点守卫（空窗模式不收集）；选不足由调用点结构化失败。
 int collect_set_addrs(int H, uint32_t target, int need,
                       const std::vector<TlbRegion>& regions,
-                      std::vector<uintptr_t>* vas) {
+                      std::vector<uintptr_t>* vas,
+                      std::vector<int>* per_region_counts) {
     if (need <= 0) return 0;
+    const size_t k = regions.size();
+    const int base_quota = need / static_cast<int>(k);
+    const int remainder = need % static_cast<int>(k);
     int found = 0;
-    for (const TlbRegion& region : regions) {
-        const uint64_t total = region.pages;
-        uint64_t bucket = total / static_cast<uint64_t>(need);
-        if (bucket == 0) bucket = 1;
+    for (size_t r = 0; r < k; ++r) {
+        const int quota = base_quota + (r + 1 == k ? remainder : 0);
+        if (quota <= 0) { per_region_counts->push_back(0); continue; }
+        const TlbRegion& region = regions[r];
         int region_found = 0;
-        for (uint64_t i = 1; i < total && found < need; ++i) {
+        uint64_t bucket = region.pages / static_cast<uint64_t>(quota);
+        if (bucket == 0) bucket = 1;
+        for (uint64_t i = 1; i < region.pages && region_found < quota; ++i) {
             if (i < static_cast<uint64_t>(region_found) * bucket) continue;
             const uintptr_t va = reinterpret_cast<uintptr_t>(region.base)
                                + i * 4096u;
             if (tlb_set_index(H, va) != target) continue;
             int dup = 0;
-            for (int k = 0; k < found; ++k)
-                if ((*vas)[k] == va) { dup = 1; break; }
+            for (size_t q = 0; q < vas->size(); ++q)
+                if ((*vas)[q] == va) { dup = 1; break; }
             if (!dup) { vas->push_back(va); ++found; ++region_found; }
         }
-        if (found >= need) break;
+        per_region_counts->push_back(region_found);
+        if (region_found < quota) return found;  // 早退：调用点按 found<need 失败
     }
     return found;
 }
 
 // 无冲突负控（G0-3）：每页落不同 set——W 次访问无自冲突，同长度窗口的
-// I 侧底噪/置换参照。
+// I 侧底噪/置换参照。同样按区域配额取样（PA-03），used[] 全域去重。
 int collect_scatter_addrs(int H, int need,
                           const std::vector<TlbRegion>& regions,
-                          std::vector<uintptr_t>* vas) {
+                          std::vector<uintptr_t>* vas,
+                          std::vector<int>* per_region_counts) {
     if (need <= 0) return 0;
     bool used[kTlbSets] = {};
+    const size_t k = regions.size();
+    const int base_quota = need / static_cast<int>(k);
+    const int remainder = need % static_cast<int>(k);
     int found = 0;
-    for (const TlbRegion& region : regions) {
-        for (uint64_t i = 1; i < region.pages && found < need; ++i) {
+    for (size_t r = 0; r < k; ++r) {
+        const int quota = base_quota + (r + 1 == k ? remainder : 0);
+        if (quota <= 0) { per_region_counts->push_back(0); continue; }
+        const TlbRegion& region = regions[r];
+        int region_found = 0;
+        for (uint64_t i = 1; i < region.pages && region_found < quota; ++i) {
             const uintptr_t va = reinterpret_cast<uintptr_t>(region.base)
                                + i * 4096u;
             const uint32_t s = tlb_set_index(H, va);
@@ -299,8 +318,10 @@ int collect_scatter_addrs(int H, int need,
             used[s] = true;
             vas->push_back(va);
             ++found;
+            ++region_found;
         }
-        if (found >= need) break;
+        per_region_counts->push_back(region_found);
+        if (region_found < quota) return found;
     }
     return found;
 }
@@ -327,6 +348,15 @@ int run_tlb_set_mode(const char* prog, const SetModeOptions& opt,
         die(prog, "set target must be < 256");
     if (opt.scatter && (opt.window < 1 || opt.window > (long long)kTlbSets))
         die(prog, "--set-scatter requires 1 <= --set-window <= 256");
+    if (opt.nsets > 0) {
+        // N-set 模式是独立估计量：不与 target/T2/scatter 组合（防语义叠加）
+        if (opt.have_target2 || opt.scatter)
+            die(prog, "--set-nsets is exclusive with --set-target2/--set-scatter");
+        if (opt.nsets > (int)kTlbSets)
+            die(prog, "--set-nsets must be <= 256");
+    }
+    if (opt.region_scope >= opt.regions)
+        die(prog, "--set-region-scope must be < --set-regions");
     if (pmu_requests.empty())
         die(prog, "tlb-set mode requires --pmu-event (0x05/0x2d/0x2f triple gate)");
     const long long base_page_bytes = sysconf(_SC_PAGESIZE);
@@ -402,17 +432,51 @@ int run_tlb_set_mode(const char* prog, const SetModeOptions& opt,
     }
 
     // ---- 目标地址收集（W=0 空窗不收集不建链）----
+    // region_scope：-1 = 全域配额取样（每区域 need/K）；>=0 = 仅该区域（
+    // A1 配对对照的隔离收集）。nsets>0 = N-set 模式：收集 set 0..nsets-1
+    // 各 W 页进一条链（A3 整体 translation reach 估计量）。
     std::vector<uintptr_t> vas, vas2;
+    std::vector<int> region_nodes;   // 每区域实际取样节点数（PA-03 审计）
+    std::vector<TlbRegion> collect_regions = regions;
+    if (opt.region_scope >= 0) {
+        if (opt.region_scope >= static_cast<int>(regions.size())) {
+            std::fprintf(stderr, "error: region_scope %d >= regions %zu\n",
+                         opt.region_scope, regions.size());
+            munmap(reservation, reservation_pages * 4096u);
+            return 1;
+        }
+        collect_regions = {regions[static_cast<size_t>(opt.region_scope)]};
+    }
     int got = 0, got2 = 0;
     if (opt.window > 0) {
         const int need = static_cast<int>(opt.window);
-        if (opt.scatter) {
-            got = collect_scatter_addrs(opt.hypothesis, need, regions, &vas);
+        if (opt.nsets > 0) {
+            // N-set 模式：nsets 个候选 set 各 need 页，链顺序按 set 序
+            for (int s = 0; s < opt.nsets; ++s) {
+                const int before = static_cast<int>(vas.size());
+                const int g = collect_set_addrs(opt.hypothesis,
+                                                static_cast<uint32_t>(s),
+                                                need, collect_regions, &vas,
+                                                &region_nodes);
+                if (g < need) {
+                    std::fprintf(stderr,
+                                 "error: nsets mode: only %d addrs for set %d "
+                                 "under H%d (increase --set-pool-pages)\n",
+                                 g, s, opt.hypothesis);
+                    munmap(reservation, reservation_pages * 4096u);
+                    return 1;
+                }
+                (void)before;
+            }
+            got = static_cast<int>(vas.size());
+        } else if (opt.scatter) {
+            got = collect_scatter_addrs(opt.hypothesis, need, collect_regions,
+                                        &vas, &region_nodes);
         } else {
             got = collect_set_addrs(opt.hypothesis, opt.target, need,
-                                    regions, &vas);
+                                    collect_regions, &vas, &region_nodes);
         }
-        if (got < need) {
+        if (opt.nsets <= 0 && got < need) {
             std::fprintf(stderr,
                          "error: only %d addrs for window %lld under H%d "
                          "(increase --set-pool-pages)\n",
@@ -423,7 +487,7 @@ int run_tlb_set_mode(const char* prog, const SetModeOptions& opt,
         build_chain(vas);
         if (opt.have_target2) {
             got2 = collect_set_addrs(opt.hypothesis, opt.target2, need,
-                                     regions, &vas2);
+                                     collect_regions, &vas2, &region_nodes);
             if (got2 < need) {
                 std::fprintf(stderr, "error: cannot collect T2 set %u under H%d\n",
                              opt.target2, opt.hypothesis);
@@ -440,8 +504,13 @@ int run_tlb_set_mode(const char* prog, const SetModeOptions& opt,
             build_chain(vas2);
         }
     }
+    // PA-03 审计：实际激励的区域数（region_nodes 为收集期逐区域计数；
+    // 空窗模式无收集 = 0 区域参与）
+    int active_regions = 0;
+    for (int n : region_nodes) if (n > 0) ++active_regions;
 
     // ---- filler：独立映射（与池天然不相交，P0-1），按候选 H 过滤目标 set ----
+    // N-set 模式过滤全部 nsets 个目标 set
     std::vector<uintptr_t> fvas;
     char* filler_map = nullptr;
     size_t filler_map_pages = 0;
@@ -466,11 +535,13 @@ int run_tlb_set_mode(const char* prog, const SetModeOptions& opt,
                                  + i * 4096u;
             if (va < reinterpret_cast<uintptr_t>(filler_map) || va >= fmap_end)
                 break;  // 双保险边界（原型 F3a）
-            if (!opt.scatter && tlb_set_index(opt.hypothesis, va) == opt.target)
+            const uint32_t fs = tlb_set_index(opt.hypothesis, va);
+            if (!opt.scatter && opt.nsets <= 0 && fs == opt.target)
                 continue;   // P0-2：filler 不占目标 set
-            if (opt.have_target2
-                    && tlb_set_index(opt.hypothesis, va) == opt.target2)
+            if (opt.nsets <= 0 && opt.have_target2 && fs == opt.target2)
                 continue;
+            if (opt.nsets > 0 && fs < static_cast<uint32_t>(opt.nsets))
+                continue;   // N-set 模式：filler 不占任何目标 set
             fvas.push_back(va);
         }
         if (static_cast<long long>(fvas.size()) < opt.filler_pages) {
@@ -607,14 +678,22 @@ int run_tlb_set_mode(const char* prog, const SetModeOptions& opt,
         return 1;
     }
 
+    // PA-02 修订：全量无条件自描述——requested 实验条件参数一律输出
+    //（含默认值与 0/1 旗标），realized 激励审计（active_regions/每区域
+    // 节点数）随记录入档；scatter 恒输出 0/1，不再有"未打印=未请求"。
     std::printf("mode=tlbset set_hypothesis=%d set_target=%u set_window=%lld "
-                "set_rounds=%lld set_filler=%lld set_regions=%d%s "
-                "set_domain=%s page_kb=4 seed=%llu "
+                "set_rounds=%lld set_pool_pages=%zu set_filler_pages=%lld "
+                "set_regions=%d scatter=%d set_region_scope=%d set_nsets=%d "
+                "set_active_regions=%d set_region_nodes=",
+                opt.hypothesis, opt.target,
+                opt.window, opt.rounds, opt.pool_pages, opt.filler_pages,
+                opt.regions, opt.scatter ? 1 : 0, opt.region_scope, opt.nsets,
+                active_regions);
+    for (size_t i = 0; i < region_nodes.size(); ++i)
+        std::printf("%s%d", i == 0 ? "" : ",", region_nodes[i]);
+    std::printf(" set_domain=%s page_kb=4 seed=%llu "
                 "window_valid_rounds=%lld window_invalid_rounds=%lld "
                 "window_mux_rounds=%lld valid_rounds=%lld probe_ns=%.0f",
-                opt.hypothesis, opt.target,
-                opt.window, opt.rounds, opt.filler_pages, opt.regions,
-                opt.scatter ? " scatter=1" : "",
                 set_domain, static_cast<unsigned long long>(seed),
                 valid_rounds, invalid_rounds, mux_rounds,
                 valid_rounds, probe_ns_sum / (opt.rounds - 1));
@@ -663,7 +742,8 @@ int main(int argc, char** argv) {
 
     enum : int { kPmuEvent = 1000, kTlbSetMode, kSetHypothesis, kSetTarget,
                  kSetTarget2, kSetWindow, kSetRounds, kSetPoolPages,
-                 kSetFiller, kSetRegions, kSetScatter };
+                 kSetFiller, kSetRegions, kSetScatter, kSetRegionScope,
+                 kSetNSets };
     const option long_options[] = {
         {"pmu-event", required_argument, nullptr, kPmuEvent},
         {"tlb-set-mode", no_argument, nullptr, kTlbSetMode},
@@ -676,6 +756,8 @@ int main(int argc, char** argv) {
         {"set-filler", required_argument, nullptr, kSetFiller},
         {"set-regions", required_argument, nullptr, kSetRegions},
         {"set-scatter", no_argument, nullptr, kSetScatter},
+        {"set-region-scope", required_argument, nullptr, kSetRegionScope},
+        {"set-nsets", required_argument, nullptr, kSetNSets},
         {nullptr, 0, nullptr, 0},
     };
     int opt;
@@ -726,6 +808,10 @@ int main(int argc, char** argv) {
         case kSetRegions:
             set_opt.regions = std::atoi(optarg); break;
         case kSetScatter: set_opt.scatter = true; break;
+        case kSetRegionScope:
+            set_opt.region_scope = std::atoi(optarg); break;
+        case kSetNSets:
+            set_opt.nsets = std::atoi(optarg); break;
         default: usage(argv[0]); return 1;
         }
     }

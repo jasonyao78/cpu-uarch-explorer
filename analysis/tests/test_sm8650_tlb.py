@@ -30,6 +30,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -666,6 +667,47 @@ class TestDescriptorCanonicalIdentity(unittest.TestCase):
         # 旧记录 params 逐案一致 → 残差相同 → 仍归一组（回归钉）
         result = analyze_records([_record(), _record()], "run-a")
         self.assertEqual(len(result.groups), 1)
+
+    def test_dict_key_order_does_not_split_groups(self):
+        # PA-07：递归规范形——dict 键序不同、语义相同 ⇒ 同组
+        a = _record()
+        a["params"]["descriptor"] = {"x": 1, "y": 2}
+        b = _record()
+        b["params"]["descriptor"] = {"y": 2, "x": 1}
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 1)
+
+    def test_tlb_identity_exported_and_downstream_rejects(self):
+        # PA-01 端到端：set_hypothesis 差异 → 分组、导出 identity 含该维、
+        # cohort/图表消费点命名拒绝（不再无声合并）
+        from analysis.sm8650_tlb import TlbError, grade_thp_cohorts
+        a = _record()
+        a["params"]["set_hypothesis"] = 1
+        b = _record()
+        b["params"]["set_hypothesis"] = 2
+        for metric in b["metrics"]:
+            if metric["name"] == "pmu.cycles.count":
+                for obs in metric["observations"]:
+                    obs["value"] = 100 * 65536
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+        hyps = {g["identity"]["set_hypothesis"] for g in result.groups}
+        self.assertEqual(hyps, {1, 2})
+        with self.assertRaisesRegex(TlbError, "MB-04"):
+            grade_thp_cohorts(result.groups)
+        # 图表消费点（模块在 main 树——与评审 overlay 同款加载；worktree
+        # 布局缺 main 时跳过，main 侧组合回归由 overlay 测试承担）
+        import importlib.util
+        chart_path = (Path(__file__).resolve().parents[3]
+                      / "cpu-uarch-explorer" / "analysis" / "tlb_figures.py")
+        if chart_path.is_file():
+            spec = importlib.util.spec_from_file_location(
+                "analysis.tlb_figures", chart_path)
+            chart = importlib.util.module_from_spec(spec)
+            sys.modules[spec.name] = chart
+            spec.loader.exec_module(chart)
+            with self.assertRaisesRegex(TlbError, "MB-04"):
+                chart.seed_medians(result.groups, "cyc_per_load")
 
 
 class TestMetricContract(unittest.TestCase):

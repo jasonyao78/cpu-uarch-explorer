@@ -133,6 +133,10 @@ class PtrChaseAdapter:
                           ("set_regions", "--set-regions")):
             if key in params:
                 argv += [flag, str(int(params[key]))]
+        if int(params.get("set_region_scope", -1)) != -1:
+            argv += ["--set-region-scope", str(int(params["set_region_scope"]))]
+        if int(params.get("set_nsets", 0)) > 0:
+            argv += ["--set-nsets", str(int(params["set_nsets"]))]
         if _binary_flag(params, "set_scatter"):
             argv.append("--set-scatter")
         if "seed" in params:
@@ -197,6 +201,20 @@ class PtrChaseAdapter:
         fields = parse_key_value_lines(stdout)
         if not fields:
             raise ParseError(f"no key=value lines in probe output; stderr={stderr.strip()!r}")
+        # PA-02 修订：解析形状由**请求**决定，不由输出自报决定——请求
+        # tlb_set 而探针输出 legacy（无 mode=tlbset）= 执行漂移，fail-closed；
+        # 请求 legacy 而输出 tlbset 同理。expected=None（旧调用）保持输出定形。
+        if expected is not None:
+            wants_set = "set_window" in expected or "set_hypothesis" in expected
+            is_set = fields.get("mode") == "tlbset"
+            if wants_set and not is_set:
+                raise ParseError(
+                    "descriptor shape mismatch: requested tlb_set but probe "
+                    f"output has no mode=tlbset (mode={fields.get('mode')!r})")
+            if is_set and not wants_set:
+                raise ParseError(
+                    "descriptor shape mismatch: probe reports mode=tlbset but "
+                    "the case did not request a tlb_set shape")
         if fields.get("mode") == "tlbset":
             metrics = self._parse_tlb_set_output(fields, stderr)
             if expected is not None:
@@ -204,23 +222,53 @@ class PtrChaseAdapter:
             return metrics
         return self._parse_chase_output(fields, stderr)
 
-    # MB-06 descriptor 契约：探针自描述输出字段 ↔ plan 规范化参数名的映射
+    # MB-06/PA-02 descriptor 契约：探针自描述字段 ↔ plan 规范化参数名。
+    # set_domain/set_active_regions/set_region_nodes 为 realized-only（预约/
+    # 激励审计结果，非请求参数）——只由 parse_realized() 入档，不做一致性
+    # 等值核验（single-region-fallback 是合法命名降级）。
     _TLB_SET_DESCRIPTOR_MAP = (
         ("set_hypothesis", "set_hypothesis"),
         ("set_target", "set_target"),
         ("set_target2", "set_target2"),
         ("set_window", "set_window"),
         ("set_rounds", "set_rounds"),
-        ("set_domain", None),   # realized-only（预约结果非请求参数，只入档）
+        ("set_pool_pages", "set_pool_pages"),
+        ("set_filler_pages", "set_filler_pages"),
+        ("set_regions", "set_regions"),
+        ("scatter", "set_scatter"),
+        ("set_region_scope", "set_region_scope"),
+        ("set_nsets", "set_nsets"),
+        ("seed", "seed"),
     )
+
+    def parse_realized(self, stdout: str) -> dict[str, Any]:
+        """探针 realized 自描述域（PA-02：随结构化记录持久化，requested 与
+        realized 分开）。非 tlbset 输出返回空 dict。region_nodes 为列表。"""
+        fields = parse_key_value_lines(stdout)
+        if fields.get("mode") != "tlbset":
+            return {}
+        realized: dict[str, Any] = {}
+        for key in ("mode", "set_domain", "set_active_regions",
+                    "set_region_nodes", "page_kb"):
+            if key in fields:
+                realized[key] = fields[key]
+        if "set_region_nodes" in realized:
+            realized["set_region_nodes"] = [
+                int(tok) for tok in str(realized["set_region_nodes"]).split(",")
+                if tok.lstrip("-").isdigit()]
+        for key in ("set_hypothesis", "set_target", "set_window", "set_rounds",
+                    "set_regions", "set_region_scope", "set_nsets",
+                    "set_active_regions", "seed"):
+            if key in fields:
+                realized[key] = int(fields[key])
+        return realized
 
     def _check_tlb_set_descriptor(self, fields: dict[str, str],
                                   expected: dict) -> None:
         """requested（expected case_params）→ realized（探针自描述）一致性。
-        请求了但探针没报、或值不一致 = 执行漂移，fail-closed。"""
+        请求了但探针没报、或值不一致 = 执行漂移，fail-closed；请求的 PMU
+        判据事件必须在输出中出现（缺关键事件 = 无可判读计数，命名拒绝）。"""
         for out_key, param_key in self._TLB_SET_DESCRIPTOR_MAP:
-            if param_key is None:
-                continue
             if param_key in expected:
                 if out_key not in fields:
                     raise ParseError(
@@ -231,6 +279,16 @@ class PtrChaseAdapter:
                         f"tlb-set descriptor mismatch: {out_key}="
                         f"{fields[out_key]!r} != requested {param_key}="
                         f"{expected[param_key]!r}")
+        requested = {e["name"] for e in _pmu_events(expected)}
+        reported = {
+            key[len("pmu_"):-len("_count")]
+            for key in fields if key.startswith("pmu_") and key.endswith("_count")
+        }
+        missing_events = sorted(requested - reported)
+        if missing_events:
+            raise ParseError(
+                f"tlb-set descriptor: requested PMU events missing from "
+                f"probe output: {missing_events}")
 
     def _parse_tlb_set_output(self, fields: dict[str, str],
                               stderr: str) -> list[dict[str, Any]]:

@@ -496,6 +496,83 @@ class TestTlbSetAdapterContract(unittest.TestCase):
                 stdout, "", {"set_hypothesis": 1, "set_target": 7,
                              "set_window": 8})
 
+    def test_shape_decided_by_request_not_output(self):
+        # PA-02：请求 tlb_set 而输出 legacy → 拒绝（不再按输出自报定形）
+        with self.assertRaisesRegex(ParseError, "shape mismatch"):
+            self.adapter.parse_output(
+                "latency_ns=1.25", "",
+                {"set_hypothesis": 1, "set_target": 7, "set_window": 8})
+        # 反向：请求 legacy 而输出 tlbset → 拒绝
+        with self.assertRaisesRegex(ParseError, "shape mismatch"):
+            self.adapter.parse_output(
+                "mode=tlbset set_hypothesis=1 set_window=8 "
+                "set_domain=multi-region window_valid_rounds=19 "
+                "window_invalid_rounds=0 window_mux_rounds=0 valid_rounds=19 "
+                "probe_ns=1 pmu_l1d_tlb_refill_count=1.0 "
+                "pmu_l1d_tlb_refill_valid_rounds=19",
+                "", {"buffer_kb": 64, "stride": 64, "loads": 8000,
+                     "warmup": 1000})
+
+    def test_condition_param_drift_rejected(self):
+        # PA-02：regions/filler/scatter/seed 漂移必须拒绝
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=1 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=1 set_region_nodes=8 "
+            "set_domain=single-region-fallback page_kb=4 seed=99 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        with self.assertRaisesRegex(ParseError, "set_regions"):
+            self.adapter.parse_output(
+                stdout, "",
+                {"set_hypothesis": 1, "set_target": 7, "set_window": 8,
+                 "set_regions": 4, "set_filler_pages": 512, "seed": 42})
+        with self.assertRaisesRegex(ParseError, "seed"):
+            self.adapter.parse_output(
+                stdout, "",
+                {"set_hypothesis": 1, "set_target": 7, "set_window": 8,
+                 "set_regions": 1, "set_filler_pages": 512, "seed": 42})
+
+    def test_missing_requested_event_rejected(self):
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=4 set_region_nodes=3,3,3,3 "
+            "set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        with self.assertRaisesRegex(ParseError, "missing"):
+            self.adapter.parse_output(
+                stdout, "",
+                {"set_hypothesis": 1, "set_target": 7, "set_window": 8,
+                 "pmu_events": [
+                     {"name": "l1d_tlb_refill", "type": 8, "config": 5},
+                     {"name": "l2d_tlb_refill", "type": 8, "config": 45}]})
+
+    def test_parse_realized_extracts_incentive_audit(self):
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=4 set_region_nodes=3,3,3,3 "
+            "set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        realized = self.adapter.parse_realized(stdout)
+        self.assertEqual(realized["set_domain"], "multi-region")
+        self.assertEqual(realized["set_active_regions"], 4)
+        self.assertEqual(realized["set_region_nodes"], [3, 3, 3, 3])
+        self.assertEqual(realized["set_hypothesis"], 1)
+        self.assertEqual(self.adapter.parse_realized("latency_ns=1.25"), {})
+
 
 if __name__ == "__main__":
     unittest.main()

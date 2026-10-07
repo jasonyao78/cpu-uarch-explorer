@@ -151,6 +151,12 @@ _IDENTITY_PARAM_KEYS = (
 # 差异。旧记录 params 除键维度外逐案一致 → 分组与战役版逐字相同。
 _IDENTITY_CONSUMED_PARAM_KEYS = frozenset(
     {"buffer_kb", "seed", "page_policy_actual", *_IDENTITY_PARAM_KEYS})
+# PA-01：tlb_set 形状的声明身份维度（与 legacy 维度并列进分组键与导出
+# identity——出口丢失 = 下游重新合并，本集合堵这个口子）。
+_TLB_SET_IDENTITY_KEYS = (
+    "set_hypothesis", "set_target", "set_target2", "set_window",
+    "set_scatter", "set_region_scope", "set_nsets",
+)
 
 
 def _canonical_type_tag(value) -> str:
@@ -173,12 +179,24 @@ def _canonical_type_tag(value) -> str:
     return "other"
 
 
+def _canonical_repr(value):
+    """PA-07：保留类型的递归规范表示——dict 键排序（插入序不改变规范
+    形）、list 序保留、bool 先于 int。语义相同 ⇒ 规范形相同。"""
+    if isinstance(value, dict):
+        return ("dict", tuple((key, _canonical_repr(value[key]))
+                              for key in sorted(value)))
+    if isinstance(value, (list, tuple)):
+        return ("list", tuple(_canonical_repr(item) for item in value))
+    return (_canonical_type_tag(value), value)
+
+
 def _residual_identity(params: dict) -> tuple:
     """类型规范残差身份：除既有键维度外的全部 params，按名排序的
-    (name, type_tag, repr) 三元组——任何参数差异（含类型差异）都阻止
-    合并，不做值解释（宽容读字段 ≠ 宽容合并实验条件）。"""
+    (name, canonical_repr)——任何参数差异（含类型差异、嵌套 dict 键序
+    差异之外的语义差异）都阻止合并，不做值解释（宽容读字段 ≠ 宽容合
+    并实验条件）。"""
     return tuple(
-        (name, _canonical_type_tag(value), repr(value))
+        (name, _canonical_repr(value))
         for name, value in sorted(params.items())
         if name not in _IDENTITY_CONSUMED_PARAM_KEYS
     )
@@ -849,21 +867,26 @@ def analyze_records(records: Iterable[dict], run_label: str,
             )
             continue
         # M0-4：身份维度取自 params（显式才参与分组；缺省 None 保持旧分组）
+        # PA-01 修订：tlb_set 声明身份维度与 legacy 维度一并进入分组键与
+        # 导出 identity——出口不再丢失，下游按完整身份分系列或命名拒绝。
         record_params = record.get("params", {})
         identity = tuple(record_params.get(k) for k in _IDENTITY_PARAM_KEYS)
+        tlb_identity = tuple(record_params.get(k) for k in _TLB_SET_IDENTITY_KEYS)
         residual = _residual_identity(record_params)  # MB-06：类型规范残差
         for sample in _samples_from_record(record, run_label, result.rejected):
             sample["_identity"] = identity
+            sample["_tlb_identity"] = tlb_identity
             # REV-M0-BATCH C2：缺失集也是身份维度——同契约才同组，组内各
             # 指标的可用样本集合恒一致（无逐字段样本分裂/选择偏差）。
-            # MB-06：身份值类型规范后入键——True 与 1 的键形不同（报告面
-            # 保持 legacy 原值以保旧重放逐字一致）。
+            # MB-06/PA-07：身份值用递归规范形入键——True 与 1 键形不同，
+            # dict 键序不敏感（报告面保持 legacy 原值以保旧重放逐字一致）。
             key = (
                 sample["buffer_kb"],
                 sample["seed"],
                 sample["page_policy_actual"],
                 sample["ring_passes"],
-                *((_canonical_type_tag(v), repr(v)) for v in identity),
+                *((_canonical_repr(v) for v in identity)),
+                *((_canonical_repr(v) for v in tlb_identity)),
                 residual,
                 tuple(sample["_metric_missing"]),
             )
@@ -880,13 +903,18 @@ def analyze_records(records: Iterable[dict], run_label: str,
         contract_missing = sorted({m for s in samples for m in s["_metric_missing"]})
         contract_extras = sorted({m for s in samples for m in s["_metric_extras"]})
         identity = samples[0]["_identity"]
+        tlb_identity = samples[0]["_tlb_identity"]
         stored = []
         for smp in samples:
             smp = dict(smp)
             smp.pop("_metric_missing")
             smp.pop("_metric_extras")
             smp.pop("_identity")
+            smp.pop("_tlb_identity")
             stored.append(smp)
+        exported_identity = dict(zip(_IDENTITY_PARAM_KEYS, identity))
+        exported_identity.update(
+            dict(zip(_TLB_SET_IDENTITY_KEYS, tlb_identity)))
         group = {
             "run_label": run_label,
             "buffer_kb": buffer_kb,
@@ -899,8 +927,9 @@ def analyze_records(records: Iterable[dict], run_label: str,
             # 派生字段为 None，判据消费入口给 INCOMPUTABLE。
             "metric_contract": {"missing": contract_missing,
                                 "extras": contract_extras},
-            # M0-4：实验身份维度（None = 该维度未声明，同战役语义）
-            "identity": dict(zip(_IDENTITY_PARAM_KEYS, identity)),
+            # M0-4/PA-01：实验身份维度（None = 该维度未声明，同战役语义；
+            # tlb_set 维度显式导出——下游守卫按完整身份拒绝合并，不再盲区）
+            "identity": exported_identity,
             # §9.2 复用契约：双峰字段钉为 l1d_tlb_refill_per_1k（knee 判
             # 据的消费字段、逐进程布局/着色方差的主要暴露面）。
             "bimodal": _is_bimodal(

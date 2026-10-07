@@ -288,6 +288,7 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
             aux_before[aux["name"]] = r.stdout.strip()[:200]
 
     sample_metrics: list[tuple[int, str, list[dict]]] = []
+    first_ok_stdout: str | None = None
     raw_refs: list[str] = []
     first_failure: dict | None = None
     raw_command = ""
@@ -305,6 +306,8 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
             # MB-06：requested→realized 一致性核验——plan case_params 随
             # 解析传入，探针自描述与请求不符即 ParseError（执行漂移不进证据）
             metrics = adapter.parse_output(result.stdout, result.stderr, params)
+            if first_ok_stdout is None:
+                first_ok_stdout = result.stdout
             sample_metrics.append((sample_index, raw_refs[-1], metrics))
         except ParseError as e:
             if first_failure is None:
@@ -362,8 +365,16 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
         except ParseError as error:
             first_failure = {"reason": "metric-aggregation-error", "detail": str(error)}
         else:
+            # PA-02：realized descriptor 随结构化记录持久化（requested=params
+            # 已入档；realized=探针自描述激励审计，schema 登记扩展）。
+            parse_realized = getattr(adapter, "parse_realized", None)
+            realized = parse_realized(first_ok_stdout or "") \
+                if parse_realized is not None else {}
+            probe_block = dict(probe_meta)
+            if realized:
+                probe_block["realized"] = realized
             return build_run_record(
-                status="ok", target=platform["target"], probe=probe_meta,
+                status="ok", target=platform["target"], probe=probe_block,
                 environment=env, params=params, params_provenance=provenance,
                 metrics=metrics, raw_command=raw_command,
             )

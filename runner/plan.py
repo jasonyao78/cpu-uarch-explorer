@@ -253,7 +253,13 @@ def _derive_tlb_set_case_params(params: dict[str, ResolvedValue]) -> dict[str, R
     if not 1 <= hypothesis <= 4:
         raise RunnerError(
             "plan-error", f"set_hypothesis must be 1..4, got {hypothesis}")
-    target_rv = _int_param("set_target", None)
+    # nsets 先读：N-set 模式下 target 不参与收集（探针按 set 0..nsets-1），
+    # 不强制要求；单 set 模式 target 必填。
+    nsets_rv = _int_param("set_nsets", 0)
+    if not 0 <= nsets_rv.value <= 256:
+        raise RunnerError(
+            "plan-error", f"set_nsets must be 0..256, got {nsets_rv.value}")
+    target_rv = _int_param("set_target", 0 if nsets_rv.value > 0 else None)
     target = target_rv.value
     if not 0 <= target <= 255:
         raise RunnerError(
@@ -286,6 +292,22 @@ def _derive_tlb_set_case_params(params: dict[str, ResolvedValue]) -> dict[str, R
         raise RunnerError(
             "plan-error",
             f"set_scatter requires 1 <= set_window <= 256, got {window}")
+    region_scope_rv = _int_param("set_region_scope", -1)
+    if not -1 <= region_scope_rv.value < 16:
+        raise RunnerError(
+            "plan-error",
+            f"set_region_scope must be -1..15, got {region_scope_rv.value}")
+    if region_scope_rv.value >= 0 and region_scope_rv.value >= regions_rv.value:
+        raise RunnerError(
+            "plan-error",
+            f"set_region_scope {region_scope_rv.value} >= set_regions "
+            f"{regions_rv.value}")
+    if nsets_rv.value > 0:
+        # N-set 模式与 target2/scatter 互斥（与探针侧校验一致，双保险）
+        if params.get("set_target2") is not None or scatter_flag:
+            raise RunnerError(
+                "plan-error",
+                "set_nsets is exclusive with set_target2/set_scatter")
 
     case_params = {
         "set_hypothesis": hypothesis_rv,
@@ -295,6 +317,8 @@ def _derive_tlb_set_case_params(params: dict[str, ResolvedValue]) -> dict[str, R
         "set_pool_pages": pool_rv,
         "set_filler_pages": filler_rv,
         "set_regions": regions_rv,
+        "set_region_scope": region_scope_rv,
+        "set_nsets": nsets_rv,
     }
     target2 = params.get("set_target2")
     if target2 is not None:
@@ -330,7 +354,7 @@ _SHAPE_INPUT_PARAMS = {
                   "warmup", "warmup_passes"},
     "tlb_set": {"set_hypothesis", "set_target", "set_target2", "set_window",
                 "set_rounds", "set_pool_pages", "set_filler_pages",
-                "set_regions", "set_scatter"},
+                "set_regions", "set_scatter", "set_region_scope", "set_nsets"},
 }
 
 

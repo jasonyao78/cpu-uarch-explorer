@@ -26,7 +26,10 @@
 | `execution.params.set_filler_pages` | integer ≥0（默认 512） | tlb_set 形状：prime 驱逐链页数（独立映射，按候选 H 过滤目标 set） | 2026-10-01 |
 | `execution.params.set_regions` | integer 1..16（默认 4） | tlb_set 形状：F4 多稀疏 VA 区域数（跨 256MiB 边界使 VPN[23:16] 各异）；预约失败回退单区域并输出 `set_domain=single-region-fallback` 命名降级 | 2026-10-01 |
 | `execution.params.set_scatter` | 0/1 | tlb_set 形状：无冲突负控（G0-3）——W 页各落不同 set；要求 1≤W≤256 | 2026-10-01 |
-| `record.probe descriptor 核验`（非字段） | 契约 | MB-06：adapter `parse_output(stdout, stderr, expected)` 第三参携带 plan case_params；tlb_set 探针自描述字段（set_hypothesis/set_target/set_target2/set_window/set_rounds/set_domain）与请求不一致或未报告 → ParseError（requested→realized 执行漂移 fail-closed） | 2026-10-07 |
+| `record.probe descriptor 核验`（非字段） | 契约 | MB-06：adapter `parse_output(stdout, stderr, expected)` 第三参携带 plan case_params；解析形状由**请求**决定——请求 tlb_set 输出 legacy 或反之即 ParseError；tlb_set 自描述字段（hypothesis/target/target2/window/rounds/pool/filler/regions/scatter/region_scope/nsets/seed）与请求不一致或未报告 → ParseError；请求的 PMU 判据事件缺失 → ParseError | 2026-10-07（PA-02 修订） |
+| `record.probe.realized` | object | PA-02：tlb_set 探针 realized 自描述域随结构化记录持久化——set_domain / set_active_regions / set_region_nodes（实际激励审计）/ 实验条件字段；requested（params）与 realized 分开；legacy 输出无此键 | 2026-10-07 |
+| `execution.params.set_region_scope` | integer -1..15（默认 -1） | tlb_set 形状：-1=全域配额取样；0..K-1=仅该区域收集（A1 隔离对照）；必须 < set_regions | 2026-10-07 |
+| `execution.params.set_nsets` | integer 0..256（默认 0=关） | tlb_set 形状 N-set 模式：收集候选 set 0..nsets-1 各 W 页进一条链（A3 整体 translation reach 估计量）；与 set_target2/set_scatter 互斥 | 2026-10-07 |
 | `record.metric_contract` / `group.identity` 语义 | 契约 | MB-06：分析器分组键采用类型规范身份——bool True 与 int 1 不可合并，任何 params 差异（类型规范残差）阻止合并；报告面 identity 字典保持 legacy 原值（旧重放逐字一致） | 2026-10-07 |
 | `generator` | object | 致密配置生成器审计块（input_run_sha256/rules_sha256/output_sha256 三锚定 + dense_points 来源标注 + quota 核算）；仅由 `analysis/tlb_dense_gen.py` 产出，非手写 | 2026-09-29 |
 

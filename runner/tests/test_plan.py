@@ -254,6 +254,47 @@ class TestPlan(unittest.TestCase):
         with self.assertRaisesRegex(RunnerError, "4K base pages"):
             build_plan(spec, {**PLATFORM, "controls": []})
 
+    def test_tlb_set_shape_region_scope_and_nsets_validation(self):
+        base = {
+            **SPEC,
+            "parameters": [{"name": "repetitions", "type": "int", "default": 3}],
+            "execution": {
+                "probe": "ptr_chase",
+                "probe_shape": "tlb_set",
+                "sweep": {"set_window": [4]},
+                "fixed_params": ["set_hypothesis", "set_target"],
+                "params": {"set_hypothesis": 1, "set_target": 7},
+            },
+        }
+        bad_scope = {**base,
+                     "execution": {**base["execution"],
+                                   "params": {"set_hypothesis": 1,
+                                              "set_target": 7,
+                                              "set_region_scope": 4},
+                                   "fixed_params": ["set_hypothesis",
+                                                    "set_target",
+                                                    "set_region_scope"]}}
+        with self.assertRaisesRegex(RunnerError, "set_region_scope"):
+            build_plan(bad_scope, {**PLATFORM, "controls": []})
+        nsets_scatter = {
+            **base,
+            "execution": {**base["execution"],
+                          "params": {"set_hypothesis": 1, "set_target": 7,
+                                     "set_nsets": 8, "set_scatter": 1},
+                          "fixed_params": ["set_hypothesis", "set_target",
+                                           "set_nsets", "set_scatter"]},
+        }
+        with self.assertRaisesRegex(RunnerError, "exclusive"):
+            build_plan(nsets_scatter, {**PLATFORM, "controls": []})
+        ok_nsets = {**base,
+                    "execution": {**base["execution"],
+                                  "params": {"set_hypothesis": 1,
+                                             "set_nsets": 8},
+                                  "fixed_params": ["set_hypothesis",
+                                                   "set_nsets"]}}
+        built = build_plan(ok_nsets, {**PLATFORM, "controls": []})
+        self.assertEqual(built.cases[0].param_value("set_nsets"), 8)
+
     def test_unconsumed_fixed_param_rejected_at_plan_time(self):
         # MB-03：不被形状消费、也不进 ID 段的参数 = plan 期显式拒绝
         spec = {
