@@ -23,9 +23,11 @@ class ProbeAdapter(Protocol):
     # 决定 + requested→realized descriptor 核验；expected=None 兼容旧调用。
     def parse_output(self, stdout: str, stderr: str,
                      expected: dict | None = None) -> list[dict[str, Any]]: ...
-    # PA-02：realized 自描述域（requested 与 realized 分开持久化）；
-    # 不支持的 adapter 可不实现（engine getattr 降级为空 dict）。
-    def parse_realized(self, stdout: str) -> dict[str, Any]: ...
+    # PA-02/RPA-03：realized 自描述域（requested 与 realized 分开持久化；
+    # expected 用于审计不变量校验）；不支持的 adapter 可不实现（engine
+    # getattr 降级为空 dict）。
+    def parse_realized(self, stdout: str,
+                       expected: dict | None = None) -> dict[str, Any]: ...
 
 
 def parse_key_value_lines(stdout: str) -> dict[str, str]:

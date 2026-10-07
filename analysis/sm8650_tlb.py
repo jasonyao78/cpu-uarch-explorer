@@ -99,6 +99,7 @@ validate_anchors docstring）。
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import re
@@ -157,6 +158,23 @@ _TLB_SET_IDENTITY_KEYS = (
     "set_hypothesis", "set_target", "set_target2", "set_window",
     "set_scatter", "set_region_scope", "set_nsets",
 )
+# RPA-04：digest 排除集 = "协议反射参数"——语义已由分组键维度承载、或其
+# 差异属于 runner 协议本身而非实验条件。逐项论证（docs/design/
+# 2026-10-07-rpa01-05-fix-design.md §3）：
+#   buffer_kb/seed → 键维度；loads/stride → ring_passes 键维度；
+#   base_pages/thp/hugepage → 实际 backing 由 page_policy_actual 承载；
+#   warmup/warmup_passes/pmu_events → runner 协议参数（归档记录普遍携带，
+#     已实证：战役 coarse run params 八键全协议性）——不排除会全员触发
+#     守卫、历史图表与 cohort 路径全拒。
+# 不在排除集的一切（loads_per_slot/min_loads/chains/set_*/任何未来新
+# 维度/descriptor 对象）进 residual_digest → 出口可见、守卫可拒、白名单
+# 不再扩。已知边界：warmup_passes 纯合成反例（同 loads 异 passes）按协议
+# 一致数据对待——真实协议里 passes⇒loads 派生，实现配派生一致性检查；
+# 若评审要求严格化，单参数翻转（移出排除集）+ 守卫改一致性语义即可。
+_IDENTITY_PROTOCOL_PARAM_KEYS = frozenset(
+    {"buffer_kb", "seed", "page_policy_actual", "loads", "stride",
+     "warmup", "warmup_passes", "base_pages", "thp", "hugepage",
+     "pmu_events", *_IDENTITY_PARAM_KEYS, *_TLB_SET_IDENTITY_KEYS})
 
 
 def _canonical_type_tag(value) -> str:
@@ -188,6 +206,21 @@ def _canonical_repr(value):
     if isinstance(value, (list, tuple)):
         return ("list", tuple(_canonical_repr(item) for item in value))
     return (_canonical_type_tag(value), value)
+
+
+def _residual_digest(params: dict) -> str | None:
+    """RPA-04：类型规范残差 digest——协议反射参数（
+    _IDENTITY_PROTOCOL_PARAM_KEYS）以外的全部 params 的规范形哈希。
+    None = 无非协议条件（旧记录恒 None：历史数据出口不变、重放不破）；
+    非 None = 存在未登记的实验条件差异 → 下游按身份拒绝/分系列。"""
+    residual = tuple(
+        (name, _canonical_repr(value))
+        for name, value in sorted(params.items())
+        if name not in _IDENTITY_PROTOCOL_PARAM_KEYS
+    )
+    if not residual:
+        return None
+    return hashlib.sha256(repr(residual).encode()).hexdigest()[:12]
 
 
 def _residual_identity(params: dict) -> tuple:
@@ -873,9 +906,11 @@ def analyze_records(records: Iterable[dict], run_label: str,
         identity = tuple(record_params.get(k) for k in _IDENTITY_PARAM_KEYS)
         tlb_identity = tuple(record_params.get(k) for k in _TLB_SET_IDENTITY_KEYS)
         residual = _residual_identity(record_params)  # MB-06：类型规范残差
+        digest = _residual_digest(record_params)      # RPA-04：语义身份出口
         for sample in _samples_from_record(record, run_label, result.rejected):
             sample["_identity"] = identity
             sample["_tlb_identity"] = tlb_identity
+            sample["_digest"] = digest
             # REV-M0-BATCH C2：缺失集也是身份维度——同契约才同组，组内各
             # 指标的可用样本集合恒一致（无逐字段样本分裂/选择偏差）。
             # MB-06/PA-07：身份值用递归规范形入键——True 与 1 键形不同，
@@ -911,10 +946,14 @@ def analyze_records(records: Iterable[dict], run_label: str,
             smp.pop("_metric_extras")
             smp.pop("_identity")
             smp.pop("_tlb_identity")
+            smp.pop("_digest")
             stored.append(smp)
         exported_identity = dict(zip(_IDENTITY_PARAM_KEYS, identity))
         exported_identity.update(
             dict(zip(_TLB_SET_IDENTITY_KEYS, tlb_identity)))
+        # RPA-04：完整语义身份出口——协议反射参数以外的条件差异以
+        # residual_digest 呈现（None = 无非协议条件，旧数据恒 None）。
+        exported_identity["residual_digest"] = samples[0]["_digest"]
         group = {
             "run_label": run_label,
             "buffer_kb": buffer_kb,

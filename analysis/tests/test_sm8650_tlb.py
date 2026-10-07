@@ -677,6 +677,54 @@ class TestDescriptorCanonicalIdentity(unittest.TestCase):
         result = analyze_records([a, b], "run-a")
         self.assertEqual(len(result.groups), 1)
 
+    def test_protocol_params_digest_none_downstream_accepts(self):
+        # RPA-04 兼容面：协议反射参数（loads/stride/base_pages…）不触发
+        # digest → legacy 数据出口不变、守卫不拒
+        a = _record()
+        a["params"]["base_pages"] = 1
+        b = _record()
+        b["params"]["loads"] = 999999
+        result = analyze_records([a, b], "run-a")
+        digests = {g["identity"]["residual_digest"] for g in result.groups}
+        # base_pages=1 被排除集吸收；loads 不同 → ring_passes 不同组，
+        # 两组 digest 均为 None（warmup=0/warmup_passes 缺省等协议参数全排除）
+        self.assertTrue(all(d is None for d in digests))
+        from analysis.sm8650_tlb import grade_thp_cohorts
+        subset = [g for g in result.groups
+                  if g["page_policy_actual"] == "base"]
+        if subset:
+            grade_thp_cohorts(subset)  # 不抛 = 守卫未误拒
+
+    def test_semantic_residual_digest_exported_and_rejected(self):
+        # RPA-04 反例：loads_per_slot 差异 → digest 非 None → identity 出口
+        # 可见 + cohort 命名拒绝（不再无声合并）
+        from analysis.sm8650_tlb import grade_thp_cohorts
+        a = _record()
+        a["params"]["loads_per_slot"] = 8
+        b = _record()
+        b["params"]["loads_per_slot"] = 16
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+        digests = {g["identity"]["residual_digest"] for g in result.groups}
+        self.assertTrue(all(d is not None for d in digests))
+        with self.assertRaisesRegex(TlbError, "MB-04"):
+            grade_thp_cohorts(result.groups)
+
+    def test_warmup_passes_boundary_documented(self):
+        # RPA-04 已知边界（设计稿 §3 末尾，回执明示 + 翻转选项）：
+        # warmup_passes 属协议反射参数（归档记录普遍携带）→ digest None。
+        # 真实协议里 passes⇒loads 派生（plan 硬拒双协议声明），同 loads 异
+        # passes 的合成输入按协议一致数据对待——评审若要求严格化，单参数
+        # 移出排除集 + 守卫改一致性语义（回执登记的开放决定）。
+        a = _record()
+        a["params"]["warmup_passes"] = 2
+        b = _record()
+        b["params"]["warmup_passes"] = 4
+        b["loads"] = 4 * (512 * 1024 // 64)   # 与 passes 派生一致的合法记录
+        result = analyze_records([a, b], "run-a")
+        self.assertTrue(all(
+            g["identity"]["residual_digest"] is None for g in result.groups))
+
     def test_tlb_identity_exported_and_downstream_rejects(self):
         # PA-01 端到端：set_hypothesis 差异 → 分组、导出 identity 含该维、
         # cohort/图表消费点命名拒绝（不再无声合并）
