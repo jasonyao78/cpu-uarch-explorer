@@ -455,6 +455,47 @@ class TestTlbSetAdapterContract(unittest.TestCase):
         metrics = self.adapter.parse_output("latency_ns=1.25", "")
         self.assertEqual(metrics[0]["name"], "latency_ns")
 
+    def test_descriptor_consistency_accepts_matching_realized(self):
+        # MB-06：requested→realized 一致 → 通过
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 set_rounds=20 "
+            "set_domain=multi-region window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        metrics = self.adapter.parse_output(
+            stdout, "",
+            {"set_hypothesis": 1, "set_target": 7, "set_window": 8,
+             "set_rounds": 20})
+        self.assertEqual(metrics[0]["name"], "window_valid_rounds")
+
+    def test_descriptor_mismatch_fails_closed(self):
+        # 探针自描述与请求不符 = 执行漂移，ParseError
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=99 set_window=8 set_rounds=20 "
+            "set_domain=multi-region window_valid_rounds=19 "
+            "window_invalid_rounds=0 window_mux_rounds=0 valid_rounds=19 "
+            "probe_ns=1500 pmu_l1d_tlb_refill_count=8.0 "
+            "pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        with self.assertRaisesRegex(ParseError, "descriptor mismatch"):
+            self.adapter.parse_output(
+                stdout, "",
+                {"set_hypothesis": 1, "set_target": 7, "set_window": 8})
+
+    def test_descriptor_missing_realized_field_fails_closed(self):
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_window=8 "
+            "set_domain=multi-region window_valid_rounds=19 "
+            "window_invalid_rounds=0 window_mux_rounds=0 valid_rounds=19 "
+            "probe_ns=1500 pmu_l1d_tlb_refill_count=8.0 "
+            "pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        with self.assertRaisesRegex(ParseError, "did not report"):
+            self.adapter.parse_output(
+                stdout, "", {"set_hypothesis": 1, "set_target": 7,
+                             "set_window": 8})
+
 
 if __name__ == "__main__":
     unittest.main()

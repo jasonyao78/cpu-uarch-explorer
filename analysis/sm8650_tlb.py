@@ -143,6 +143,45 @@ _IDENTITY_PARAM_KEYS = (
     "chains",               # K 独立链数（Q-D）
     "mapping_span_kb",      # 保留 VA 跨度（与驻留字节分字段）
 )
+# MB-06 descriptor 契约：参与分组键的"既有维度"（buffer/seed/backing/
+# passes 之外）。params 中不在此集合的键不直接进身份字典（保持 MB-04
+# legacy 报告面），但以**类型规范残差**形式参与分组相等性判定——
+# bool True 与 int 1 不可合并，"H1" 与 "H2" 不可合并（评审收口复核
+# 反例）；plan 侧只发射真实消费参数（MB-03），故残差差异 = 真实证据
+# 差异。旧记录 params 除键维度外逐案一致 → 分组与战役版逐字相同。
+_IDENTITY_CONSUMED_PARAM_KEYS = frozenset(
+    {"buffer_kb", "seed", "page_policy_actual", *_IDENTITY_PARAM_KEYS})
+
+
+def _canonical_type_tag(value) -> str:
+    """JSON 值的类型规范标签：bool 先于 int 判定（bool 是 int 子类），
+    True 与 1 在规范形下不可合并（MB-06）。"""
+    if isinstance(value, bool):
+        return "bool"
+    if isinstance(value, int):
+        return "int"
+    if isinstance(value, float):
+        return "float"
+    if isinstance(value, str):
+        return "str"
+    if value is None:
+        return "null"
+    if isinstance(value, list):
+        return "list"
+    if isinstance(value, dict):
+        return "dict"
+    return "other"
+
+
+def _residual_identity(params: dict) -> tuple:
+    """类型规范残差身份：除既有键维度外的全部 params，按名排序的
+    (name, type_tag, repr) 三元组——任何参数差异（含类型差异）都阻止
+    合并，不做值解释（宽容读字段 ≠ 宽容合并实验条件）。"""
+    return tuple(
+        (name, _canonical_type_tag(value), repr(value))
+        for name, value in sorted(params.items())
+        if name not in _IDENTITY_CONSUMED_PARAM_KEYS
+    )
 _BACKING_ORDER = {"base": 0, "mixed": 1, "thp": 2, "hugetlb-2m": 3,
                   "platform-default": 4}
 # 与 runner/adapters/ptr_chase.py 同款：vma_base 只认小写 hex 地址形态。
@@ -812,16 +851,20 @@ def analyze_records(records: Iterable[dict], run_label: str,
         # M0-4：身份维度取自 params（显式才参与分组；缺省 None 保持旧分组）
         record_params = record.get("params", {})
         identity = tuple(record_params.get(k) for k in _IDENTITY_PARAM_KEYS)
+        residual = _residual_identity(record_params)  # MB-06：类型规范残差
         for sample in _samples_from_record(record, run_label, result.rejected):
             sample["_identity"] = identity
             # REV-M0-BATCH C2：缺失集也是身份维度——同契约才同组，组内各
             # 指标的可用样本集合恒一致（无逐字段样本分裂/选择偏差）。
+            # MB-06：身份值类型规范后入键——True 与 1 的键形不同（报告面
+            # 保持 legacy 原值以保旧重放逐字一致）。
             key = (
                 sample["buffer_kb"],
                 sample["seed"],
                 sample["page_policy_actual"],
                 sample["ring_passes"],
-                *identity,
+                *((_canonical_type_tag(v), repr(v)) for v in identity),
+                residual,
                 tuple(sample["_metric_missing"]),
             )
             grouped[key].append(sample)

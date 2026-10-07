@@ -302,7 +302,9 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
                 _, first_failure = _failure_reason(result)
             continue
         try:
-            metrics = adapter.parse_output(result.stdout, result.stderr)
+            # MB-06：requested→realized 一致性核验——plan case_params 随
+            # 解析传入，探针自描述与请求不符即 ParseError（执行漂移不进证据）
+            metrics = adapter.parse_output(result.stdout, result.stderr, params)
             sample_metrics.append((sample_index, raw_refs[-1], metrics))
         except ParseError as e:
             if first_failure is None:

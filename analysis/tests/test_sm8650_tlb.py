@@ -632,6 +632,42 @@ class TestIdentityParamKeys(unittest.TestCase):
         self.assertIsNone(result.groups[0]["identity"]["chain_distribution"])
 
 
+class TestDescriptorCanonicalIdentity(unittest.TestCase):
+    """MB-06 descriptor 最小契约：类型规范身份——bool True 与 int 1 不
+    合并；不同 str 值不合并；残差 params 差异（任何键）阻止合并；报告面
+    identity 字典保持 legacy 原值；旧记录分组不变。"""
+
+    def test_bool_and_int_do_not_merge(self):
+        a = _record()
+        a["params"]["chains"] = True
+        b = _record()
+        b["params"]["chains"] = 1
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+
+    def test_different_string_values_do_not_merge(self):
+        a = _record()
+        a["params"]["hypothesis"] = "H1"
+        b = _record()
+        b["params"]["hypothesis"] = "H2"
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+
+    def test_residual_param_difference_separates_groups(self):
+        # 非身份键的 params 差异（类型规范残差）也阻止合并
+        a = _record()
+        a["params"]["loads_per_slot"] = 8
+        b = _record()
+        b["params"]["loads_per_slot"] = 16
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+
+    def test_legacy_records_unchanged_by_residual(self):
+        # 旧记录 params 逐案一致 → 残差相同 → 仍归一组（回归钉）
+        result = analyze_records([_record(), _record()], "run-a")
+        self.assertEqual(len(result.groups), 1)
+
+
 class TestMetricContract(unittest.TestCase):
     """M0-2 命名降级契约（OI-13 关闭）：
 

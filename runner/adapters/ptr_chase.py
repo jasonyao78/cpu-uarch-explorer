@@ -184,18 +184,53 @@ class PtrChaseAdapter:
             ])
         return argv
 
-    def parse_output(self, stdout: str, stderr: str) -> list[dict[str, Any]]:
+    def parse_output(self, stdout: str, stderr: str,
+                     expected: dict | None = None) -> list[dict[str, Any]]:
         """stdout key=value → metrics 列表。缺 latency_ns、非数值、nan/inf
         一律抛 ParseError（绝不编造数值，空 metrics + failure 是合法出路）。
         page_policy 存在时随 metric 入档（§2 显式标注纪律）。
         M0-4b：mode=tlbset 输出 → tlb_set 分支（无 latency_ns；metrics 为
-        pmu.<label>.count 窗口差分均值 + 窗口有效性计数，事件集自描述）。"""
+        pmu.<label>.count 窗口差分均值 + 窗口有效性计数，事件集自描述）。
+        MB-06：expected（plan case_params）提供时做 requested→realized
+        一致性核验——探针自描述字段必须与请求的规范化参数一致，不符即
+        ParseError（fail-closed，不让执行漂移混进证据）。"""
         fields = parse_key_value_lines(stdout)
         if not fields:
             raise ParseError(f"no key=value lines in probe output; stderr={stderr.strip()!r}")
         if fields.get("mode") == "tlbset":
-            return self._parse_tlb_set_output(fields, stderr)
+            metrics = self._parse_tlb_set_output(fields, stderr)
+            if expected is not None:
+                self._check_tlb_set_descriptor(fields, expected)
+            return metrics
         return self._parse_chase_output(fields, stderr)
+
+    # MB-06 descriptor 契约：探针自描述输出字段 ↔ plan 规范化参数名的映射
+    _TLB_SET_DESCRIPTOR_MAP = (
+        ("set_hypothesis", "set_hypothesis"),
+        ("set_target", "set_target"),
+        ("set_target2", "set_target2"),
+        ("set_window", "set_window"),
+        ("set_rounds", "set_rounds"),
+        ("set_domain", None),   # realized-only（预约结果非请求参数，只入档）
+    )
+
+    def _check_tlb_set_descriptor(self, fields: dict[str, str],
+                                  expected: dict) -> None:
+        """requested（expected case_params）→ realized（探针自描述）一致性。
+        请求了但探针没报、或值不一致 = 执行漂移，fail-closed。"""
+        for out_key, param_key in self._TLB_SET_DESCRIPTOR_MAP:
+            if param_key is None:
+                continue
+            if param_key in expected:
+                if out_key not in fields:
+                    raise ParseError(
+                        f"tlb-set descriptor: probe did not report {out_key!r} "
+                        f"for requested param {param_key!r}")
+                if fields[out_key] != str(expected[param_key]):
+                    raise ParseError(
+                        f"tlb-set descriptor mismatch: {out_key}="
+                        f"{fields[out_key]!r} != requested {param_key}="
+                        f"{expected[param_key]!r}")
 
     def _parse_tlb_set_output(self, fields: dict[str, str],
                               stderr: str) -> list[dict[str, Any]]:

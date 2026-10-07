@@ -60,7 +60,8 @@ class MultiMetricAdapter:
     def build_argv(self, params):
         return []
 
-    def parse_output(self, stdout, stderr):
+    def parse_output(self, stdout, stderr, expected=None):
+        # MB-06：adapter 协议第三参（plan case_params，descriptor 核验用）
         sample = int(stdout.split("=", 1)[1])
         return [
             {
@@ -78,7 +79,7 @@ class MultiMetricAdapter:
 
 
 class MismatchedMetricAdapter(MultiMetricAdapter):
-    def parse_output(self, stdout, stderr):
+    def parse_output(self, stdout, stderr, expected=None):
         metrics = super().parse_output(stdout, stderr)
         return metrics if "sample=1" in stdout else metrics[:1]
 
