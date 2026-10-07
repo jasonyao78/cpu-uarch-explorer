@@ -1,0 +1,34 @@
+{
+  "review_date": "2026-10-07",
+  "input_commits": {
+    "r2": "dbd9831c896a380b1ebe63b1fb55d79b9dde9936",
+    "m0b": "4655dd327d8d40738e62b8304a1dd3bf8488d38b",
+    "main": "9093f4a48331b262f37338d059487c557df70abd"
+  },
+  "artifact_parent_head": "edfddd1738210f1bd6d2dd8a032826ed5e85d0e4",
+  "scope": "software review; synthetic executor/VA fixtures and archived public records; no adb/device/perf execution",
+  "exit_codes": {
+    "analysis155": 0,
+    "runner187": 0,
+    "macos_build_ctest19": 0,
+    "ndk_syntax": 0,
+    "diagnostics": 0
+  },
+  "diagnostic_exit_meaning": "diagnostics completed; remaining P1 reproduced, review not approved",
+  "source_sha256": {
+    "probes/cache-mem/ptr_chase.cpp": "62b34db6f407bcec12d1541c9ad67be1d97e4691f9db7e7d0a151df3e1c21cf3",
+    "runner/engine.py": "d8b0b3f8e26cd2f28e2b5d07f6f754f1d9357adf20a7caeceb540b638b978d60",
+    "analysis/sm8650_tlb.py": "128ad86b0d6a224fe04cdc0db0f7573696a6d9f6bea31f848001363752012770"
+  },
+  "sha256": {
+    "docs/reviews/2026-10-07-pa01-05-rereview.md": "96127693b506da371b2847905c729f27ec2993ce1361f60e3572b7e6cb3205aa",
+    "scripts/review_pa_response_20261007.py": "9f1cb648cba72a13c9523f5f7eeeae21866a2238e04bc713cd8c992017bb03fc",
+    "docs/reviews/evidence/2026-10-07-pa-response/README.md": "407a7ac5152eabf48257ada8f3da1da55d28a1686d95b32e3ac9a03ee73825ce",
+    "docs/reviews/evidence/2026-10-07-pa-response/analysis.log": "e190cb0d73d8fd6010587cb322e8e31511c34611779fbecb1667b532ab9c7ad4",
+    "docs/reviews/evidence/2026-10-07-pa-response/build-ctest.log": "f1173336e51927a9fdb51c04ca0d4fc7fc5d1fc6b82f2364c1a4c0b4cb590bec",
+    "docs/reviews/evidence/2026-10-07-pa-response/diagnostics.log": "2b7c1b94627d3a06a637bc47720336a6cc08d0e726a8dac1cfefd138aee79571",
+    "docs/reviews/evidence/2026-10-07-pa-response/ndk-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/reviews/evidence/2026-10-07-pa-response/results.json": "5bd5bddaf1f607b970b14b751cc768045372f6742fa765fec3e985b6415627c1",
+    "docs/reviews/evidence/2026-10-07-pa-response/runner.log": "5716138086f4b9b12c8d59caa7551e33ab1c0425656b0e73ad7ebe60898d102b"
+  }
+}

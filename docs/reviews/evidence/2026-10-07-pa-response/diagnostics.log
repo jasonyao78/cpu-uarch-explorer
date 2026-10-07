@@ -1,0 +1,285 @@
+{
+  "tree_head": "4655dd327d8d40738e62b8304a1dd3bf8488d38b",
+  "main_head": "9093f4a48331b262f37338d059487c557df70abd",
+  "scope": "Read-only PA response diagnostics: synthetic fixtures and archived public data.\n\nThe C++ harness uses production address selection without dereferencing VAs.\nThe executor is a Python fake; no adb, device binary or perf syscall is invoked.\nExit 0 means diagnostics completed, not that the reviewed package passed.\n",
+  "identity_set_hypothesis": {
+    "groups": 2,
+    "identity": [
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": 1,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null
+      },
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": 2,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null
+      }
+    ],
+    "chart": {
+      "ok": false,
+      "exception": "TlbError",
+      "message": "SYNTHETIC-set_hypothesis: 非 legacy identity {'chain_distribution': None, 'node_offset_policy': None, 'chains': None, 'mapping_span_kb': None, 'set_hypothesis': 1, 'set_target': None, 'set_target2': None, 'set_window': None, 'set_scatter': None, 'set_region_scope': None, 'set_nsets': None}（MB-04：扫描曲线禁止跨条件合并；buffer=512KiB）"
+    },
+    "cohort": {
+      "ok": false,
+      "exception": "TlbError",
+      "message": "grade_thp_cohorts/buffer=512KiB: non-legacy identity {'chain_distribution': None, 'node_offset_policy': None, 'chains': None, 'mapping_span_kb': None, 'set_hypothesis': 1, 'set_target': None, 'set_target2': None, 'set_window': None, 'set_scatter': None, 'set_region_scope': None, 'set_nsets': None} — THP cohort grading requires uniform legacy identity (MB-04); conditioned cohorts need an explicit preregistered rule"
+    }
+  },
+  "identity_loads_per_slot": {
+    "groups": 2,
+    "identity": [
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": null,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null
+      },
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": null,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null
+      }
+    ],
+    "chart": {
+      "ok": true,
+      "value": [
+        [
+          512,
+          0.031280517578125
+        ]
+      ]
+    },
+    "cohort": {
+      "ok": true,
+      "value": [
+        4
+      ]
+    }
+  },
+  "identity_warmup_passes": {
+    "groups": 2,
+    "identity": [
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": null,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null
+      },
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": null,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null
+      }
+    ],
+    "chart": {
+      "ok": true,
+      "value": [
+        [
+          512,
+          0.031280517578125
+        ]
+      ]
+    },
+    "cohort": {
+      "ok": true,
+      "value": [
+        4
+      ]
+    }
+  },
+  "same_json_object_groups": 1,
+  "a3_plan": {
+    "96": {
+      "ok": true,
+      "value": [
+        {
+          "set_filler_pages": 512,
+          "set_hypothesis": 1,
+          "set_nsets": 96,
+          "set_pool_pages": 65536,
+          "set_region_scope": -1,
+          "set_regions": 4,
+          "set_rounds": 20,
+          "set_target": 0,
+          "set_window": 8
+        }
+      ]
+    },
+    "256": {
+      "ok": true,
+      "value": [
+        {
+          "set_filler_pages": 512,
+          "set_hypothesis": 1,
+          "set_nsets": 256,
+          "set_pool_pages": 65536,
+          "set_region_scope": -1,
+          "set_regions": 4,
+          "set_rounds": 20,
+          "set_target": 0,
+          "set_window": 8
+        }
+      ]
+    },
+    "258": {
+      "ok": false,
+      "exception": "RunnerError",
+      "message": "set_nsets must be 0..256, got 258"
+    },
+    "260": {
+      "ok": false,
+      "exception": "RunnerError",
+      "message": "set_nsets must be 0..256, got 260"
+    },
+    "264": {
+      "ok": false,
+      "exception": "RunnerError",
+      "message": "set_nsets must be 0..256, got 264"
+    },
+    "272": {
+      "ok": false,
+      "exception": "RunnerError",
+      "message": "set_nsets must be 0..256, got 272"
+    },
+    "288": {
+      "ok": false,
+      "exception": "RunnerError",
+      "message": "set_nsets must be 0..256, got 288"
+    },
+    "320": {
+      "ok": false,
+      "exception": "RunnerError",
+      "message": "set_nsets must be 0..256, got 320"
+    }
+  },
+  "descriptor_shape_rejects_legacy": {
+    "ok": false,
+    "exception": "ParseError",
+    "message": "descriptor shape mismatch: requested tlb_set but probe output has no mode=tlbset (mode=None)"
+  },
+  "descriptor_matching": {
+    "ok": true,
+    "value": [
+      {
+        "name": "window_valid_rounds",
+        "value": 19.0,
+        "unit": "rounds"
+      },
+      {
+        "name": "window_invalid_rounds",
+        "value": 0.0,
+        "unit": "rounds"
+      },
+      {
+        "name": "window_mux_rounds",
+        "value": 0.0,
+        "unit": "rounds"
+      },
+      {
+        "name": "probe_latency_ns",
+        "value": 1000.0,
+        "unit": "ns"
+      },
+      {
+        "name": "pmu.l1d_tlb_refill.count",
+        "value": 8.0,
+        "unit": "events"
+      },
+      {
+        "name": "pmu.l1d_tlb_refill.valid_rounds",
+        "value": 19.0,
+        "unit": "rounds"
+      },
+      {
+        "name": "pmu.l2d_tlb_refill.count",
+        "value": 5.0,
+        "unit": "events"
+      },
+      {
+        "name": "pmu.l2d_tlb_refill.valid_rounds",
+        "value": 19.0,
+        "unit": "rounds"
+      }
+    ]
+  },
+  "descriptor_parameter_drift": {
+    "ok": false,
+    "exception": "ParseError",
+    "message": "tlb-set descriptor mismatch: seed='99' != requested seed=42"
+  },
+  "descriptor_event_missing": {
+    "ok": false,
+    "exception": "ParseError",
+    "message": "tlb-set descriptor: requested PMU events missing from probe output: ['l2d_tlb_refill']"
+  },
+  "engine_bad_active_regions": {
+    "ok": false,
+    "exception": "ValueError",
+    "message": "invalid literal for int() with base 10: 'oops'"
+  },
+  "native_compile": {
+    "rc": 0,
+    "stderr": ""
+  },
+  "native_selection": "quota H=1 T=7 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=1 T=42 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=1 T=100 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=1 T=200 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=2 T=7 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=2 T=42 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=2 T=100 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=2 T=200 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=3 T=7 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=3 T=42 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=3 T=100 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=3 T=200 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=4 T=7 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=4 T=42 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=4 T=100 nodes=12 counts=3,3,3,3, same_as_iso0=0\nquota H=4 T=200 nodes=12 counts=3,3,3,3, same_as_iso0=0\nnsets N=4 nodes=32 audit_length=16 reported_active=16 actual_region_mask=15 traversed_unique=32 trace_hash=14441124618404072195 filler_candidates=756 required_filler=512\nnsets N=32 nodes=256 audit_length=128 reported_active=128 actual_region_mask=15 traversed_unique=160 trace_hash=3734372668442217219 filler_candidates=672 required_filler=512\nnsets N=96 nodes=768 audit_length=384 reported_active=384 actual_region_mask=15 traversed_unique=160 trace_hash=3734372668442217219 filler_candidates=480 required_filler=512\nnsets N=256 nodes=2048 audit_length=1024 reported_active=1024 actual_region_mask=15 traversed_unique=160 trace_hash=3734372668442217219 filler_candidates=0 required_filler=512\nisolated_scope cross_high_field=1 nodes=12 active_regions=1\n",
+  "native_probe_loop_uses_window_not_chain_length": true,
+  "main_overlay": {
+    "tests": 24,
+    "failures": 0,
+    "errors": 0,
+    "log": "........................\n----------------------------------------------------------------------\nRan 24 tests in 0.079s\n\nOK\n"
+  }
+}
+legacy_runs 51 records 295 normalized_equal 51 cohort_equal 51
+engine_uniform_realized {"ok": true, "probe": {"name": "ptr_chase", "protocol_version": "1.0", "implementation_id": "portable", "git": {"commit": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "dirty": false}, "artifact": {"sha256": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"}, "realized": {"mode": "tlbset", "set_domain": "multi-region", "set_active_regions": 4, "set_region_nodes": [2, 2, 2, 2], "page_kb": "4", "set_hypothesis": 1, "set_target": 7, "set_window": 8, "set_rounds": 20, "set_regions": 4, "set_region_scope": -1, "set_nsets": 0, "seed": 42}}, "failure": null}
+engine_mixed_realized {"ok": true, "probe": {"name": "ptr_chase", "protocol_version": "1.0", "implementation_id": "portable", "git": {"commit": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "dirty": false}, "artifact": {"sha256": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"}, "realized": {"mode": "tlbset", "set_domain": "multi-region", "set_active_regions": 4, "set_region_nodes": [2, 2, 2, 2], "page_kb": "4", "set_hypothesis": 1, "set_target": 7, "set_window": 8, "set_rounds": 20, "set_regions": 4, "set_region_scope": -1, "set_nsets": 0, "seed": 42}}, "failure": null}
+engine_bad_active_regions {"ok": false, "probe": null, "failure": "invalid literal for int() with base 10: 'oops'"}
+engine_bad_region_nodes {"ok": true, "probe": {"name": "ptr_chase", "protocol_version": "1.0", "implementation_id": "portable", "git": {"commit": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "dirty": false}, "artifact": {"sha256": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"}, "realized": {"mode": "tlbset", "set_domain": "multi-region", "set_active_regions": 4, "set_region_nodes": [2, 2, 2], "page_kb": "4", "set_hypothesis": 1, "set_target": 7, "set_window": 8, "set_rounds": 20, "set_regions": 4, "set_region_scope": -1, "set_nsets": 0, "seed": 42}}, "failure": null}

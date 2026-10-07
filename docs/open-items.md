@@ -225,3 +225,12 @@
 - **P2/口径及触发**：PA-06 OI-13 保持部分关闭，extras 派生/消费在首个正式新事件组使用前完成或正式拆分跟踪；旧“图表 1 failure”叙述移除。PA-07 递归 typed canonical identity 在结构化 descriptor 正式使用前完成。PA-08 ProbeAdapter 第三参 Protocol 在新 ROB/ALU/FPU adapter 接入前同步。PA-09 3/轮的重复汇总/边际/删失/种子计数规则在正式矩阵前冻结。
 - **出口裁定**：本包不通过，Phase A 不冻结；MB-03/07 清零不代替本轮新 P1 清零。两层集成可用于修复和软件组合验证，不能视为正式矩阵放行。MB-04 对旧显式身份的既有关闭保留，但新增残差身份已使守卫范围不足（PA-01）。
 - **新证据边界**：m0b runner182/analysis153/CTest19、main analysis170；旧战役51 runs/295 records规范化分析与cohort一致（完整AnalysisResult新增identity，不能无条件称逐字相同）；生产选址函数16/16合成布局只访问region0；pilot结构化记录0/14含set_domain。NDK仅目标语法检查，无adb/手机执行；上板验证由其他Agent负责。本次仅提交评审产物，不代修生产代码。
+
+## REV-PA-RESPONSE-20261007 v1.6 修复回执复核
+
+- **输入/归属**：SM8650 TLB r2 `dbd9831`、m0b `4655dd3`、main `9093f4a`；[最新复核](reviews/2026-10-07-pa01-05-rereview.md)。旧回执保留，本段为当前出口裁定。
+- **已修子项**：H身份出口及cohort/图表命名拒绝；请求形状/seed漂移/缺事件拒绝；单目标16/16四区域配额；PA-07递归规范形；PA-08Protocol同步。MB-03/07历史关闭维持，OI-13仍部分关闭。
+- **P1 / 正式采样前关闭**：RPA-01 A3超过256的N不可生成、filler不可实现、每轮仅W访问导致目标工作集未测；RPA-02按region ID累加N-set/T2审计并按实际访问核对；RPA-03逐进程realized持久化/混域处理/ParseError守卫；RPA-04完整残差身份出口及二次聚合；RPA-05A1 scope特定门、target/seed真实矩阵、实际高字段预测分区和量化判据。
+- **行动链**：先修估计量/链长与审计→runner每样本闭环→完整身份→实际配置plan与预注册→双层/main整树回归→重送审→上板Agent做NDK完整构建/部署/新几何pilot→独立正式矩阵。可连续推进；正式后置项须保留本表触发条件。
+- **证据**：187/155/19、NDK语法检查、main组合24/24、51runs/295records规范化统计与cohort一致；合成N=96/256仅访问160节点，审计误报384/1024区域；三样本后两次fallback仍ok且record标签取首样本。无adb/手机验证。详细日志与脚本见评审。
+- **出口**：当前代码侧不通过，Phase A v1.6不冻结；不能将单目标配额/H专有身份的关闭扩展成五项全关闭。
