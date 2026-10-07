@@ -657,6 +657,20 @@ int run_tlb_set_mode(const char* prog, const SetModeOptions& opt,
         for (size_t i = 0; i < t2_region_nodes.size(); ++i)
             std::printf("%s%d", i == 0 ? "" : ",", t2_region_nodes[i]);
     }
+    // 实际高字段（RPA-05：预测表按实际 VA 计算，区域编号 k ≠ 实际 vpn_hi）。
+    // purity：区域内每页 vpn_hi 与基址一致（64MiB 区域基址不对齐时可能
+    // 跨 256MiB 窗口——已实证 25% 随机基址跨界）；purity=0 → 折叠类 H
+    // 判别降级（命名，不静默）。
+    bool vpn_hi_pure = true;
+    std::printf(" set_region_vpn_hi=");
+    for (size_t i = 0; i < regions.size(); ++i) {
+        const uintptr_t rbase = reinterpret_cast<uintptr_t>(regions[i].base);
+        const uintptr_t rend = rbase + (regions[i].pages - 1) * 4096u;
+        if ((rbase >> 28) != (rend >> 28)) vpn_hi_pure = false;
+        std::printf("%s%lu", i == 0 ? "" : ",",
+                    static_cast<unsigned long>((rbase >> 28) & 0xFF));
+    }
+    std::printf(" set_region_vpn_hi_pure=%d", vpn_hi_pure ? 1 : 0);
     std::printf(" set_domain=%s page_kb=4 seed=%llu "
                 "window_valid_rounds=%lld window_invalid_rounds=%lld "
                 "window_mux_rounds=%lld valid_rounds=%lld probe_ns=%.0f",

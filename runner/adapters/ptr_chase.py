@@ -257,6 +257,19 @@ class PtrChaseAdapter:
         for key in ("mode", "set_domain", "page_kb"):
             if key in fields:
                 realized[key] = fields[key]
+        if "set_region_vpn_hi" in fields:
+            toks = str(fields["set_region_vpn_hi"]).split(",")
+            if not all(t.isdigit() for t in toks):
+                raise ParseError(
+                    f"realized set_region_vpn_hi: invalid token in "
+                    f"{fields['set_region_vpn_hi']!r}")
+            realized["set_region_vpn_hi"] = [int(t) for t in toks]
+        for key in ("set_region_vpn_hi_pure",):
+            if key in fields:
+                raw = fields[key]
+                if raw not in ("0", "1"):
+                    raise ParseError(f"realized {key}: must be 0/1, got {raw!r}")
+                realized[key] = int(raw)
         for key in ("set_target_region_nodes", "set_t2_region_nodes"):
             if key not in fields:
                 continue
