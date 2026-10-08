@@ -48,7 +48,9 @@ OI-1/OI-6）。
 - `docs/methodology/` — 测量纪律与[注释纪律](docs/methodology/comment-discipline.md)（新代码强制遵守）
 - `docs/open-items.md` — 遗留问题跟踪（设备信息回填、gem5 intake 梳理等）
 - `docs/design/` — 框架详细设计文档（面向初级微架构背景读者）
-- `docs/reviews/` — 外部评审归档
+- `docs/README.md` — 文档地图（各目录职责 + 战役结论入口索引）
+- `docs/reviews/` — 评审与裁定归档（外部评审 + 本仓自评判定：Gate/Phase/战役终审）
+- `docs/reports/` — 面向读者的传播报告（同事版/对外版）
 - `docs/learning/` — 个人学习笔记（费曼工作流，开源时可整目录移除）
 - `probes/` — P0 微基准源码（C++17 + CMake；构建走 `CMakePresets.json`，`build/<target-triple>/<profile>` 分层，ADR-0008）
 - `runner/` — Python 编排（`schema/` 为统一数据模型；v2 含 experiment / capability / run-record / artifact 四类记录，ADR-0006）
