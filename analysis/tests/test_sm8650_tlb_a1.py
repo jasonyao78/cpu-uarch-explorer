@@ -4,8 +4,8 @@ import unittest
 
 from analysis.sm8650_tlb import TlbError
 from analysis.sm8650_tlb_a1 import (adjudicate_h, check_l3_consistency,
-                                    classify_onset, gate_record,
-                                    predicted_hw_sets)
+                                    classify_onset, freeze_thresholds,
+                                    gate_record, predicted_hw_sets)
 
 
 def _record(scope=-1, regions=4, nodes=None, pure=1, consistent=None):
@@ -32,11 +32,14 @@ class TestGate(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn("active", why)
 
-    def test_impure_all_scope_rejected_isolated_ok(self):
-        ok, _ = gate_record(_record(scope=-1, pure=0))
-        self.assertFalse(ok)
-        ok, _ = gate_record(_record(scope=0, pure=0))  # 隔离不涉折叠
-        self.assertTrue(ok)
+    def test_impure_rejected_all_scopes(self):
+        # RV2-02-3：隔离单区域同样可能跨高字段（生产选址反例）——
+        # purity=0 全 scope 命名降级
+        for scope, nodes in ((-1, [3, 3, 3, 3]), (0, [12, 0, 0, 0]),
+                             (1, [0, 12, 0, 0])):
+            ok, why = gate_record(_record(scope=scope, nodes=nodes, pure=0))
+            self.assertFalse(ok)
+            self.assertEqual(why, "vpn-hi-impure")
 
     def test_mixed_domain_and_missing_rejected(self):
         ok, why = gate_record(_record(consistent=False))
@@ -48,11 +51,19 @@ class TestGate(unittest.TestCase):
 
 
 class TestPrediction(unittest.TestCase):
-    def test_fold_vs_unfold_prediction(self):
+    def test_collection_model_distinct(self):
+        # RV2-02-1：收集假设与被检验模型分列——以 H3 选址 + H3 模型
+        # 检查，集合必为 {7}（匹配模型恒单 set）
         his = [5, 6, 7, 8]
-        self.assertEqual(predicted_hw_sets(1, 7, his), {7})
-        self.assertEqual(predicted_hw_sets(3, 7, his), {7 ^ 5, 7 ^ 6, 7 ^ 7, 7 ^ 8})
-        self.assertEqual(predicted_hw_sets(3, 7, [5]), {7 ^ 5})  # 隔离 = 单 set
+        self.assertEqual(predicted_hw_sets(3, 7, 3, his), {7})
+        self.assertEqual(predicted_hw_sets(1, 7, 1, his), {7})
+        # 交叉：H3 收集的页在 H1 模型下 = {t⊕hi}（全域多 set → 退化）
+        self.assertEqual(predicted_hw_sets(3, 7, 1, his),
+                         {7 ^ 5, 7 ^ 6, 7 ^ 7, 7 ^ 8})
+        # 低位耦合差异 → multi（None）
+        self.assertIsNone(predicted_hw_sets(1, 7, 2, his))
+        # 隔离（单 hi）时 folded 退化为单 set
+        self.assertEqual(predicted_hw_sets(3, 7, 1, [5]), {7 ^ 5})
 
 
 class TestOnsetClassification(unittest.TestCase):
@@ -61,31 +72,44 @@ class TestOnsetClassification(unittest.TestCase):
         self.assertEqual(r["kind"], "sharp")
         self.assertEqual(r["onset"], 8)
 
+    def test_weak_platform_degraded(self):
+        # RV2-02-2：平台仅为峰值 37.5%（3.0/8.0）→ 退化，不判锐
+        r = classify_onset({6: 0.2, 8: 8.0, 10: 3.0, 12: 3.0})
+        self.assertEqual(r["kind"], "degraded")
+
+    def test_right_censored_not_sharp(self):
+        # RV2-02-2：末点越线 / 越线后平台不可观测 → 右删失
+        r = classify_onset({6: 0.2, 8: 0.3, 10: 0.2, 12: 4.0})
+        self.assertEqual(r["kind"], "right-censored")
+        r = classify_onset({8: 4.0})
+        self.assertEqual(r["kind"], "right-censored")
+
     def test_degraded_never_on(self):
         self.assertEqual(classify_onset({6: 0.1, 8: 0.2, 10: 0.1})["kind"],
                          "degraded")
 
     def test_nonmonotonic_interval(self):
-        r = classify_onset({6: 0.2, 8: 4.0, 10: 6.0, 12: 0.1, 14: 0.0})
+        r = classify_onset({6: 0.2, 8: 4.0, 10: 6.0, 12: 6.5, 14: 0.1, 16: 0.0})
         self.assertEqual(r["kind"], "interval")
-        self.assertEqual(r["onset"], (8, 12))
+        self.assertEqual(r["onset"], (8, 14))
 
 
 class TestAdjudicateH(unittest.TestCase):
     def test_h1_pattern_supported(self):
-        curve = {-1: {6: 0.2, 8: 4.0, 10: 6.5},
-                 0: {6: 0.2, 8: 4.2, 10: 6.6},
-                 1: {6: 0.3, 8: 4.1, 10: 6.4}}
+        curve = {-1: {6: 0.2, 8: 4.0, 10: 6.5, 12: 7.0},
+                 0: {6: 0.2, 8: 4.2, 10: 6.6, 12: 7.1},
+                 1: {6: 0.3, 8: 4.1, 10: 6.4, 12: 6.9}}
         r = adjudicate_h(curve, [5, 6, 7, 8], hypothesis=1)
         self.assertEqual(r["verdict"], "supported")
 
     def test_h3_pattern_folds(self):
-        all_scope = {6: 0.3, 8: 0.4, 10: 0.5, 12: 0.4}   # 全域退化
-        iso = {6: 0.2, 8: 4.0, 10: 6.5}                   # 隔离锐
+        all_scope = {6: 0.3, 8: 0.4, 10: 0.5, 12: 0.4}      # 全域退化
+        iso = {6: 0.2, 8: 4.0, 10: 6.5, 12: 7.0}            # 隔离锐
+        # 自检验（C=M=H3）预测 {7}；但行为证据（全域退化+隔离锐）与
+        # 单 set 预测矛盾 → 至少不是 supported；判定需交叉检验支撑
         r = adjudicate_h({-1: all_scope, 0: iso, 1: iso},
                          [5, 6, 7, 8], hypothesis=3)
-        self.assertEqual(r["verdict"], "folds-high-bits")
-        self.assertEqual(len(r["predicted_hw_sets"]), 4)
+        self.assertIn(r["verdict"], ("suspect", "inconsistent", "folds-high-bits"))
 
 
 class TestL3(unittest.TestCase):
@@ -95,6 +119,26 @@ class TestL3(unittest.TestCase):
         bad = check_l3_consistency({7: {"verdict": "supported"}, 42: {"verdict": "suspect"}})
         self.assertFalse(bad["consistent"])
 
+    def test_empty_l3_rejected(self):
+        # RV2-02-3：空输入不得返回 consistent=true
+        with self.assertRaisesRegex(TlbError, "empty"):
+            check_l3_consistency({})
+
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestFreezeThresholds(unittest.TestCase):
+    def test_happy_path_freezes(self):
+        r = freeze_thresholds([0.0, 0.2, 0.0, 0.4, 0.2], scatter_mid=0.0)
+        self.assertTrue(r["frozen"])
+        self.assertEqual(r["on_threshold"], 2.0)
+
+    def test_stop_rules(self):
+        r = freeze_thresholds([0.0, 5.0, 0.0, 8.0], scatter_mid=0.0)
+        self.assertEqual(r["stop"], "floor-noisy")
+        r = freeze_thresholds([0.0, 0.1, 0.0], scatter_mid=2.0)
+        self.assertEqual(r["stop"], "filler-exclusion-broken")
+        r = freeze_thresholds([4.0, 4.2, 3.8], scatter_mid=0.0)
+        self.assertEqual(r["stop"], "no-grid-value")
