@@ -29,6 +29,8 @@ fail-closed（同 analysis.cli 退出码阶梯，1 = 输入错误）：缺 run
 
 from __future__ import annotations
 
+import json
+
 import argparse
 import sys
 from collections import defaultdict
@@ -72,11 +74,14 @@ def seed_medians(groups: list[dict], field: str,
     只消费 base backing 组：扫描曲线合并不同 backing 会静默混淆页策略
     制度（mixed/thp 的 refill 形态与 base 完全不同），非 base 组即
     TlbError fail-closed。
-    REV-M0-BATCH MB-04：非 legacy 身份（chains/分布/offset 等实验条件）
-    拒绝进入扫描曲线（禁止跨条件无声合并），需显式分系列规则。
+    REV-M0-BATCH MB-04 / RPA-04（评审第三轮）：身份**一致性**守卫——
+    相同条件合并合法，不同条件命名拒绝；粒度 = buffer（跨 seed 合并单元；
+    warmup=f(passes,buffer) 按 buffer 合法不同，跨 buffer 不比较）。
+    非一致 identity 的组一律拒绝进入扫描曲线，需显式分系列规则。
     REV-M0-BATCH MB-07：None（降级字段）点不进曲线但必须进 skipped
     审计清单（run/buffer/seed/field），由调用方披露——禁止静默删点。
     """
+    unit_identity: dict[int, str] = {}
     by_point: dict[tuple[int, int], list[float]] = defaultdict(list)
     for group in groups:
         label = group.get('run_label', '?')
@@ -87,10 +92,16 @@ def seed_medians(groups: list[dict], field: str,
                 f"防静默合并不同 backing）"
             )
         identity = group.get("identity")
-        if identity and any(value is not None for value in identity.values()):
+        # RPA-04（评审第三轮）：一致性语义——相同条件合并合法，不同
+        # 条件命名拒绝；粒度 = buffer（跨 seed 合并单元）。历史数据安全性
+        # 已实证（单元内 warmup=f(passes,buffer) 恒均匀）。
+        canonical = json.dumps(identity, sort_keys=True) if identity else None
+        prior = unit_identity.setdefault(group["buffer_kb"], canonical)
+        if prior != canonical:
             raise TlbError(
-                f"{label}: 非 legacy identity {identity}（MB-04：扫描曲线"
-                f"禁止跨条件合并；buffer={group['buffer_kb']}KiB）"
+                f"{label}: 非一致 identity（MB-04/RPA-04：扫描曲线禁止"
+                f"跨条件合并；buffer={group['buffer_kb']}KiB，"
+                f"identity={identity}）"
             )
         stats = group.get(field)
         if stats is None:

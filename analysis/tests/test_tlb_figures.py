@@ -71,12 +71,36 @@ class TestRunRosterPinned(unittest.TestCase):
         self.assertIn("数据局限", report)
 
     def test_nonlegacy_identity_rejected_on_scan_curve(self):
-        """MB-04：非 legacy 身份拒绝进扫描曲线（不跨条件合并）。"""
+        """MB-04/RPA-04：身份**一致性**守卫——同条件（单组/均匀身份）
+        合法合并；不同条件命名拒绝（不跨条件合并）。"""
         group = _group(buffer_kb=512, seed=7, field="cyc_per_load",
                        median=1.0)
         group["identity"] = {"chains": 2}
+        # 单组同条件：合法（一致性语义，评审第三轮）
+        seed_medians([group], "cyc_per_load")
+        # 同 buffer 异 seed 异条件（合并单元威胁）：命名拒绝
+        other = _group(buffer_kb=512, seed=42, field="cyc_per_load",
+                       median=2.0)
+        other["identity"] = {"chains": 4}
         with self.assertRaisesRegex(TlbError, "MB-04"):
-            seed_medians([group], "cyc_per_load")
+            seed_medians([group, other], "cyc_per_load")
+        # 跨 buffer 异条件：不合并（各自成点），不拒绝
+        far = _group(buffer_kb=1024, seed=7, field="cyc_per_load",
+                     median=2.0)
+        far["identity"] = {"chains": 4}
+        points = seed_medians([group, far], "cyc_per_load")
+        self.assertEqual(len(points), 2)
+
+    def test_uniform_identity_with_protocol_digest_accepted(self):
+        """RPA-04：协议派生参数差异（warmup=f(passes,buffer)）在合并
+        单元内恒均匀——带 residual_digest 的 legacy 组一致性通过。"""
+        g1 = _group(buffer_kb=512, seed=7, field="cyc_per_load", median=1.0)
+        g1["identity"] = {"residual_digest": "abc123"}
+        g2 = _group(buffer_kb=512, seed=42, field="cyc_per_load", median=1.1)
+        g2["identity"] = {"residual_digest": "abc123"}
+        # per-(buffer,seed) 两点各自成立，不抛 = 均匀身份被接受
+        points = seed_medians([g1, g2], "cyc_per_load")
+        self.assertEqual(sorted(points), [(512, 7), (512, 42)])
     def test_roster(self):
         self.assertEqual(tlb_figures.RUN_COARSE,
                          "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse")
