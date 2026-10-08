@@ -21,7 +21,7 @@
 | `~/workspace/cpu-uarch-explorer-tlb-r2`     | `codex/sm8650-tlb-hierarchy-r2` | **`dbd8ca1`** | 本 kickoff 文档住这里——同步后读到的才是当前基线说明                                                                    |
 
 ```bash
-cd ~/workspace/cpu-uarch-explorer-tlb-r2-m0b && git pull --ff-only   # 代码 → b0f287f
+cd ~/workspace/cpu-uarch-explorer-tlb-r2-m0b && git pull --ff-only   # 代码 → 6f433e3（R10 raw 文件名修复，noconflict 必需）
 cd ~/workspace/cpu-uarch-explorer-tlb-r2 && git pull --ff-only       # 文档 → dbd8ca1
 ```
 
