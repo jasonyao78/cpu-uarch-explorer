@@ -170,6 +170,19 @@ class TestA1FinalContract(unittest.TestCase):
             self.assertNotEqual(case['processes'][0]['vpn_hi'],
                                 case['processes'][-1]['vpn_hi'])
 
+    def test_late_process_purity_and_domain_cannot_hide_behind_first(self):
+        for old, new, reason in (
+            ('set_region_vpn_hi_pure=1', 'set_region_vpn_hi_pure=0', 'vpn-hi-impure'),
+            ('set_domain=multi-region', 'set_domain=single-region-fallback', 'mixed-domain'),
+        ):
+            def output(case, sample, stdout):
+                return stdout.replace(old, new) if sample == 9 else stdout
+            with self.subTest(new=new), tempfile.TemporaryDirectory() as tmp:
+                # 全部 record 都由真实 producer 产生，末个进程违反几何/域合同。
+                records = produce_a1(tmp, output)
+                with self.assertRaisesRegex(TlbError, reason):
+                    run_a1_adjudication(records, self.frozen)
+
 
 class TestA1ShapeEdges(unittest.TestCase):
     def test_platform_uses_all_observations_without_threshold_filter(self):

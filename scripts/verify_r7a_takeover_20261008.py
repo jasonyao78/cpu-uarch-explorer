@@ -27,7 +27,8 @@ def main():
     sys.path.insert(0, str(tree))
     from analysis.load import load_run
     from analysis.sm8650_tlb import TlbError
-    from analysis.sm8650_tlb_a1 import freeze_thresholds, run_a1_adjudication
+    from analysis.sm8650_tlb_a1 import run_a1_adjudication
+    from analysis.tests.a1_production_fixture import freeze_fixture
     from runner.tests.tlb_set_fixtures import A1_LAYERS, a1_plan, run_synthetic_plan
 
     def produce(plan, platform, directory, output_filter=None):
@@ -61,7 +62,7 @@ def main():
                 "manifest_experiment_id": loaded.manifest["experiment_id"]}
             records.extend(loaded.ok_records)
 
-        frozen = freeze_thresholds([0.0, 0.2, 0.0, 0.4, 0.2], scatter_mid=0.0)
+        frozen = freeze_fixture(root / "calibration")
         baseline = run_a1_adjudication(records, frozen)
         if baseline["h_star"] != 1 or baseline["n_records"] != 128:
             raise AssertionError(f"unexpected synthetic adjudication: {baseline}")

@@ -22,3 +22,12 @@
 SM8650 X4 TLB 战役（终审 `docs/reviews/2026-09-28-sm8650-tlb-hierarchy.md`）的同事版四图 + 读法报告；run 名单与 (buffer × seed) 网格钉死在 `analysis/tlb_figures.py` 模块常量，chart.py 的 shaded/vlines 泛化参数由此引入。
 
 待做：跨 run 汇总对比、校准差异单（MEASURED vs SIMULATED）。
+
+### SM8650 r2 A1 两阶段入口
+
+`analysis/sm8650_tlb_a1_cli.py` 提供 freeze/adjudicate；正式三层配置与
+专用 floor/scatter 标定在 `configs/experiments/ptr-chase-sm8650-x4-tlb-a1-*.json`。
+完整条件/统计/几何合同在 `analysis/sm8650_tlb_a1_contract.py`，冻结工件与
+谱系核验在 `analysis/sm8650_tlb_a1_freeze.py`；规则见
+`docs/tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md` §5.5，交接见
+`docs/runbooks/2026-10-08-sm8650-a1-integrated-handoff.md`。

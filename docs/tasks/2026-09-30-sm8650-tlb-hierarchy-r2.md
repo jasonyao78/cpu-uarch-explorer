@@ -1,6 +1,6 @@
-# SM8650 Cortex-X4 TLB 层级探测 · 第二次战役（r2）任务书 v1.1
+# SM8650 Cortex-X4 TLB 层级探测 · 第二次战役（r2）任务书 v1.9
 
-> 版本：v1.8（2026-10-08；…→ v1.7（RPA-01..05 修复 + A1 三层矩阵）→ **v1.8.2（R6：阈值贯穿/三层分组/置换不变，m0b `3c4b507`）；v1.8.1（RV2-02 修复：双假设预测/平台删失/审计闭合/阈值决策表 `freeze_thresholds`，m0b `fa663f5`）；v1.8（评审第三轮三项阻塞修复：warmup 入 digest + 合并单元一致性守卫、A1 判据消费入口模块、金样 CTest 注册补提交，m0b `5ccb841`）**，处置见 §10.3）
+> 版本：v1.9（2026-10-08；A1 最终消费合同、锚定阈值工件、两阶段文件入口与软件集成收口。替代 v1.8.2 的 §5.5；历史评审处置保留于 §10.3 / docs/reviews/）。
 
 ## 1. 任务契约与有限终点
 
@@ -151,39 +151,55 @@
 
 **登记观察（不判读，Phase A 处理）**：① 0x2f 在 W=16 饱和 ~15/轮（<W）；② 0x2d 的轮数依赖（替换态积累）；③ 锚点小 footprint 漂移对大 footprint 不敏感（与共跑干扰假设一致）。
 
-### 5.5 Phase A 正式矩阵冻结（v1.7，2026-10-07 夜；配置已生成且全部 plan 预览通过）
+### 5.5 Phase A A1 软件合同冻结（v1.9，2026-10-08）
 
-**总则**：B1 默认主估计量；校准口径 §5.4；每块前 2-case 标定复测 + 锚点夹块（charging-thermal）；**A3 正式后置**（open-items 登记：全链遍历 reach 模式，触发 = A1 判出 H* 后）。pilot 的 multi-region 标签不作 H 判别证据。
+**冻结边界**：本节冻结配置、选择程序和消费合同；目标板的数值工件须由独立标定生成。合成测试中的 H*=1 只验证软件，不是 SM8650 结论。旧 pilot 的 multi-region 标签不作 H 判别证据，不回填 realized。B1 继续作主估计量。A3 按 open-items 的既有条件后置，不混入本次 A1 软件出口。
 
-**A1 三层矩阵（配置已入库 m0b `95fa2a9`，case 数经 planner 机器核算）**：
+**正式三层矩阵**（配置路径均在 `configs/experiments/`，机器展开共 128 cases / 1280 个进程样本）：
 
-| 层 | 配置 | 矩阵 | cases | 判据角色 |
-|---|---|---|---|---|
-| L1 主判定 | `...-tlb-a1-l1-main` | H[1..4] × scope{-1,0,1} × W[6,8,10,12]，seed 42 | 48 | H* 主判定 |
-| L2 复现 | `...-tlb-a1-l2-repro` | 同 L1，seed 1337 | 48 | 复现条件（不一致 → 并列表格） |
-| L3 target 一致性 | `...-tlb-a1-l3-target` | H × target{7,42,100,200} × W{8,12}（全域），seed 42 | 32 | 附加一致性条件 |
+| 层/精确配置文件 | 条件 | cases | 角色 |
+|---|---|---:|---|
+| `ptr-chase-sm8650-x4-tlb-a1-l1-main.json` | H{1,2,3,4}×scope{-1,0,1}×W{6,8,10,12}；target7、seed42 | 48 | 主判定 |
+| `ptr-chase-sm8650-x4-tlb-a1-l2-repro.json` | 同 L1；seed1337 | 48 | 独立顺序复现 |
+| `ptr-chase-sm8650-x4-tlb-a1-l3-target.json` | H×target{7,42,100,200}×W{8,12}；scope−1、seed42 | 32 | 两点附加形态一致性 |
 
-合计 128 cases / 1280 进程 + 标定/锚点。
+record 的精确 `experiment_id` 绑定角色；完整 params/control/target/protocol 必须匹配实际配置展开的计划。L1/L3 即使有相同 params 仍是不同角色。缺 H/scope/W/seed/target、未知条件、重复 case（包括完全相同记录）、重复 record ID 或跨 case 重用 raw 引用均拒绝。失败记录与旧 schema 不静默过滤；单次裁定要求三层全覆盖。重新采样作为新的一次完整裁定保留，不自动合并重复记录。
 
-**判别原理（PA-04 数学事实内）**：候选 H 收集的页是否构成**单个真实硬件 set**，由 onset 曲线量化特征 + 跨收集范围一致性判定；区域内 `H3≡H1⊕c` 是编号置换，不构成判别依据。
+**必经软件入口与部件索引**：
 
-**预测分区按实际 VA 计算**（RPA-05）：判据脚本消费 record.probe.realized 的 `set_region_vpn_hi`（各区域基址实际 VA[35:28]）计算候选冲突分区——**不用区域编号代替实际高字段**。几何实证修正：64MiB 区域基址不对齐时 ~25% 概率跨 256MiB 窗口（随机采样 20 万基址实证），故 realized 带 `set_region_vpn_hi_pure` 标志；**purity=0 → 该 case 的折叠类（H3/H4）判别无效，命名降级**，不静默。
+- `analysis/sm8650_tlb_a1_contract.py`：实际 planner 条件合同、全覆盖、逐 observations 统计与逐进程 realized 几何。
+- `analysis/sm8650_tlb_a1_freeze.py`：专用标定文件加载、谱系锚定、阈值独立重算、输入隔离核验。
+- `analysis/sm8650_tlb_a1.py`：C×M 实际 VA 预测、onset 分类、L1/L2/L3→H*；`run_a1_adjudication(records, frozen)` 在分类前必经完整合同和冻结核验，没有正式 bypass。
+- `analysis/sm8650_tlb_a1_cli.py`：`freeze` / `adjudicate` 文件入口；后者审计每个 run 的 manifest、二进制及 raw 引用闭合。
+- `runner/engine.py`、`runner/adapters/ptr_chase.py`、`runner/schema/README.md`：requested→realized、逐记录角色与样本持久化。纯函数 helper 单独通过不代表正式裁定获准。
 
-**scope 特定审计门**（修 RPA-05 矛盾）：expected_active = (scope<0 ? set_regions : 1)；门按每 record 的请求 scope + realized 判定——隔离 case 不再被全域硬门误杀；附加 `domain_consistent==true` 与审计不变量（adapter 侧已 fail-closed）。
+**数据与几何硬门**：每 case 恰 10 个进程 observations，sample_index 为 0..9，全部有限、单位正确、各 metric 引用同一进程，median/value 与 observations 重算一致。每进程有效轮≥1，valid+invalid+mux=rounds−1（冷轮不计），各事件 valid_rounds 等于窗口有效轮。无效/mux 轮由探针排除均值并披露，不新增无依据的比例排除线。所有请求 descriptor 精确类型和值匹配 realized；节点向量长度、非负整数、总和 W、active 数量、隔离槽位、actual vpn_hi 与 purity 全核验。全域四区域必须实际有节点且高字段不同；隔离只激励指定区域；所有 scope 都要求 purity=1。任一失败命名拒绝整次正式裁定，保留失败/审计，不丢点继续宣布 H*。
 
-**判据消费入口（m0b `3c4b507`，第六轮修订）**：`analysis/sm8650_tlb_a1.py`——`gate_record`（混域/scope 特定 active/purity/审计）、`predicted_hw_sets`（双假设：收集 C × 模型 M）、`classify_onset`（锐/退化/弱平台/左右删失，on_threshold 参数化）、`adjudicate_h`（L1 三 scope 强制 + 阈值贯穿）、`check_l3_consistency`（4 target 强制）、`freeze_thresholds`（决策表 + 四条 STOP）、`run_a1_adjudication`（records→硬门→L1/L2/L3→H* 必经链：分组键 (H,scope,seed,target) 三层不覆盖、逐层排序聚合**输入置换不变**、L3 强制**精确覆盖**：target 恰为 {7,42,100,200}、W 恰为 {8,12}，不符即拒；两点形态规则 = 四 target 一致且非 both-below）。阈值经 frozen 产出的 on_threshold 贯穿全部分类调用，未冻结拒跑。record 级 experiment_id 由 runner 逐条写入（归层权威来源）。：`analysis/sm8650_tlb_a1.py`——realized 硬门（gate_record：混域/scope 特定 active/purity/审计）、实际 VA 预测分区（predicted_hw_sets，按 realized `set_region_vpn_hi` 计算）、量化 onset 分类（classify_onset）、单 H 判定（adjudicate_h）、L3 一致性（check_l3_consistency），全部带合成金样。**阈值确定程序**（两阶段预注册）：程序与判据结构现已冻结（见下）；唯二数值（on 阈值 3.0/轮、过渡/平台比）为候选值——A1 首块标定（2-case 标定复测块）采集后，用标定块 + 合成曲线推演复核数值并冻结，**标定数据与正式判定数据隔离**（标定块不进入 H* 判定的 onset 曲线，只用于数值冻结与门限验证），冻结后任务书留修订痕。
+逐进程 VA 重分配允许变化，不能用最后一个 record 或第一个进程的 hi 代表全矩阵。`case_audit` 保留 128 个 case 各 10 个进程的实际 active hi、节点与四模型预测。按 C 收集、按 M 检验：C=M 必为 {target}；差一个高字段折叠时为 {target⊕hi}；低字段耦合差异为 multi。区域内编号置换不单独构成 H 判别证据。
 
-**量化 onset 判定（"锐/退化"操作定义，数值随首块标定按上程序冻结）：**
-- 输入：每 case 10 进程 per-round 均值的中位 m(W)；
-- **锐 onset**：存在 W*，m 从 <1.0 到 ≥3.0 的过渡宽度 ≤2 个 W 档，且其后平台 ≥ 过渡峰值的 80%；
-- **退化**：全程 <3.0/轮，或过渡宽度 >4 档，或平台缺失；
-- 非单调 → onset **区间**（首个 ≥3.0 的 W 至其后连续两点 <1.0 的 W）；边界删失在本节自含表述（不引用外部节号）。
-- 3.0/轮 = 候选操作阈值，不作物理 way/set 证明；几何改变后的分母口径 = 每轮窗口访问数（W 或 N×W），随块标定复核。
-- **取消 [5,10] H 淘汰硬门**：B1 pilot 的 [6,8] 仅作参考级证据。
+**标定程序与固定规则**：专用配置 `ptr-chase-sm8650-x4-tlb-a1-calibration-floor.json`（W0）与 `...-calibration-scatter.json`（W8/set_scatter1）各 1 case/10 进程，显式 `analysis_role=CALIBRATION`；与正式块同一二进制、clean source、充电/频率限制/服务 regime，均选 `charging-thermal` 并有合格 before/after 快照。标定样本绝不进入正式曲线。
 
-**H* 判定规则（预注册）**：候选 H 同时满足 ①全域与隔离 onset 一致（锐且 |ΔW*|≤1，按 scope 门各自的 realized 审计有效域）；②L2 复现一致；③L3 四 target 一致；④全域 case purity=1。全满足 → H* 按比较级命名；部分候选并存 → EQUIVALENT_ON_TEST_DOMAIN 并列表格；全不符 → 按候选分别报告，不拍板。
+固定 floor=1.0/轮、平台比例=0.8、候选网格 {2,3,4,5}/轮。只有 on 由标定选择，不再把过渡/平台比描述为第二个待标定数值。令 f 为 W0 的 10 个进程 per-round 0x2d 值，s 为 scatter 的中位：
 
-**停止线**：任一块标定复测不过 → 停块回任务书；realized 硬门拒绝的 case 不进判定（命名清单）。
+1. MAD(f)>1 → STOP `floor-noisy`；s>1 → STOP `filler-exclusion-broken`。
+2. 在升序网格取最小 g，要求 g≥median(f)+5MAD(f)，且 g≤0.5×6（6 为已登记 pilot 信号参考，非重新拟合正式数据）。无候选 → STOP `no-grid-value`。
+3. 候选须通过内置锐/不起/弱平台/右删失合成形态验证；网格耗尽 → STOP `synthetic-validation-failed`。
+4. `freeze` 写 `a1-freeze-v1`：规则、决策、三正式/两标定/平台配置 SHA、影响条件/采集/统计/判定的代码 SHA、两标定 records/manifest/artifacts SHA、record/raw 引用、二进制/source/环境谱系、自身摘要。现存不同冻结文件拒绝覆盖；STOP 也存审计，退出码2，不可正式消费。
+5. `adjudicate` 独立重算标定决策，核对当前代码/配置、标定文件及正式谱系/环境；标定与正式 record ID/raw 引用必须不相交。仅 `frozen=True`、修改阈值后自行重算摘要、输入/代码/配置漂移均无消费资格。工件 SHA 是漂移检测，不是签名或设备真实性证明。
+
+文件入口（在 r2 仓库根；实际路径由上板 Agent 记录，不复用本机合成输出）：
+
+```bash
+python -m analysis.sm8650_tlb_a1_cli freeze --floor-run <标定floor-run> --scatter-run <标定scatter-run> --out <新冻结文件.json>
+python -m analysis.sm8650_tlb_a1_cli adjudicate --run <L1-run> --run <L2-run> --run <L3-run> --frozen-file <冻结文件.json> --out <裁定.json>
+```
+
+**onset 决策单元**：m(W) 是每 case 10 个进程 per-round 均值的中位；不是独立 round 样本。on 使用已冻结 g。全程未达 on → degraded；首个越线前无 <floor 观察 → left-censored。越线后、首次连续两点 <floor 之前的**全部**后续点构成平台，不过滤低于 on 的点；平台须至少两点且中位≥max(floor,峰值×0.8)。末端越线/平台不足且未观察持续回落 → right-censored；观察到持续回落 → interval。最近低侧点到首个越线点之间的中间 W 档数≤2 才 sharp，其他不晋升 supported。完整实现和边界金样见上述 A1 模块/测试；删失与区间不得冒充精确 onset。
+
+**H* 规则**：L1 三 scope 都 sharp 且 onset 的 |ΔW*|≤1；L2 按 verdict 与全域 onset 复现（|ΔW*|≤1），平台振幅噪声不参与逐字比较。L3 每 target 必须恰为 W8/12，四 target 形态一致且是 crossing 或 both-above；both-below/falling 拒绝。L3 两点不能定位 onset，其正证据只作附加一致性，onset 来自 L1/L2。唯一合格候选报 unique；多个合格候选并列 equivalent-on-test-domain；全无则 none-supported。不将本矩阵自动升格为物理 way/set 或排他硬件模型证明，不恢复旧 [5,10] 淘汰硬门。
+
+**执行停止线与边界**：块前标定复测/锚点夹块沿 §5.3–5.4 纪律；失败停块调查，不用正式结果调阈值。代码/配置/二进制/regime 变化须重标定并生成新工件。macOS CTest 和合成传输不能替代 Android arm64 构建、Linux VMA/PerfWindow、目标事件资格或真机激励审计；这些由上板 Agent 从 r2 集成基线独立验证。
+
 ## 6. 实验协议、预注册规则与统计
 
 ### 6.1 固定协议（v1.1 更新）
@@ -278,12 +294,12 @@ Q-A/Q-B/Q-C/Q-D 判据同 §1.2 各问；另冻结（F8/F9）：
 | 阶段 | 触发 | 动作 |
 |---|---|---|
 | m0b 开发使命结束 | RV2-02 清零（M0 代码侧出口） | `merge --no-ff` 进 r2 + 整树集成回归（runner/analysis/CTest/图表真实数据/51 runs 重放）+ 集成证据提交评审。**不等待设备实验得出 H***（评审 2026-10-08 明确） |
-| m0b 物理退役 | r2→main 战役终审集成 + 完整测试 + 推送之后（铁律 7） | worktree 回收与分支删除**分两步**：先回收 worktree（使命完成/工作树干净/无进程依赖/数据分层处置），后删分支（此时其提交已是 r2 祖先，零丢失） |
+| m0b 物理退役 | worktree：使命完成/干净/无依赖/数据处置；分支删除：main 集成+完整测试+推送（铁律 7） | worktree 回收与分支删除**分两步**：先回收 worktree（使命完成/工作树干净/无进程依赖/数据分层处置），后删分支（此时其提交已是 r2 祖先，零丢失） |
 | r2 退役 | 战役终审（Phase A/B 判读收口、评审终审通过） | r2→main 集成；历史全量保留在 main（同战役 1 路径） |
 
 **纪律**：m0b 不直接碰 main（评审隔离层的意义）；main 侧仅允许战役自有文件的小步提交（如图表守卫），每次先核对 `git status` 防混入并行会话改动（铁律 6）；合入跳级（m0b→main）不被授权。
 
-### 10.4 分支退役（同 v1.0 §10.3）
+### 10.5 分支退役（同 v1.0 §10.3）
 
 ## 11. 后置项登记（铁律 0）
 
@@ -295,4 +311,4 @@ Q-A/Q-B/Q-C/Q-D 判据同 §1.2 各问；另冻结（F8/F9）：
 6. 冒烟未关闭项（若有）。
 7. **PerfWindow 窗口完整性 API（MB-05 余量）**：~~snapshot 解码与 window validity 分离、前后差分（enabled/running 不随 RESET 清零）、正式窗口有效运行检查——Phase B 短窗 pilot 前完成~~ **API 层已交付（2026-10-01 m0b `44e3e3f`）**：`read_snapshot` 解码与解释分离、`window_delta` 纯函数（enabled/running 累计值跨 RESET 差分有效；命名否决 enabled-zero/mux-detected/enabled-regressed/nr-mismatch；RESET 值非单调标记 values_monotonic），6 个合成场景入黄金测试。剩余 = 真机窗口有效性证据（首个短窗 pilot 的 S6 类 case 随采数取得）。
 8. **descriptor 最小证据契约（MB-06）**：按两层评审 §4 表格落地 requested → canonical plan → adapter/kernel → realized observation → identity-aware analysis 链；params 类型规范化与 canonical identity；schema README 登记 probe_shape 与身份维度。
-9. OI-13 余量（REV-M0-BATCH C6）：extras 事件的派生字段与消费语义；overlay 测试 `test_missing_metric_fails` 的旧契约期望在 r2 合并时更新（缺指标从"受控退出 1"变为"命名降级"，1 failure 为预期口径差异）。
+9. OI-13（REV-M0-BATCH C6）：main 图表线已同步 r2；局部缺指标渲染/命名披露及整段缺点的历史结论降级由 `analysis/tests/test_tlb_figures_integration.py` 验证。整条 walk 系列缺失仍受控拒绝，不能把空系列错误改成成功。原派生字段/消费语义后置项若另有登记，继续原触发，不随图表集成扩大关闭范围。
