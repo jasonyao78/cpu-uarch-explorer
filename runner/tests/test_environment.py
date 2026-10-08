@@ -13,6 +13,7 @@ FakeExecutor 维护可变 governor 状态；锁为假锁；store 用临时目录
 
 import tempfile
 import unittest
+from unittest import mock
 import re
 from pathlib import Path
 
@@ -389,6 +390,12 @@ class TestReconcileAndSpecs(unittest.TestCase):
     运行前被检测并完成 restore；host_requirements 声明式换算。"""
 
     def setUp(self):
+        # reconcile 没有显式 lock 参数；测试仍只使用假锁，不触碰真实
+        # data/private/env-journals 或与上板会话争抢 mutation.lock。
+        lock_patch = mock.patch('runner.environment.coordinator._default_lock',
+                                side_effect=lambda platform: FakeLock())
+        lock_patch.start()
+        self.addCleanup(lock_patch.stop)
         self._tmp = tempfile.TemporaryDirectory()
         self.store = JournalStore(Path(self._tmp.name))
 
@@ -476,6 +483,12 @@ class TestRestoreDurability(unittest.TestCase):
     """BOARD-A1-THERMAL：重启回读恢复失败，并重放被中断的恢复。"""
 
     def setUp(self):
+        # reconcile 没有显式 lock 参数；测试仍只使用假锁，不触碰真实
+        # data/private/env-journals 或与上板会话争抢 mutation.lock。
+        lock_patch = mock.patch('runner.environment.coordinator._default_lock',
+                                side_effect=lambda platform: FakeLock())
+        lock_patch.start()
+        self.addCleanup(lock_patch.stop)
         self.tmp = tempfile.TemporaryDirectory()
         self.store = JournalStore(Path(self.tmp.name))
         self.executor = RestorePressureExecutor()
