@@ -128,12 +128,18 @@
     "cmake-build.log": "87d783bbd7566cdbcd49ed54675a3d69e9303e4a832c8cf73959ea3be4640b46",
     "cmake-configure.log": "8ee0c100aaedf0e90436a2594ce0da31a9e039a0cb2530e803f1c810d0f6c8d4",
     "commands.json": "8e59a5e25b68cd8eb5781496a016e1b0ebc3ea83340e686b136dc8c1ee018e96",
-    "contract-red.log": "99b19423b7e1a3800f7986627f6045a08446b2eba9c86aa0d9361ea6a0112033",
+    "contract-red.log": "6ad62b4e5eac00b2769fbf1ccb1e1bbe975be760411a0c3e6b1b486b24699c4e",
     "ctest.log": "b0c60294b071019bf9492068efb204e7e0745030a4625c440316d4ba79758031",
     "diagnostics.json": "da1e62531e3b595bd83b3e8bb484206f8126ca9bfbe004db9c3468d0de8db817",
     "freeze-red.log": "4b041c802fac99444b8e46e7711aecab7a77bfb2d411da9777673e2b5ac06559",
     "r7-compat.log": "5aa89615fcceca917e3f007615f1b31ff2f76adf26eb4c128cd2da2954d62220",
     "runner.log": "b7d7e782826b5682ff93544b898a3426877f4f7122e4dc9042be5ec994ccdeee",
     "software-exit.log": "20586c081812b27cd1d10285442051a7742d5fbddba49bd6f4a57ae322b7006e"
+  },
+  "log_presentation_normalization": {
+    "contract-red.log": {
+      "operation": "strip trailing whitespace only; preserve assertion/traceback content",
+      "original_sha256": "99b19423b7e1a3800f7986627f6045a08446b2eba9c86aa0d9361ea6a0112033"
+    }
   }
 }

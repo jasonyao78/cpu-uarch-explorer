@@ -55,7 +55,7 @@ OI-13 的一般 extras 派生/消费语义 PA-06 不借本次图表通过扩大�
 
 r2首次runner测试曾调用旧build中的ptr_chase而失败；标准preset重建后通过，最终验证用重建产物。macOS不能执行Linux专属VMA/PerfWindow路径，证据等级不提升。
 
-证据目录：`docs/reviews/evidence/2026-10-08-a1-software-exit/`。`verification-manifest.json`给出源码/测试/配置/文档与证据SHA；`commands.json`给出命令/工作目录/实际退出码；`diagnostics.json`保留完整旧run名单与摘要、生产成功数及负例拒绝、图表摘要。RED日志保留旧实现确实放行裸frozen和旧合同缺口的反证；RED的失败是预期诊断，不计入最终通过数。
+证据目录：`docs/reviews/evidence/2026-10-08-a1-software-exit/`。`verification-manifest.json`给出源码/测试/配置/文档与证据SHA；`commands.json`给出命令/工作目录/实际退出码；`diagnostics.json`保留完整旧run名单与摘要、生产成功数及负例拒绝、图表摘要。RED日志保留旧实现确实放行裸frozen和旧合同缺口的反证；RED的失败是预期诊断，不计入最终通过数。contract-red.log仅去除行末空白用于归档，原始字节SHA另记于manifest；断言与traceback内容不改。
 
 复现（r2根目录，Python用已有环境）：
 
