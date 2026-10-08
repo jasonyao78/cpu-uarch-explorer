@@ -1,0 +1,9 @@
+report: /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/tmpz9tv06f1/run/report.md
+chart:  /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/tmpz9tv06f1/run/latency.svg
+report: /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/tmpz9tv06f1/run/report.md
+chart:  /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/tmpz9tv06f1/run/latency.svg
+......................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 182 tests in 0.039s
+
+OK

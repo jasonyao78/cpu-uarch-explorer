@@ -1,0 +1,510 @@
+{
+  "heads": {
+    "m0b": "3c4b50762379adba70ca51d57e6f3a62eaf204d2",
+    "r2": "6a45a9321098ccec698d346fb8fd1addf9751260",
+    "main": "2fa8d5d2fbc99a7a03c79634e47efcde23035e2c"
+  },
+  "scope": "Read-only R6 review: real planner/adapter/engine with a fake executor.\n\nEvery metric is synthetic. No binary, adb, phone, or perf is executed. Temporary\nraw fixtures are deleted; only diagnostic summaries are saved. Exit 0 denotes\ncompleted diagnostics, never approval of the implementation under review.\n",
+  "source_sha256": {
+    "analysis/sm8650_tlb_a1.py": "4c8a019c46318217f9b6c8af7a2b9707152ef9e189ab3ed26d4d6c288ef77216",
+    "analysis/tests/test_sm8650_tlb_a1.py": "ea848f03898c3873b9d80486e280db1e825439d620002220a9189dc2e49a8f53"
+  },
+  "plan_cases": {
+    "l1-main": 48,
+    "l2-repro": 48,
+    "l3-target": 32
+  },
+  "identical_params_overlap_l1_l3": 8,
+  "frozen": {
+    "frozen": true,
+    "on_threshold": 2.0,
+    "floor_median": 0.2,
+    "floor_mad": 0.2,
+    "validated": "synthetic-suite"
+  },
+  "fake_runner_summary": {
+    "records": 128,
+    "process_observations": 1280,
+    "all_status_ok": true,
+    "set_target_present_by_layer": {
+      "l1-main": 48,
+      "l2-repro": 48,
+      "l3-target": 32
+    }
+  },
+  "actual_128_forward": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "a1: L1 coverage incomplete, missing scopes [-1]"
+  },
+  "actual_128_classifier_calls": 0,
+  "actual_128_l3_calls": 0,
+  "actual_128_shuffled": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "a1: L1 coverage incomplete, missing scopes [-1]"
+  },
+  "threshold_two": {
+    "hypothesis": 1,
+    "verdict": "supported",
+    "classes": {
+      "-1": {
+        "kind": "sharp",
+        "onset": 8,
+        "transition_steps": 0,
+        "platform_median": 2.5
+      },
+      "0": {
+        "kind": "sharp",
+        "onset": 8,
+        "transition_steps": 0,
+        "platform_median": 2.5
+      },
+      "1": {
+        "kind": "sharp",
+        "onset": 8,
+        "transition_steps": 0,
+        "platform_median": 2.5
+      }
+    },
+    "predicted_hw_sets": [
+      7
+    ]
+  },
+  "threshold_three": {
+    "hypothesis": 1,
+    "verdict": "suspect",
+    "classes": {
+      "-1": {
+        "kind": "degraded",
+        "onset": null,
+        "reason": "never-reaches-on-threshold"
+      },
+      "0": {
+        "kind": "degraded",
+        "onset": null,
+        "reason": "never-reaches-on-threshold"
+      },
+      "1": {
+        "kind": "degraded",
+        "onset": null,
+        "reason": "never-reaches-on-threshold"
+      }
+    },
+    "predicted_hw_sets": [
+      7
+    ]
+  },
+  "threshold_classifier_kwargs": [
+    {
+      "on_threshold": 2.0
+    },
+    {
+      "on_threshold": 2.0
+    },
+    {
+      "on_threshold": 2.0
+    },
+    {
+      "on_threshold": 3.0
+    },
+    {
+      "on_threshold": 3.0
+    },
+    {
+      "on_threshold": 3.0
+    }
+  ],
+  "owner_fixture_shape": {
+    "records": 24,
+    "set_target_present": 0,
+    "hypotheses": [
+      1
+    ],
+    "seeds": [
+      42,
+      1337
+    ],
+    "notes": "handmade author test fixture: not a production record positive oracle"
+  },
+  "owner_no_l3": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3": null,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 24,
+    "h_star": 1,
+    "h_star_status": "unique"
+  },
+  "owner_classifier_kwargs": [
+    {
+      "on_threshold": 2.0
+    },
+    {
+      "on_threshold": 2.0
+    },
+    {
+      "on_threshold": 2.0
+    },
+    {
+      "on_threshold": 2.0
+    },
+    {
+      "on_threshold": 2.0
+    },
+    {
+      "on_threshold": 2.0
+    }
+  ],
+  "owner_24_permutation_equal": true,
+  "owner_24_unsorted_json_byte_equal": false,
+  "owner_plus_all_negative_l3": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3": {
+          "consistent": true,
+          "verdicts": {
+            "7": "suspect",
+            "42": "suspect",
+            "100": "suspect",
+            "200": "suspect"
+          },
+          "targets": [
+            7,
+            42,
+            100,
+            200
+          ]
+        },
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 32,
+    "h_star": 1,
+    "h_star_status": "unique"
+  },
+  "l3_two_point_labels": {
+    "low_high": {
+      "kind": "right-censored",
+      "onset": [
+        12,
+        null
+      ],
+      "reason": "onset at or near last window; platform unobserved"
+    },
+    "high_high": {
+      "kind": "left-censored",
+      "onset": [
+        null,
+        8
+      ],
+      "reason": "no below-floor observation on low side"
+    },
+    "low_low": {
+      "kind": "degraded",
+      "onset": null,
+      "reason": "never-reaches-on-threshold"
+    }
+  },
+  "l3_wrong_four_targets": {
+    "ok": true,
+    "value": {
+      "consistent": true,
+      "verdicts": {
+        "7": "supported",
+        "42": "supported",
+        "100": "supported",
+        "201": "supported"
+      },
+      "targets": [
+        7,
+        42,
+        100,
+        201
+      ]
+    }
+  },
+  "owner_same_onset_different_platform": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": false,
+        "l3": null,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 24,
+    "h_star": null,
+    "h_star_status": "multiple-or-none"
+  },
+  "l2_same_onset_classes": {
+    "42": {
+      "-1": {
+        "kind": "sharp",
+        "onset": 8,
+        "transition_steps": 0,
+        "platform_median": 6.75
+      },
+      "0": {
+        "kind": "sharp",
+        "onset": 8,
+        "transition_steps": 0,
+        "platform_median": 6.75
+      },
+      "1": {
+        "kind": "sharp",
+        "onset": 8,
+        "transition_steps": 0,
+        "platform_median": 6.75
+      }
+    },
+    "1337": {
+      "-1": {
+        "kind": "sharp",
+        "onset": 8,
+        "transition_steps": 0,
+        "platform_median": 6.85
+      },
+      "0": {
+        "kind": "sharp",
+        "onset": 8,
+        "transition_steps": 0,
+        "platform_median": 6.85
+      },
+      "1": {
+        "kind": "sharp",
+        "onset": 8,
+        "transition_steps": 0,
+        "platform_median": 6.85
+      }
+    }
+  },
+  "missing_window": {
+    "ok": true,
+    "value": {
+      "per_hypothesis": {
+        "1": {
+          "verdict": "suspect",
+          "reproducible": true,
+          "l3": null,
+          "classes": {
+            "-1": {
+              "kind": "left-censored",
+              "onset": [
+                null,
+                8
+              ],
+              "reason": "no below-floor observation on low side"
+            },
+            "0": {
+              "kind": "left-censored",
+              "onset": [
+                null,
+                8
+              ],
+              "reason": "no below-floor observation on low side"
+            },
+            "1": {
+              "kind": "left-censored",
+              "onset": [
+                null,
+                8
+              ],
+              "reason": "no below-floor observation on low side"
+            }
+          },
+          "predicted_hw_sets": [
+            7
+          ]
+        }
+      },
+      "on_threshold": 2.0,
+      "n_records": 18,
+      "h_star": null,
+      "h_star_status": "multiple-or-none"
+    }
+  },
+  "duplicate_first": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3": null,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 25,
+    "h_star": 1,
+    "h_star_status": "unique"
+  },
+  "duplicate_last": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3": null,
+        "classes": {
+          "-1": {
+            "kind": "left-censored",
+            "onset": [
+              null,
+              6
+            ],
+            "reason": "no below-floor observation on low side"
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 25,
+    "h_star": null,
+    "h_star_status": "multiple-or-none"
+  },
+  "empty_records": {
+    "ok": true,
+    "value": {
+      "per_hypothesis": {},
+      "on_threshold": 2.0,
+      "n_records": 0,
+      "h_star": null,
+      "h_star_status": "multiple-or-none"
+    }
+  },
+  "audit_gates": {
+    "wrong_sum": {
+      "ok": true,
+      "value": [
+        true,
+        "ok"
+      ]
+    },
+    "wrong_dimension": {
+      "ok": true,
+      "value": [
+        true,
+        "ok"
+      ]
+    },
+    "missing_actual_hi": {
+      "ok": true,
+      "value": [
+        true,
+        "ok"
+      ]
+    }
+  },
+  "task_diff_since_r5": "diff --git a/docs/tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md b/docs/tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md\nindex c574097..1eadab1 100644\n--- a/docs/tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md\n+++ b/docs/tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md\n@@ -1,6 +1,6 @@\n # SM8650 Cortex-X4 TLB 层级探测 · 第二次战役（r2）任务书 v1.1\n \n-> 版本：v1.8（2026-10-08；…→ v1.7（RPA-01..05 修复 + A1 三层矩阵）→ **v1.8.1（RV2-02 修复：双假设预测/平台删失/审计闭合/阈值决策表 `freeze_thresholds`，m0b `fa663f5`）；v1.8（评审第三轮三项阻塞修复：warmup 入 digest + 合并单元一致性守卫、A1 判据消费入口模块、金样 CTest 注册补提交，m0b `5ccb841`）**，处置见 §10.3）\n+> 版本：v1.8（2026-10-08；…→ v1.7（RPA-01..05 修复 + A1 三层矩阵）→ **v1.8.2（R6：阈值贯穿/三层分组/置换不变，m0b `3c4b507`）；v1.8.1（RV2-02 修复：双假设预测/平台删失/审计闭合/阈值决策表 `freeze_thresholds`，m0b `fa663f5`）；v1.8（评审第三轮三项阻塞修复：warmup 入 digest + 合并单元一致性守卫、A1 判据消费入口模块、金样 CTest 注册补提交，m0b `5ccb841`）**，处置见 §10.3）\n \n ## 1. 任务契约与有限终点\n \n@@ -171,7 +171,7 @@\n \n **scope 特定审计门**（修 RPA-05 矛盾）：expected_active = (scope<0 ? set_regions : 1)；门按每 record 的请求 scope + realized 判定——隔离 case 不再被全域硬门误杀；附加 `domain_consistent==true` 与审计不变量（adapter 侧已 fail-closed）。\n \n-**判据消费入口（评审第三轮要求，已交付 m0b `5ccb841`）**：`analysis/sm8650_tlb_a1.py`——realized 硬门（gate_record：混域/scope 特定 active/purity/审计）、实际 VA 预测分区（predicted_hw_sets，按 realized `set_region_vpn_hi` 计算）、量化 onset 分类（classify_onset）、单 H 判定（adjudicate_h）、L3 一致性（check_l3_consistency），全部带合成金样。**阈值确定程序**（两阶段预注册）：程序与判据结构现已冻结（见下）；唯二数值（on 阈值 3.0/轮、过渡/平台比）为候选值——A1 首块标定（2-case 标定复测块）采集后，用标定块 + 合成曲线推演复核数值并冻结，**标定数据与正式判定数据隔离**（标定块不进入 H* 判定的 onset 曲线，只用于数值冻结与门限验证），冻结后任务书留修订痕。\n+**判据消费入口（m0b `3c4b507`，第六轮修订）**：`analysis/sm8650_tlb_a1.py`——`gate_record`（混域/scope 特定 active/purity/审计）、`predicted_hw_sets`（双假设：收集 C × 模型 M）、`classify_onset`（锐/退化/弱平台/左右删失，on_threshold 参数化）、`adjudicate_h`（L1 三 scope 强制 + 阈值贯穿）、`check_l3_consistency`（4 target 强制）、`freeze_thresholds`（决策表 + 四条 STOP）、`run_a1_adjudication`（records→硬门→L1/L2/L3→H* 必经链：分组键 (H,scope,seed,target) 三层不覆盖、逐层排序聚合**输入置换不变**、L3 强制 4 target 判定）。阈值经 frozen 产出的 on_threshold 贯穿全部分类调用，未冻结拒跑。：`analysis/sm8650_tlb_a1.py`——realized 硬门（gate_record：混域/scope 特定 active/purity/审计）、实际 VA 预测分区（predicted_hw_sets，按 realized `set_region_vpn_hi` 计算）、量化 onset 分类（classify_onset）、单 H 判定（adjudicate_h）、L3 一致性（check_l3_consistency），全部带合成金样。**阈值确定程序**（两阶段预注册）：程序与判据结构现已冻结（见下）；唯二数值（on 阈值 3.0/轮、过渡/平台比）为候选值——A1 首块标定（2-case 标定复测块）采集后，用标定块 + 合成曲线推演复核数值并冻结，**标定数据与正式判定数据隔离**（标定块不进入 H* 判定的 onset 曲线，只用于数值冻结与门限验证），冻结后任务书留修订痕。\n \n **量化 onset 判定（\"锐/退化\"操作定义，数值随首块标定按上程序冻结）：**\n - 输入：每 case 10 进程 per-round 均值的中位 m(W)；"
+}

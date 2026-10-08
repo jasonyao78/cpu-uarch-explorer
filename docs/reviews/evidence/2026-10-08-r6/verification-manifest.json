@@ -1,0 +1,75 @@
+{
+  "reviewed_heads": {
+    "m0b": "3c4b50762379adba70ca51d57e6f3a62eaf204d2",
+    "r2": "6a45a9321098ccec698d346fb8fd1addf9751260",
+    "main": "2fa8d5d2fbc99a7a03c79634e47efcde23035e2c"
+  },
+  "source_sha256": {
+    "analysis/sm8650_tlb_a1.py": "4c8a019c46318217f9b6c8af7a2b9707152ef9e189ab3ed26d4d6c288ef77216",
+    "analysis/tests/test_sm8650_tlb_a1.py": "ea848f03898c3873b9d80486e280db1e825439d620002220a9189dc2e49a8f53"
+  },
+  "artifact_sha256": {
+    "docs/reviews/2026-10-08-r6-review.md": "7095eb03d3d5d9ff49273a67a82b2d917c95a30eb573c72f97acaa06c72b108a",
+    "scripts/review_rpa_r6_20261008.py": "1614320bff00859bf68ac5dddac6704c947dd10f929817632611cef6939787b4",
+    "docs/reviews/evidence/2026-10-08-r6/diagnostics.json": "eb2e41f70feec96ab46d8035aa7afd721a58bc473c5161d21424901222cf6e77",
+    "docs/reviews/evidence/2026-10-08-r6/analysis.log": "e71b2cac8f930085d510911a83b86cfc98d588cfe085bc0c8b736656c45c751b",
+    "docs/reviews/evidence/2026-10-08-r6/a1-tests.log": "9597d381b7c64e07158ceb3a5fae8d81c8667e0dc5afffc358c1fd4629b9560b"
+  },
+  "test_commands": [
+    {
+      "name": "analysis",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "analysis/tests",
+        "-t",
+        "."
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "exit_code": 0
+    },
+    {
+      "name": "a1-tests",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "analysis.tests.test_sm8650_tlb_a1"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "exit_code": 0
+    }
+  ],
+  "diagnostics_command": [
+    "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+    "scripts/review_rpa_r6_20261008.py",
+    "--tree",
+    "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+    "--r2-tree",
+    "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+    "--main-tree",
+    "/Users/michaelyao/workspace/cpu-uarch-explorer",
+    "--out",
+    "/private/tmp/rpa-r6-diagnostics.json"
+  ],
+  "diagnostics_exit_code": 0,
+  "plan_sha256": {
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json": "2d9aaf702dff4dd498c8600e2021405aaa74ae40e82d3be9f87c92fd903c382b",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json": "db0c20cd62d43e76d9a684cf18946b2bc3717af8dd2efe19ed6343a1a6231cfc",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json": "89092fc94a2a54e27db46f4311e8d49143ae6b3f353133275b8d7addc51ba85b"
+  },
+  "task_sha256": "62def96bc78f8d13cef80ef3c375534f678630696338d8c5f352997feb168629",
+  "boundaries": {
+    "adb_phone_perf_executed": false,
+    "runner_fixture": "real planner/adapter/engine with fake executor; argv never executed",
+    "production_shape_records": 128,
+    "synthetic_observations": 1280,
+    "secondary_fixture": "author handmade 24-record shape, explicitly separated from production record oracle",
+    "raw_policy": "temporary synthetic raw deleted; not committed",
+    "runner_ctest_ndk_history": "unchanged code paths not rerun; runner192 is author-reported"
+  }
+}
