@@ -11,7 +11,10 @@ from runner.environment.android_state import (collect_android_state,
                                               parse_loadavg,
                                               parse_thermal)
 from runner.errors import RunnerError
-from runner.environment.policy import evaluate_preconditions, evaluate_stability
+from runner.environment.policy import (evaluate_preconditions,
+                                       evaluate_preconditions_full,
+                                       evaluate_stability,
+                                       evaluate_stability_full)
 from runner.executor.adb import AdbExecutor
 from runner.executor.local import ExecutionResult
 
@@ -223,6 +226,72 @@ class TestAndroidQuietStatePolicy(unittest.TestCase):
         with self.assertRaises(RunnerError) as cm:
             evaluate_preconditions(self.snapshot, {"preconditions": {"wakefulness": "Dozing"}})
         self.assertEqual(cm.exception.code, "env-policy-invalid")
+
+
+class TestAcceptedNonbaseline(unittest.TestCase):
+    """充电态协议（任务书 v1.5 增补）：accepted_nonbaseline 降级为命名告警，
+    测量核 policy7 永不可降级，其余违规不受降级影响。"""
+    def setUp(self):
+        self.snapshot = collect_android_state(ScriptedAdbExecutor())
+        for fields in self.snapshot["cpufreq"].values():
+            fields["governor"] = "performance"
+        self.policy = deepcopy(POLICY)
+        self.policy["preconditions"]["accepted_nonbaseline"] = {
+            "cpufreq_max_khz": ["policy0", "policy2", "policy5"]}
+
+    def test_accepted_policy_downgraded_to_named_warning(self):
+        bad = deepcopy(self.snapshot)
+        bad["cpufreq"]["policy0"]["max_khz"] = 1459200   # 实锤案例值
+        violations, warnings = evaluate_preconditions_full(bad, self.policy)
+        self.assertEqual(violations, [])
+        self.assertEqual(warnings,
+                         ["accepted-nonbaseline:cpufreq-max-mismatch:policy0"])
+        # 向后兼容包装：违规口径不含降级项
+        self.assertEqual(evaluate_preconditions(bad, self.policy), [])
+
+    def test_measured_cluster_policy7_stays_hard(self):
+        bad = deepcopy(self.snapshot)
+        bad["cpufreq"]["policy7"]["max_khz"] = 2304000
+        violations, warnings = evaluate_preconditions_full(bad, self.policy)
+        self.assertEqual(violations, ["cpufreq-max-mismatch:policy7"])
+        self.assertEqual(warnings, [])
+
+    def test_non_cpufreq_violations_never_downgraded(self):
+        bad = deepcopy(self.snapshot)
+        bad["cpufreq"]["policy0"]["max_khz"] = 1459200
+        bad["thermal"]["max_cpu_c"] = 91.0
+        violations, warnings = evaluate_preconditions_full(bad, self.policy)
+        self.assertEqual(violations, ["thermal-over-limit"])
+        self.assertEqual(len(warnings), 1)
+
+    def test_accepted_drift_downgraded_in_stability(self):
+        after = deepcopy(self.snapshot)
+        after["cpufreq"]["policy0"]["max_khz"] = 1459200  # cap 运行中迁移
+        violations, warnings = evaluate_stability_full(
+            self.snapshot, after, self.policy)
+        self.assertEqual(violations, [])
+        self.assertEqual(warnings,
+                         ["accepted-nonbaseline:state-drift:cpufreq.policy0.max_khz"])
+
+    def test_unaccepted_drift_stays_hard(self):
+        after = deepcopy(self.snapshot)
+        after["cpufreq"]["policy7"]["max_khz"] = 2304000
+        violations, _ = evaluate_stability_full(self.snapshot, after, self.policy)
+        self.assertEqual(violations, ["state-drift:cpufreq.policy7.max_khz"])
+
+    def test_full_coverage_rejected(self):
+        policy = deepcopy(POLICY)
+        policy["preconditions"]["accepted_nonbaseline"] = {
+            "cpufreq_max_khz": ["policy0", "policy2", "policy5", "policy7"]}
+        with self.assertRaisesRegex(RunnerError, "must not cover all"):
+            evaluate_preconditions_full(self.snapshot, policy)
+
+    def test_unknown_name_rejected(self):
+        policy = deepcopy(POLICY)
+        policy["preconditions"]["accepted_nonbaseline"] = {
+            "cpufreq_max_khz": ["policy99"]}
+        with self.assertRaisesRegex(RunnerError, "not in"):
+            evaluate_preconditions_full(self.snapshot, policy)
 
 
 if __name__ == "__main__":

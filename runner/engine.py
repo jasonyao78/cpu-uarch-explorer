@@ -18,14 +18,16 @@
 
 from __future__ import annotations
 
+import json
 import math
 from pathlib import Path
 
 from .adapters.ptr_chase import PtrChaseAdapter
-from .artifacts import ArtifactStore
+from .artifacts import ArtifactStore, raw_sample_stem
 from .errors import ParseError, RunnerError
 from .environment.policy import (collect_environment_state,
-                                 evaluate_preconditions, evaluate_stability)
+                                 evaluate_preconditions_full,
+                                 evaluate_stability_full)
 from .executor import make_executor
 from .plan import Case, Plan
 from .records import (JsonlWriter, build_run_record, environment_block,  # noqa: F401
@@ -179,7 +181,12 @@ def _register_probe(store: ArtifactStore, executor, platform: dict,
 
 
 def run_plan(plan: Plan, platform: dict, run_dir: Path, repo_root: Path) -> dict:
-    """执行整个 plan，逐 case 落 record；返回 run 汇总。任何 case 失败不中断后续 case。"""
+    """执行整个 plan，逐 case 落 record；返回 run 汇总。任何 case 失败不中断后续 case。
+
+    每种 status 的 record 都持久化 plan.experiment_id，与 run-manifest 同源。
+    独立加载或合并 records 时也能恢复实验角色（A1 L1/L2/L3），无需读者
+    补写来源字段；R7-A/R9 生产归层合同。
+    """
     run_dir = Path(run_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
     store = ArtifactStore(run_dir)
@@ -205,6 +212,7 @@ def run_plan(plan: Plan, platform: dict, run_dir: Path, repo_root: Path) -> dict
         for case in plan.cases:
             record = _run_case(case, platform, probe_meta, probe_path, executor,
                                store, system_info, git)
+            record["experiment_id"] = plan.experiment_id
             writer.append(record)
             summary["total"] += 1
             summary[record["status"]] += 1
@@ -243,7 +251,8 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
     if environment_policy is not None:
         try:
             state_before = collect_environment_state(executor, environment_policy)
-            violations = evaluate_preconditions(state_before, environment_policy)
+            violations, env_warnings = evaluate_preconditions_full(
+                state_before, environment_policy)
         except RunnerError as error:
             env["state_snapshot"] = {
                 "policy_result": {"valid": False, "stage": "before",
@@ -257,7 +266,8 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
         env["state_snapshot"] = {
             "before": state_before,
             "policy_result": {"valid": not violations, "stage": "before",
-                              "violations": violations},
+                              "violations": violations,
+                              "accepted_nonbaseline": env_warnings},
         }
         if violations:
             return build_run_record(
@@ -285,21 +295,48 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
             aux_before[aux["name"]] = r.stdout.strip()[:200]
 
     sample_metrics: list[tuple[int, str, list[dict]]] = []
+    realized_per_sample: list[tuple[int, str, dict]] = []
     raw_refs: list[str] = []
     first_failure: dict | None = None
     raw_command = ""
     for sample_index in range(case.repetitions):
         result = executor.execute(argv, case.control.command_prefix)
         raw_command = result.raw_command
-        store.write_raw_sample(case.id, sample_index, result.stdout, result.stderr)
-        raw_refs.append(f"raw-samples:{case.id.replace('/', '_').replace(':', '_')}.s{sample_index}")
+        try:
+            store.write_raw_sample(case.id, sample_index, result.stdout,
+                                   result.stderr)
+        except OSError as exc:
+            # R10 次级健壮性：raw 落盘失败 = 结构化 failure，不许异常逃逸
+            if first_failure is None:
+                first_failure = {"reason": "raw-write-failed",
+                                 "detail": str(exc)}
+            continue
+        raw_refs.append(f"raw-samples:{raw_sample_stem(case.id)}.s{sample_index}")
         status = _EXIT_STATUS.get(result.returncode, "failed")
         if status != "ok":
             if first_failure is None:
                 _, first_failure = _failure_reason(result)
             continue
         try:
-            metrics = adapter.parse_output(result.stdout, result.stderr)
+            # MB-06：requested→realized 一致性核验——plan case_params 随
+            # 解析传入，探针自描述与请求不符即 ParseError（执行漂移不进证据）
+            metrics = adapter.parse_output(result.stdout, result.stderr, params)
+            # RPA-03：每次进程解析阶段取 realized 并绑定 sample_index——
+            # 首样本不代表全部；跨进程域不一致 → 混域命名状态（见聚合处）。
+            # 防御：realized 解析的任何异常统一转结构化失败（评审复现的
+            # ValueError 逃逸随此消除），不信任第三方 adapter 只抛 ParseError。
+            parse_realized = getattr(adapter, "parse_realized", None)
+            if parse_realized is not None:
+                try:
+                    realized_i = parse_realized(result.stdout, params)
+                except Exception as exc:
+                    if first_failure is None:
+                        first_failure = {"reason": "realized-parse-error",
+                                         "detail": str(exc)}
+                    continue
+                if realized_i:
+                    realized_per_sample.append(
+                        (sample_index, raw_refs[-1], realized_i))
             sample_metrics.append((sample_index, raw_refs[-1], metrics))
         except ParseError as e:
             if first_failure is None:
@@ -324,10 +361,12 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
     if environment_policy is not None:
         try:
             state_after = collect_environment_state(executor, environment_policy)
-            post_violations = evaluate_preconditions(state_after, environment_policy)
-            post_violations.extend(
-                evaluate_stability(state_before, state_after, environment_policy))
-            post_violations = sorted(set(post_violations))
+            post_violations, post_warnings = evaluate_preconditions_full(
+                state_after, environment_policy)
+            drift_violations, drift_warnings = evaluate_stability_full(
+                state_before, state_after, environment_policy)
+            post_violations = sorted(set(post_violations) | set(drift_violations))
+            post_warnings = sorted(set(post_warnings) | set(drift_warnings))
         except RunnerError as error:
             env["state_snapshot"]["policy_result"] = {
                 "valid": False, "stage": "after", "violations": [error.code]}
@@ -339,7 +378,8 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
         env["state_snapshot"]["after"] = state_after
         env["state_snapshot"]["policy_result"] = {
             "valid": not post_violations, "stage": "after",
-            "violations": post_violations}
+            "violations": post_violations,
+            "accepted_nonbaseline": post_warnings}
         if post_violations:
             return build_run_record(
                 status="failed", target=platform["target"], probe=probe_meta,
@@ -354,8 +394,38 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
         except ParseError as error:
             first_failure = {"reason": "metric-aggregation-error", "detail": str(error)}
         else:
+            # PA-02/RPA-03：realized descriptor 随结构化记录持久化（requested=
+            # params 已入档；realized=探针自描述激励审计，schema 登记扩展）。
+            # 逐样本闭环：全部一致 → 公共值；不一致 → 公共字段 + 逐样本列表。
+            # 域变化命名拒绝，域内 VA 变化逐进程审计，不静默采纳首样本。
+            probe_block = dict(probe_meta)
+            if realized_per_sample:
+                canonical = [
+                    json.dumps(r, sort_keys=True)
+                    for _, _, r in realized_per_sample]
+                if len(set(canonical)) <= 1:
+                    probe_block["realized"] = realized_per_sample[0][2]
+                else:
+                    # R3-C/R5-C：ASLR/重分配改变实际 VA 不是混域。保留所有
+                    # realized，由消费者逐进程核 purity/配额；domain_consistent
+                    # 只描述相同请求下的域，不能以整字典相等代替域判定。
+                    descriptors = [r for _, _, r in realized_per_sample]
+                    domain_keys = ("mode", "set_domain", "page_kb", "set_regions",
+                                   "set_region_scope", "set_nsets")
+                    domains = {json.dumps({k: r.get(k) for k in domain_keys},
+                                          sort_keys=True) for r in descriptors}
+                    common = {k: v for k, v in descriptors[0].items()
+                              if all(k in d and json.dumps(d[k], sort_keys=True) ==
+                                     json.dumps(v, sort_keys=True) for d in descriptors)}
+                    probe_block["realized"] = {
+                        **common, "domain_consistent": len(domains) == 1,
+                        "samples": [
+                            {"sample_index": si, "raw_sample_ref": ref,
+                             "realized": r}
+                            for si, ref, r in realized_per_sample],
+                    }
             return build_run_record(
-                status="ok", target=platform["target"], probe=probe_meta,
+                status="ok", target=platform["target"], probe=probe_block,
                 environment=env, params=params, params_provenance=provenance,
                 metrics=metrics, raw_command=raw_command,
             )

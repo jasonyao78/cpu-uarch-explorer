@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "id": "ptr-chase-sm8650-x4-tlb-pilot-g03-empty",
+  "title": "SM8650 X4 TLB M0-5 pilot：G0-3 空窗底噪（-w 0 等价，CALIBRATION/PILOT 标定块）",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    { "name": "set_hypothesis", "type": "int", "default": 1 },
+    { "name": "set_target", "type": "int", "default": 7 },
+    { "name": "set_window", "type": "int", "default": 0 },
+    { "name": "set_rounds", "type": "int", "default": 20 },
+    { "name": "set_pool_pages", "type": "int", "default": 65536 },
+    { "name": "set_filler_pages", "type": "int", "default": 512 },
+    { "name": "set_regions", "type": "int", "default": 4 },
+    { "name": "repetitions", "type": "int", "default": 10 },
+    { "name": "base_pages", "type": "int", "default": 1 },
+    { "name": "seed", "type": "int", "default": 42 },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        { "name": "cycles", "type": 8, "config": "0x11" },
+        { "name": "l1d_tlb_refill", "type": 8, "config": "0x05" },
+        { "name": "l2d_tlb_refill", "type": 8, "config": "0x2d" },
+        { "name": "l2d_tlb", "type": 8, "config": "0x2f" }
+      ]
+    }
+  ],
+  "preconditions": [
+    "同 ptr-chase-sm8650-x4-tlb-pilot-b1（标定块同批执行，环境快照共享）"
+  ],
+  "metrics": [
+    { "name": "pmu.cycles.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l1d_tlb_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l2d_tlb_refill.count", "unit": "events", "statistic": "median" },
+    { "name": "pmu.l2d_tlb.count", "unit": "events", "statistic": "median" },
+    { "name": "window_valid_rounds", "unit": "rounds", "statistic": "median" },
+    { "name": "window_mux_rounds", "unit": "rounds", "statistic": "median" },
+    { "name": "probe_latency_ns", "unit": "ns", "statistic": "median" }
+  ],
+  "execution": {
+    "probe": "ptr_chase",
+    "probe_shape": "tlb_set",
+    "controls": ["x4-prime"],
+    "params": { "repetitions": 10 },
+    "sweep": {
+      "set_window": [0]
+    },
+    "fixed_params": [
+      "set_hypothesis", "set_target", "set_rounds", "set_pool_pages",
+      "set_filler_pages", "set_regions", "base_pages", "seed", "pmu_events"
+    ]
+  },
+  "notes": "G0-3 空窗 case（任务书 §102：-w 0 空窗 = 强制开销标定）：prime 照常跑，probe 段 0 次访问——窗口底噪量级 = 冒烟 S3 口径（0x05≈4、0x2d≈0、0x2f≈3）。B1 曲线减法时的负值保留并解释（F5），不截零。"
+}

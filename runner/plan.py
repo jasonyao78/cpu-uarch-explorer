@@ -10,7 +10,9 @@ plan 只做解析与展开，不产生任何副作用（不执行、不写盘）
 
 from __future__ import annotations
 
+import hashlib
 import itertools
+import json
 import re
 from dataclasses import dataclass, field
 from typing import Any
@@ -152,6 +154,210 @@ def _normalize_pmu_events(rv: ResolvedValue | None) -> list[dict[str, int | str]
     return normalized
 
 
+
+
+def _derive_ptr_chase_case_params(params: dict[str, ResolvedValue]) -> dict[str, ResolvedValue]:
+    """ptr_chase 形状的语义参数派生（M0-4 从 planner 主循环抽出，逻辑逐字不变）。
+
+    buffer/stride/loads/warmup 在 plan 期完成并可审计；warmup 双语义
+    （精确 loads vs ring passes）硬拒绝共存；loads 对齐展开因子 8。
+    """
+    buffer_kb = parse_size_kb(str(params["buffer"].value))
+    stride_b = parse_size_bytes(str(params["stride"].value))
+    slots = (buffer_kb * 1024) // stride_b
+    if slots < 2:
+        raise RunnerError("plan-error", f"buffer {buffer_kb}KB too small for stride {stride_b}B")
+    loads_per_slot = int(params.get("loads_per_slot", ResolvedValue(8, "spec-default")).value)
+    min_loads = int(params.get("min_loads", ResolvedValue(1 << 22, "spec-default")).value)
+    loads = max(min_loads, loads_per_slot * slots)
+    loads -= loads % 8  # 对齐展开因子（Probe ABI：loads >= 8 且为 8 的倍数）
+
+    # 新协议按完整 ring pass 表达预热；Probe ABI 仍接收精确 load 数。
+    # legacy warmup 仅用于历史配置重放。两种语义同时出现会使记录无法
+    # 判定操作者意图，因此在 plan 期硬拒绝。
+    warmup_rv = params.get("warmup")
+    passes_rv = params.get("warmup_passes")
+    if warmup_rv is not None and passes_rv is not None:
+        raise RunnerError(
+            "plan-error",
+            "ptr_chase cannot declare both warmup and warmup_passes",
+        )
+    if passes_rv is not None:
+        if type(passes_rv.value) is not int:  # bool 也不得冒充 int
+            raise RunnerError(
+                "plan-error",
+                f"warmup_passes must be an integer, got {passes_rv.value!r}",
+            )
+        warmup_passes = passes_rv.value
+        if warmup_passes < 1:
+            raise RunnerError(
+                "plan-error",
+                f"warmup_passes must be >= 1, got {warmup_passes}",
+            )
+        warmup = warmup_passes * slots
+        if warmup > MAX_PROBE_LOADS:
+            raise RunnerError(
+                "plan-error",
+                f"derived warmup loads exceed signed 64-bit limit: {warmup}",
+            )
+    elif warmup_rv is not None:
+        if type(warmup_rv.value) is not int:
+            raise RunnerError(
+                "plan-error",
+                f"legacy warmup must be an integer, got {warmup_rv.value!r}",
+            )
+        warmup = warmup_rv.value
+        if warmup < 0:
+            raise RunnerError(
+                "plan-error", f"legacy warmup must be >= 0, got {warmup}",
+            )
+    else:
+        raise RunnerError(
+            "plan-error",
+            "ptr_chase requires warmup_passes (current) or warmup (legacy)",
+        )
+
+    case_params = {
+        "buffer_kb": ResolvedValue(buffer_kb, params["buffer"].source),
+        "stride": ResolvedValue(stride_b, params["stride"].source),
+        "loads": ResolvedValue(loads, "derived"),
+        "warmup": ResolvedValue(
+            warmup, "derived" if passes_rv is not None else warmup_rv.source,
+        ),
+    }
+    if passes_rv is not None:
+        case_params["warmup_passes"] = ResolvedValue(
+            warmup_passes, passes_rv.source,
+        )
+    return case_params
+
+
+# M0-4b：TLB set prime+probe 形状的语义参数派生（ptr_chase --tlb-set-mode
+# 的证据探针版；方法蓝本 = 原型 l2_set_probe v2.3，差异见探针文件头注释：
+# F5 GROUP 原子读 + window_delta 有效性、F4 多区域、G0-3 空窗/scatter 负控）。
+# 所有参数被探针 argv 真实消费（MB-03 消费契约），无一仅为身份。
+def _derive_tlb_set_case_params(params: dict[str, ResolvedValue]) -> dict[str, ResolvedValue]:
+    def _int_param(name: str, default: int | None) -> ResolvedValue:
+        rv = params.get(name)
+        if rv is None:
+            if default is None:
+                raise RunnerError("plan-error", f"tlb_set shape requires param {name!r}")
+            return ResolvedValue(default, "spec-default")
+        if type(rv.value) is not int:
+            raise RunnerError(
+                "plan-error", f"{name} must be an integer, got {rv.value!r}")
+        return rv
+
+    hypothesis_rv = _int_param("set_hypothesis", None)
+    hypothesis = hypothesis_rv.value
+    if not 1 <= hypothesis <= 4:
+        raise RunnerError(
+            "plan-error", f"set_hypothesis must be 1..4, got {hypothesis}")
+    # nsets 先读：N-set 模式下 target 不参与收集（探针按 set 0..nsets-1），
+    # 不强制要求；单 set 模式 target 必填。
+    nsets_rv = _int_param("set_nsets", 0)
+    if not 0 <= nsets_rv.value <= 256:
+        raise RunnerError(
+            "plan-error", f"set_nsets must be 0..256, got {nsets_rv.value}")
+    target_rv = _int_param("set_target", 0 if nsets_rv.value > 0 else None)
+    target = target_rv.value
+    if not 0 <= target <= 255:
+        raise RunnerError(
+            "plan-error", f"set_target must be 0..255, got {target}")
+    window_rv = _int_param("set_window", None)
+    window = window_rv.value
+    if window < 0:
+        raise RunnerError(
+            "plan-error", f"set_window must be >= 0 (0 = empty window), got {window}")
+    rounds_rv = _int_param("set_rounds", 20)
+    if rounds_rv.value < 2:
+        raise RunnerError(
+            "plan-error",
+            f"set_rounds must be >= 2 (round 0 cold-start), got {rounds_rv.value}")
+    pool_rv = _int_param("set_pool_pages", 65536)
+    if pool_rv.value < 1024:
+        raise RunnerError(
+            "plan-error", f"set_pool_pages must be >= 1024, got {pool_rv.value}")
+    filler_rv = _int_param("set_filler_pages", 512)
+    if filler_rv.value < 0:
+        raise RunnerError(
+            "plan-error", f"set_filler_pages must be >= 0, got {filler_rv.value}")
+    regions_rv = _int_param("set_regions", 4)
+    if not 1 <= regions_rv.value <= 16:
+        raise RunnerError(
+            "plan-error", f"set_regions must be 1..16, got {regions_rv.value}")
+    scatter = params.get("set_scatter")
+    scatter_flag = _binary_flag("set_scatter", scatter) if scatter else 0
+    if scatter_flag and not 1 <= window <= 256:
+        raise RunnerError(
+            "plan-error",
+            f"set_scatter requires 1 <= set_window <= 256, got {window}")
+    region_scope_rv = _int_param("set_region_scope", -1)
+    if not -1 <= region_scope_rv.value < 16:
+        raise RunnerError(
+            "plan-error",
+            f"set_region_scope must be -1..15, got {region_scope_rv.value}")
+    if region_scope_rv.value >= 0 and region_scope_rv.value >= regions_rv.value:
+        raise RunnerError(
+            "plan-error",
+            f"set_region_scope {region_scope_rv.value} >= set_regions "
+            f"{regions_rv.value}")
+    if nsets_rv.value > 0:
+        # N-set 模式与 target2/scatter 互斥（与探针侧校验一致，双保险）
+        if params.get("set_target2") is not None or scatter_flag:
+            raise RunnerError(
+                "plan-error",
+                "set_nsets is exclusive with set_target2/set_scatter")
+
+    case_params = {
+        "set_hypothesis": hypothesis_rv,
+        "set_target": target_rv,
+        "set_window": window_rv,
+        "set_rounds": rounds_rv,
+        "set_pool_pages": pool_rv,
+        "set_filler_pages": filler_rv,
+        "set_regions": regions_rv,
+        "set_region_scope": region_scope_rv,
+        "set_nsets": nsets_rv,
+    }
+    target2 = params.get("set_target2")
+    if target2 is not None:
+        if type(target2.value) is not int or not 0 <= target2.value <= 255:
+            raise RunnerError(
+                "plan-error", f"set_target2 must be 0..255, got {target2.value!r}")
+        case_params["set_target2"] = ResolvedValue(target2.value, target2.source)
+    if scatter is not None:
+        case_params["set_scatter"] = ResolvedValue(scatter_flag, scatter.source)
+    return case_params
+
+
+# MB-03（收口复核修订）：允许进通用 case_id 段的 swept 参数必须是
+# deriver 真实消费的输入（见 _derive_ptr_chase_case_params）。"仅进 ID
+# 不进执行"= 命名不同实验、证据无该维度，一律 leftover 拒绝。
+# chains/chain_distribution/node_offset_policy/mapping_span_kb 等未实现
+# 的探针语义维度不在此列——原生探针无对应 argv 协议，sweep 它们在
+# plan 期受控失败（评审反例：chains=1/2 记录成两个条件、argv 完全相同）。
+_CHASE_ID_SEGMENT_PARAMS = frozenset(
+    {"loads_per_slot", "min_loads", "warmup", "warmup_passes"})
+
+# M0-4 扩展缝：probe_shape → 语义参数派生函数。新探头形状在此注册；
+# planner 主循环只负责 sweep 展开/fixed_params/通用旗标（页策略/PMU/seed）/case 组装。
+# tlb_set 与 ptr_chase 共用同一二进制（ptr_chase --tlb-set-mode 模式分发）。
+_CASE_DERIVERS = {
+    "ptr_chase": _derive_ptr_chase_case_params,
+    "tlb_set": _derive_tlb_set_case_params,
+}
+
+# 各形状的真实输入契约（MB-03 收口复核：leftover 拒绝按形状判定消费）。
+_SHAPE_INPUT_PARAMS = {
+    "ptr_chase": {"buffer", "stride", "loads_per_slot", "min_loads",
+                  "warmup", "warmup_passes"},
+    "tlb_set": {"set_hypothesis", "set_target", "set_target2", "set_window",
+                "set_rounds", "set_pool_pages", "set_filler_pages",
+                "set_regions", "set_scatter", "set_region_scope", "set_nsets"},
+}
+
+
 def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) -> Plan:
     """展开确定性 case 集合：controls × sweep 笛卡尔积，每 case 携带
     repetitions 与参数溯源。所有单位解析/派生计算在此完成——plan 期报错，
@@ -189,61 +395,17 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                                              platform_defaults=platform_defaults,
                                              spec_defaults=spec_defaults)
 
-            # ptr_chase 语义参数计算（buffer/stride/loads）：在 plan 期完成并可审计
-            buffer_kb = parse_size_kb(str(params["buffer"].value))
-            stride_b = parse_size_bytes(str(params["stride"].value))
-            slots = (buffer_kb * 1024) // stride_b
-            if slots < 2:
-                raise RunnerError("plan-error", f"buffer {buffer_kb}KB too small for stride {stride_b}B")
-            loads_per_slot = int(params.get("loads_per_slot", ResolvedValue(8, "spec-default")).value)
-            min_loads = int(params.get("min_loads", ResolvedValue(1 << 22, "spec-default")).value)
-            loads = max(min_loads, loads_per_slot * slots)
-            loads -= loads % 8  # 对齐展开因子（Probe ABI：loads >= 8 且为 8 的倍数）
-
-            # 新协议按完整 ring pass 表达预热；Probe ABI 仍接收精确 load 数。
-            # legacy warmup 仅用于历史配置重放。两种语义同时出现会使记录无法
-            # 判定操作者意图，因此在 plan 期硬拒绝。
-            warmup_rv = params.get("warmup")
-            passes_rv = params.get("warmup_passes")
-            if warmup_rv is not None and passes_rv is not None:
+            # M0-4：probe_shape 派分——descriptor 扩展缝。默认 ptr_chase 保持
+            # 战役行为逐字不变；新形状在 _CASE_DERIVERS 注册派生函数。
+            shape = exe.get("probe_shape", "ptr_chase")
+            deriver = _CASE_DERIVERS.get(shape)
+            if deriver is None:
                 raise RunnerError(
                     "plan-error",
-                    "ptr_chase cannot declare both warmup and warmup_passes",
+                    f"unknown probe_shape {shape!r} (supported: "
+                    f"{sorted(_CASE_DERIVERS)})",
                 )
-            if passes_rv is not None:
-                if type(passes_rv.value) is not int:  # bool 也不得冒充 int
-                    raise RunnerError(
-                        "plan-error",
-                        f"warmup_passes must be an integer, got {passes_rv.value!r}",
-                    )
-                warmup_passes = passes_rv.value
-                if warmup_passes < 1:
-                    raise RunnerError(
-                        "plan-error",
-                        f"warmup_passes must be >= 1, got {warmup_passes}",
-                    )
-                warmup = warmup_passes * slots
-                if warmup > MAX_PROBE_LOADS:
-                    raise RunnerError(
-                        "plan-error",
-                        f"derived warmup loads exceed signed 64-bit limit: {warmup}",
-                    )
-            elif warmup_rv is not None:
-                if type(warmup_rv.value) is not int:
-                    raise RunnerError(
-                        "plan-error",
-                        f"legacy warmup must be an integer, got {warmup_rv.value!r}",
-                    )
-                warmup = warmup_rv.value
-                if warmup < 0:
-                    raise RunnerError(
-                        "plan-error", f"legacy warmup must be >= 0, got {warmup}",
-                    )
-            else:
-                raise RunnerError(
-                    "plan-error",
-                    "ptr_chase requires warmup_passes (current) or warmup (legacy)",
-                )
+            case_params = deriver(params)
 
             # hugepage：实验声明时才进入 case（测量语义参数，measurement-discipline
             # §2）；未声明的实验完全不出现该键——旧配置零影响。
@@ -258,6 +420,14 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                     "plan-error",
                     "ptr_chase cannot request both; page policies are mutually exclusive",
                 )
+            if shape == "tlb_set" and (hp_rv is not None or thp_rv is not None):
+                # set 索引按 4K 粒度计算：tlb_set 形状强制 base 页，大页请求
+                # 在 plan 期命名拒绝（探针侧 -h/-H/-T 同样拒绝，双保险）
+                raise RunnerError(
+                    "plan-error",
+                    "tlb_set shape forces 4K base pages (set index assumes "
+                    "4K granule); hugepage/thp requests are not allowed",
+                )
             pmu_events_rv = params.get("pmu_events")
             pmu_events = _normalize_pmu_events(pmu_events_rv)
             seed_rv = params.get("seed")
@@ -271,18 +441,8 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                     )
                 seed = seed_rv.value
 
-            case_params = {
-                "buffer_kb": ResolvedValue(buffer_kb, params["buffer"].source),
-                "stride": ResolvedValue(stride_b, params["stride"].source),
-                "loads": ResolvedValue(loads, "derived"),
-                "warmup": ResolvedValue(
-                    warmup, "derived" if passes_rv is not None else warmup_rv.source,
-                ),
-            }
-            if passes_rv is not None:
-                case_params["warmup_passes"] = ResolvedValue(
-                    warmup_passes, passes_rv.source,
-                )
+            # chase 几何读法只在 ptr_chase 分支内使用（收口复核 MB-03：
+            # 通用形状不得隐含 chase 契约，否则新形状 plan 即 KeyError）
             if hp_rv is not None:
                 case_params["hugepage"] = ResolvedValue(hugepage, hp_rv.source)
             if thp_rv is not None:
@@ -297,46 +457,117 @@ def build_plan(spec: dict, platform: dict, cli_overrides: dict | None = None) ->
                 )
             if seed_rv is not None:
                 case_params["seed"] = ResolvedValue(seed, seed_rv.source)
-            case_id = (f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"
-                       + (f"-seed{seed}" if seed_rv is not None else "")
-                       + ("-hp2m" if hugepage else "")
-                       + ("-thp" if thp else "")
-                       + ("-base" if base_pages else ""))
-            # 通用 id 段（触发案例：tlb-overhead 配置 sweep loads_per_slot 后
-            # 24 case 仅 8 个唯一 id，raw 样本按 case id 命名覆盖写 → 样本互覆、
-            # manifest id 重复、SHA256 锚定失效）：模板未覆盖的 swept 参数按
-            # sweep 名排序追加 -{name}{value}；未 sweep 的参数不进 id（既有配置
-            # id 逐字不变）。非 int/str 标量（如 pmu_events 列表）fail-closed——
-            # 字符串化进 id 既不可读又可能再引入碰撞。
-            for name in sweep_names:
-                if name in _CASE_ID_COVERED_PARAMS:
-                    continue
-                # 段（sweep 键名与 str 值）直接进 raw 样本文件名：artifacts.py
-                # 落盘前的 safe_case 净化是内联局部表达式（artifacts.py 中
-                # case_id.replace("/", "_").replace(":", "_")，非函数），只替换
-                # "/"与":"，唯一性断言又作用于净化前 id——含 "/"、空格等字符的
-                # 键名/值会绕过断言后仍在落盘时互覆；白名单（仿 _PMU_LABEL_RE
-                # 先例）把这一层残留风险同样 fail-closed 在 plan 期
-                if not _CASE_ID_VALUE_RE.fullmatch(name):
+
+            if shape == "ptr_chase":
+                buffer_kb = case_params["buffer_kb"].value
+                stride_b = int(case_params["stride"].value)
+                if pmu_events_rv is not None and "pmu_events" in sweep_names:
+                    # 结构化值进不了 chase 模板 ID：swept pmu_events 会让
+                    # 仅事件不同的 case 共享同一 id（重复 id 守卫才炸，语义
+                    # 不清）——plan 期命名拒绝，走 fixed_params 或通用形状
                     raise RunnerError(
                         "plan-error",
-                        f"swept param name {name!r} has unsafe characters, "
-                        "cannot form case id segment",
+                        "swept pmu_events is not supported for probe_shape "
+                        "'ptr_chase' (structured values cannot enter the "
+                        "legacy case id template); use fixed_params or a "
+                        "generic probe_shape",
                     )
-                value = params[name].value
-                if type(value) is not int and not isinstance(value, str):
-                    raise RunnerError(
-                        "plan-error",
-                        f"swept param {name!r} has non-scalar value, "
-                        f"cannot form case id segment: {value!r}",
-                    )
-                if isinstance(value, str) and not _CASE_ID_VALUE_RE.fullmatch(value):
-                    raise RunnerError(
-                        "plan-error",
-                        f"swept param {name!r} case id segment value has unsafe "
-                        f"characters: {value!r}",
-                    )
-                case_id += f"-{name}{value}"
+                case_id = (f"{spec['id']}:{control.id}:b{buffer_kb}K-s{stride_b}B"
+                           + (f"-seed{seed}" if seed_rv is not None else "")
+                           + ("-hp2m" if hugepage else "")
+                           + ("-thp" if thp else "")
+                           + ("-base" if base_pages else ""))
+            else:
+                # MB-03（收口复核）：通用形状 case_id = 全部 case_params 的
+                # 规范化枚举，无任何 chase 隐含契约。标量 int/str 直接进段；
+                # 结构化公共参数（pmu_events 列表等）用 canonical JSON 的
+                # sha256 摘要进段（明确的规范化签名，不把列表字符串化成
+                # 逐字段片段）；bool fail-closed（与 int 1 不可混淆，MB-06
+                # 精神在 ID 层先守住）。
+                segs = []
+                for name in sorted(case_params):
+                    val = case_params[name].value
+                    if not _CASE_ID_VALUE_RE.fullmatch(name):
+                        raise RunnerError(
+                            "plan-error",
+                            f"param name {name!r} has unsafe characters",
+                        )
+                    if type(val) is bool:
+                        raise RunnerError(
+                            "plan-error",
+                            f"param {name!r} is bool; bool must not collapse "
+                            "into an int case id segment",
+                        )
+                    if isinstance(val, (int, str)):
+                        if not _CASE_ID_VALUE_RE.fullmatch(str(val)):
+                            raise RunnerError(
+                                "plan-error",
+                                f"param {name!r} value has unsafe characters",
+                            )
+                        segs.append(f"{name}{val}")
+                    elif isinstance(val, (list, dict)):
+                        digest = hashlib.sha256(
+                            json.dumps(val, sort_keys=True,
+                                       separators=(",", ":")).encode(),
+                        ).hexdigest()[:12]
+                        segs.append(f"{name}h{digest}")
+                    else:
+                        raise RunnerError(
+                            "plan-error",
+                            f"param {name!r} value {val!r} cannot form a "
+                            "case id segment (int/str or structured required)",
+                        )
+                case_id = f"{spec['id']}:{control.id}-" + "-".join(segs)
+            # chase 形状的通用 id 段（触发案例：tlb-overhead 配置 sweep
+            # loads_per_slot 后 24 case 仅 8 个唯一 id，raw 样本按 case id
+            # 命名覆盖写 → 样本互覆、manifest id 重复、SHA256 锚定失效）：
+            # 只允许 _CHASE_ID_SEGMENT_PARAMS（deriver 真实消费的输入）进段；
+            # 段（sweep 键名与 str 值）直接进 raw 样本文件名：artifacts.py
+            # 落盘前的 safe_case 净化是内联局部表达式（artifacts.py 中
+            # case_id.replace("/", "_").replace(":", "_")，非函数），只替换
+            # "/"与":"，唯一性断言又作用于净化前 id——含 "/"、空格等字符的
+            # 键名/值会绕过断言后仍在落盘时互覆；白名单（仿 _PMU_LABEL_RE
+            # 先例）把这一层残留风险同样 fail-closed 在 plan 期
+            id_seg_names = set()
+            if shape == "ptr_chase":
+                for name in sweep_names:
+                    if name in _CASE_ID_COVERED_PARAMS \
+                            or name not in _CHASE_ID_SEGMENT_PARAMS:
+                        continue
+                    id_seg_names.add(name)
+                    if not _CASE_ID_VALUE_RE.fullmatch(name):
+                        raise RunnerError(
+                            "plan-error",
+                            f"swept param name {name!r} has unsafe characters, "
+                            "cannot form case id segment",
+                        )
+                    value = params[name].value
+                    if type(value) is not int and not isinstance(value, str):
+                        raise RunnerError(
+                            "plan-error",
+                            f"swept param {name!r} has non-scalar value, "
+                            f"cannot form case id segment: {value!r}",
+                        )
+                    if isinstance(value, str) and not _CASE_ID_VALUE_RE.fullmatch(value):
+                        raise RunnerError(
+                            "plan-error",
+                            f"swept param {name!r} case id segment value has unsafe "
+                            f"characters: {value!r}",
+                        )
+                    case_id += f"-{name}{value}"
+            # MB-03：未被当前形状真实消费的参数在 plan 期显式拒绝。"消费"
+            # = 进入 case_params（deriver 产出或通用旗标处理，证据通道）或
+            # 是该形状声明的真实输入（_SHAPE_INPUT_PARAMS）。任何只换名字的
+            # 参数（语义未实现/探针无协议）在此受控失败，不得靠进 ID 段放行。
+            _consumed = set(case_params) | _SHAPE_INPUT_PARAMS.get(shape, frozenset())
+            leftover = sorted(set(params) - _consumed)
+            if leftover:
+                raise RunnerError(
+                    "plan-error",
+                    f"probe_shape {shape!r} does not consume params "
+                    f"{leftover}; register them in the shape's deriver with "
+                    "real probe support or drop them",
+                )
             cases.append(Case(id=case_id, probe=probe, control=control,
                               params=tuple(sorted(case_params.items())),
                               repetitions=repetitions))

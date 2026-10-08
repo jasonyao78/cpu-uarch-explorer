@@ -99,6 +99,7 @@ validate_anchors docstring）。
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import re
@@ -134,6 +135,105 @@ _ANCHOR_REQUIRED_EVENTS = (
     "pmu.l1d_tlb_refill.count",
     "pmu.dtlb_walk.count",
 )
+# M0-4 分析身份键（F6：宽容读字段 ≠ 宽容合并实验条件）：实验条件的
+# 身份维度来自 record params；旧记录无这些键 → 恒 None → 分组行为与
+# 战役版完全一致，新维度只在显式出现时分离组。
+_IDENTITY_PARAM_KEYS = (
+    "chain_distribution",   # 连续/大步距/随机集合/随机序（Q-A 变量表）
+    "node_offset_policy",   # 页内 line 分布（页首固定 vs 64×(i mod 64)）
+    "chains",               # K 独立链数（Q-D）
+    "mapping_span_kb",      # 保留 VA 跨度（与驻留字节分字段）
+)
+# MB-06 descriptor 契约：参与分组键的"既有维度"（buffer/seed/backing/
+# passes 之外）。params 中不在此集合的键不直接进身份字典（保持 MB-04
+# legacy 报告面），但以**类型规范残差**形式参与分组相等性判定——
+# bool True 与 int 1 不可合并，"H1" 与 "H2" 不可合并（评审收口复核
+# 反例）；plan 侧只发射真实消费参数（MB-03），故残差差异 = 真实证据
+# 差异。旧记录 params 除键维度外逐案一致 → 分组与战役版逐字相同。
+_IDENTITY_CONSUMED_PARAM_KEYS = frozenset(
+    {"buffer_kb", "seed", "page_policy_actual", *_IDENTITY_PARAM_KEYS})
+# PA-01：tlb_set 形状的声明身份维度（与 legacy 维度并列进分组键与导出
+# identity——出口丢失 = 下游重新合并，本集合堵这个口子）。
+_TLB_SET_IDENTITY_KEYS = (
+    "set_hypothesis", "set_target", "set_target2", "set_window",
+    "set_scatter", "set_region_scope", "set_nsets",
+)
+# RPA-04：digest 排除集 = "协议反射参数"——语义已由分组键维度承载、或其
+# 差异属于 runner 协议本身而非实验条件。逐项论证（docs/design/
+# 2026-10-07-rpa01-05-fix-design.md §3）：
+#   buffer_kb/seed → 键维度；loads/stride → ring_passes 键维度；
+#   base_pages/thp/hugepage → 实际 backing 由 page_policy_actual 承载；
+#   warmup/warmup_passes → **不排除**（评审第三轮推翻我方立场：planner
+#     可合法生成同 loads 异 -w 的两个 case——"只能来自伪造记录"前提不
+#     成立）。已实证钉死数据安全：cohort 合并单元（buffer×backing）内
+#     warmup = f(passes, buffer) 恒均匀；THP B/T 合并对 warmup_passes=2
+#     双方一致 → 守卫用**一致性语义**（见 _check_identity_uniform）时
+#     历史路径不受影响。
+# 不在排除集的一切（warmup/warmup_passes/loads_per_slot/min_loads/
+# chains/set_*/任何未来新维度/descriptor 对象）进 residual_digest →
+# 出口可见、守卫按一致性语义可拒、白名单不再扩。
+_IDENTITY_PROTOCOL_PARAM_KEYS = frozenset(
+    {"buffer_kb", "seed", "page_policy_actual", "loads", "stride",
+     "base_pages", "thp", "hugepage",
+     "pmu_events", *_IDENTITY_PARAM_KEYS, *_TLB_SET_IDENTITY_KEYS})
+
+
+def _canonical_type_tag(value) -> str:
+    """JSON 值的类型规范标签：bool 先于 int 判定（bool 是 int 子类），
+    True 与 1 在规范形下不可合并（MB-06）。"""
+    if isinstance(value, bool):
+        return "bool"
+    if isinstance(value, int):
+        return "int"
+    if isinstance(value, float):
+        return "float"
+    if isinstance(value, str):
+        return "str"
+    if value is None:
+        return "null"
+    if isinstance(value, list):
+        return "list"
+    if isinstance(value, dict):
+        return "dict"
+    return "other"
+
+
+def _canonical_repr(value):
+    """PA-07：保留类型的递归规范表示——dict 键排序（插入序不改变规范
+    形）、list 序保留、bool 先于 int。语义相同 ⇒ 规范形相同。"""
+    if isinstance(value, dict):
+        return ("dict", tuple((key, _canonical_repr(value[key]))
+                              for key in sorted(value)))
+    if isinstance(value, (list, tuple)):
+        return ("list", tuple(_canonical_repr(item) for item in value))
+    return (_canonical_type_tag(value), value)
+
+
+def _residual_digest(params: dict) -> str | None:
+    """RPA-04：类型规范残差 digest——协议反射参数（
+    _IDENTITY_PROTOCOL_PARAM_KEYS）以外的全部 params 的规范形哈希。
+    None = 无非协议条件（旧记录恒 None：历史数据出口不变、重放不破）；
+    非 None = 存在未登记的实验条件差异 → 下游按身份拒绝/分系列。"""
+    residual = tuple(
+        (name, _canonical_repr(value))
+        for name, value in sorted(params.items())
+        if name not in _IDENTITY_PROTOCOL_PARAM_KEYS
+    )
+    if not residual:
+        return None
+    return hashlib.sha256(repr(residual).encode()).hexdigest()[:12]
+
+
+def _residual_identity(params: dict) -> tuple:
+    """类型规范残差身份：除既有键维度外的全部 params，按名排序的
+    (name, canonical_repr)——任何参数差异（含类型差异、嵌套 dict 键序
+    差异之外的语义差异）都阻止合并，不做值解释（宽容读字段 ≠ 宽容合
+    并实验条件）。"""
+    return tuple(
+        (name, _canonical_repr(value))
+        for name, value in sorted(params.items())
+        if name not in _IDENTITY_CONSUMED_PARAM_KEYS
+    )
 _BACKING_ORDER = {"base": 0, "mixed": 1, "thp": 2, "hugetlb-2m": 3,
                   "platform-default": 4}
 # 与 runner/adapters/ptr_chase.py 同款：vma_base 只认小写 hex 地址形态。
@@ -789,7 +889,7 @@ def analyze_records(records: Iterable[dict], run_label: str,
     registry 缺省按无注册处理（fail-closed：全部 PMU 事件资格不足）——
     SEMANTICS_UNVERIFIED 只降级结论，不阻断样本入表。
     """
-    grouped: dict[tuple[int, int, str, float], list[dict]] = defaultdict(list)
+    grouped: dict[tuple, list[dict]] = defaultdict(list)
     result = AnalysisResult(run_label=run_label)
     seen = False
     for record in records:
@@ -800,34 +900,61 @@ def analyze_records(records: Iterable[dict], run_label: str,
                 f": record status={record.get('status')}"
             )
             continue
+        # M0-4：身份维度取自 params（显式才参与分组；缺省 None 保持旧分组）
+        # PA-01 修订：tlb_set 声明身份维度与 legacy 维度一并进入分组键与
+        # 导出 identity——出口不再丢失，下游按完整身份分系列或命名拒绝。
+        record_params = record.get("params", {})
+        identity = tuple(record_params.get(k) for k in _IDENTITY_PARAM_KEYS)
+        tlb_identity = tuple(record_params.get(k) for k in _TLB_SET_IDENTITY_KEYS)
+        residual = _residual_identity(record_params)  # MB-06：类型规范残差
+        digest = _residual_digest(record_params)      # RPA-04：语义身份出口
         for sample in _samples_from_record(record, run_label, result.rejected):
+            sample["_identity"] = identity
+            sample["_tlb_identity"] = tlb_identity
+            sample["_digest"] = digest
             # REV-M0-BATCH C2：缺失集也是身份维度——同契约才同组，组内各
             # 指标的可用样本集合恒一致（无逐字段样本分裂/选择偏差）。
+            # MB-06/PA-07：身份值用递归规范形入键——True 与 1 键形不同，
+            # dict 键序不敏感（报告面保持 legacy 原值以保旧重放逐字一致）。
             key = (
                 sample["buffer_kb"],
                 sample["seed"],
                 sample["page_policy_actual"],
                 sample["ring_passes"],
+                *((_canonical_repr(v) for v in identity)),
+                *((_canonical_repr(v) for v in tlb_identity)),
+                residual,
                 tuple(sample["_metric_missing"]),
             )
             grouped[key].append(sample)
     if not seen:
         raise TlbError(f"{run_label}: no records")
 
-    # REV-M0-BATCH C2：键含缺失集维度（变长）；排序与解包只取前 4 元，
-    # metric_contract 取自组内样本（同组契约恒一致）。
+    # 键含身份维度与缺失集维度（变长）；排序与解包只取前 4 元（旧语义），
+    # identity / metric_contract 取自组内样本（同组恒一致）。
     for _key, samples in sorted(
         grouped.items(), key=lambda item: (item[0][0], item[0][1], _BACKING_ORDER[item[0][2]], item[0][3])
     ):
         buffer_kb, seed, backing, passes = _key[:4]
         contract_missing = sorted({m for s in samples for m in s["_metric_missing"]})
         contract_extras = sorted({m for s in samples for m in s["_metric_extras"]})
+        identity = samples[0]["_identity"]
+        tlb_identity = samples[0]["_tlb_identity"]
         stored = []
         for smp in samples:
             smp = dict(smp)
             smp.pop("_metric_missing")
             smp.pop("_metric_extras")
+            smp.pop("_identity")
+            smp.pop("_tlb_identity")
+            smp.pop("_digest")
             stored.append(smp)
+        exported_identity = dict(zip(_IDENTITY_PARAM_KEYS, identity))
+        exported_identity.update(
+            dict(zip(_TLB_SET_IDENTITY_KEYS, tlb_identity)))
+        # RPA-04：完整语义身份出口——协议反射参数以外的条件差异以
+        # residual_digest 呈现（None = 无非协议条件，旧数据恒 None）。
+        exported_identity["residual_digest"] = samples[0]["_digest"]
         group = {
             "run_label": run_label,
             "buffer_kb": buffer_kb,
@@ -840,6 +967,9 @@ def analyze_records(records: Iterable[dict], run_label: str,
             # 派生字段为 None，判据消费入口给 INCOMPUTABLE。
             "metric_contract": {"missing": contract_missing,
                                 "extras": contract_extras},
+            # M0-4/PA-01：实验身份维度（None = 该维度未声明，同战役语义；
+            # tlb_set 维度显式导出——下游守卫按完整身份拒绝合并，不再盲区）
+            "identity": exported_identity,
             # §9.2 复用契约：双峰字段钉为 l1d_tlb_refill_per_1k（knee 判
             # 据的消费字段、逐进程布局/着色方差的主要暴露面）。
             "bimodal": _is_bimodal(
@@ -1066,6 +1196,10 @@ def grade_thp_cohorts(rows: Iterable[dict]) -> dict:
     by_cohort: dict[tuple[int, str], dict[int, list[dict]]] = defaultdict(
         lambda: defaultdict(list)
     )
+    # MB-04/RPA-04：身份一致性守卫的粒度 = 合并单元 (buffer × backing)——
+    # warmup=f(passes,buffer) 按 buffer 合法不同，跨 buffer 不比较；单元内
+    # 非一致（不同实验条件）→ 命名拒绝。
+    unit_identity: dict[tuple[int, str], str] = {}
     for row in rows:
         context = f"grade_thp_cohorts/buffer={row.get('buffer_kb')}KiB"
         buffer_kb = row.get("buffer_kb")
@@ -1086,7 +1220,21 @@ def grade_thp_cohorts(rows: Iterable[dict]) -> dict:
                     raise TlbError(
                         f"{context}: sample missing numeric {field_name}"
                     )
-        by_cohort[(buffer_kb, cohort)][seed].extend(samples)
+        # MB-04/RPA-04（评审第三轮）：身份**一致性**守卫——相同条件合并
+        # 合法，不同条件命名拒绝（"按完整身份分系列/比较，或命名拒绝"）。
+        # 历史数据安全性已实证：单元内 warmup=f(passes,buffer) 恒均匀
+        # （THP B/T 合并对 warmup_passes=2 双方一致）。
+        ident = row.get("identity") or {}
+        canonical = json.dumps(ident, sort_keys=True)
+        unit_key = (buffer_kb, cohort)
+        prior = unit_identity.setdefault(unit_key, canonical)
+        if prior != canonical:
+            raise TlbError(
+                f"{context}: non-uniform identity within merge unit "
+                f"{unit_key} — {ident} != prior (MB-04/RPA-04); "
+                "conditioned cohorts need an explicit preregistered rule"
+            )
+        by_cohort[unit_key][seed].extend(samples)
     cohorts = []
     for (buffer_kb, cohort), by_seed in sorted(
         by_cohort.items(), key=lambda item: (item[0][0], _BACKING_ORDER[item[0][1]])

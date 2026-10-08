@@ -4,8 +4,10 @@
 import json
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from runner.errors import RunnerError
+from runner import plan as plan_module
 from runner.plan import build_plan
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -101,6 +103,224 @@ class TestPlan(unittest.TestCase):
         self.assertEqual(prov["buffer_kb"].source, "experiment-sweep")
         self.assertEqual(prov["stride"].source, "spec-default")
         self.assertEqual(prov["loads"].source, "derived")
+
+    def test_unimplemented_semantic_param_rejected_at_plan_time(self):
+        # MB-03 收口复核：chains 等语义维度原生探针无 argv 协议——记录成
+        # 两个条件但 argv 完全相同 = 测量证据错误；plan 期受控失败，
+        # 待探针真实实现后经 shape deriver 登记消费。
+        spec = {
+            **SPEC,
+            "parameters": SPEC["parameters"]
+            + [{"name": "chains", "type": "int", "default": 1}],
+            "execution": {**SPEC["execution"],
+                          "sweep": {"buffer": ["64KiB"], "chains": [1, 2]}},
+        }
+        with self.assertRaisesRegex(RunnerError, "does not consume"):
+            build_plan(spec, {**PLATFORM, "controls": []})
+
+    def test_unknown_swept_param_rejected_at_plan_time(self):
+        # MB-03 收口复核：未知 swept 参数不得靠"进 ID 段"放行——仅进 ID
+        # 不进执行 = 命名不同实验、证据无该维度。
+        spec = {
+            **SPEC,
+            "parameters": SPEC["parameters"]
+            + [{"name": "unsupported_dimension", "type": "int", "default": 1}],
+            "execution": {**SPEC["execution"],
+                          "sweep": {"buffer": ["64KiB"],
+                                    "unsupported_dimension": [1, 2]}},
+        }
+        with self.assertRaisesRegex(RunnerError, "does not consume"):
+            build_plan(spec, {**PLATFORM, "controls": []})
+
+    def test_generic_shape_id_independent_of_chase_geometry(self):
+        # MB-03 收口复核：注册新形状 deriver 后，无 buffer/stride 的配置
+        # 不再 KeyError；case_id 由 deriver 产出的 case_params 规范化枚举。
+        derivers = {**plan_module._CASE_DERIVERS,
+                    "tlb-set": lambda p: {"ways": p["ways"]}}
+        spec = {
+            **SPEC,
+            "parameters": [{"name": "repetitions", "type": "int", "default": 3}],
+            "execution": {"probe": "tlb_set", "probe_shape": "tlb-set",
+                          "sweep": {"ways": [8, 9]}, "fixed_params": []},
+        }
+        platform = {**PLATFORM, "probes": {**PLATFORM["probes"],
+                                           "tlb_set": "SYNTHETIC-UNEXECUTED"}}
+        with mock.patch.dict(plan_module._CASE_DERIVERS, derivers, clear=True):
+            built = build_plan(spec, {**platform, "controls": []})
+        self.assertEqual(len(built.cases), 2)
+        self.assertEqual({c.param_value("ways") for c in built.cases}, {8, 9})
+        self.assertEqual(len({c.id for c in built.cases}), 2)
+
+    def test_generic_shape_id_supports_structured_common_params(self):
+        # MB-03 收口复核：pmu_events（结构化公共参数）不得被通用 ID 拒绝——
+        # 列表值用 canonical JSON 的 sha256 摘要进段。
+        derivers = {**plan_module._CASE_DERIVERS,
+                    "tlb-set": lambda p: {"ways": p["ways"]}}
+        spec = {
+            **SPEC,
+            "parameters": [{"name": "repetitions", "type": "int", "default": 3}],
+            "execution": {"probe": "tlb_set", "probe_shape": "tlb-set",
+                          "sweep": {"ways": [8]},
+                          "fixed_params": ["pmu_events"],
+                          "params": {"pmu_events": [
+                              {"name": "cycles", "type": 4, "config": 17}]}},
+        }
+        platform = {**PLATFORM, "probes": {**PLATFORM["probes"],
+                                           "tlb_set": "SYNTHETIC-UNEXECUTED"}}
+        with mock.patch.dict(plan_module._CASE_DERIVERS, derivers, clear=True):
+            built = build_plan(spec, {**platform, "controls": []})
+        case = built.cases[0]
+        self.assertIn("pmu_eventsh", case.id)
+        # 不同 pmu 列表 → 不同 id（摘要不碰撞）
+        spec2 = {**spec,
+                 "execution": {**spec["execution"],
+                               "params": {"pmu_events": [
+                                   {"name": "cycles", "type": 4, "config": 18}]}}}
+        with mock.patch.dict(plan_module._CASE_DERIVERS, derivers, clear=True):
+            built2 = build_plan(spec2, {**platform, "controls": []})
+        self.assertNotEqual(built2.cases[0].id, case.id)
+
+    def test_tlb_set_shape_registered_deriver_end_to_end(self):
+        # M0-4b：注册 deriver 的 tlb_set 形状——MB-03 收口复核要求"两条不同
+        # 新形状条件走到不同执行入参"；这里 window 4/12 两 case 的 argv 不同。
+        from runner.adapters.ptr_chase import PtrChaseAdapter
+        spec = {
+            **SPEC,
+            "parameters": [{"name": "repetitions", "type": "int", "default": 3}],
+            "execution": {
+                "probe": "ptr_chase",
+                "probe_shape": "tlb_set",
+                "sweep": {"set_window": [4, 12]},
+                "fixed_params": ["set_hypothesis", "set_target", "pmu_events"],
+                "params": {
+                    "set_hypothesis": 1,
+                    "set_target": 7,
+                    "pmu_events": [{"name": "l1d_tlb_refill", "type": 8,
+                                    "config": "0x5"}],
+                },
+            },
+        }
+        built = build_plan(spec, {**PLATFORM, "controls": []})
+        self.assertEqual(len(built.cases), 2)
+        self.assertEqual(len({c.id for c in built.cases}), 2)
+        argvs = [PtrChaseAdapter().build_argv({k: rv.value for k, rv in c.params})
+                 for c in built.cases]
+        windows = {a[a.index("--set-window") + 1] for a in argvs}
+        self.assertEqual(windows, {"4", "12"})
+
+    def test_tlb_set_shape_rejects_missing_foreign_and_bad_range(self):
+        base = {
+            **SPEC,
+            "parameters": [{"name": "repetitions", "type": "int", "default": 3}],
+            "execution": {
+                "probe": "ptr_chase",
+                "probe_shape": "tlb_set",
+                "sweep": {"set_window": [4]},
+                "fixed_params": ["set_hypothesis", "set_target"],
+                "params": {"set_hypothesis": 1, "set_target": 7},
+            },
+        }
+        missing = {**base,
+                   "execution": {**base["execution"],
+                                 "fixed_params": ["set_hypothesis"]}}
+        with self.assertRaisesRegex(RunnerError, "set_target"):
+            build_plan(missing, {**PLATFORM, "controls": []})
+        foreign = {**base,
+                   "execution": {**base["execution"],
+                                 "sweep": {"set_window": [4],
+                                           "buffer": ["64KiB"]}}}
+        with self.assertRaisesRegex(RunnerError, "does not consume"):
+            build_plan(foreign, {**PLATFORM, "controls": []})
+        bad_range = {**base,
+                     "execution": {**base["execution"],
+                                   "params": {"set_hypothesis": 9,
+                                              "set_target": 7}}}
+        with self.assertRaisesRegex(RunnerError, "set_hypothesis"):
+            build_plan(bad_range, {**PLATFORM, "controls": []})
+
+    def test_tlb_set_shape_rejects_hugepage_requests(self):
+        spec = {
+            **SPEC,
+            "parameters": [{"name": "repetitions", "type": "int", "default": 3}],
+            "execution": {
+                "probe": "ptr_chase",
+                "probe_shape": "tlb_set",
+                "sweep": {"set_window": [4]},
+                "fixed_params": ["set_hypothesis", "set_target", "hugepage"],
+                "params": {"set_hypothesis": 1, "set_target": 7,
+                           "hugepage": 1},
+            },
+        }
+        with self.assertRaisesRegex(RunnerError, "4K base pages"):
+            build_plan(spec, {**PLATFORM, "controls": []})
+
+    def test_tlb_set_shape_region_scope_and_nsets_validation(self):
+        base = {
+            **SPEC,
+            "parameters": [{"name": "repetitions", "type": "int", "default": 3}],
+            "execution": {
+                "probe": "ptr_chase",
+                "probe_shape": "tlb_set",
+                "sweep": {"set_window": [4]},
+                "fixed_params": ["set_hypothesis", "set_target"],
+                "params": {"set_hypothesis": 1, "set_target": 7},
+            },
+        }
+        bad_scope = {**base,
+                     "execution": {**base["execution"],
+                                   "params": {"set_hypothesis": 1,
+                                              "set_target": 7,
+                                              "set_region_scope": 4},
+                                   "fixed_params": ["set_hypothesis",
+                                                    "set_target",
+                                                    "set_region_scope"]}}
+        with self.assertRaisesRegex(RunnerError, "set_region_scope"):
+            build_plan(bad_scope, {**PLATFORM, "controls": []})
+        nsets_scatter = {
+            **base,
+            "execution": {**base["execution"],
+                          "params": {"set_hypothesis": 1, "set_target": 7,
+                                     "set_nsets": 8, "set_scatter": 1},
+                          "fixed_params": ["set_hypothesis", "set_target",
+                                           "set_nsets", "set_scatter"]},
+        }
+        with self.assertRaisesRegex(RunnerError, "exclusive"):
+            build_plan(nsets_scatter, {**PLATFORM, "controls": []})
+        ok_nsets = {**base,
+                    "execution": {**base["execution"],
+                                  "params": {"set_hypothesis": 1,
+                                             "set_nsets": 8},
+                                  "fixed_params": ["set_hypothesis",
+                                                   "set_nsets"]}}
+        built = build_plan(ok_nsets, {**PLATFORM, "controls": []})
+        self.assertEqual(built.cases[0].param_value("set_nsets"), 8)
+
+    def test_unconsumed_fixed_param_rejected_at_plan_time(self):
+        # MB-03：不被形状消费、也不进 ID 段的参数 = plan 期显式拒绝
+        spec = {
+            **SPEC,
+            "parameters": SPEC["parameters"]
+            + [{"name": "gadget", "type": "int", "default": 7}],
+            "execution": {**SPEC["execution"],
+                          "fixed_params": ["stride", "warmup", "gadget"]},
+        }
+        with self.assertRaisesRegex(RunnerError, "does not consume"):
+            build_plan(spec, PLATFORM)
+
+    def test_unknown_probe_shape_fails_at_plan_time(self):
+        # M0-4：probe_shape 扩展缝——未注册形状在 plan 期拒绝（不静默按
+        # ptr_chase 派生几何，防新探头参数被旧公式曲解）
+        bad = {**SPEC,
+               "execution": {**SPEC["execution"], "probe_shape": "tlb-set"}}
+        with self.assertRaisesRegex(RunnerError, "probe_shape"):
+            build_plan(bad, PLATFORM)
+
+    def test_default_shape_is_ptr_chase_unchanged(self):
+        # M0-4 回归：未声明 probe_shape → ptr_chase 派生，数值与战役版一致
+        plan = build_plan(SPEC, PLATFORM)
+        case = plan.cases[0]
+        self.assertEqual(case.param_value("loads") % 8, 0)
+        self.assertGreater(case.param_value("loads"), 0)
 
     def test_unknown_unit_fails_at_plan_time(self):
         bad = {**SPEC, "execution": {**SPEC["execution"], "sweep": {"buffer": ["64M"]}}}
@@ -215,8 +435,10 @@ class TestPlan(unittest.TestCase):
              "exp:uncontrolled:b4096K-s64B-loads_per_slot64"],
         )
 
-    def test_non_scalar_swept_param_in_case_id_fails_closed(self):
-        # 列表/字典值字符串化进 id 会让 id 不可读且可能再引入碰撞：fail-closed
+    def test_swept_pmu_events_rejected_for_chase_shape(self):
+        # pmu_events 是结构化公共参数：chase 模板 ID 无其编码位，sweep 它
+        # 会让仅事件不同的 case 共享 id——plan 期命名拒绝（fixed_params
+        # 或通用形状的 hash 段才是出路）
         events = [{"name": "cycles", "type": 8, "config": "0x11"}]
         spec = {
             **PASS_SPEC,
@@ -229,52 +451,52 @@ class TestPlan(unittest.TestCase):
                 "sweep": {"buffer": ["4MiB"], "pmu_events": [events]},
             },
         }
-        with self.assertRaisesRegex(RunnerError, "non-scalar"):
+        with self.assertRaisesRegex(RunnerError, "swept pmu_events"):
             build_plan(spec, {**PLATFORM, "controls": []})
 
-    def test_swept_case_id_segment_value_charset_fails_closed(self):
-        # str sweep 值直接进 raw 样本文件名（artifacts 的 safe_case 只替换
+    def _generic_plan(self, deriver, sweep, extra_execution=None):
+        """通用形状 plan 的测试夹具：注册临时 deriver，无 chase 几何。"""
+        spec = {
+            **PASS_SPEC,
+            "parameters": [
+                {"name": "repetitions", "type": "int", "default": 3}],
+            "execution": {
+                "probe": "tlb_set", "probe_shape": "tlb-set",
+                "sweep": sweep, "fixed_params": [],
+                **(extra_execution or {}),
+            },
+        }
+        platform = {**PLATFORM, "controls": [],
+                    "probes": {"tlb_set": "SYNTHETIC-UNEXECUTED"}}
+        with mock.patch.dict(
+                plan_module._CASE_DERIVERS, {"tlb-set": deriver}, clear=True):
+            return build_plan(spec, platform)
+
+    def test_generic_shape_id_value_charset_fails_closed(self):
+        # str 值直接进 raw 样本文件名（artifacts 的 safe_case 只替换
         # "/"与":"，且唯一性断言作用于净化前 id）：含 "/"、空格等字符的值会
         # 绕过 plan 期防线后仍在落盘时互覆——白名单字符集 fail-closed
-        spec = {
-            **PASS_SPEC,
-            "execution": {
-                **PASS_SPEC["execution"],
-                "sweep": {"buffer": ["4MiB"], "label": ["a/b"]},
-            },
-        }
+        deriver = lambda p: {"label": p["label"]}  # noqa: E731
         with self.assertRaisesRegex(RunnerError, "unsafe characters"):
-            build_plan(spec, {**PLATFORM, "controls": []})
+            self._generic_plan(deriver, {"label": ["a/b"]})
 
-    def test_swept_case_id_segment_accepts_whitelisted_str_value(self):
+    def test_generic_shape_id_accepts_whitelisted_str_value(self):
         # 正向钉：合法 str 值必须放行且逐字进 id——白名单条件写反时拒绝路径
         # 测试不变、此测试变红（覆盖 -_. 三类白名单字符）
-        spec = {
-            **PASS_SPEC,
-            "execution": {
-                **PASS_SPEC["execution"],
-                "sweep": {"buffer": ["4MiB"], "label": ["4KiB", "v2.1_x-b"]},
-            },
-        }
-        plan = build_plan(spec, {**PLATFORM, "controls": []})
+        deriver = lambda p: {"label": p["label"]}  # noqa: E731
+        plan = self._generic_plan(deriver, {"label": ["4KiB", "v2.1_x-b"]})
         self.assertEqual(
             [case.id for case in plan.cases],
-            ["exp:uncontrolled:b4096K-s64B-label4KiB",
-             "exp:uncontrolled:b4096K-s64B-labelv2.1_x-b"],
+            ["exp:uncontrolled-label4KiB",
+             "exp:uncontrolled-labelv2.1_x-b"],
         )
 
-    def test_swept_case_id_segment_name_charset_fails_closed(self):
-        # sweep 键名同样进 id 与样本文件名：含 "/" 的键名在 safe_case 净化后
-        # 可能互覆——与 value 同一白名单 fail-closed
-        spec = {
-            **PASS_SPEC,
-            "execution": {
-                **PASS_SPEC["execution"],
-                "sweep": {"buffer": ["4MiB"], "a/b": [1]},
-            },
-        }
+    def test_generic_shape_id_name_charset_fails_closed(self):
+        # case_params 键名同样进 id 与样本文件名：含 "/" 的键名在 safe_case
+        # 净化后可能互覆——与 value 同一白名单 fail-closed
+        deriver = lambda p: {"a/b": p["ways"]}  # noqa: E731
         with self.assertRaisesRegex(RunnerError, "unsafe characters"):
-            build_plan(spec, {**PLATFORM, "controls": []})
+            self._generic_plan(deriver, {"ways": [1]})
 
     def test_duplicate_case_ids_fail_at_plan_time(self):
         # 纵深防御：任何未来的 id 碰撞（如此处重复 sweep 值）必须炸在 plan 期，
@@ -308,6 +530,10 @@ class TestPlan(unittest.TestCase):
                 )
                 self.assertEqual(spec["protocol_version"], expected_protocol)
                 parameter_names = {param["name"] for param in spec["parameters"]}
+                if spec["execution"].get("probe_shape") == "tlb_set":
+                    # M0-4b：tlb_set 形状无 ring warmup 语义（round 0 冷启动
+                    # 剔除是其等价口径）——只验协议号，不验 warmup_passes
+                    continue
                 self.assertIn("warmup_passes", parameter_names)
                 self.assertNotIn("warmup", parameter_names)
                 self.assertIn("warmup_passes", spec["execution"]["fixed_params"])

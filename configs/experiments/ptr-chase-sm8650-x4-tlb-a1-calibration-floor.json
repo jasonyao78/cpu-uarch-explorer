@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    {
+      "name": "set_hypothesis",
+      "type": "int",
+      "default": 1
+    },
+    {
+      "name": "set_target",
+      "type": "int",
+      "default": 7
+    },
+    {
+      "name": "set_window",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "set_rounds",
+      "type": "int",
+      "default": 20
+    },
+    {
+      "name": "set_pool_pages",
+      "type": "int",
+      "default": 65536
+    },
+    {
+      "name": "set_filler_pages",
+      "type": "int",
+      "default": 512
+    },
+    {
+      "name": "set_regions",
+      "type": "int",
+      "default": 4
+    },
+    {
+      "name": "set_region_scope",
+      "type": "int",
+      "default": -1
+    },
+    {
+      "name": "repetitions",
+      "type": "int",
+      "default": 10
+    },
+    {
+      "name": "base_pages",
+      "type": "int",
+      "default": 1
+    },
+    {
+      "name": "seed",
+      "type": "int",
+      "default": 42
+    },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        {
+          "name": "cycles",
+          "type": 8,
+          "config": "0x11"
+        },
+        {
+          "name": "l1d_tlb_refill",
+          "type": 8,
+          "config": "0x05"
+        },
+        {
+          "name": "l2d_tlb_refill",
+          "type": 8,
+          "config": "0x2d"
+        },
+        {
+          "name": "l2d_tlb",
+          "type": 8,
+          "config": "0x2f"
+        }
+      ]
+    }
+  ],
+  "preconditions": [
+    "--environment-profile charging-thermal；完整 before/after 合格快照",
+    "同一二进制、代码/配置和环境 regime；10 进程样本；不与正式输入重用记录/raw 引用"
+  ],
+  "metrics": [
+    {
+      "name": "pmu.cycles.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l1d_tlb_refill.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l2d_tlb_refill.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l2d_tlb.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "window_valid_rounds",
+      "unit": "rounds",
+      "statistic": "median"
+    },
+    {
+      "name": "window_mux_rounds",
+      "unit": "rounds",
+      "statistic": "median"
+    }
+  ],
+  "id": "ptr-chase-sm8650-x4-tlb-a1-calibration-floor",
+  "title": "A1 CALIBRATION floor：阈值冻结专用，禁止混入正式判定",
+  "execution": {
+    "probe": "ptr_chase",
+    "probe_shape": "tlb_set",
+    "controls": [
+      "x4-prime"
+    ],
+    "params": {
+      "repetitions": 10
+    },
+    "sweep": {
+      "set_window": [
+        0
+      ]
+    },
+    "fixed_params": [
+      "set_target",
+      "set_rounds",
+      "set_pool_pages",
+      "set_filler_pages",
+      "set_regions",
+      "base_pages",
+      "seed",
+      "pmu_events",
+      "set_hypothesis",
+      "set_region_scope"
+    ]
+  },
+  "notes": "任务书 §5.5：floor=W0；scatter=W8/set_scatter1；freeze 命令写不可变工件。旧 pilot 不晋升为正式标定。",
+  "analysis_role": "CALIBRATION"
+}

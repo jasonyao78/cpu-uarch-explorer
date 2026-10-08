@@ -119,8 +119,8 @@ class TestEnvironmentProfileCLI(unittest.TestCase):
               mock.patch("runner.cli.make_executor", return_value=executor),
               mock.patch("runner.environment.collect_environment_state",
                          return_value=snapshot) as collect,
-              mock.patch("runner.environment.evaluate_preconditions",
-                         return_value=["thermal-over-limit"])):
+              mock.patch("runner.environment.evaluate_preconditions_full",
+                         return_value=(["thermal-over-limit"], []))):
             out = io.StringIO()
             with redirect_stdout(out):
                 self.assertEqual(_cmd_env(args), 1)
@@ -135,8 +135,8 @@ class TestEnvironmentProfileCLI(unittest.TestCase):
               mock.patch("runner.cli.make_executor", return_value=object()),
               mock.patch("runner.environment.collect_environment_state",
                          return_value={"schema_version": "1.0"}),
-              mock.patch("runner.environment.evaluate_preconditions",
-                         return_value=["cpufreq-governor-mismatch:policy7"])):
+              mock.patch("runner.environment.evaluate_preconditions_full",
+                         return_value=(["cpufreq-governor-mismatch:policy7"], []))):
             out = io.StringIO()
             with redirect_stdout(out):
                 self.assertEqual(_cmd_env(args), 0)

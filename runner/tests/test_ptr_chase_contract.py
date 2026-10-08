@@ -356,6 +356,280 @@ class TestPtrChaseContract(unittest.TestCase):
         for metric in metrics:
             self.assertNotIn("vma_base", metric)
 
+    def test_tlb_set_mode_is_unsupported_on_macos(self):
+        # M0-4b：set 模式与 legacy PMU 同口径——非 Linux exit 2（能力不支持），
+        # 不伪装成可执行
+        argv = self.adapter.build_argv({
+            "set_hypothesis": 1, "set_target": 7, "set_window": 8,
+            "set_rounds": 20, "set_pool_pages": 65536,
+            "set_filler_pages": 512, "set_regions": 4,
+            "pmu_events": [{"name": "l1d_tlb_refill", "type": 8,
+                            "config": 0x5}],
+        })
+        self.assertIn("--tlb-set-mode", argv)
+        proc = self._run(argv)
+        self.assertEqual(proc.returncode, 2, f"stderr={proc.stderr}")
+        self.assertIn("unsupported", proc.stderr)
+
+
+class TestTlbSetAdapterContract(unittest.TestCase):
+    """M0-4b：tlb_set 形状的 adapter 契约（合成输出级；真机执行归上板）。
+
+    不依赖编译产物——argv 构造与输出解析在任何平台可测。"""
+    def setUp(self):
+        self.adapter = PtrChaseAdapter()
+
+    def _params(self, **over):
+        params = {
+            "set_hypothesis": 1, "set_target": 7, "set_window": 8,
+            "set_rounds": 20, "set_pool_pages": 65536,
+            "set_filler_pages": 512, "set_regions": 4,
+            "pmu_events": [
+                {"name": "l1d_tlb_refill", "type": 8, "config": 0x5},
+                {"name": "l2d_tlb_refill", "type": 8, "config": 0x2d},
+                {"name": "l2d_tlb", "type": 8, "config": 0x2f},
+            ],
+        }
+        params.update(over)
+        return params
+
+    def test_build_argv_consumes_all_set_params(self):
+        argv = self.adapter.build_argv(
+            self._params(set_target2=100, seed=42))
+        joined = " ".join(argv)
+        self.assertIn("--tlb-set-mode", joined)
+        for flag in ("--set-hypothesis 1", "--set-target 7", "--set-window 8",
+                     "--set-rounds 20", "--set-pool-pages 65536",
+                     "--set-filler 512", "--set-regions 4",
+                     "--set-target2 100", "-S 42", "-B"):
+            self.assertIn(flag, joined)
+        for event in ("l1d_tlb_refill:8:5", "l2d_tlb_refill:8:45",
+                      "l2d_tlb:8:47"):
+            self.assertIn(f"--pmu-event {event}", joined)
+
+    def test_scatter_flag_emitted_only_when_set(self):
+        argv = self.adapter.build_argv(self._params(set_scatter=1))
+        self.assertIn("--set-scatter", " ".join(argv))
+        argv = self.adapter.build_argv(self._params(set_scatter=0))
+        self.assertNotIn("--set-scatter", " ".join(argv))
+
+    def test_missing_required_param_fails_closed(self):
+        for missing in ("set_window", "set_hypothesis", "set_target"):
+            params = self._params()
+            del params[missing]
+            with self.assertRaisesRegex(ParseError, missing):
+                self.adapter.build_argv(params)
+
+    def test_legacy_params_never_take_set_branch(self):
+        argv = self.adapter.build_argv(
+            {"buffer_kb": 64, "stride": 64, "loads": 8000, "warmup": 1000})
+        self.assertNotIn("--tlb-set-mode", " ".join(argv))
+
+    def test_parse_tlbset_output_roundtrip(self):
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 set_rounds=20 "
+            "set_filler=512 set_regions=4 set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 window_mux_rounds=0 "
+            "valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19 "
+            "pmu_l2d_tlb_refill_count=0.2 pmu_l2d_tlb_refill_valid_rounds=19 "
+            "pmu_l2d_tlb_count=8.1 pmu_l2d_tlb_valid_rounds=19"
+        )
+        metrics = self.adapter.parse_output(stdout, "")
+        by_name = {m["name"]: m["value"] for m in metrics}
+        self.assertEqual(by_name["pmu.l1d_tlb_refill.count"], 8.0)
+        self.assertEqual(by_name["pmu.l2d_tlb_refill.count"], 0.2)
+        self.assertEqual(by_name["window_valid_rounds"], 19)
+        self.assertEqual(by_name["window_mux_rounds"], 0)
+        self.assertEqual(by_name["probe_latency_ns"], 1500)
+
+    def test_parse_tlbset_output_without_events_fails_closed(self):
+        stdout = ("mode=tlbset set_domain=multi-region "
+                  "window_valid_rounds=19 window_invalid_rounds=0 "
+                  "window_mux_rounds=0 valid_rounds=19 probe_ns=1")
+        with self.assertRaisesRegex(ParseError, "no pmu"):
+            self.adapter.parse_output(stdout, "")
+
+    def test_parse_legacy_output_stays_on_chase_branch(self):
+        # 回归：legacy 输出（无 mode=tlbset）不因 parser 分支改变语义
+        metrics = self.adapter.parse_output("latency_ns=1.25", "")
+        self.assertEqual(metrics[0]["name"], "latency_ns")
+
+    def test_descriptor_consistency_accepts_matching_realized(self):
+        # MB-06：requested→realized 一致 → 通过
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 set_rounds=20 "
+            "set_domain=multi-region window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        metrics = self.adapter.parse_output(
+            stdout, "",
+            {"set_hypothesis": 1, "set_target": 7, "set_window": 8,
+             "set_rounds": 20})
+        self.assertEqual(metrics[0]["name"], "window_valid_rounds")
+
+    def test_descriptor_mismatch_fails_closed(self):
+        # 探针自描述与请求不符 = 执行漂移，ParseError
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=99 set_window=8 set_rounds=20 "
+            "set_domain=multi-region window_valid_rounds=19 "
+            "window_invalid_rounds=0 window_mux_rounds=0 valid_rounds=19 "
+            "probe_ns=1500 pmu_l1d_tlb_refill_count=8.0 "
+            "pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        with self.assertRaisesRegex(ParseError, "descriptor mismatch"):
+            self.adapter.parse_output(
+                stdout, "",
+                {"set_hypothesis": 1, "set_target": 7, "set_window": 8})
+
+    def test_descriptor_missing_realized_field_fails_closed(self):
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_window=8 "
+            "set_domain=multi-region window_valid_rounds=19 "
+            "window_invalid_rounds=0 window_mux_rounds=0 valid_rounds=19 "
+            "probe_ns=1500 pmu_l1d_tlb_refill_count=8.0 "
+            "pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        with self.assertRaisesRegex(ParseError, "did not report"):
+            self.adapter.parse_output(
+                stdout, "", {"set_hypothesis": 1, "set_target": 7,
+                             "set_window": 8})
+
+    def test_shape_decided_by_request_not_output(self):
+        # PA-02：请求 tlb_set 而输出 legacy → 拒绝（不再按输出自报定形）
+        with self.assertRaisesRegex(ParseError, "shape mismatch"):
+            self.adapter.parse_output(
+                "latency_ns=1.25", "",
+                {"set_hypothesis": 1, "set_target": 7, "set_window": 8})
+        # 反向：请求 legacy 而输出 tlbset → 拒绝
+        with self.assertRaisesRegex(ParseError, "shape mismatch"):
+            self.adapter.parse_output(
+                "mode=tlbset set_hypothesis=1 set_window=8 "
+                "set_domain=multi-region window_valid_rounds=19 "
+                "window_invalid_rounds=0 window_mux_rounds=0 valid_rounds=19 "
+                "probe_ns=1 pmu_l1d_tlb_refill_count=1.0 "
+                "pmu_l1d_tlb_refill_valid_rounds=19",
+                "", {"buffer_kb": 64, "stride": 64, "loads": 8000,
+                     "warmup": 1000})
+
+    def test_condition_param_drift_rejected(self):
+        # PA-02：regions/filler/scatter/seed 漂移必须拒绝
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=1 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=1 set_target_region_nodes=8 "
+            "set_domain=single-region-fallback page_kb=4 seed=99 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        with self.assertRaisesRegex(ParseError, "set_regions"):
+            self.adapter.parse_output(
+                stdout, "",
+                {"set_hypothesis": 1, "set_target": 7, "set_window": 8,
+                 "set_regions": 4, "set_filler_pages": 512, "seed": 42})
+        with self.assertRaisesRegex(ParseError, "seed"):
+            self.adapter.parse_output(
+                stdout, "",
+                {"set_hypothesis": 1, "set_target": 7, "set_window": 8,
+                 "set_regions": 1, "set_filler_pages": 512, "seed": 42})
+
+    def test_missing_requested_event_rejected(self):
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=4 set_target_region_nodes=3,3,3,3 "
+            "set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        with self.assertRaisesRegex(ParseError, "missing"):
+            self.adapter.parse_output(
+                stdout, "",
+                {"set_hypothesis": 1, "set_target": 7, "set_window": 8,
+                 "pmu_events": [
+                     {"name": "l1d_tlb_refill", "type": 8, "config": 5},
+                     {"name": "l2d_tlb_refill", "type": 8, "config": 45}]})
+
+    def test_parse_realized_extracts_incentive_audit(self):
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=4 set_target_region_nodes=3,3,3,3 "
+            "set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        realized = self.adapter.parse_realized(stdout)
+        self.assertEqual(realized["set_domain"], "multi-region")
+        self.assertEqual(realized["set_active_regions"], 4)
+        self.assertEqual(realized["set_target_region_nodes"], [3, 3, 3, 3])
+        self.assertEqual(realized["set_hypothesis"], 1)
+        self.assertEqual(self.adapter.parse_realized("latency_ns=1.25"), {})
+
+    def test_parse_realized_rejects_invalid_tokens(self):
+        # RPA-03：非法 token 拒绝而非静默删除（评审复现："2,bad,2,2" 被
+        # 静默解析成 [2,2,2]）
+        base = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=4 set_target_region_nodes=2,bad,2,2 "
+            "set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        with self.assertRaisesRegex(ParseError, "invalid token"):
+            self.adapter.parse_realized(base)
+        clean = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=4 set_target_region_nodes=2,2,2,2 "
+            "set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        bad_active = clean.replace("set_active_regions=4",
+                                   "set_active_regions=oops")
+        with self.assertRaisesRegex(ParseError, "not an integer"):
+            self.adapter.parse_realized(bad_active)
+
+    def test_parse_realized_invariants_with_expected(self):
+        stdout = (
+            "mode=tlbset set_hypothesis=1 set_target=7 set_window=8 "
+            "set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+            "set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
+            "set_active_regions=4 set_target_region_nodes=2,2,2,2 "
+            "set_domain=multi-region page_kb=4 seed=42 "
+            "window_valid_rounds=19 window_invalid_rounds=0 "
+            "window_mux_rounds=0 valid_rounds=19 probe_ns=1500 "
+            "pmu_l1d_tlb_refill_count=8.0 pmu_l1d_tlb_refill_valid_rounds=19"
+        )
+        expected = {"set_window": 8, "set_regions": 4,
+                    "set_region_scope": -1, "set_nsets": 0}
+        # 一致例（sum=8==window）通过：
+        self.assertEqual(
+            self.adapter.parse_realized(stdout, expected)["set_active_regions"], 4)
+        # sum 违例：
+        bad = stdout.replace("set_target_region_nodes=2,2,2,2",
+                             "set_target_region_nodes=3,3,3,3")
+        with self.assertRaisesRegex(ParseError, "node sum"):
+            self.adapter.parse_realized(bad, expected)
+        # scope 隔离违例
+        iso_bad = stdout.replace("set_region_scope=-1", "set_region_scope=1")
+        with self.assertRaisesRegex(ParseError, "scope isolation"):
+            self.adapter.parse_realized(iso_bad,
+                                        {**expected, "set_region_scope": 1})
+
 
 if __name__ == "__main__":
     unittest.main()

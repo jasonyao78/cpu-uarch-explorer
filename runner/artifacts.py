@@ -20,6 +20,25 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# R10（2026-10-08 上板实证）：APFS NAME_MAX=255——RPA 轮 case_id 段扩展后
+# 实测 259 字节越线截杀 raw 落盘（且异常逃逸、连失败记录都没写）。统一
+# 截断+哈希命名：≤200 字节保持原样（旧 run 全部可读）；超限取前 100 字节
+# + sha256(case_id) 前 16 字节——不同 case 哈希必不同（钉桩测试）。
+_FILENAME_MAX = 200
+
+
+def raw_sample_stem(case_id: str) -> str:
+    """case_id → raw 样本文件茎（artifacts 与 engine 共用，落盘名与
+    raw_sample_ref 恒一致）。"""
+    import hashlib
+    safe = case_id.replace("/", "_").replace(":", "_")
+    if len(safe.encode()) <= _FILENAME_MAX:
+        return safe
+    digest = hashlib.sha256(case_id.encode()).hexdigest()[:16]
+    prefix = safe.encode()[:100].decode(errors="ignore")
+    return f"{prefix}-{digest}"
+
+
 class ArtifactStore:
     def __init__(self, run_dir: Path):
         self.run_dir = Path(run_dir)
@@ -71,7 +90,7 @@ class ArtifactStore:
     def write_raw_sample(self, case_id: str, sample_index: int,
                          stdout: str, stderr: str) -> dict:
         """原始样本字节先落盘再算 SHA256，manifest id 即 raw_samples_ref 引用目标。"""
-        safe_case = case_id.replace("/", "_").replace(":", "_")
+        safe_case = raw_sample_stem(case_id)
         base = self.raw_dir / f"{safe_case}.s{sample_index}"
         # 注意：不能用 with_suffix——".s0" 会被当作后缀替换掉，导致重复样本互相覆盖
         out_path = base.with_name(base.name + ".stdout.txt")

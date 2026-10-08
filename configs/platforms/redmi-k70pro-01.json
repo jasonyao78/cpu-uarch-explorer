@@ -55,6 +55,45 @@
           "cpufreq.*.max_khz"
         ]
       }
+    },
+    "charging-thermal": {
+      "_note": "充电态热策略 regime（2026-10-07 任务书 v1.5 增补）：USB 充电为必须行为时，policy0/2/5 的 scaling_max 被 MIUI 热策略压制属于显式接受的非基线条件——降级为命名告警（accepted-nonbaseline:*）随 record 入档，不阻塞执行。**测量核 policy7 永不降级**：cap 迁移到 X4 才是有效性威胁。与 campaign 1（电池态）基线不跨 regime 直接比（判读边界，任务书 §5.3 增补）。",
+      "host_requirements": {
+        "cpufreq.governor": "performance"
+      },
+      "measurement_environment": {
+        "collector": "android-controlled-quiet-v2",
+        "required": true,
+        "preconditions": {
+          "wakefulness": ["Dozing"],
+          "screen_on": false,
+          "force_idle": false,
+          "active_camera": false,
+          "services": {
+            "mi_thermald": "running"
+          },
+          "cpufreq_governor": "performance",
+          "cpufreq_max_khz": {
+            "policy0": 2265600,
+            "policy2": 2707200,
+            "policy5": 2707200,
+            "policy7": 2745600
+          },
+          "max_cpu_temp_c": 90.0,
+          "accepted_nonbaseline": {
+            "cpufreq_max_khz": ["policy0", "policy2", "policy5"]
+          }
+        },
+        "stable_fields": [
+          "airplane_mode",
+          "power.screen_on",
+          "device_idle.force_idle",
+          "services.mi_thermald",
+          "cpufreq.*.governor",
+          "cpufreq.*.min_khz",
+          "cpufreq.*.max_khz"
+        ]
+      }
     }
   },
   "aux_snapshots": [

@@ -7,6 +7,18 @@
 
 set(PT $<TARGET_FILE:ptr_chase>)
 
+# M0-3：PerfWindow 布局解码黄金测试（合成输入，平台无关）
+add_executable(perf_window_golden ${CMAKE_SOURCE_DIR}/probes/tests/perf_window_golden.cpp)
+target_link_libraries(perf_window_golden PRIVATE probe_common)
+add_test(NAME perf_window_golden COMMAND perf_window_golden)
+
+# RPA-02/PA-03：TLB set 收集器金样（与探针同源共享实现；N-set/T2/隔离/
+# 跨界布局审计——评审复现法场景全覆盖）
+add_executable(tlb_set_collect_golden
+               ${CMAKE_SOURCE_DIR}/probes/tests/tlb_set_collect_golden.cpp)
+target_link_libraries(tlb_set_collect_golden PRIVATE probe_common)
+add_test(NAME tlb_set_collect_golden COMMAND tlb_set_collect_golden)
+
 add_test(NAME ptr_chase_valid_small COMMAND ${PT} -b 64 -s 64 -n 8000)
 set_tests_properties(ptr_chase_valid_small PROPERTIES
     PASS_REGULAR_EXPRESSION "latency_ns=[0-9]+\\.[0-9]+")

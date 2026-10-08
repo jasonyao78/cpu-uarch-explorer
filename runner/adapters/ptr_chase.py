@@ -84,10 +84,77 @@ class PtrChaseAdapter:
     protocol_version = "1.2"
     implementation_id = "portable"
 
+    # M0-4b：tlb_set 形状的必需参数（探针 argv 真实消费；缺一即 ParseError，
+    # fail-closed——不让半套参数悄悄退化成别的模式）
+    _SET_MODE_REQUIRED = ("set_hypothesis", "set_target", "set_window")
+    _SET_MODE_OPTIONAL = ("set_target2", "set_rounds", "set_pool_pages",
+                          "set_filler_pages", "set_regions")
+
     def build_argv(self, params: dict[str, Any]) -> list[str]:
         """参数 dict → probe argv。缺参数/类型错误抛 ParseError（plan 期已校验，
         此处是最后一道防线）。hugepage 非 0 时加 -h（fallback 允许）；
-        thp 非 0 时加 -T；base_pages 非 0 时加 -B；三类页请求互斥。"""
+        thp 非 0 时加 -T；base_pages 非 0 时加 -B；三类页请求互斥。
+        M0-4b：含 set_window 参数 → tlb_set 模式 argv（--tlb-set-mode 族），
+        与 legacy chase argv 互斥（探针侧同样硬拒）。"""
+        if "set_window" in params or "set_hypothesis" in params:
+            return self._build_tlb_set_argv(params)
+        return self._build_chase_argv(params)
+
+    def _build_tlb_set_argv(self, params: dict[str, Any]) -> list[str]:
+        for key in self._SET_MODE_REQUIRED:
+            if key not in params:
+                raise ParseError(
+                    f"tlb-set mode requires param {key!r} "
+                    f"(got {sorted(params)})")
+        try:
+            hypothesis = int(params["set_hypothesis"])
+            target = int(params["set_target"])
+            window = int(params["set_window"])
+        except (TypeError, ValueError) as e:
+            raise ParseError(f"tlb-set argv build failed: {e}")
+        if not 1 <= hypothesis <= 4:
+            raise ParseError(f"set_hypothesis must be 1..4: {hypothesis}")
+        if not 0 <= target <= 255:
+            raise ParseError(f"set_target must be 0..255: {target}")
+        if window < 0:
+            raise ParseError(f"set_window must be >= 0: {window}")
+        argv = ["--tlb-set-mode",
+                "--set-hypothesis", str(hypothesis),
+                "--set-target", str(target),
+                "--set-window", str(window)]
+        if "set_target2" in params:
+            target2 = int(params["set_target2"])
+            if not 0 <= target2 <= 255:
+                raise ParseError(f"set_target2 must be 0..255: {target2}")
+            argv += ["--set-target2", str(target2)]
+        for key, flag in (("set_rounds", "--set-rounds"),
+                          ("set_pool_pages", "--set-pool-pages"),
+                          ("set_filler_pages", "--set-filler"),
+                          ("set_regions", "--set-regions")):
+            if key in params:
+                argv += [flag, str(int(params[key]))]
+        if int(params.get("set_region_scope", -1)) != -1:
+            argv += ["--set-region-scope", str(int(params["set_region_scope"]))]
+        if int(params.get("set_nsets", 0)) > 0:
+            argv += ["--set-nsets", str(int(params["set_nsets"]))]
+        if _binary_flag(params, "set_scatter"):
+            argv.append("--set-scatter")
+        if "seed" in params:
+            raw_seed = params["seed"]
+            if type(raw_seed) is not int or raw_seed < 0 \
+                    or raw_seed > (1 << 64) - 1:
+                raise ParseError(f"seed must be a uint64 integer: {raw_seed!r}")
+            argv.extend(["-S", str(raw_seed)])
+        # tlb_set 强制 4K base 页：显式带 -B 与探针内部 madvise 口径一致
+        argv.append("-B")
+        for event in _pmu_events(params):
+            argv.extend([
+                "--pmu-event",
+                f"{event['name']}:{event['type']}:{event['config']}",
+            ])
+        return argv
+
+    def _build_chase_argv(self, params: dict[str, Any]) -> list[str]:
         try:
             buffer_kb = int(params["buffer_kb"])
             stride = int(params["stride"])
@@ -121,13 +188,217 @@ class PtrChaseAdapter:
             ])
         return argv
 
-    def parse_output(self, stdout: str, stderr: str) -> list[dict[str, Any]]:
+    def parse_output(self, stdout: str, stderr: str,
+                     expected: dict | None = None) -> list[dict[str, Any]]:
         """stdout key=value → metrics 列表。缺 latency_ns、非数值、nan/inf
         一律抛 ParseError（绝不编造数值，空 metrics + failure 是合法出路）。
-        page_policy 存在时随 metric 入档（§2 显式标注纪律）。"""
+        page_policy 存在时随 metric 入档（§2 显式标注纪律）。
+        M0-4b：mode=tlbset 输出 → tlb_set 分支（无 latency_ns；metrics 为
+        pmu.<label>.count 窗口差分均值 + 窗口有效性计数，事件集自描述）。
+        MB-06：expected（plan case_params）提供时做 requested→realized
+        一致性核验——探针自描述字段必须与请求的规范化参数一致，不符即
+        ParseError（fail-closed，不让执行漂移混进证据）。"""
         fields = parse_key_value_lines(stdout)
         if not fields:
             raise ParseError(f"no key=value lines in probe output; stderr={stderr.strip()!r}")
+        # PA-02 修订：解析形状由**请求**决定，不由输出自报决定——请求
+        # tlb_set 而探针输出 legacy（无 mode=tlbset）= 执行漂移，fail-closed；
+        # 请求 legacy 而输出 tlbset 同理。expected=None（旧调用）保持输出定形。
+        if expected is not None:
+            wants_set = "set_window" in expected or "set_hypothesis" in expected
+            is_set = fields.get("mode") == "tlbset"
+            if wants_set and not is_set:
+                raise ParseError(
+                    "descriptor shape mismatch: requested tlb_set but probe "
+                    f"output has no mode=tlbset (mode={fields.get('mode')!r})")
+            if is_set and not wants_set:
+                raise ParseError(
+                    "descriptor shape mismatch: probe reports mode=tlbset but "
+                    "the case did not request a tlb_set shape")
+        if fields.get("mode") == "tlbset":
+            metrics = self._parse_tlb_set_output(fields, stderr)
+            if expected is not None:
+                self._check_tlb_set_descriptor(fields, expected)
+            return metrics
+        return self._parse_chase_output(fields, stderr)
+
+    # MB-06/PA-02 descriptor 契约：探针自描述字段 ↔ plan 规范化参数名。
+    # set_domain/set_active_regions/set_region_nodes 为 realized-only（预约/
+    # 激励审计结果，非请求参数）——只由 parse_realized() 入档，不做一致性
+    # 等值核验（single-region-fallback 是合法命名降级）。
+    _TLB_SET_DESCRIPTOR_MAP = (
+        ("set_hypothesis", "set_hypothesis"),
+        ("set_target", "set_target"),
+        ("set_target2", "set_target2"),
+        ("set_window", "set_window"),
+        ("set_rounds", "set_rounds"),
+        ("set_pool_pages", "set_pool_pages"),
+        ("set_filler_pages", "set_filler_pages"),
+        ("set_regions", "set_regions"),
+        ("scatter", "set_scatter"),
+        ("set_region_scope", "set_region_scope"),
+        ("set_nsets", "set_nsets"),
+        ("seed", "seed"),
+    )
+
+    def parse_realized(self, stdout: str,
+                       expected: dict | None = None) -> dict[str, Any]:
+        """探针 realized 自描述域（PA-02/RPA-03：随结构化记录持久化，
+        requested 与 realized 分开；每次进程解析阶段调用）。
+
+        防御契约（评审反例驱动）：非法 token **拒绝而非丢弃**；有 expected
+        时校验维数（== set_regions）、节点总和（== window×max(nsets,1)）、
+        scope 隔离一致性、active_regions 与槽位一致性——任何违例 ParseError，
+        由 engine 既有失败路径转成结构化 failure（不逃逸 ValueError）。"""
+        fields = parse_key_value_lines(stdout)
+        if fields.get("mode") != "tlbset":
+            return {}
+        realized: dict[str, Any] = {}
+        for key in ("mode", "set_domain", "page_kb"):
+            if key in fields:
+                realized[key] = fields[key]
+        if "set_region_vpn_hi" in fields:
+            toks = str(fields["set_region_vpn_hi"]).split(",")
+            if not all(t.isdigit() for t in toks):
+                raise ParseError(
+                    f"realized set_region_vpn_hi: invalid token in "
+                    f"{fields['set_region_vpn_hi']!r}")
+            realized["set_region_vpn_hi"] = [int(t) for t in toks]
+        for key in ("set_region_vpn_hi_pure",):
+            if key in fields:
+                raw = fields[key]
+                if raw not in ("0", "1"):
+                    raise ParseError(f"realized {key}: must be 0/1, got {raw!r}")
+                realized[key] = int(raw)
+        for key in ("set_target_region_nodes", "set_t2_region_nodes"):
+            if key not in fields:
+                continue
+            counts: list[int] = []
+            for tok in str(fields[key]).split(","):
+                if not tok.isdigit():   # 严格非负整数；非法 token 拒绝
+                    raise ParseError(
+                        f"realized {key}: invalid token {tok!r}")
+                counts.append(int(tok))
+            realized[key] = counts
+        for key in ("set_hypothesis", "set_target", "set_window", "set_rounds",
+                    "set_pool_pages", "set_filler_pages", "scatter",
+                    "set_regions", "set_region_scope", "set_nsets",
+                    "set_active_regions", "seed"):
+            if key in fields:
+                raw = fields[key]
+                if not str(raw).lstrip("-").isdigit():
+                    raise ParseError(f"realized {key}: not an integer: {raw!r}")
+                realized[key] = int(raw)
+        if expected is not None:
+            self._check_realized_invariants(realized, expected)
+        return realized
+
+    def _check_realized_invariants(self, realized: dict[str, Any],
+                                   expected: dict) -> None:
+        regions = int(expected.get("set_regions", 4))
+        for key in ("set_target_region_nodes", "set_t2_region_nodes"):
+            if key in realized and len(realized[key]) != regions:
+                raise ParseError(
+                    f"realized {key}: dim {len(realized[key])} != "
+                    f"set_regions {regions}")
+        window = int(expected.get("set_window", 0))
+        nsets = int(expected.get("set_nsets", 0))
+        expected_sum = (window * (nsets if nsets > 0 else 1)
+                        if window > 0 else 0)
+        nodes = realized.get("set_target_region_nodes")
+        if nodes is not None and sum(nodes) != expected_sum:
+            raise ParseError(
+                f"realized target node sum {sum(nodes)} != "
+                f"window*nsets {expected_sum}")
+        scope = int(expected.get("set_region_scope", -1))
+        if nodes is not None and scope >= 0 and nodes[scope] != expected_sum:
+            raise ParseError(
+                f"realized scope isolation violated: slot[{scope}]="
+                f"{nodes[scope]} != {expected_sum}")
+        active = realized.get("set_active_regions")
+        if active is not None and nodes is not None:
+            actual = sum(1 for n in nodes if n > 0)
+            if active != actual:
+                raise ParseError(
+                    f"realized set_active_regions {active} != nonzero "
+                    f"slots {actual}")
+
+    def _check_tlb_set_descriptor(self, fields: dict[str, str],
+                                  expected: dict) -> None:
+        """requested（expected case_params）→ realized（探针自描述）一致性。
+        请求了但探针没报、或值不一致 = 执行漂移，fail-closed；请求的 PMU
+        判据事件必须在输出中出现（缺关键事件 = 无可判读计数，命名拒绝）。"""
+        for out_key, param_key in self._TLB_SET_DESCRIPTOR_MAP:
+            if param_key in expected:
+                if out_key not in fields:
+                    raise ParseError(
+                        f"tlb-set descriptor: probe did not report {out_key!r} "
+                        f"for requested param {param_key!r}")
+                if fields[out_key] != str(expected[param_key]):
+                    raise ParseError(
+                        f"tlb-set descriptor mismatch: {out_key}="
+                        f"{fields[out_key]!r} != requested {param_key}="
+                        f"{expected[param_key]!r}")
+        requested = {e["name"] for e in _pmu_events(expected)}
+        reported = {
+            key[len("pmu_"):-len("_count")]
+            for key in fields if key.startswith("pmu_") and key.endswith("_count")
+        }
+        missing_events = sorted(requested - reported)
+        if missing_events:
+            raise ParseError(
+                f"tlb-set descriptor: requested PMU events missing from "
+                f"probe output: {missing_events}")
+
+    def _parse_tlb_set_output(self, fields: dict[str, str],
+                              stderr: str) -> list[dict[str, Any]]:
+        """tlb_set 模式：probe 段窗口差分均值（events/round）+ 有效性证据。
+
+        事件集自描述（pmu_<label>_count 键）；至少一个事件必填，否则该
+        窗口没有任何可判读的计数（fail-closed）。"""
+        required = ("set_domain", "window_valid_rounds", "window_invalid_rounds",
+                    "window_mux_rounds", "valid_rounds", "probe_ns")
+        for key in required:
+            if key not in fields:
+                raise ParseError(f"tlb-set output missing {key!r}; stderr={stderr.strip()!r}")
+        metrics: list[dict[str, Any]] = [
+            {"name": "window_valid_rounds",
+             "value": require_finite_number(fields, "window_valid_rounds"),
+             "unit": "rounds"},
+            {"name": "window_invalid_rounds",
+             "value": require_finite_number(fields, "window_invalid_rounds"),
+             "unit": "rounds"},
+            {"name": "window_mux_rounds",
+             "value": require_finite_number(fields, "window_mux_rounds"),
+             "unit": "rounds"},
+            {"name": "probe_latency_ns",
+             "value": require_finite_number(fields, "probe_ns"),
+             "unit": "ns"},
+        ]
+        n_events = 0
+        for key, raw in fields.items():
+            if not key.startswith("pmu_") or not key.endswith("_count"):
+                continue
+            label = key[len("pmu_"):-len("_count")]
+            if not label:
+                raise ParseError(f"tlb-set event label empty in key {key!r}")
+            metrics.append({"name": f"pmu.{label}.count",
+                            "value": require_finite_number(fields, key),
+                            "unit": "events"})
+            valid_key = f"pmu_{label}_valid_rounds"
+            if valid_key in fields:
+                metrics.append({
+                    "name": f"pmu.{label}.valid_rounds",
+                    "value": require_finite_number(fields, valid_key),
+                    "unit": "rounds"})
+            n_events += 1
+        if n_events == 0:
+            raise ParseError(
+                f"tlb-set output has no pmu_<label>_count events; stderr={stderr.strip()!r}")
+        return metrics
+
+    def _parse_chase_output(self, fields: dict[str, str],
+                            stderr: str) -> list[dict[str, Any]]:
         latency = require_finite_number(fields, "latency_ns")
         metric: dict[str, Any] = {"name": "latency_ns", "value": latency, "unit": "ns"}
         warmup_keys = {"warmup_loads", "warmup_passes_effective", "warmup_state"}

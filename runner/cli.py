@@ -135,7 +135,7 @@ def _cmd_env(args) -> int:
     """Inspect device state or manage durable mutation journals."""
     if args.action == "inspect":
         from .environment import (collect_environment_state,
-                                  evaluate_preconditions)
+                                  evaluate_preconditions_full)
         platform, requirements = _resolve_environment_profile(
             load_platform(args.platform), getattr(args, "environment_profile", None))
         policy = platform.get("measurement_environment")
@@ -144,7 +144,7 @@ def _cmd_env(args) -> int:
                               "env inspect requires --environment-profile")
         executor = make_executor(platform)
         snapshot = collect_environment_state(executor, policy)
-        violations = evaluate_preconditions(snapshot, policy)
+        violations, warnings = evaluate_preconditions_full(snapshot, policy)
         mutation_specs = _resolve_environment_specs(requirements, None)
         covers_governor = any(spec.startswith("governor=") for spec in mutation_specs)
         covered = [violation for violation in violations
@@ -160,6 +160,7 @@ def _cmd_env(args) -> int:
                 "violations": uncovered,
                 "covered_by_mutation": covered,
                 "observed_violations": violations,
+                "accepted_nonbaseline": warnings,
             },
         }, ensure_ascii=False, indent=2, sort_keys=True))
         return EXIT_OK if not uncovered else EXIT_USAGE

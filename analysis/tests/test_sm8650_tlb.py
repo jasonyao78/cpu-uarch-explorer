@@ -30,6 +30,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -609,6 +610,157 @@ class TestBimodalFlag(unittest.TestCase):
         self.assertFalse(result.groups[0]["bimodal"])
 
 
+class TestIdentityParamKeys(unittest.TestCase):
+    """M0-4 分析身份键（F6）：实验条件维度进分组键——同几何同 seed 但
+    chain_distribution 不同的记录必须分成两组；旧记录（无这些 params）
+    分组行为与战役版一致（回归保证）。"""
+
+    def test_distribution_param_separates_groups(self):
+        a = _record()
+        a["params"]["chain_distribution"] = "random-set"
+        b = _record()
+        b["params"]["chain_distribution"] = "strided-set"
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+        dists = {g["identity"]["chain_distribution"] for g in result.groups}
+        self.assertEqual(dists, {"random-set", "strided-set"})
+
+    def test_legacy_records_group_as_before(self):
+        # 无身份 params：全部归一组（旧 4 元组行为）
+        result = analyze_records([_record(), _record()], "run-a")
+        self.assertEqual(len(result.groups), 1)
+        self.assertIsNone(result.groups[0]["identity"]["chains"])
+        self.assertIsNone(result.groups[0]["identity"]["chain_distribution"])
+
+
+class TestDescriptorCanonicalIdentity(unittest.TestCase):
+    """MB-06 descriptor 最小契约：类型规范身份——bool True 与 int 1 不
+    合并；不同 str 值不合并；残差 params 差异（任何键）阻止合并；报告面
+    identity 字典保持 legacy 原值；旧记录分组不变。"""
+
+    def test_bool_and_int_do_not_merge(self):
+        a = _record()
+        a["params"]["chains"] = True
+        b = _record()
+        b["params"]["chains"] = 1
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+
+    def test_different_string_values_do_not_merge(self):
+        a = _record()
+        a["params"]["hypothesis"] = "H1"
+        b = _record()
+        b["params"]["hypothesis"] = "H2"
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+
+    def test_residual_param_difference_separates_groups(self):
+        # 非身份键的 params 差异（类型规范残差）也阻止合并
+        a = _record()
+        a["params"]["loads_per_slot"] = 8
+        b = _record()
+        b["params"]["loads_per_slot"] = 16
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+
+    def test_legacy_records_unchanged_by_residual(self):
+        # 旧记录 params 逐案一致 → 残差相同 → 仍归一组（回归钉）
+        result = analyze_records([_record(), _record()], "run-a")
+        self.assertEqual(len(result.groups), 1)
+
+    def test_dict_key_order_does_not_split_groups(self):
+        # PA-07：递归规范形——dict 键序不同、语义相同 ⇒ 同组
+        a = _record()
+        a["params"]["descriptor"] = {"x": 1, "y": 2}
+        b = _record()
+        b["params"]["descriptor"] = {"y": 2, "x": 1}
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 1)
+
+    def test_protocol_reflected_params_not_in_digest(self):
+        # RPA-04：键维度已反射的协议参数（loads→ring_passes、
+        # base_pages/thp→page_policy_actual）不进 digest。warmup_passes
+        # 进 digest（评审第三轮）→ legacy digest 非 None，但合并单元内
+        # 恒均匀（已实证 THP B/T 对一致）→ 一致性守卫接受历史 cohort。
+        from analysis.sm8650_tlb import grade_thp_cohorts
+        # digest None 情形：params 全部落在键维度/协议反射集（无 warmup*）
+        minimal = _record()
+        del minimal["params"]["warmup_passes"]
+        result0 = analyze_records([minimal], "run-a")
+        self.assertIsNone(result0.groups[0]["identity"]["residual_digest"])
+        a = _record()
+        b = _record()
+        b["params"]["loads"] = 999999   # ring_passes 不同 → 不同组
+        result = analyze_records([a, b], "run-a")
+        b2 = _record()
+        result2 = analyze_records([a, b2], "run-a")
+        self.assertTrue(all(
+            g["identity"]["residual_digest"] is not None for g in result2.groups))
+        grade_thp_cohorts(result2.groups)  # 均匀 → 接受
+
+    def test_semantic_residual_digest_exported_and_rejected(self):
+        # RPA-04 反例：loads_per_slot 差异 → digest 非 None → identity 出口
+        # 可见 + cohort 命名拒绝（不再无声合并）
+        from analysis.sm8650_tlb import grade_thp_cohorts
+        a = _record()
+        a["params"]["loads_per_slot"] = 8
+        b = _record()
+        b["params"]["loads_per_slot"] = 16
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+        digests = {g["identity"]["residual_digest"] for g in result.groups}
+        self.assertTrue(all(d is not None for d in digests))
+        with self.assertRaisesRegex(TlbError, "MB-04"):
+            grade_thp_cohorts(result.groups)
+
+    def test_warmup_counterexample_rejected(self):
+        # RPA-04 评审第三轮反例（我方原立场被推翻后修正）：同 loads 异
+        # warmup（-w 16384/32768，planner 可合法生成）→ digest 不同 →
+        # 一致性守卫命名拒绝，不再无声合并。
+        from analysis.sm8650_tlb import grade_thp_cohorts
+        a = _record()
+        a["params"]["warmup"] = 16384
+        b = _record(seed=1337)
+        b["params"]["warmup"] = 32768
+        result = analyze_records([a, b], "run-a")
+        digests = {g["identity"]["residual_digest"] for g in result.groups}
+        self.assertTrue(all(d is not None for d in digests))
+        with self.assertRaisesRegex(TlbError, "MB-04"):
+            grade_thp_cohorts(result.groups)
+
+    def test_tlb_identity_exported_and_downstream_rejects(self):
+        # PA-01 端到端：set_hypothesis 差异 → 分组、导出 identity 含该维、
+        # cohort/图表消费点命名拒绝（不再无声合并）
+        from analysis.sm8650_tlb import TlbError, grade_thp_cohorts
+        a = _record()
+        a["params"]["set_hypothesis"] = 1
+        b = _record()
+        b["params"]["set_hypothesis"] = 2
+        for metric in b["metrics"]:
+            if metric["name"] == "pmu.cycles.count":
+                for obs in metric["observations"]:
+                    obs["value"] = 100 * 65536
+        result = analyze_records([a, b], "run-a")
+        self.assertEqual(len(result.groups), 2)
+        hyps = {g["identity"]["set_hypothesis"] for g in result.groups}
+        self.assertEqual(hyps, {1, 2})
+        with self.assertRaisesRegex(TlbError, "MB-04"):
+            grade_thp_cohorts(result.groups)
+        # 图表消费点（模块在 main 树——与评审 overlay 同款加载；worktree
+        # 布局缺 main 时跳过，main 侧组合回归由 overlay 测试承担）
+        import importlib.util
+        chart_path = (Path(__file__).resolve().parents[3]
+                      / "cpu-uarch-explorer" / "analysis" / "tlb_figures.py")
+        if chart_path.is_file():
+            spec = importlib.util.spec_from_file_location(
+                "analysis.tlb_figures", chart_path)
+            chart = importlib.util.module_from_spec(spec)
+            sys.modules[spec.name] = chart
+            spec.loader.exec_module(chart)
+            with self.assertRaisesRegex(TlbError, "MB-04"):
+                chart.seed_medians(result.groups, "cyc_per_load")
+
+
 class TestMetricContract(unittest.TestCase):
     """M0-2 命名降级契约（OI-13 关闭）：
 
@@ -689,6 +841,25 @@ class TestRevM0BatchRegression(unittest.TestCase):
         for rec in (*run.ok_records, *run.failed_records):
             rec["metrics"] = [m for m in rec["metrics"] if m["name"] != name]
         return run
+
+    def test_mb04_cohort_rejects_nonuniform_identity(self):
+        # MB-04/RPA-04（评审第三轮）：一致性语义——同条件合法合并，
+        # 不同条件命名拒绝
+        a = _record()
+        a["params"]["chains"] = 2
+        b = _record(seed=1337)   # 同 buffer 异 seed 异条件 = 合并单元威胁
+        b["params"]["chains"] = 4
+        result = analyze_records([a, b], "run-a")
+        with self.assertRaisesRegex(TlbError, "MB-04"):
+            grade_thp_cohorts(result.groups)
+        # 单条件均匀：合法
+        result2 = analyze_records([a, _record()], "run-a")
+        result2.groups[0]["params"] if False else None
+        rec2 = _record()
+        rec2["params"]["chains"] = 2
+        result2 = analyze_records([a, rec2], "run-a")
+        grade_thp_cohorts(result2.groups)
+
 
     def test_c2_mixed_contract_same_identity_separates_groups(self):
         # 同几何同 seed，契约不同 → 不同组；组内各指标样本集合恒一致
