@@ -1,0 +1,32 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "217e5e37a4fa6ce05cd948c264ceceae4fe36e71",
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "flags": [
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-I",
+    "probes/common"
+  ],
+  "cpp_flags": [
+    "-std=c++17"
+  ],
+  "binaries": {
+    "rob_window_probe": "7d217b050ec08564e5c46160ae49dfc39ee02135adcefbce7e8f3a40e46af28d",
+    "tlb_local_pair": "b49180240eee4885d287d06bd9e6f3dee7ef15cf7d9d2cdc745f9716f3394381"
+  },
+  "independent_rebuild_byte_identical": true,
+  "source_sha256": {
+    "docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c": "7e66a9e7a2b12e85674b6dbc47cb8e137bc8a0b576dd73b5800fde0590472cb8",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/diagnostic/tlb_local_pair.cpp": "ffd4296d8d55cdd450d4c53afc531c934a820618c6a872b5f2dcec237c60e8ee",
+    "probes/diagnostic/tlb_local_layout.h": "083f6f81d4b6ec04e522cab16c01a9ee796135b30b1476485048859e9283f9d5",
+    "probes/common/tlb_set_collect.h": "ead8eaf63c36cfcc082aa54cb5af718a82de9c1af6426b9c5c9c50b257ceb4b1",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_window.h": "95dc834898a0feb47474b4b7899533f0762a9a7298315a71dd33830d907363c7"
+  }
+}
