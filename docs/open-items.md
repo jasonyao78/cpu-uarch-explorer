@@ -383,7 +383,15 @@
 ## OI-ROB-PROBE-20261009 ROB批判性吸收后的软件前置
 
 - **归属**：OI-12 ROB项目；审查与最小路线 `docs/reviews/2026-10-09-rob-probe-critical-reuse.md`。软件设计可并行，手机采样必须串行。
-- **P1未修 / 任何ROB容量采数前**：既有R1回跳多除4、R2 GROUP读布局/事件身份、R3未初始化锚点与FP filler覆盖；新增对称双链与串行负控、输入范围/事件数组/失败路径、实际缺失与独占line/page足迹验证。当前compile/--write-asm成功仅软件证据，不能进入ROB容量结论。
-- **P1判据 / 下版采数前冻结**：改正固定ROB−8、D→2D却要求差≥1.5D、taken分支必flush、NOP不发射等同不占窗口、窗口差值当PRF容量等错误；审计NOP融合、真实循环对齐/代码大小、operand/FPCR/连续sqrt稳定值与类别寄存器交集。首量命名W_class，384只作第三方候选。
+- **软件P1已修（2026-10-09，`217e5e3`）**：R1/R2/R3、对称双链/同VA串行负控、严格输入/事件身份/失败与实际对齐。host8项、七类独立反汇编、目标机71进程/327窗退休数量与无mux核验通过。详见 `docs/reviews/2026-10-09-minimal-probes-results.md`。硬件归因仍OPEN；16MiB miss路线在若干点串行更快，尚无稳定DRAM锚点资格。
+- **判据正文已修（v0.2，2026-10-09）**：`docs/cpu-uarch-deep-analysis/rob-deep-analysis/ROB微架构深度分析报告.md` §4.2/§5改为实际N、对称协议、真实周期、无固定减8/补偿或差/比混淆；不由taken/NOP不发射/类别差值推结构容量。当前double fsqrt(1.0)相关链约13cycles/op；fsqrt+NOP每gap N∈(512,768]响应仍只作有效窗口线索。384不参与命名判据。
 - **来源核验 / 使用计数比前**：指定TRM r0p3/Issue06与Arm事件JSON对0x1b描述不同；旧arm-docs/x4trm.txt为r0p2/Issue05。按目标r0p1实测0x1b、0x3a、0x3b口径与并发组可用性，不把执行/退休比直接当ROB分配因子。
 - **后置 / 首条可信曲线后**：ADD/FADD/混合类别、跨锚点、PRF/LSQ/前端专项归因及runner正式对接范围；先保留独立原型并复用已验证证据能力，不先扩框架。BTBSize_Probe_H2可作后续分支/前端参考，必须排除I-cache/iTLB和分支吞吐，归属BTB项目，触发=该项目立项。
+
+
+## MINIMAL-PROBES-20261009 真实最小探针交付与下一局部确认
+
+- **已完成 / 当前探针负责人**：r2源码`217e5e3`，审计与证据`468dad9`；报告 `docs/reviews/2026-10-09-minimal-probes-results.md`，全脱敏派生表 `docs/reviews/evidence/2026-10-09-minimal-probes/summary.json`。77真实进程/5127窗，无invalid/mux。TLB主批5mapping/200格，W8/9共享最大地址集、F共享前缀、target页内轮转和反序；40双差正，幅值有敏感性，未命名8ways。ROB两档fsqrt已得到粗网格响应；miss负控不满足理想容量解读。
+- **后续 / TLB局部容量负责人 / 触发 = 正式确认设计或ways命名前**：用同一最小协议确认target100；再判断是否必要扩到W7–10的同max集合/不同target顺序。识别描述符、PFN/cache残差，独立mapping作为重复单位；不以40相关配对冒充40物理独立实验。承接OI-TLB-LOCAL-20261009，不拼接旧A1。
+- **后续 / ROB与执行部件负责人 / 触发 = 下一局部实验**：512–768内预注册细网格；无锚点同网格、真实对齐0/32、ADD/FADD资源对照；ALU/FPU依赖/独立链latency/throughput与operand标定。缺失路线另做hot/long/翻译/cache资格，不凭allocation断言DRAM，不把NOP数除2救384。承接OI-ROB-PROBE-20261009与OI-7/OI-12。
+- **后置 / 软件集成负责人 / 触发 = 独立原型行为稳定且需正式矩阵时**：决定runner/schema/CMake正式接入；当前JSONL明确是独立探针格式，不冒充schema v2 record。当前实现/测试说明在 `docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/README.md`，板测驱动 `tools/diagnostic/run_sm8650_minimal.py`。远端与worktree回收沿既有分支门禁，当前不操作。
