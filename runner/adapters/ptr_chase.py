@@ -281,6 +281,7 @@ class PtrChaseAdapter:
                 counts.append(int(tok))
             realized[key] = counts
         for key in ("set_hypothesis", "set_target", "set_window", "set_rounds",
+                    "set_pool_pages", "set_filler_pages", "scatter",
                     "set_regions", "set_region_scope", "set_nsets",
                     "set_active_regions", "seed"):
             if key in fields:

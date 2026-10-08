@@ -13,6 +13,8 @@ from __future__ import annotations
 from typing import Any
 
 from .sm8650_tlb import TlbError
+from .sm8650_tlb_a1_contract import (bind_formal_records, canonical,
+    geometry_gate, realized_processes)
 
 # 量化 onset 候选阈值（任务书 v1.7 §5.5：随首块标定复核后正式冻结；
 # 程序已固定，数值是唯二待标定项）
@@ -24,35 +26,12 @@ PLATFORM_MIN_RATIO = 0.8        # 锐：平台中位 ≥ 峰值×此比例
 
 
 def gate_record(record: dict) -> tuple[bool, str]:
-    """A1 realized 硬门（评审阻塞项 2 的"消费入口"实体）。
+    """最终逐进程几何门；命名拒绝类型/维数/总和/域/purity/实际 hi 违例。
 
-    逐项 fail-closed；返回 (通过?, 命名理由)。门项（任务书 §5.5）：
-    domain_consistent、scope 特定 active 数、purity（全域折叠判别）、
-    审计不变量（adapter 已二次校验，此处为判据入口的最终防线）。
+    完整统计/身份/覆盖由 run_a1_adjudication 必经合同承担，不能把此门
+    单独通过当成正式矩阵已获准。R3-C/R5-C 软件收口。
     """
-    realized = record.get("probe", {}).get("realized")
-    if not realized:
-        return False, "missing-realized"
-    if realized.get("domain_consistent") is False:
-        return False, "mixed-domain"
-    params = record.get("params", {})
-    scope = int(params.get("set_region_scope", -1))
-    regions = int(params.get("set_regions", 4))
-    nodes = realized.get("set_target_region_nodes")
-    if nodes is None:
-        return False, "missing-region-nodes"
-    expected_active = regions if scope < 0 else 1
-    active = sum(1 for n in nodes if n > 0)
-    if active != expected_active:
-        return False, f"active-regions {active} != expected {expected_active}"
-    if scope >= 0 and nodes[scope] != sum(nodes):
-        return False, "scope-isolation-violated"
-    # purity 全 scope 检查：隔离用的单区域同样可能跨高字段（生产选址
-    # 反例：基址不对齐时 ~25% 跨界），折叠类判别依赖区域 hi 恒定——
-    # impure 一律命名降级（RV2-02-3）。
-    if realized.get("set_region_vpn_hi_pure") != 1:
-        return False, "vpn-hi-impure"
-    return True, "ok"
+    return geometry_gate(record)
 
 
 # 双假设预测表（评审 RV2-02-1 修正）：行 = 收集假设 C，列 = 被检验的
@@ -89,67 +68,57 @@ def predicted_hw_sets(collection_h: int, target: int, model_h: int,
 
 def classify_onset(median_by_window: dict[int, float],
                    on_threshold: float | None = None) -> dict[str, Any]:
-    """量化 onset 分类（任务书 §5.5 操作定义）。
+    """量化 onset：左右删失、非单调区间和未按 on 过滤的平台中位。
 
-    输入：每 case 10 进程 per-round 均值的中位 m(W)。
-    锐：存在 floor→on 过渡宽度 ≤2 档且其后平台 ≥ 峰值 80%；
-    退化：全程 <on 或宽度 >4 档或平台缺失；非单调 → onset 区间。
+    平台取首次越线之后、首次连续两点低于 floor 之前的全部点；至少
+    两点。过滤低于 on 的平台值会产生选择偏差（R4/P2 软件收口）。
     """
+    import math
+    import statistics
     if not median_by_window:
         raise TlbError("a1: empty onset curve")
     on = on_threshold if on_threshold is not None else ONSET_ON_PER_ROUND
+    if type(on) not in (int, float) or not math.isfinite(on) or on <= ONSET_FLOOR_PER_ROUND:
+        raise TlbError("a1: invalid finite on threshold")
+    if any(type(w) is not int or w < 0 or type(v) not in (int, float)
+           or not math.isfinite(v) for w, v in median_by_window.items()):
+        raise TlbError("a1: onset curve needs integer windows and finite values")
     windows = sorted(median_by_window)
-    values = {w: median_by_window[w] for w in windows}
-    if all(v < on for v in values.values()):
+    values = median_by_window
+    if all(values[w] < on for w in windows):
         return {"kind": "degraded", "onset": None,
                 "reason": "never-reaches-on-threshold"}
-    on_windows = [w for w in windows if values[w] >= on]
-    w_star = on_windows[0]
-    peak = max(values.values())
-    # 右删失（RV2-02-2）：末点越线或越线后不足两个平台点 → 不能判锐
-    # 左删失（R4）：w_star 左侧未观察到 <floor 的点 → onset 下界不可观测
-    has_low_side = any(values[w] < ONSET_FLOOR_PER_ROUND and w < w_star
-                       for w in windows)
-    if not has_low_side:
+    star = next(i for i, w in enumerate(windows) if values[w] >= on)
+    w_star = windows[star]
+    low = [i for i in range(star) if values[windows[i]] < ONSET_FLOOR_PER_ROUND]
+    if not low:
         return {"kind": "left-censored", "onset": (None, w_star),
                 "reason": "no below-floor observation on low side"}
-    post = [w for w in windows if w > w_star]
-    plateau_vals = [values[w] for w in post if values[w] >= on]
-    if not post or len(plateau_vals) < 2:
+    drop = next((i for i in range(star + 1, len(windows) - 1)
+                 if values[windows[i]] < ONSET_FLOOR_PER_ROUND
+                 and values[windows[i + 1]] < ONSET_FLOOR_PER_ROUND), None)
+    end = drop if drop is not None else len(windows)
+    plateau = [values[w] for w in windows[star + 1:end]]
+    if len(plateau) < 2:
+        if drop is not None:
+            return {"kind": "interval", "onset": (w_star, windows[drop]),
+                    "reason": "nonmonotonic drop before platform was established"}
         return {"kind": "right-censored", "onset": (w_star, None),
                 "reason": "onset at or near last window; platform unobserved"}
-    # 平台强度（RV2-02-2 修正：旧条件 ON×0.8 恒不成立）。平台中位必须
-    # ≥ max(地板, 峰值×平台比)——平台仅为峰值 37.5% 的曲线必须退化。
-    import statistics
-    platform_med = statistics.median(plateau_vals)
+    peak = max(values[w] for w in windows[:end])
+    platform_med = statistics.median(plateau)
     if platform_med < max(ONSET_FLOOR_PER_ROUND, peak * PLATFORM_MIN_RATIO):
         return {"kind": "degraded", "onset": None,
-                "reason": f"weak platform {platform_med:.2f} "
-                          f"(peak {peak:.2f})"}
-    # 过渡宽度：从首个 <floor 的 W 到 w_star 的档数（不含端点）
-    low = [w for w in windows if values[w] < ONSET_FLOOR_PER_ROUND and w < w_star]
-    transition = 0
-    if low:
-        prev = low[-1]
-        idx_prev, idx_star = windows.index(prev), windows.index(w_star)
-        transition = idx_star - idx_prev - 1
+                "reason": f"weak platform {platform_med:.2f} (peak {peak:.2f})"}
+    transition = star - low[-1] - 1
+    kind = "sharp" if transition <= SHARP_MAX_TRANSITION_STEPS else "degraded"
     if transition > DEGRADED_TRANSITION_STEPS:
         return {"kind": "degraded", "onset": None,
                 "reason": f"transition {transition} steps too wide"}
-    kind = "sharp" if transition <= SHARP_MAX_TRANSITION_STEPS else "degraded"
-    # 非单调 → onset 区间（首个 on 到其后连续两点 <floor 的 W）
-    onset_lo, onset_hi = w_star, w_star
-    if kind == "sharp":
-        for i, w in enumerate(windows):
-            if w <= w_star or values[w] >= ONSET_FLOOR_PER_ROUND:
-                continue
-            nxt = windows[i + 1] if i + 1 < len(windows) else None
-            if nxt is not None and values[nxt] < ONSET_FLOOR_PER_ROUND:
-                onset_hi = w
-                break
-        if onset_hi != onset_lo:
-            kind = "interval"
-    return {"kind": kind, "onset": (onset_lo, onset_hi) if onset_hi != onset_lo else w_star,
+    if kind == "sharp" and drop is not None:
+        kind = "interval"
+    return {"kind": kind,
+            "onset": (w_star, windows[drop]) if kind == "interval" else w_star,
             "transition_steps": transition, "platform_median": platform_med}
 
 
@@ -260,116 +229,88 @@ def freeze_thresholds(floor_samples: list[float],
 def _synthetic_suite_validates(on: float) -> bool:
     """合成曲线形态验证：用候选 on 阈值，分类器必须正确标记四种
     已知形态（锐 / 退化-不起 / 退化-弱平台 / 右删失）。"""
-    saved = globals()["ONSET_ON_PER_ROUND"]
-    try:
-        globals()["ONSET_ON_PER_ROUND"] = on
-        sharp = classify_onset({6: 0.2, 8: 4.0, 10: 6.5, 12: 7.0})
-        never = classify_onset({6: 0.1, 8: 0.2, 10: 0.1, 12: 0.2})
-        weak = classify_onset({6: 0.2, 8: 8.0, 10: 3.0, 12: 3.0})
-        cens = classify_onset({6: 0.2, 8: 0.3, 12: 4.0})
-    finally:
-        globals()["ONSET_ON_PER_ROUND"] = saved
+    sharp = classify_onset({6: 0.2, 8: 4.0, 10: 6.5, 12: 7.0}, on_threshold=on)
+    never = classify_onset({6: 0.1, 8: 0.2, 10: 0.1, 12: 0.2}, on_threshold=on)
+    weak = classify_onset({6: 0.2, 8: 8.0, 10: 3.0, 12: 3.0}, on_threshold=on)
+    cens = classify_onset({6: 0.2, 8: 0.3, 12: 4.0}, on_threshold=on)
     return (sharp["kind"] == "sharp" and never["kind"] == "degraded"
             and weak["kind"] == "degraded" and cens["kind"] == "right-censored")
 
 
-def _layer_of(rec: dict) -> str:
-    exp = str(rec.get("experiment_id", ""))
-    for tag, layer in (("a1-l3", "l3"), ("a1-l2", "l2"), ("a1-l1", "l1")):
-        if tag in exp:
-            return layer
-    raise TlbError(f"a1: unknown layer from experiment_id {exp!r}")
-
-
-def run_a1_adjudication(records: list[dict],
-                        frozen: dict,
+def run_a1_adjudication(records: list[dict], frozen: dict,
                         expected_l3_targets: tuple = (7, 42, 100, 200),
                         expected_l3_windows: tuple = (8, 12)) -> dict[str, Any]:
-    """records → 硬门 → L1(主判定) / L2(复现) / L3(target) → H*。
+    """正式 plan → 完整记录合同 → L1/L2/L3 → H*；拒绝未知/缺失/重复。
 
-    归层 = record.experiment_id（生产配置三实验各带 a1-l1/l2/l3 标签；
-    不再用 set_target 存在性推断——生产记录全部带 set_target 默认键）。
-    L2 复现判据 = onset 相等（|ΔW*|≤1），不比较平台中位等噪声项。
-    L3 通过 = target 恰为 {7,42,100,200}、各 W 恰为 {8,12}，四 target
-    的两点形态一致且非 both-below（R8/R9）。两点不提供 onset 定位；
-    onset 正证据由 L1/L2 四点曲线承担，不能以一致的退化曲线替代。
+    层角色绑定 experiment_id 和完整条件，不根据默认键或 seed 排序猜测。
+    每个进程的实际高字段独立计算 C×M 预测，结果附 case_audit；域内 VA
+    重分配允许变化，混域/跨界/不完整统计仍拒绝。R3-C/R5-C 收口。
     """
-    if not frozen.get("frozen"):
-        raise TlbError(f"a1: thresholds not frozen: {frozen.get('stop')}")
+    if not isinstance(frozen, dict) or frozen.get("frozen") is not True:
+        raise TlbError(f"a1: thresholds not frozen: {frozen}")
+    if expected_l3_targets != (7, 42, 100, 200) or expected_l3_windows != (8, 12):
+        raise TlbError("a1: registered formal coverage cannot be overridden")
     on = frozen["on_threshold"]
-    l1: dict[tuple[int, int], dict[int, dict[int, float]]] = {}
-    l3: dict[tuple[int, int], dict[int, float]] = {}
-    vpn_hi: list[int] = []
-    n = 0
-    for rec in records:
-        ok, why = gate_record(rec)
-        if not ok:
-            raise TlbError(f"a1: record gate rejected ({why})")
-        n += 1
-        p = rec["params"]
-        h = int(p["set_hypothesis"]); scope = int(p.get("set_region_scope", -1))
-        target = int(p.get("set_target", 7)); window = int(p["set_window"])
-        l2r = next((m for m in rec["metrics"]
-                    if m["name"] == "pmu.l2d_tlb_refill.count"), None)
-        if l2r is None:
-            raise TlbError("a1: record missing l2d_tlb_refill")
-        layer = _layer_of(rec)
-        if layer in ("l1", "l2"):
-            seed = int(p.get("seed", 42))
-            l1.setdefault((h, seed), {}).setdefault(scope, {})[window] = float(l2r["value"])
-        else:
-            l3.setdefault((h, target), {})[window] = float(l2r["value"])
-        r = rec.get("probe", {}).get("realized", {})
-        if r.get("set_region_vpn_hi"):
-            vpn_hi = [int(v) for v in r["set_region_vpn_hi"]]
-    per_h: dict[int, dict[str, Any]] = {}
-    for h in sorted({k[0] for k in list(l1) + list(l3)}):
-        seeds = sorted({sd for (hh, sd) in l1 if hh == h})
-        if len(seeds) < 2:
-            raise TlbError(f"a1: L1/L2 needs 2 seeds, got {seeds}")
-        vm = adjudicate_h(l1[(h, seeds[0])], vpn_hi, hypothesis=h, on_threshold=on)
-        vr = adjudicate_h(l1[(h, seeds[1])], vpn_hi, hypothesis=h, on_threshold=on)
-        def _w(cls):
-            o = cls["onset"]
-            return o[0] if isinstance(o, tuple) else o
-        w_m = _w(vm["classes"][-1]) if -1 in vm["classes"] else None
-        w_r = _w(vr["classes"][-1]) if -1 in vr["classes"] else None
+    bound = bind_formal_records(records)
+    curves, high_fields, audit = {}, {}, []
+    for case, record, metrics in bound:
+        p = case.params
+        h, target, scope, window = (p[k] for k in
+            ("set_hypothesis", "set_target", "set_region_scope", "set_window"))
+        key = case.layer, h, target
+        curves.setdefault(key, {}).setdefault(scope, {})[window] = metrics["pmu.l2d_tlb_refill.count"]["value"]
+        realized = record["probe"]["realized"]
+        by_sample = ({s["sample_index"]: s["realized"] for s in realized["samples"]}
+                     if "samples" in realized else None)
+        obs = sorted(metrics["pmu.l2d_tlb_refill.count"]["observations"], key=lambda o: o["sample_index"])
+        processes = []
+        for observation in obs:
+            index = observation["sample_index"]
+            r = by_sample[index] if by_sample is not None else realized
+            nodes = r["set_target_region_nodes"]
+            hi = sorted({r["set_region_vpn_hi"][i] for i, n in enumerate(nodes) if n})
+            high_fields.setdefault(key, set()).update(hi)
+            predictions = {model: predicted_hw_sets(h, target, model, hi) for model in (1, 2, 3, 4)}
+            processes.append({"sample_index": index, "raw_sample_ref": observation["raw_sample_ref"],
+                "vpn_hi": hi, "region_vpn_hi": r["set_region_vpn_hi"], "nodes": nodes,
+                "predicted_by_model": {model: sorted(v) if v is not None else None
+                                       for model, v in predictions.items()}})
+        audit.append({"case_id": case.case_id, "layer": case.layer,
+            "experiment_id": case.experiment_id, "params": p,
+            "record_run_id": record["run_id"], "processes": processes})
+    per_h = {}
+    for h in (1, 2, 3, 4):
+        main_key, repro_key = ("l1", h, 7), ("l2", h, 7)
+        vm = adjudicate_h(curves[main_key], sorted(high_fields[main_key]), h, on_threshold=on)
+        vr = adjudicate_h(curves[repro_key], sorted(high_fields[repro_key]), h, on_threshold=on)
+        wm, wr = vm["classes"][-1]["onset"], vr["classes"][-1]["onset"]
+        # R6-C 关闭维持：比较 verdict 和全域 onset，不比较平台振幅噪声。
         reproducible = (vm["verdict"] == vr["verdict"]
-                        and w_m is not None and w_r is not None
-                        and abs(w_m - w_r) <= 1)
-        l3_curves = {t: c for (hh, t), c in sorted(l3.items()) if hh == h}
-        if sorted(l3_curves) != sorted(expected_l3_targets):
-            raise TlbError(
-                f"a1: L3 exact coverage violation: got "
-                f"{sorted(l3_curves)} != expected {sorted(expected_l3_targets)}")
-        for c in l3_curves.values():
-            if tuple(sorted(c)) != tuple(sorted(expected_l3_windows)):
-                raise TlbError(
-                    f"a1: L3 window grid violation: got {sorted(c)} != "
-                    f"expected {sorted(expected_l3_windows)}")
-        # L3 两点比较规则（预注册）：配置仅 W={8,12}，用低点 < on、
-        # 高点 ≥ on 的方向+越线检查替代完整 onset 分类（后者需 ≥4 点）。
-        l3_shapes = {classify_l3_two_point(c, on) for c in l3_curves.values()}
-        l3_pass = (len(l3_shapes) == 1 and "both-below" not in l3_shapes)
+                        and type(wm) in (int, float) and type(wr) in (int, float)
+                        and abs(wm - wr) <= 1)
+        shapes = {target: classify_l3_two_point(curves[("l3", h, target)][-1], on)
+                  for target in (7, 42, 100, 200)}
+        l3_pass = len(set(shapes.values())) == 1 and set(shapes.values()) <= {"crossing", "both-above"}
         per_h[h] = {"verdict": vm["verdict"], "reproducible": reproducible,
-                    "l3_pass": l3_pass,
-                    "classes": vm["classes"],
-                    "predicted_hw_sets": vm["predicted_hw_sets"]}
-    supported = [h for h, r in per_h.items()
-                 if r["verdict"] == "supported" and r["reproducible"]
-                 and r["l3_pass"]]
-    return {"per_hypothesis": per_h, "on_threshold": on, "n_records": n,
-            "h_star": supported[0] if len(supported) == 1 else None,
-            "h_star_status": "unique" if len(supported) == 1 else "multiple-or-none"}
+            "l3_pass": l3_pass, "l3_shapes": shapes, "classes": vm["classes"],
+            "repro_classes": vr["classes"], "predicted_hw_sets": vm["predicted_hw_sets"]}
+    supported = [h for h, r in per_h.items() if r["verdict"] == "supported"
+                 and r["reproducible"] and r["l3_pass"]]
+    return {"per_hypothesis": per_h, "on_threshold": on, "n_records": len(bound),
+        "h_star": supported[0] if len(supported) == 1 else None,
+        "supported_hypotheses": supported,
+        "h_star_status": "unique" if len(supported) == 1 else
+            "equivalent-on-test-domain" if supported else "none-supported",
+        "case_audit": audit}
 
 
 def classify_l3_two_point(curve: dict[int, float], on: float) -> str:
     """L3 两点形态分类（任务书 v1.8.2 预注册，R8 修订）：两点网格不能做
     onset 定位，L3 的证据形态 = 四 target **相互一致**且非全低于阈值。
-    返回 "both-below" / "crossing" / "both-above"。"""
+    返回 both-below/crossing/both-above/falling；falling 有独立拒绝标签。"""
     if len(curve) != 2:
         raise TlbError(f"a1: L3 two-point rule needs exactly 2 windows, "
                        f"got {sorted(curve)}")
     ws = sorted(curve)
     lo, hi = curve[ws[0]] >= on, curve[ws[1]] >= on
-    return "both-above" if (lo and hi) else ("crossing" if hi else "both-below")
+    return "both-above" if (lo and hi) else "crossing" if hi else "falling" if lo else "both-below"

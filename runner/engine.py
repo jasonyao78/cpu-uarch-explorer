@@ -396,8 +396,8 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
         else:
             # PA-02/RPA-03：realized descriptor 随结构化记录持久化（requested=
             # params 已入档；realized=探针自描述激励审计，schema 登记扩展）。
-            # 逐样本闭环：全部一致 → 公共值；不一致 → 逐样本列表 + 混域
-            # 命名状态（数据不丢，A1 判据入口据此拒绝，不静默采纳首样本）。
+            # 逐样本闭环：全部一致 → 公共值；不一致 → 公共字段 + 逐样本列表。
+            # 域变化命名拒绝，域内 VA 变化逐进程审计，不静默采纳首样本。
             probe_block = dict(probe_meta)
             if realized_per_sample:
                 canonical = [
@@ -406,8 +406,19 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
                 if len(set(canonical)) <= 1:
                     probe_block["realized"] = realized_per_sample[0][2]
                 else:
+                    # R3-C/R5-C：ASLR/重分配改变实际 VA 不是混域。保留所有
+                    # realized，由消费者逐进程核 purity/配额；domain_consistent
+                    # 只描述相同请求下的域，不能以整字典相等代替域判定。
+                    descriptors = [r for _, _, r in realized_per_sample]
+                    domain_keys = ("mode", "set_domain", "page_kb", "set_regions",
+                                   "set_region_scope", "set_nsets")
+                    domains = {json.dumps({k: r.get(k) for k in domain_keys},
+                                          sort_keys=True) for r in descriptors}
+                    common = {k: v for k, v in descriptors[0].items()
+                              if all(k in d and json.dumps(d[k], sort_keys=True) ==
+                                     json.dumps(v, sort_keys=True) for d in descriptors)}
                     probe_block["realized"] = {
-                        "domain_consistent": False,
+                        **common, "domain_consistent": len(domains) == 1,
                         "samples": [
                             {"sample_index": si, "raw_sample_ref": ref,
                              "realized": r}

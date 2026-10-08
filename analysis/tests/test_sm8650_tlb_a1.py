@@ -9,15 +9,18 @@ from analysis.sm8650_tlb_a1 import (adjudicate_h, check_l3_consistency,
 
 
 def _record(scope=-1, regions=4, nodes=None, pure=1, consistent=None):
-    realized = {
-        "set_target_region_nodes": nodes if nodes is not None else (
-            [3, 3, 3, 3] if scope < 0 else [12, 0, 0, 0]),
-        "set_region_vpn_hi_pure": pure,
-    }
+    # 仅供几何纯函数测试；不作为正式 producer 证据。
+    params = {"set_hypothesis": 1, "set_target": 7, "set_window": 12,
+        "set_rounds": 20, "set_pool_pages": 65536, "set_filler_pages": 512,
+        "set_regions": regions, "set_region_scope": scope, "set_nsets": 0, "seed": 42}
+    counts = nodes if nodes is not None else ([3] * regions if scope < 0 else [12] + [0] * (regions - 1))
+    realized = {**params, "mode": "tlbset", "page_kb": "4", "scatter": 0,
+        "set_domain": "multi-region", "set_target_region_nodes": counts,
+        "set_active_regions": sum(n > 0 for n in counts),
+        "set_region_vpn_hi": list(range(5, 5 + regions)), "set_region_vpn_hi_pure": pure}
     if consistent is not None:
         realized["domain_consistent"] = consistent
-    return {"params": {"set_region_scope": scope, "set_regions": regions},
-            "probe": {"realized": realized}}
+    return {"params": params, "probe": {"realized": realized}}
 
 
 class TestGate(unittest.TestCase):
@@ -168,83 +171,6 @@ class TestRound4(unittest.TestCase):
             run_a1_adjudication([], {"frozen": False, "stop": "floor-noisy"})
 
 
-def _chain_record(h, scope, seed, target, window, value, exp="x-a1-l1"):
-    # 生产形态：records 全带 set_target 默认键，归层靠 experiment_id
-    params = {"set_hypothesis": h, "set_region_scope": scope, "seed": seed,
-              "set_target": target,
-              "set_window": window, "set_regions": 4}
-    return {"experiment_id": exp, "params": params,
-            "probe": {"realized": {
-                "set_target_region_nodes": (
-                    [3, 3, 3, 3] if scope < 0
-                    else [0] * scope + [12] + [0] * (3 - scope)),
-                "set_region_vpn_hi_pure": 1}},
-            "metrics": [{"name": "pmu.l2d_tlb_refill.count", "value": value}]}
-
-
-class TestFullChain(unittest.TestCase):
-    FROZEN = {"frozen": True, "on_threshold": 2.0}
-
-    def _l1_l2(self):
-        recs = []
-        for seed, exp in ((42, "x-a1-l1-main"), (1337, "x-a1-l2-repro")):
-            for scope in (-1, 0, 1):
-                for w, v in ((6, 0.2), (8, 2.5), (10, 6.5), (12, 7.0)):
-                    recs.append(_chain_record(1, scope, seed, 7, w, v, exp=exp))
-        return recs
-
-    def _l3(self, h=1):
-        # 生产网格 W={8,12} 两点
-        return [_chain_record(h, -1, 42, t, w, v, exp="x-a1-l3-target")
-                for t in (7, 42, 100, 200)
-                for w, v in ((8, 4.0), (12, 6.5))]
-
-    def test_permutation_invariance(self):
-        import random
-        a = run_a1_adjudication(self._l1_l2() + self._l3(), self.FROZEN)
-        recs = self._l1_l2() + self._l3()
-        random.seed(7); random.shuffle(recs)
-        b = run_a1_adjudication(recs, self.FROZEN)
-        self.assertEqual(a, b)
-        self.assertEqual(a["per_hypothesis"][1]["verdict"], "supported")
-
-    def test_frozen_threshold_propagates(self):
-        # on=2.0 贯穿：8 档 4.0 在 on=2.0 下判 on、on=3.0 下不判 → 曲线形态随冻结值变
-        recs = self._l1_l2() + self._l3()
-        r2 = run_a1_adjudication(recs, {"frozen": True, "on_threshold": 2.0})
-        r3 = run_a1_adjudication(recs, {"frozen": True, "on_threshold": 3.0})
-        self.assertEqual(r2["on_threshold"], 2.0)
-        self.assertNotEqual(
-            r2["per_hypothesis"][1]["classes"],
-            r3["per_hypothesis"][1]["classes"])
-
-    def test_missing_seed_layer_rejected(self):
-        recs = [r for r in self._l1_l2() + self._l3() if r["params"]["seed"] == 42]
-        with self.assertRaisesRegex(TlbError, "2 seeds"):
-            run_a1_adjudication(recs, self.FROZEN)
-
-    def test_missing_l3_rejected(self):
-        with self.assertRaisesRegex(TlbError, "exact coverage"):
-            run_a1_adjudication(self._l1_l2(), self.FROZEN)
-
-    def test_l3_uniform_suspect_not_passed(self):
-        # 四 target 全退化 → l3_pass=False → 无 H*
-        bad_l3 = [_chain_record(1, -1, 42, t, w, 0.3, exp="x-a1-l3-target")
-                  for t in (7, 42, 100, 200)
-                  for w in (8, 12)]
-        r = run_a1_adjudication(self._l1_l2() + bad_l3, self.FROZEN)
-        self.assertIsNone(r["h_star"])
-
-    def test_l2_onset_match_ignores_platform_noise(self):
-        # 平台中位微差（6.75 vs 6.85）不影响复现判定（onset 比较）
-        recs = self._l1_l2() + self._l3()
-        for r in recs:
-            if r["experiment_id"].endswith("l2-repro") and r["params"]["set_window"] == 12:
-                r["metrics"][0]["value"] = 7.2
-        out = run_a1_adjudication(recs, self.FROZEN)
-        self.assertTrue(out["per_hypothesis"][1]["reproducible"])
-
-
 class TestProductionChain(unittest.TestCase):
     """Real checked-in plans → run_plan/adapter → disk → load_run → A1.
 
@@ -330,28 +256,6 @@ class TestProductionChain(unittest.TestCase):
             records = self._build(tmp, ("set_window", {8: 100, 12: 200}))
         with self.assertRaisesRegex(TlbError, "window grid"):
             run_a1_adjudication(records, freeze_thresholds([0.0, 0.2, 0.0], 0.0))
-
-
-class TestR9(unittest.TestCase):
-    def test_l3_exact_target_and_window_guards(self):
-        recs = TestFullChain()._l1_l2() + TestFullChain()._l3()
-        # target 201 冒充 200 → 拒
-        bad = [r for r in recs if not (r["params"].get("set_target") == 200
-                                       and "l3" in r["experiment_id"])]
-        bad.append(_chain_record(1, -1, 42, 201, 8, 4.0, exp="x-a1-l3-target"))
-        bad.append(_chain_record(1, -1, 42, 201, 12, 6.5, exp="x-a1-l3-target"))
-        with self.assertRaisesRegex(TlbError, "exact coverage"):
-            run_a1_adjudication(bad, {"frozen": True, "on_threshold": 3.0})
-
-    def test_l3_window_grid_guard(self):
-        recs = [r for r in (TestFullChain()._l1_l2() + TestFullChain()._l3())
-                if "l3" not in r["experiment_id"]]
-        for t in (7, 42, 100, 200):
-            recs.append(_chain_record(1, -1, 42, t, 100, 4.0, exp="x-a1-l3-target"))
-            recs.append(_chain_record(1, -1, 42, t, 200, 6.5, exp="x-a1-l3-target"))
-        with self.assertRaisesRegex(TlbError, "window grid"):
-            run_a1_adjudication(recs, {"frozen": True, "on_threshold": 3.0})
-
 
 
 if __name__ == "__main__":

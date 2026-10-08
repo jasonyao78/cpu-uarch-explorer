@@ -53,6 +53,19 @@ class TestEngineExperimentIdentity(unittest.TestCase):
             self.assertEqual(record["failure"]["reason"], "parse-error")
             self.assertEqual(record.get("experiment_id"), plan.experiment_id)
 
+    def test_valid_va_reallocation_is_not_a_mixed_domain(self):
+        def varying_va(case, sample, stdout):
+            return stdout.replace("set_region_vpn_hi=5,6,7,8",
+                "set_region_vpn_hi=" + ",".join(str(x + sample) for x in (5, 6, 7, 8)))
+        _, summary, records = self._run(varying_va)
+        self.assertEqual(summary["ok"], 32)
+        for record in records:
+            realized = record["probe"]["realized"]
+            self.assertTrue(realized["domain_consistent"])
+            self.assertEqual(len(realized["samples"]), 10)
+            self.assertNotEqual(realized["samples"][0]["realized"]["set_region_vpn_hi"],
+                                realized["samples"][-1]["realized"]["set_region_vpn_hi"])
+
     def test_missing_requested_event_cannot_be_a_success_fixture(self):
         def without_cycles(case, sample, stdout):
             return " ".join(t for t in stdout.split() if not t.startswith("pmu_cycles_"))

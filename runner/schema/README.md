@@ -33,6 +33,13 @@
 | `record.metric_contract` / `group.identity` 语义 | 契约 | MB-06：分析器分组键采用类型规范身份——bool True 与 int 1 不可合并，任何 params 差异（类型规范残差）阻止合并；报告面 identity 字典保持 legacy 原值（旧重放逐字一致） | 2026-10-07 |
 | `generator` | object | 致密配置生成器审计块（input_run_sha256/rules_sha256/output_sha256 三锚定 + dense_points 来源标注 + quota 核算）；仅由 `analysis/tlb_dense_gen.py` 产出，非手写 | 2026-09-29 |
 
+### A1 最终消费与逐进程 realized 合同（2026-10-08）
+
+- `record.probe.realized` 完整保存 tlb_set 整数 descriptor（含 `set_pool_pages` / `set_filler_pages` / `scatter`）。adapter 验证输出，A1 consumer 再按正式 plan 验证完整请求身份与实际几何，不依赖首样本标签。
+- 若各进程 realized 不同，`record.probe.realized.samples[]` 保存 `{sample_index, raw_sample_ref, realized}` 并保留公共字段；`domain_consistent` 只表示 mode/domain/page/region/scope/nsets 一致。域内 VA 重分配不等于混域；每个进程的 purity/配额/实际高字段分别核验，任一不合格即命名拒绝。
+- 正式 consumer 只接受登记的完整 128-case 计划，各 case 恰一条成功记录、plan 指定的 10 observations。重复 record 拒绝；不隐式合并，不按最后一条覆盖。每 metric 的有限值/单位/中位、sample indices/raw 引用及事件/窗口有效轮守恒均校验。
+- 以上为新增 A1 入口合同；旧通用分析器、历史 records 与 schema required 不变。扩展保持 `additionalProperties=true`。
+
 ### 已登记的 run-record 扩展字段
 
 | 字段 | 类型 | 用途 | 登记日期 |
