@@ -4,6 +4,8 @@
 
 ## OI-12 ROB 微架构深度分析项目（2026-09-30 登记，第二个部件探测项目）
 
+- **2026-10-09 当前裁定**：ROB软件研究可与TLB并行，设备采样串行；骨架仍不通过采数资格。既有R1–R3未修，新增协议/输入/锚点与判据项见本文件 `OI-ROB-PROBE-20261009`，审查路径 `docs/reviews/2026-10-09-rob-probe-critical-reuse.md`。
+
 - **交付物（v0.1 已入库）**：`docs/cpu-uarch-deep-analysis/rob-deep-analysis/`——报告 v0.1（采数前版本：估计量定义/混淆清单/判据预注册 J1–J8/协议三要素）、探针骨架 `probes/rob_window_probe.c`（mini-JIT，7 类别 × 2 锚点，本机编译冒烟 + 生成码 capstone 核验通过）、probes README；方法迁移矩阵相应升级 v0.3。
 - **与 TLB 项目最大差异**：ROB 无 TRM 真值（已全文核验 TRM+优化指南零披露），走"估计量优先 + 第三方候选区间 + 交叉约束"（矩阵 C1 ✏️ 档）。
 - **不做工程对接**（项目边界，2026-09-29 拍板）：不挂 runner/analysis/probes-CMake；采数数据按 B3 逐轮落盘但不进 runner 数据模型；数据分层/quarantine 纪律仍适用。
@@ -369,3 +371,19 @@
 
 - **首轮真实探索完成（2026-10-09）**：两target/反序，50进程/950有效轮；A/B高、C低支持H1型初步行为，不是正式H*。结果及全部尝试登记 `docs/reviews/2026-10-09-sm8650-bit-axes-exploration-results.md`。
 - **下一研究项 / 当前探针与分析负责人 / 触发 = ways或完整TLB映射结论前**：核对0x2d的I/D来源及0x05超旧协议带的窗口背景；用数据walk事件和匹配对照检验，再安排局部W与确认设计。没有将探索结果晋升baseline，原正式合同保留。
+
+
+## OI-TLB-LOCAL-20261009 反证后局部转折的识别边界
+
+- **已完成**：185进程/3515有效轮，原始SHA/重新解析/请求-realized/环境核验通过；数据walk支持集中/分散区别，探索中位响应跨W8→W9。证据：`docs/reviews/2026-10-09-sm8650-tlb-falsification-results.md`，全量派生观测：`docs/reviews/evidence/2026-10-09-tlb-falsification/summary.json`。
+- **未关闭，归属TLB局部容量**：W8存在8.0 walks/轮样本，选址bucket随W变化且各进程映射新建；精确ways不能命名。下一次局部稳健性实验前，设计固定最大地址集的嵌套W、W8/9 filler压力/seed/页内offset对照及实际filler地址摘要；只加有区分力的最小参数，requested/realized/adapter/schema同步，禁止先扩正式大矩阵。
+- **未关闭，归属PMU/I侧**：ITLB_WALK的专门正控与实现语义资格尚未认证；触发=未来BTB/指令TLB实验把零值当机制证据前。当前数据来源判断依据0x2d/0x34/0x35同窗相干与配对差异，未声称ITLB完全不发生。
+- **待决策，归属r2确认设计**：原48/48/32、旧frozen、14条旧L1观察数据不拼接；触发=局部机制控制完成后决定继续旧合同或另冻结精简确认设计。本轮不变更正式门禁，也不将科学问题开放作为m0b永续开发理由。
+
+## OI-ROB-PROBE-20261009 ROB批判性吸收后的软件前置
+
+- **归属**：OI-12 ROB项目；审查与最小路线 `docs/reviews/2026-10-09-rob-probe-critical-reuse.md`。软件设计可并行，手机采样必须串行。
+- **P1未修 / 任何ROB容量采数前**：既有R1回跳多除4、R2 GROUP读布局/事件身份、R3未初始化锚点与FP filler覆盖；新增对称双链与串行负控、输入范围/事件数组/失败路径、实际缺失与独占line/page足迹验证。当前compile/--write-asm成功仅软件证据，不能进入ROB容量结论。
+- **P1判据 / 下版采数前冻结**：改正固定ROB−8、D→2D却要求差≥1.5D、taken分支必flush、NOP不发射等同不占窗口、窗口差值当PRF容量等错误；审计NOP融合、真实循环对齐/代码大小、operand/FPCR/连续sqrt稳定值与类别寄存器交集。首量命名W_class，384只作第三方候选。
+- **来源核验 / 使用计数比前**：指定TRM r0p3/Issue06与Arm事件JSON对0x1b描述不同；旧arm-docs/x4trm.txt为r0p2/Issue05。按目标r0p1实测0x1b、0x3a、0x3b口径与并发组可用性，不把执行/退休比直接当ROB分配因子。
+- **后置 / 首条可信曲线后**：ADD/FADD/混合类别、跨锚点、PRF/LSQ/前端专项归因及runner正式对接范围；先保留独立原型并复用已验证证据能力，不先扩框架。BTBSize_Probe_H2可作后续分支/前端参考，必须排除I-cache/iTLB和分支吞吐，归属BTB项目，触发=该项目立项。

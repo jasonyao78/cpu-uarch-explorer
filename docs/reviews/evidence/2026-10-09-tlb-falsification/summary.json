@@ -1,0 +1,6087 @@
+{
+  "schema": "exploratory-derived-summary-v1",
+  "purpose": "falsification and effective local transition; no formal H* or physical ways",
+  "target": "redmi-k70pro-01",
+  "profile": "exploration-stock-walt-v1",
+  "page_kb": 4,
+  "rounds_per_process": 20,
+  "valid_rounds_per_process": 19,
+  "repetitions_per_condition": 5,
+  "epochs": [
+    {
+      "directory": "data/private/20261008T165359Z-sm8650-tlb-controls",
+      "manifest_sha256": "31d1d9748720eb68af85439aaa148ff19b5e6818cd471d1d71d10778baa39e36",
+      "created_utc": "20261008T165359Z",
+      "binary_sha256": "54d105930b8743e7a3a69c31d7e640cdec1044a0276a5f040efff4b1dc82398c",
+      "source_head": "155602756cd1df9ff1853d9dc0fab8da0b1a7990",
+      "driver_sha256": "4001f8e640009c880f037fff7c7169efe0f336ac4f5c0761e357dc83d5b23dfe",
+      "conditions": [
+        {
+          "label": "floor-k4",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 0
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              52.0,
+              49.0,
+              52.0,
+              49.0,
+              44.0
+            ],
+            "pmu.cycles.count": [
+              356.6,
+              376.6,
+              364.4,
+              372.3,
+              365.7
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              2.0,
+              2.0,
+              2.0,
+              2.0,
+              7.9
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.1,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              2.0,
+              2.0,
+              2.0,
+              2.0,
+              2.1
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.1,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "d96f8eb9a3663bdf619f94a82aed0d74e1e28e6d8a07c174bc6be6ad433a22b3",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 1,
+              "sha256": "eaf8e29d4d064809a74f156be0560f2872498f5522fb45eacfa4c9771a8a9262",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 2,
+              "sha256": "620d442574a0a7d938da0379c7794ef663509569445599bfd3d0aeab470a3987",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 3,
+              "sha256": "f489250e37e4f127e907cf5b2661b55bd7e2e27c1e2ab1b994f2e3305ad744e4",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 4,
+              "sha256": "2c16b47593a10ce1d3aba3bfcf82b65a293e3588838e9b9ad09f17744dd02f74",
+              "size_bytes": 889
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 38.4,
+          "temperature_after_c": 39.2,
+          "wall_seconds": 4.103446583729237,
+          "input_spec_sha256": "d5da80a079647806e0950a4cad9c2b8ed265df6f86b44757f6cfb0f24ba13a87"
+        },
+        {
+          "label": "a512",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              151.0,
+              164.0,
+              145.0,
+              186.0,
+              140.0
+            ],
+            "pmu.cycles.count": [
+              657.7,
+              711.9,
+              674.2,
+              741.5,
+              602.8
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              18.5,
+              17.2,
+              16.9,
+              17.2,
+              14.8
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              7.7,
+              10.5,
+              8.6,
+              9.4,
+              5.8
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              14.5,
+              14.4,
+              14.3,
+              14.6,
+              14.3
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              7.7,
+              10.5,
+              8.6,
+              9.4,
+              5.8
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "f483b67a5bbb397d6ec8138595889f498f85afb3830a1a0491de27c21c610b2f",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 1,
+              "sha256": "361ab1f01695dd61ca0be159cb69a32f8a18175a5324feea85d5c758903e3cfc",
+              "size_bytes": 901
+            },
+            {
+              "sample_index": 2,
+              "sha256": "f2556cdfd6b82ee34f4ea1719292b069127226308280552e278d07954d879f81",
+              "size_bytes": 899
+            },
+            {
+              "sample_index": 3,
+              "sha256": "2b8e7cce44e2de65bb072d9f5bf1b26ce0aea1110cfd7596aeed0b4acb917f5a",
+              "size_bytes": 899
+            },
+            {
+              "sample_index": 4,
+              "sha256": "eafdac320b504e306ee2c76c9569e9a9e82b98e3ed3c14787dcd7168e7704bcb",
+              "size_bytes": 895
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 39.2,
+          "temperature_after_c": 38.4,
+          "wall_seconds": 5.080504625104368,
+          "input_spec_sha256": "a391bd8856ef005e35c6f40c6a00c988c3885f09c7378b58cb032c8ac3ac9da1"
+        },
+        {
+          "label": "c512",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              93.0,
+              85.0,
+              123.0,
+              85.0,
+              99.0
+            ],
+            "pmu.cycles.count": [
+              492.9,
+              480.8,
+              593.2,
+              504.2,
+              518.8
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              14.7,
+              16.0,
+              14.9,
+              14.8,
+              17.1
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.1,
+              0.1,
+              0.1,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              14.7,
+              14.9,
+              14.9,
+              14.8,
+              14.4
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.0,
+              0.1,
+              0.1,
+              0.1,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "b313b30261cbbf2d33448673fca69bbbf5185acb9bce1c00769c72584bf39497",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 1,
+              "sha256": "13f6e2eb6599bf37c64ae41d564bb56ecb25f7f9823641c6c393e0706385a9e5",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 2,
+              "sha256": "879dfe65e28bf6a8308fca50a68200149978a28f47e9d3d0e414c537faf4bd29",
+              "size_bytes": 899
+            },
+            {
+              "sample_index": 3,
+              "sha256": "f24ddfb891cb2942ad8f2fa55e2a840a8c982fb501c02059d1baffda5245be99",
+              "size_bytes": 890
+            },
+            {
+              "sample_index": 4,
+              "sha256": "3b74d0e65bb608d89ae004191b33e5564978e6fcdbea04fec7c7309f3e8914ec",
+              "size_bytes": 898
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 39.2,
+          "temperature_after_c": 39.9,
+          "wall_seconds": 5.0202681249938905,
+          "input_spec_sha256": "20d6427524dc6fe70ae178849f51eaacaa5ba7e7b93e6a282c5b89097f84f170"
+        },
+        {
+          "label": "a0",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 0,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              52.0,
+              49.0,
+              55.0,
+              49.0,
+              49.0
+            ],
+            "pmu.cycles.count": [
+              332.4,
+              338.0,
+              335.4,
+              330.4,
+              331.2
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              0.0,
+              0.1,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              0.0,
+              0.1,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "7b6208090f3fcfb016011103977f6fea9a726dd14db10b79eb56d1d9a046379f",
+              "size_bytes": 890
+            },
+            {
+              "sample_index": 1,
+              "sha256": "f99c0981a60c4f3b6ff5e8efcd5a6fbee6be8ff980d635f89894a07eb21a8479",
+              "size_bytes": 890
+            },
+            {
+              "sample_index": 2,
+              "sha256": "173adcfefb8f82e0c2457142eb00c9efd264e8a395e182cec78e6f26e1ef0534",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 3,
+              "sha256": "6c3a82440ae69afaf94dc0f4f6b94bd1d664b9f918465735889621ad0b736f6b",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 4,
+              "sha256": "ee7da997a82517ae6d6793f757d0ebd180aa2886a85d0b3ee10fb929e54562d1",
+              "size_bytes": 894
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 40.3,
+          "temperature_after_c": 39.6,
+          "wall_seconds": 4.925899958238006,
+          "input_spec_sha256": "d0abd8fe59044a44aedc02b484a13370711cb159a3a3ec0b6c07b2c3314a741d"
+        },
+        {
+          "label": "c0",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 0,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              60.0,
+              66.0,
+              68.0,
+              80.0,
+              58.0
+            ],
+            "pmu.cycles.count": [
+              381.2,
+              376.9,
+              387.1,
+              391.5,
+              349.9
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              0.0,
+              0.0,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "a7a8ffe270ba00113229dbd5bfed65181b5a7c43cb0fd7da268ebaad47207c25",
+              "size_bytes": 890
+            },
+            {
+              "sample_index": 1,
+              "sha256": "3b0ffabe991a73d072f13f63095aaea304337f1dd8d69bab335cf14ffc190c12",
+              "size_bytes": 890
+            },
+            {
+              "sample_index": 2,
+              "sha256": "b50c72ee79ce64224051762c750dc203feaab82fa4ad50f56fb3298397d7c232",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 3,
+              "sha256": "443274679cb71c14f94e4edbe1b6f200fa3e3245d37151407274b6a5ddc7d1f7",
+              "size_bytes": 890
+            },
+            {
+              "sample_index": 4,
+              "sha256": "4b54a981ab4d9713b572a9ae1136055861adadf501f552be262a653b152f3741",
+              "size_bytes": 894
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 38.4,
+          "temperature_after_c": 39.9,
+          "wall_seconds": 5.018031666986644,
+          "input_spec_sha256": "bda546584f6da1ed5662e217648be49e358f230a4d734f3bcddf5577a7917b8c"
+        },
+        {
+          "label": "floor0",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 0,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 0
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              52.0,
+              52.0,
+              52.0,
+              49.0,
+              47.0
+            ],
+            "pmu.cycles.count": [
+              308.6,
+              323.8,
+              319.4,
+              316.0,
+              305.1
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "de62d68b923315dec573c3d8a5c56a1fdb4e863ceb2ab6073440a9ca8a737671",
+              "size_bytes": 887
+            },
+            {
+              "sample_index": 1,
+              "sha256": "795cf373bf0ca86cc794854a1d2f5c2000a37da8f27dd906929470898ce44eee",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 2,
+              "sha256": "ed1cc1db6da82d0020451771fc9b2226017e3001bad44bc494bf8ab4d2cf453f",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 3,
+              "sha256": "25b2714d2795366037987f10a4afe614f09bedf16d4acf2a61125556746e0df9",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 4,
+              "sha256": "9fa21f405faa7c28495acdf9c94ed3d3525f160d6f2cd1e63231324cd4db4204",
+              "size_bytes": 891
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 40.3,
+          "temperature_after_c": 40.7,
+          "wall_seconds": 5.510069916024804,
+          "input_spec_sha256": "be05fd8ee07dfd28d1fc3cce37703cfa0017f756c8a0004cb4305b557f603a2a"
+        },
+        {
+          "label": "c128",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 128,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              90.0,
+              93.0,
+              77.0,
+              82.0,
+              88.0
+            ],
+            "pmu.cycles.count": [
+              461.9,
+              477.6,
+              453.9,
+              473.5,
+              456.2
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              14.3,
+              14.2,
+              14.1,
+              13.4,
+              14.7
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.1,
+              0.2,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              13.8,
+              13.9,
+              13.9,
+              13.1,
+              14.0
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.1,
+              0.2,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "9da0e703282943a26506a3b5bf4803cc457ff91db030edcbf904bd312eaed60e",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 1,
+              "sha256": "0e532b39e50cbe4a5c93d4965eba6f9004155ec4b74a5a089fe8809879885a22",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 2,
+              "sha256": "f725eba710c68b1b695de03a6a5df4bda30e5427b7cb6a15fe161fca50b2c97d",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 3,
+              "sha256": "b3072e59d29b1bbae0a61dadea66f83f14b17454fe2193e20fa3ec10d5f7b49e",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 4,
+              "sha256": "d5c32d98f4215d25d5badfc55280316ba1be7fa5422766b63c80d1e7f1c58321",
+              "size_bytes": 898
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 39.9,
+          "temperature_after_c": 39.9,
+          "wall_seconds": 5.122270541265607,
+          "input_spec_sha256": "5ee3039764be1bdea025b4b8b31e7b308a9a1069627f4055ebeb05cb1bcb2897"
+        },
+        {
+          "label": "a128",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 128,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              151.0,
+              107.0,
+              176.0,
+              110.0,
+              126.0
+            ],
+            "pmu.cycles.count": [
+              630.8,
+              519.3,
+              712.3,
+              522.2,
+              578.4
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              14.5,
+              11.7,
+              14.0,
+              13.9,
+              12.9
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              8.4,
+              4.9,
+              11.1,
+              4.7,
+              6.7
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              13.3,
+              10.5,
+              13.7,
+              9.2,
+              12.0
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              8.4,
+              4.9,
+              11.1,
+              4.7,
+              6.7
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "bddead9c323fc80bc0c7a36f74a5378ac77e783f845f9d268e7dfb3b9210094a",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 1,
+              "sha256": "540ad6659101df8e0db3b1a722b73962f0f2514e04d086091e1a17cd4265f3e4",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 2,
+              "sha256": "295cb69ce7ae5e910476165c7a1a2340204e754ae484b2568be6b9fa94c353a2",
+              "size_bytes": 901
+            },
+            {
+              "sample_index": 3,
+              "sha256": "59abffa05506e150ea51c4887a3c500be4119c33192e4ef7f19dc2f0ba53f97c",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 4,
+              "sha256": "4d72e11e0825e7bc61a5a8474e6038ecaf83ef9ee50677538d8eacfdac913b86",
+              "size_bytes": 895
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.1,
+          "temperature_after_c": 39.6,
+          "wall_seconds": 5.078041333239526,
+          "input_spec_sha256": "c02a150d8f875aab53331d44c279b4670eb463ed24b2b0fda8bd7c8c46da6c50"
+        },
+        {
+          "label": "b",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": -1,
+            "set_regions": 12,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              162.0,
+              230.0,
+              236.0,
+              156.0,
+              181.0
+            ],
+            "pmu.cycles.count": [
+              713.8,
+              883.2,
+              888.4,
+              631.5,
+              754.5
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              22.1,
+              15.0,
+              14.6,
+              16.6,
+              17.4
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              5.1,
+              12.0,
+              12.0,
+              5.8,
+              8.1
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              13.5,
+              15.0,
+              14.6,
+              13.3,
+              13.9
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              5.1,
+              12.0,
+              12.0,
+              5.8,
+              8.1
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "7966da5f08b09c074dd78343efef26ce54cce867848ef3412805dc25c7f50f43",
+              "size_bytes": 949
+            },
+            {
+              "sample_index": 1,
+              "sha256": "0cda619810a67d9ff427f84f5dda4727582470dc60a0151868d9f2a599e8356e",
+              "size_bytes": 939
+            },
+            {
+              "sample_index": 2,
+              "sha256": "648435167556bb12acf0c34b7c3b581e0b00604a38d6f52171ed8b68917545f5",
+              "size_bytes": 950
+            },
+            {
+              "sample_index": 3,
+              "sha256": "fdbc8f925109fc31d8823ab21b3cb1813eda5fb3c61f1a4013b18ee8d815a2e7",
+              "size_bytes": 937
+            },
+            {
+              "sample_index": 4,
+              "sha256": "1c99ea28e8a10806ae9e69a7ac1e36448bc56d73a010576e94777eddfaf00d4e",
+              "size_bytes": 937
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 40.7,
+          "temperature_after_c": 40.3,
+          "wall_seconds": 6.598523332737386,
+          "input_spec_sha256": "ddac86140eb9d4c1b2d4a720b29c6ae58768a8059b2e88da61311cf858d8c89a"
+        },
+        {
+          "label": "d",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 3,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": -1,
+            "set_regions": 12,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              96.0,
+              88.0,
+              69.0,
+              82.0,
+              90.0
+            ],
+            "pmu.cycles.count": [
+              507.3,
+              471.1,
+              464.5,
+              489.1,
+              636.2
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              14.5,
+              16.3,
+              16.9,
+              19.5,
+              16.1
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.1,
+              0.1
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              14.5,
+              14.9,
+              14.5,
+              14.4,
+              14.8
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.1,
+              0.1
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "c8ccc362a7d9fbbd507cc035833c327a51a8f1def618ea0b346772d425080745",
+              "size_bytes": 948
+            },
+            {
+              "sample_index": 1,
+              "sha256": "ffe2197281adf563d1ffbc0d50230868ee03508025da58303d30d0a014123eda",
+              "size_bytes": 948
+            },
+            {
+              "sample_index": 2,
+              "sha256": "02429c84564048a46288adfec7ecb83f57e3442431315748acaf320bf70ea409",
+              "size_bytes": 948
+            },
+            {
+              "sample_index": 3,
+              "sha256": "661124f2525ecf9de1259b80bd869e4f3d8e3f200957d6e7bfcd88fd27b1d446",
+              "size_bytes": 948
+            },
+            {
+              "sample_index": 4,
+              "sha256": "17f4bf1efb2f7fe779a4cfc00cd43114015e46f67b82291cbffab32e7f8ef920",
+              "size_bytes": 948
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.1,
+          "temperature_after_c": 41.1,
+          "wall_seconds": 5.547824167180806,
+          "input_spec_sha256": "bb7303b8e78662743c6ec52669902721d9601a47b7606430e0589ab002ade25e"
+        },
+        {
+          "label": "floor-k12",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": -1,
+            "set_regions": 12,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 0
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              44.0,
+              52.0,
+              49.0,
+              44.0,
+              49.0
+            ],
+            "pmu.cycles.count": [
+              361.4,
+              367.5,
+              375.7,
+              360.9,
+              548.5
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              2.0,
+              3.4,
+              5.9,
+              2.1,
+              4.6
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              2.0,
+              2.0,
+              2.2,
+              2.1,
+              2.1
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "3ad230d444aa922f275c859cb2adf482ec2fa839d165558f02f9b52334231bea",
+              "size_bytes": 943
+            },
+            {
+              "sample_index": 1,
+              "sha256": "94b2e33b289708bd375b42b43fc38d7f3aa8626c5ee8ccd9e86f16a663e81d36",
+              "size_bytes": 943
+            },
+            {
+              "sample_index": 2,
+              "sha256": "e7aa9feb163a982ad80e548925d517db2fadd23896a6207c05e0b64bffa72b8b",
+              "size_bytes": 943
+            },
+            {
+              "sample_index": 3,
+              "sha256": "ac9c72d1f537a368df2afafe8a56f61bc2be6ceb591e1b2b02f16ee1f209f011",
+              "size_bytes": 931
+            },
+            {
+              "sample_index": 4,
+              "sha256": "a5cf57041575083728631a6b6f038a02eeacf9c8ef037cd24397068182823502",
+              "size_bytes": 931
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 40.3,
+          "temperature_after_c": 41.9,
+          "wall_seconds": 5.333276167046279,
+          "input_spec_sha256": "0506f97be486906fe7b41f7450c87c963efba90680116245aff6ab7083e397f0"
+        },
+        {
+          "label": "c512-end",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              82.0,
+              99.0,
+              82.0,
+              101.0,
+              96.0
+            ],
+            "pmu.cycles.count": [
+              644.6,
+              646.7,
+              646.4,
+              677.3,
+              645.7
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              15.0,
+              15.0,
+              14.9,
+              16.7,
+              15.9
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.4,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              15.0,
+              15.0,
+              14.9,
+              14.3,
+              14.4
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.4,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "4167741a3d7af81cf85be0f6cde02a23dd19bf204e6c065b60ff638507a4d6a4",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 1,
+              "sha256": "dcc906dea7a1231cd91e37e712a8edcfcba9f307e79d124c355a7962b8478cbe",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 2,
+              "sha256": "ef707997e40f99a8f4391810973482b8474d389dd9b29c659d74a7798cd2b601",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 3,
+              "sha256": "5551b9f85ccafcad6a2737d3a68e524b56a35bba9ed6980b64c0a9750f00ba3d",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 4,
+              "sha256": "1fab727cd7f404c19f9d769eacec8d13f56cb5c4287a0e842d6452f7b23b5fe5",
+              "size_bytes": 898
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.9,
+          "temperature_after_c": 41.5,
+          "wall_seconds": 5.618444708175957,
+          "input_spec_sha256": "57408f12f93d014052cb25d90272def03b4cd304116ec8f910c69102a761626f"
+        },
+        {
+          "label": "a512-end",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              178.0,
+              154.0,
+              159.0,
+              159.0,
+              175.0
+            ],
+            "pmu.cycles.count": [
+              903.6,
+              804.0,
+              835.4,
+              871.3,
+              899.8
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              15.0,
+              17.8,
+              20.9,
+              22.8,
+              18.5
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              12.1,
+              7.9,
+              9.4,
+              8.7,
+              10.2
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              15.0,
+              14.9,
+              14.2,
+              14.3,
+              14.9
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              12.1,
+              7.9,
+              9.4,
+              8.7,
+              10.2
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "d70f0b5df39696401fc5e33e175ce1b3b329a893c971d6155a6c55ac3b817032",
+              "size_bytes": 901
+            },
+            {
+              "sample_index": 1,
+              "sha256": "f21968c0b6aafa9a8e48e6ef300cf293fea1bcc95187664588189e6151fccc07",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 2,
+              "sha256": "d19bc6933fc8771d37fe6083b6cdfac03bd7f8f95340bb0c72b0921390409e54",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 3,
+              "sha256": "8eb5a4b7698817b0739aa7e4f3d71ef568adb3f17686b29f223f77250827e580",
+              "size_bytes": 899
+            },
+            {
+              "sample_index": 4,
+              "sha256": "94bc706f7f88c9baa733d5a2c799d79874a8c598700e295d54e1fa2b4fd94a0d",
+              "size_bytes": 897
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.9,
+          "temperature_after_c": 41.9,
+          "wall_seconds": 6.001678999979049,
+          "input_spec_sha256": "352a01855c78c8c473250b4fab1b2c12da7b42c002ecb0d1aa6db6417b00f076"
+        }
+      ],
+      "process_count": 65,
+      "wall_seconds_sum": 68.95828012470156
+    },
+    {
+      "directory": "data/private/20261008T165531Z-sm8650-tlb-scan",
+      "manifest_sha256": "9a627954dff68a2fc3fc2b38eb40e26db698fba9d97ed94171b45e4be767fc81",
+      "created_utc": "20261008T165531Z",
+      "binary_sha256": "54d105930b8743e7a3a69c31d7e640cdec1044a0276a5f040efff4b1dc82398c",
+      "source_head": "155602756cd1df9ff1853d9dc0fab8da0b1a7990",
+      "driver_sha256": "4001f8e640009c880f037fff7c7169efe0f336ac4f5c0761e357dc83d5b23dfe",
+      "conditions": [
+        {
+          "label": "c-w8",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 8
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              96.0,
+              170.0,
+              63.0,
+              63.0,
+              90.0
+            ],
+            "pmu.cycles.count": [
+              372.2,
+              359.3,
+              399.3,
+              404.6,
+              375.5
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              10.0,
+              10.8,
+              10.0,
+              10.3,
+              10.3
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.1,
+              0.0,
+              0.1,
+              0.1,
+              0.1
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              10.0,
+              10.8,
+              10.0,
+              10.3,
+              10.3
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.1,
+              0.0,
+              0.1,
+              0.1,
+              0.1
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "2026eaec466f7467f5353a5b1755d05e2970e6724e409a0beaca765c402de8b1",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 1,
+              "sha256": "c68dda0fab00fcc9f34825691c06b4694efd21aab266a3606441f10e012c91bf",
+              "size_bytes": 896
+            },
+            {
+              "sample_index": 2,
+              "sha256": "01557408d9275a8be0c4d63fa692860714f234a0065ee4e09bf35514cfcce906",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 3,
+              "sha256": "d8eeafc75abb347b88735ae8de358817a8b7ad1a86870b6acd6e6d6985f0d187",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 4,
+              "sha256": "ba73a2f6f6a44028e262b560431f98d9718604504080ebfb472436dbb1d646db",
+              "size_bytes": 895
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 40.7,
+          "temperature_after_c": 41.9,
+          "wall_seconds": 4.640340084210038,
+          "input_spec_sha256": "f69bf9b668a33c72e9e346f6d5176a2979085c7f8bfdfee9b496f3590a5979b1"
+        },
+        {
+          "label": "a-w8",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 8
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              115.0,
+              71.0,
+              58.0,
+              60.0,
+              60.0
+            ],
+            "pmu.cycles.count": [
+              558.1,
+              432.7,
+              396.1,
+              408.8,
+              402.2
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              10.4,
+              11.5,
+              10.5,
+              10.7,
+              10.1
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              8.0,
+              2.2,
+              1.0,
+              1.3,
+              1.3
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              10.4,
+              11.5,
+              10.5,
+              10.7,
+              10.1
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              8.0,
+              2.2,
+              1.0,
+              1.3,
+              1.3
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "338dd18e2cfa225264fd890052cbf7fbae8371af799ca657261aa1424dd9dcd2",
+              "size_bytes": 896
+            },
+            {
+              "sample_index": 1,
+              "sha256": "3d6ca50e578cb9d0f51f802c0dcb7c9b8847c09733c05de7c91d0ceb35add058",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 2,
+              "sha256": "bf6dbb28e671027d7c76e969bf7a90c7023266afd31fd4bcf32390d51d46acec",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 3,
+              "sha256": "00ddadc0573ae822d0ea0d8d4f6333e5668e41893e593c47ceb0fef483057126",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 4,
+              "sha256": "eede20255b55b445a8c0eef5308779e6eb2b9ce7dc89439e9cbc7ab3d63b199e",
+              "size_bytes": 895
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 42.3,
+          "temperature_after_c": 40.3,
+          "wall_seconds": 5.122704749926925,
+          "input_spec_sha256": "a8649c87d95bdeecd3af2ebe497303cc257fb35f7a568b72889300d4ddd30090"
+        },
+        {
+          "label": "a-w12",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              189.0,
+              192.0,
+              181.0,
+              173.0,
+              178.0
+            ],
+            "pmu.cycles.count": [
+              903.0,
+              887.8,
+              891.2,
+              894.5,
+              892.2
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              15.0,
+              15.0,
+              15.0,
+              15.0,
+              15.0
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              12.1,
+              12.0,
+              12.0,
+              12.0,
+              12.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              15.0,
+              15.0,
+              15.0,
+              15.0,
+              15.0
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              12.1,
+              12.0,
+              12.0,
+              12.0,
+              12.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "0df6975e3527d519bb666a3796bf27487b88830b6d4ed578b1a1f5e0b6ef81a0",
+              "size_bytes": 901
+            },
+            {
+              "sample_index": 1,
+              "sha256": "c74e0c5bb1835106f30c459395332766a3804c2c7a08a9236bab7e53784b7b87",
+              "size_bytes": 897
+            },
+            {
+              "sample_index": 2,
+              "sha256": "678879c8c007d9416ba12c257ae56b2f54b960a9eb385ce020fa39324ed9172b",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 3,
+              "sha256": "d41e71045e13135a91eee677580fa4d2b5252112f404f1e595af46162c14b0e2",
+              "size_bytes": 901
+            },
+            {
+              "sample_index": 4,
+              "sha256": "49a089c2423f22b741d23f26c418e2ff195da283030b4648708b91e97b56e8ce",
+              "size_bytes": 901
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 40.7,
+          "temperature_after_c": 42.4,
+          "wall_seconds": 5.418126832693815,
+          "input_spec_sha256": "e58a10aa5ec993b0a2b2a56a4966e7b8af024a0934e481ad346f3a8f874e5c1f"
+        },
+        {
+          "label": "c-w12",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              85.0,
+              93.0,
+              90.0,
+              88.0,
+              99.0
+            ],
+            "pmu.cycles.count": [
+              626.8,
+              654.5,
+              650.7,
+              650.4,
+              641.9
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              17.6,
+              15.0,
+              15.0,
+              14.7,
+              15.0
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.1,
+              0.2,
+              0.1,
+              0.1
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              14.5,
+              15.0,
+              15.0,
+              14.7,
+              15.0
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.0,
+              0.1,
+              0.2,
+              0.1,
+              0.1
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "78e3eba4e572c890f801ef3b1a7ab73f27db4cad9fedfdc9f17dba806d2c65c1",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 1,
+              "sha256": "a40025a4572f272e96576c447fc5c351b187558b9c0a305e001528a04427c340",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 2,
+              "sha256": "cde7e4c939edfcff66198535241ed448fd54cfd75148fd10eadc4904654aed6b",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 3,
+              "sha256": "8ac956e215219d4a6926944ecf308232c9e7e1850cda1e7687a538c0363c913e",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 4,
+              "sha256": "cd4a2528074e629ad03c03a0f3fd96b8a49cba1679b9e1c3320aa0bb918ffa68",
+              "size_bytes": 894
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.9,
+          "temperature_after_c": 40.7,
+          "wall_seconds": 5.528022000100464,
+          "input_spec_sha256": "27a0134d173d720dbcf07cd2a37f3f3be77652b1e0609ba68bf7c0918e4a6667"
+        },
+        {
+          "label": "c-w6",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 6
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              49.0,
+              49.0,
+              55.0,
+              52.0,
+              58.0
+            ],
+            "pmu.cycles.count": [
+              529.1,
+              527.3,
+              534.4,
+              521.3,
+              568.2
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              8.0,
+              8.0,
+              8.4,
+              8.2,
+              9.5
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.1,
+              0.1,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              8.0,
+              8.0,
+              8.4,
+              8.2,
+              8.1
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.1,
+              0.1,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "9e1f2bda8bbbf2513c44eb2009b68ff883dcacaec4994493a8c94fe40414b3dd",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 1,
+              "sha256": "d3d9a31564c0419ebb80f5f5d501c2c2f64cf93f48b80e4ef258fc85157dcc5a",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 2,
+              "sha256": "5e332c32d1369153e05ebf3c4c76abfd361e316ec36fcaa14205a4df91b5fb40",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 3,
+              "sha256": "30ead43981187a156f395b8c9f7e8d6252721c5e9249da8944970d669b0c5ef9",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 4,
+              "sha256": "2de463b8822136058c64d6a4c4fce8819531fb00bba56cbfd8a22bc758e8b94c",
+              "size_bytes": 885
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.1,
+          "temperature_after_c": 42.3,
+          "wall_seconds": 5.464650417212397,
+          "input_spec_sha256": "954eef21833b558922c74be91e16efc5d85ff6af75a526043ebfc64a916420d1"
+        },
+        {
+          "label": "a-w6",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 6
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              55.0,
+              49.0,
+              49.0,
+              52.0,
+              49.0
+            ],
+            "pmu.cycles.count": [
+              555.9,
+              535.8,
+              516.7,
+              538.1,
+              535.1
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              10.3,
+              10.8,
+              8.3,
+              13.9,
+              8.0
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.2,
+              0.1,
+              0.1,
+              0.1,
+              0.1
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              7.8,
+              8.3,
+              8.3,
+              8.0,
+              8.0
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.2,
+              0.1,
+              0.1,
+              0.1,
+              0.1
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "2eb026e5619e0507ebbde8fd697f08c7e7176d0e949cab1ee78aaf62c7c6ac97",
+              "size_bytes": 890
+            },
+            {
+              "sample_index": 1,
+              "sha256": "0a2252d2db8140d3c868e735f020a3be626412a8f0b42040046ab0e148221b9d",
+              "size_bytes": 890
+            },
+            {
+              "sample_index": 2,
+              "sha256": "437a604dae190f5eb2ac63bda9ba37be027f6ff7215382cfb104ebe125b70e00",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 3,
+              "sha256": "626614cacb5fc34d196202970e2db5c6c337b550c0d73bc1debd33b9d90cf369",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 4,
+              "sha256": "22539d015a43632e2ea3ff4276d162160dfe7ae2ba5aa1c58fcd33d2bca6a734",
+              "size_bytes": 893
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 42.6,
+          "temperature_after_c": 42.6,
+          "wall_seconds": 5.837721792049706,
+          "input_spec_sha256": "54e665e9f25ec974722992b4dc0bf048e4a4823251f825e39a014b4047ef9101"
+        },
+        {
+          "label": "a-w10",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 10
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              123.0,
+              110.0,
+              104.0,
+              115.0,
+              104.0
+            ],
+            "pmu.cycles.count": [
+              737.0,
+              704.4,
+              682.9,
+              727.8,
+              675.5
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              15.5,
+              12.7,
+              14.5,
+              15.1,
+              14.1
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              7.1,
+              6.0,
+              4.2,
+              6.0,
+              5.1
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              13.0,
+              12.7,
+              13.0,
+              12.8,
+              12.8
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              7.1,
+              6.0,
+              4.2,
+              5.9,
+              5.1
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.1,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "2179fb70ec3469fbab0cf5b8feca8bd7a121e2081c625c80205278c54b4c3641",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 1,
+              "sha256": "3a801284ae744a6a0860a652ab9ec0e20bb3f0a0869fe14b6d0b8d3ba8a47ec3",
+              "size_bytes": 899
+            },
+            {
+              "sample_index": 2,
+              "sha256": "a1a93bc4a47d86231b364bd4718ef1d303f71962d089f79972e989b7a9fe8179",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 3,
+              "sha256": "063ec5de7fd4ed480e25fa7aa62a67403ddf89b0a9e14d21ae2c7d92dc61525c",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 4,
+              "sha256": "e01294308611a10f3bf4977fb12ae86f86bdcd873673cf11f2127b527cf3b9f1",
+              "size_bytes": 899
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 42.3,
+          "temperature_after_c": 41.5,
+          "wall_seconds": 5.3891555410809815,
+          "input_spec_sha256": "9b191738f50d870486a8edf1ae09e3693b4311c83541a70d659574ede88252ac"
+        },
+        {
+          "label": "c-w10",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 10
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              77.0,
+              66.0,
+              82.0,
+              82.0,
+              74.0
+            ],
+            "pmu.cycles.count": [
+              600.8,
+              599.2,
+              649.4,
+              638.7,
+              594.7
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              12.8,
+              12.9,
+              17.4,
+              12.8,
+              12.7
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.3,
+              0.1,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              12.8,
+              12.9,
+              12.9,
+              12.8,
+              12.7
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.3,
+              0.1,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "7420977939ce9cdaa4225a67d13f839ac3a90e6bdc9c5c66b4913f8427e2fdc8",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 1,
+              "sha256": "1c50947aff01178888c11c5682d7757e35a1bb0847b18a6d1e0d9e1a6541f47d",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 2,
+              "sha256": "475ba5aefadee38ae482359b1ccee9e252a5a9f67bb3e4b5378987fda5fe8469",
+              "size_bytes": 890
+            },
+            {
+              "sample_index": 3,
+              "sha256": "353871e5675b5f0634e928446aff3f96e99e4d14554e66022eac50120b0c6762",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 4,
+              "sha256": "ee954aa40ed9224381b5dd629afc8f3b177146ddd795fbb096f98a44fd40289c",
+              "size_bytes": 898
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 42.3,
+          "temperature_after_c": 41.9,
+          "wall_seconds": 5.471860624849796,
+          "input_spec_sha256": "2a706778ba377638505998e6051705955b06ffd6920b4f6d6cbfb3ce2e1b7085"
+        }
+      ],
+      "process_count": 40,
+      "wall_seconds_sum": 42.87258204212412
+    },
+    {
+      "directory": "data/private/20261008T220015Z-sm8650-tlb-followup",
+      "manifest_sha256": "7f50ca88bec975208c6538bbd0a59ad3c0bec8499919e49bef9613f7d4079d0d",
+      "created_utc": "20261008T220015Z",
+      "binary_sha256": "54d105930b8743e7a3a69c31d7e640cdec1044a0276a5f040efff4b1dc82398c",
+      "source_head": "155602756cd1df9ff1853d9dc0fab8da0b1a7990",
+      "driver_sha256": "4001f8e640009c880f037fff7c7169efe0f336ac4f5c0761e357dc83d5b23dfe",
+      "conditions": [
+        {
+          "label": "t200-a-w9",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 9
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              74.0,
+              99.0,
+              126.0,
+              91.0,
+              60.0
+            ],
+            "pmu.cycles.count": [
+              432.3,
+              513.4,
+              580.2,
+              524.9,
+              409.8
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              17.8,
+              13.4,
+              15.4,
+              16.1,
+              12.2
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              2.1,
+              5.0,
+              7.2,
+              4.8,
+              2.1
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              11.3,
+              11.9,
+              12.1,
+              11.2,
+              10.7
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              2.1,
+              5.0,
+              7.1,
+              4.8,
+              2.1
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "d9a2a66a336a2e8cd2098023f338528c765922ef41710910aa6605993caad6f6",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 1,
+              "sha256": "0738c8fa4fb8e3aa9c16a1822c1de1c7367dafd78a584ed895f9fea55fabc6aa",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 2,
+              "sha256": "64a24f11cd87aeefd8ae5b5d1b64d1179220e3293e35431858a38f1369181709",
+              "size_bytes": 892
+            },
+            {
+              "sample_index": 3,
+              "sha256": "085ccccfcf1c0429da228c828434c921e36f1d67a055cedccf37dfae77fac66b",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 4,
+              "sha256": "1f98b2ec04e2de980038a52f8929f8c6185e0e272f92ae07cbffab1394853fd1",
+              "size_bytes": 895
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 38.4,
+          "temperature_after_c": 39.2,
+          "wall_seconds": 4.872986332979053,
+          "input_spec_sha256": "878e66e7338731b133f0507dcd5fdc270a130542a17ec9b19eedcb52eba95f57"
+        },
+        {
+          "label": "t200-c-w9",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 9
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              60.0,
+              60.0,
+              74.0,
+              85.0,
+              74.0
+            ],
+            "pmu.cycles.count": [
+              420.2,
+              428.2,
+              440.6,
+              443.1,
+              444.6
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              13.0,
+              11.8,
+              11.5,
+              12.7,
+              13.6
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.1,
+              0.1,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              11.5,
+              11.8,
+              11.5,
+              11.5,
+              11.2
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.1,
+              0.1,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "f284c9890fa4e902fd23aab6a60d3563da53ab14ff95883077cc33ed31713ee0",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 1,
+              "sha256": "2a87d757a0485d981f446f1521525359c69fc55de69090f6398564f7e3047089",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 2,
+              "sha256": "f1f75181ba54959e9697263ae54fbb341ea3af61b6cd04c997f1afb46d7351d2",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 3,
+              "sha256": "7610887afdc722067a8060fed0e019cf3dd3fb60d43874d21a8b9013da53c3a3",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 4,
+              "sha256": "e521601894be471dc74d8b00c7439bc567c9523fb039a7ccf6456b75f163ca39",
+              "size_bytes": 895
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 38.8,
+          "temperature_after_c": 38.9,
+          "wall_seconds": 4.946699374821037,
+          "input_spec_sha256": "7fc54bebb356e4aea4155479534548ba4f1391f7250929f30a152cbb01167bca"
+        },
+        {
+          "label": "t100-floor-pre",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 0
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              49.0,
+              44.0,
+              52.0,
+              44.0,
+              49.0
+            ],
+            "pmu.cycles.count": [
+              368.7,
+              360.6,
+              372.7,
+              365.4,
+              378.4
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              2.0,
+              2.0,
+              2.0,
+              2.0,
+              2.8
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              2.0,
+              2.0,
+              2.0,
+              2.0,
+              2.1
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "70fd344eeb44e3d8c7273580f5e86e8c3f5ef37754d77557cdd3d251a38e04c5",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 1,
+              "sha256": "5f98ddef957da24fb59fa2a0d80b7b6eececaf183d77df6e7f780141e143f5c8",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 2,
+              "sha256": "86b433d1853692c2c392a1c01f5ac264d23fd736fa19c4e70d17cb27c00e326d",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 3,
+              "sha256": "8b6b3f0cb44fab6911ac546ddae050f2ed8e801170a513c16d8ecf18494c05e9",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 4,
+              "sha256": "266c83c94e9b6e72e7788ce62aa22e8dae5ed0e4ccc727d1ca5164b5d663b076",
+              "size_bytes": 893
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 39.6,
+          "temperature_after_c": 39.6,
+          "wall_seconds": 5.048210707958788,
+          "input_spec_sha256": "9e581c01090db1accaf009ab3294e9d76e0ed75d5c39566e3be6cdbe07a1a485"
+        },
+        {
+          "label": "t100-c-w9",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 9
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              66.0,
+              80.0,
+              66.0,
+              66.0,
+              74.0
+            ],
+            "pmu.cycles.count": [
+              406.1,
+              423.5,
+              412.8,
+              419.7,
+              434.9
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              11.4,
+              11.3,
+              11.7,
+              11.7,
+              13.8
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              11.4,
+              11.3,
+              11.7,
+              11.7,
+              11.7
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "928a822bc1145f11f2dced7e22e661883cb33975c9a5816b3f0c8c7c433fdb4f",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 1,
+              "sha256": "dc94a4ba42fe21f588595689b744996f5a4b7afb59f971b9ee97f6502edbe9b5",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 2,
+              "sha256": "77aec188d24ed13e9b7dc45d671b7c9a85356296a1add2164180701ff8ab9f1c",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 3,
+              "sha256": "0ec3e59d80830bc7a794f4c25d359a672c48cb25bfa94b85e077a1dd59fb8b33",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 4,
+              "sha256": "9433113decf5cceeba596f13ad99be03bcda85d058820ec7b32f29160843da8b",
+              "size_bytes": 895
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 40.3,
+          "temperature_after_c": 39.2,
+          "wall_seconds": 5.186164000071585,
+          "input_spec_sha256": "ff5b3373cf15703bee3a3a96b6a4c70861cfc62cc994f043397a0d053da1ae41"
+        },
+        {
+          "label": "t100-a-w9",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 9
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              85.0,
+              74.0,
+              93.0,
+              74.0,
+              112.0
+            ],
+            "pmu.cycles.count": [
+              479.4,
+              446.1,
+              499.8,
+              422.3,
+              510.3
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              15.2,
+              11.9,
+              17.7,
+              12.3,
+              12.7
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              2.9,
+              2.1,
+              3.3,
+              3.0,
+              5.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              11.6,
+              11.9,
+              11.8,
+              11.1,
+              11.3
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              2.9,
+              2.1,
+              3.3,
+              3.0,
+              5.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "66f3e286008f7bfde848dc7be31b846c438c1d9bf2947e3714ea835eb3d66a81",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 1,
+              "sha256": "57c3a12002aeac7e8d6b7816b21909fb1b24c68806cd8f49e3d368e601e4ebce",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 2,
+              "sha256": "db82e8fda4b70b9071e33d6a327182e6f15e17d29e5f5d56734ae02f2feff551",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 3,
+              "sha256": "f2fe86dbee2dddf13f6ff0b637976e845ca1cf83d08f03354ecc8d4d6b3fdd37",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 4,
+              "sha256": "ed585c187e3ef06379d6bb01f52b636a3ef3fd5fe10e21e0ab826be9c2ae5f14",
+              "size_bytes": 892
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 40.3,
+          "temperature_after_c": 40.3,
+          "wall_seconds": 5.685358750168234,
+          "input_spec_sha256": "24ed9e3feab85608b2e2a558da28431de31d0d9590cca107f3a779ec5268a267"
+        },
+        {
+          "label": "t100-c-w10",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 10
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              82.0,
+              74.0,
+              74.0,
+              99.0,
+              63.0
+            ],
+            "pmu.cycles.count": [
+              456.4,
+              451.7,
+              447.5,
+              498.4,
+              541.3
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              15.5,
+              14.1,
+              12.9,
+              13.4,
+              14.0
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.1,
+              0.0,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              12.6,
+              12.6,
+              12.9,
+              12.6,
+              12.5
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.1,
+              0.0,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "9de12d00aaa1f6caefebe5420ff794dd51e18311f6de54eeb22f5760cd2afb48",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 1,
+              "sha256": "8cf5c7a458bda7d192a52250392e3434b96d42dd276dfe4a05e01d193a667f54",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 2,
+              "sha256": "4c8b6a93f4673736fb0b4ba7bdfabea59d159640f26b954b913e48b586bfa6c0",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 3,
+              "sha256": "6b3e3c05c1e294f3f67be036dc2e17858cd642d76f9f3f0a94b03cb632a7e5f7",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 4,
+              "sha256": "3f4ee6a95d820b3a7c93960e0eebca9e287cf07bc333000646db2dc9a0f68d37",
+              "size_bytes": 894
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.1,
+          "temperature_after_c": 40.7,
+          "wall_seconds": 6.14514375012368,
+          "input_spec_sha256": "70928d03057b1f6bf4ba65fb3bb60c2977ce3bc989daf86c8532c82999cb8794"
+        },
+        {
+          "label": "t100-a-w10",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 10
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              164.0,
+              126.0,
+              99.0,
+              93.0,
+              148.0
+            ],
+            "pmu.cycles.count": [
+              644.8,
+              621.7,
+              519.2,
+              511.9,
+              637.8
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              12.7,
+              13.6,
+              16.6,
+              14.2,
+              14.0
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              7.6,
+              7.4,
+              3.8,
+              3.2,
+              8.2
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              12.4,
+              12.5,
+              12.5,
+              12.7,
+              12.9
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              7.6,
+              7.4,
+              3.8,
+              3.2,
+              8.2
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "6dbb2998af881f6f7a0eff471a7ce17f32c3e105d1aeab2941177d8b40d8fd1b",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 1,
+              "sha256": "0e3136d63a2843d9a52e10d31a4ea42a0af6eee1e5c12ef91206f0bd0f9d0d09",
+              "size_bytes": 899
+            },
+            {
+              "sample_index": 2,
+              "sha256": "c4474e3a3146b12955fcf6b3deaf0d0c574a6a601ab472f5adeeabbfa5858c49",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 3,
+              "sha256": "11dd58a01f1a1ef4f0ed25c6a4fc93e10d7953d91a8b5a01cdd2e3e55e607506",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 4,
+              "sha256": "84d8f5372244243c57c4e8d27ac93a10cab41df7590e76d571331eae774c3933",
+              "size_bytes": 899
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 40.7,
+          "temperature_after_c": 40.3,
+          "wall_seconds": 5.60663520777598,
+          "input_spec_sha256": "6b41b9ea8871dc81e670ae28b321ebd87e059c4d192e4c76a5d3096614dd078d"
+        },
+        {
+          "label": "t100-a-w6",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 6
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              52.0,
+              52.0,
+              52.0,
+              52.0,
+              52.0
+            ],
+            "pmu.cycles.count": [
+              370.4,
+              363.0,
+              367.3,
+              531.2,
+              544.6
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              8.1,
+              7.9,
+              8.1,
+              8.0,
+              11.6
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.3,
+              0.1,
+              0.1,
+              0.1,
+              0.2
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              8.1,
+              7.9,
+              8.1,
+              8.0,
+              8.2
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.3,
+              0.1,
+              0.1,
+              0.1,
+              0.2
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "e803922b939837561e2bb6280a837af9a655d1922c8433b0f508da1881da7c47",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 1,
+              "sha256": "ae17dec3650e587a9637ce421fd4a8c86f9c5bfc2760c49b70dce1a7fa8c5af2",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 2,
+              "sha256": "7c9a9bbfa0c292113db6414cd2bd5d5ff5a58c4fb6262f585f3698b6714739c8",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 3,
+              "sha256": "1e83c9c1bb94e332a61029f61dd075001ceb5c89e4faf78f5a2f750c4b23fe80",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 4,
+              "sha256": "7ab511bf7cff4063ab589ff53ca8f01a79394ffed5dc8c5f0ee8a316d4fc4aea",
+              "size_bytes": 890
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.1,
+          "temperature_after_c": 40.3,
+          "wall_seconds": 5.276072166860104,
+          "input_spec_sha256": "f2aea6a65d5d3e59e875164e6f4b56885e026b653782f2475c3d39b88f6f4698"
+        },
+        {
+          "label": "t100-c-w6",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 6
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              55.0,
+              60.0,
+              66.0,
+              52.0,
+              52.0
+            ],
+            "pmu.cycles.count": [
+              540.6,
+              565.7,
+              577.2,
+              529.6,
+              532.6
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              9.0,
+              13.3,
+              9.2,
+              8.2,
+              9.4
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.1,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              9.0,
+              8.2,
+              8.4,
+              8.2,
+              8.2
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.1,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "706f42cfdb64db55f29f5bc6d3c920fe23f3531befffab8f414515ca1bab6e99",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 1,
+              "sha256": "301fca7879465cdc1c4002e81071b02001602e8b01e7a8b1797790b904203ab1",
+              "size_bytes": 886
+            },
+            {
+              "sample_index": 2,
+              "sha256": "59145fc3f790e41da94206fca8c09d66601412138cb26d4dcd2da9da4127983d",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 3,
+              "sha256": "b6e0f0398983b5d15b273c332c2b31f242d90ea381ab4cb951288ba95da71db3",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 4,
+              "sha256": "5626c7f69bbf7e1859298c9a1cc5ddf2f3ca4b36694d5151eff98d3fe9b5c9f8",
+              "size_bytes": 893
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.5,
+          "temperature_after_c": 39.9,
+          "wall_seconds": 4.8982295002788305,
+          "input_spec_sha256": "0cf42489d476b06b5fb6cbb8c06709b7252f37c6a9a29e76147440de6adf892a"
+        },
+        {
+          "label": "t100-c-w12",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              121.0,
+              107.0,
+              90.0,
+              63.0,
+              110.0
+            ],
+            "pmu.cycles.count": [
+              758.8,
+              677.8,
+              638.5,
+              670.2,
+              698.3
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              19.1,
+              15.0,
+              16.2,
+              18.4,
+              16.6
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.1,
+              0.1,
+              0.1
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              14.8,
+              15.0,
+              14.8,
+              14.4,
+              14.2
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.0,
+              0.0,
+              0.1,
+              0.1,
+              0.1
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "740b6bf17234d617956279ef37c065dfe7dfed6d85345eeb9fd79c365bad7a16",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 1,
+              "sha256": "fbab0076673c0ad8ae967b2068e4bce8436563ec29726edb7e3986231fb95dc8",
+              "size_bytes": 899
+            },
+            {
+              "sample_index": 2,
+              "sha256": "cca1b5957bffb02ffe7fea8555f55d53f8244120df150cb601edecdd73a31971",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 3,
+              "sha256": "32355ef61e12f34db4c60f356ddf1b0e5f2619da831ebcda9b11f5eac0b676e7",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 4,
+              "sha256": "444029fd47dfdd7dc4fd669cc3d179793f7819d8408832232ab66e3425f7d42b",
+              "size_bytes": 895
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.5,
+          "temperature_after_c": 40.7,
+          "wall_seconds": 5.428485500160605,
+          "input_spec_sha256": "e551d694e398fe8500d4d4bbcbb35ceb4b42fecb965c04f5e74a1cd931a8c611"
+        },
+        {
+          "label": "t100-a-w12",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              178.0,
+              214.0,
+              203.0,
+              170.0,
+              170.0
+            ],
+            "pmu.cycles.count": [
+              906.1,
+              985.8,
+              948.0,
+              871.2,
+              884.8
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              15.0,
+              16.8,
+              15.0,
+              16.4,
+              15.0
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              12.0,
+              10.6,
+              12.0,
+              8.2,
+              12.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              15.0,
+              14.9,
+              15.0,
+              14.7,
+              15.0
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              12.0,
+              10.6,
+              12.0,
+              8.2,
+              12.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "91796f0c39809acdec079782f765dfdb96c99fbce13537b1dc7ccdaef6ffc95f",
+              "size_bytes": 897
+            },
+            {
+              "sample_index": 1,
+              "sha256": "f479d13cb498b78e5eaabd741ef900d90723e926f51ee5e686168cfe320ccfdb",
+              "size_bytes": 897
+            },
+            {
+              "sample_index": 2,
+              "sha256": "192087551fafef6b11c6480a4b7c798b57b2885a681a1d34788a5f2eee517418",
+              "size_bytes": 897
+            },
+            {
+              "sample_index": 3,
+              "sha256": "8f03fc8294d9e184d7a5f7f52d28fffbf501b2737c4010babb83e2865fd8f64b",
+              "size_bytes": 899
+            },
+            {
+              "sample_index": 4,
+              "sha256": "6df46c27d76633f2a11ebd09847f77392ec07b1eeafa80d05edaeb4dfa99acef",
+              "size_bytes": 901
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.1,
+          "temperature_after_c": 40.7,
+          "wall_seconds": 5.130952958017588,
+          "input_spec_sha256": "83db3a031d41721052955c53be728e3f1bf9ac926c85897448d7fde4d346323d"
+        },
+        {
+          "label": "t100-a-w8",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 8
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              60.0,
+              57.0,
+              63.0,
+              88.0,
+              66.0
+            ],
+            "pmu.cycles.count": [
+              545.1,
+              566.7,
+              584.5,
+              634.2,
+              581.3
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              10.0,
+              10.1,
+              10.2,
+              11.9,
+              18.2
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.8,
+              1.4,
+              0.3,
+              0.5,
+              0.8
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              10.0,
+              10.1,
+              10.2,
+              10.5,
+              10.3
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.8,
+              1.4,
+              0.3,
+              0.5,
+              0.8
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "33308fe3209b7ae6743fe5c1742b681f8340a901f8cf103775509c87c83ae79f",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 1,
+              "sha256": "0968cc9c5475bdd212fcab5f01646dce89195f132bf439f2835474fe28d22fe1",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 2,
+              "sha256": "7335409c01ba8e97650ffb553c806a46298bc399efc0c4088c6b76fd94f780fb",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 3,
+              "sha256": "a5bc355fd77abf103e6e2dd94835f4d418c39a8b4d4efaecd17205075882a510",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 4,
+              "sha256": "d16d3551e6efc356a4bc1d77f2342e1a1218bf8bc676da1c41d59adabe396144",
+              "size_bytes": 895
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.1,
+          "temperature_after_c": 41.9,
+          "wall_seconds": 5.749946165829897,
+          "input_spec_sha256": "248b4def149a60470f311da6568aaf369bc80bcb73e58519d83f5af6c2db7a04"
+        },
+        {
+          "label": "t100-c-w8",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 8
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              63.0,
+              71.0,
+              63.0,
+              66.0,
+              60.0
+            ],
+            "pmu.cycles.count": [
+              575.6,
+              612.3,
+              548.9,
+              566.2,
+              564.7
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              11.5,
+              12.5,
+              11.4,
+              12.3,
+              11.2
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.1,
+              0.0,
+              0.0,
+              0.1,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              10.3,
+              10.8,
+              10.3,
+              10.8,
+              10.1
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.1,
+              0.0,
+              0.0,
+              0.1,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "25c21e1a7f3d693fd522554ae33f155330cdcc74f84dc821702e09a237c9cac8",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 1,
+              "sha256": "20e6e5fb83ff1eb31b873b5be271ca1f5e991b2121d71e286c1125eed0ac36bd",
+              "size_bytes": 891
+            },
+            {
+              "sample_index": 2,
+              "sha256": "f650ec1dad10e3fd447233b2d5b1965871b5e7693d6a59a6084902fcbacca405",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 3,
+              "sha256": "f64a9e441a7cca52a1a50a9b5bd42c2882df0a48b4a67cdc7965b8cea7c8ce8d",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 4,
+              "sha256": "da6ba2b0d7d412f8949a6a7b4bd3dfd837eabaa37cf74d741343f2b5a2098013",
+              "size_bytes": 891
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.3,
+          "temperature_after_c": 41.1,
+          "wall_seconds": 5.7168610827066,
+          "input_spec_sha256": "4b2a473da3882b64417fc4b8aeed42a724f88de85eebfb61c8b60784bef93875"
+        },
+        {
+          "label": "t100-floor-end",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 0
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              52.0,
+              52.0,
+              47.0,
+              52.0,
+              52.0
+            ],
+            "pmu.cycles.count": [
+              530.2,
+              527.7,
+              520.1,
+              510.9,
+              521.5
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              2.0,
+              2.0,
+              2.0,
+              2.1,
+              6.5
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.1,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              2.0,
+              2.0,
+              2.0,
+              2.1,
+              2.2
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.1,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "f1985837f4b63266fcb78df9f6f68971ab8649bef1b9e9a85bae35ac621ea9ee",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 1,
+              "sha256": "4fb2e488dda289304fe2e37d1dc83e4fd89b238f95af2e5badc6f7709f9ec59b",
+              "size_bytes": 889
+            },
+            {
+              "sample_index": 2,
+              "sha256": "9f5bd41b69ea04c81cc1d593eb38f550462340f98402d12b749ae47f6d998829",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 3,
+              "sha256": "7e676c4ff8e2e25274fd7e5a9bc9102079fc532c654932ac5d620f13125fc94f",
+              "size_bytes": 893
+            },
+            {
+              "sample_index": 4,
+              "sha256": "1ff57b795595dc47c3cb88eefd0e416d00821b5b3f7ee450d0b8acf04adab9c1",
+              "size_bytes": 893
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.1,
+          "temperature_after_c": 41.5,
+          "wall_seconds": 5.05015862500295,
+          "input_spec_sha256": "6bdced92f31b2f2e01b7d365154c4b9d006c25d079ce95b975ba833c796b4248"
+        },
+        {
+          "label": "t100-c-w12-end",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              96.0,
+              93.0,
+              99.0,
+              85.0,
+              93.0
+            ],
+            "pmu.cycles.count": [
+              645.2,
+              652.7,
+              664.7,
+              743.2,
+              646.1
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              17.0,
+              17.2,
+              14.8,
+              16.3,
+              16.3
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.1,
+              0.0,
+              0.0,
+              0.2,
+              0.0
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              14.1,
+              14.9,
+              14.8,
+              15.3,
+              14.8
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              0.1,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.2,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "7b21097c13ffea656f4430879d1f6db8fb80d1e111cc2f24e8959bd288faad8a",
+              "size_bytes": 898
+            },
+            {
+              "sample_index": 1,
+              "sha256": "28b9898f335529a50076cdfb61ceb6c3be441dee04c4fb9ec55864bb933af080",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 2,
+              "sha256": "f5da9f6b91df8b0be54a0cd093716364b25b8d7cbf1c53431ff6a2b2f1b61a2a",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 3,
+              "sha256": "418b1af5f824e0d7d866378d6f7ebfbf7235606a9fa97b933ae89607a1c649b9",
+              "size_bytes": 894
+            },
+            {
+              "sample_index": 4,
+              "sha256": "fbf4771b64ec4940a67b17527497a09cd5b7e52f127f01fa058974b99e1d4362",
+              "size_bytes": 898
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.6,
+          "temperature_after_c": 41.1,
+          "wall_seconds": 5.072334999684244,
+          "input_spec_sha256": "20808aaa8bf77170933db0f48312ee3e1108130c321defb3973e72cc0a2bd7b9"
+        },
+        {
+          "label": "t100-a-w12-end",
+          "params": {
+            "base_pages": 1,
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 12
+          },
+          "metrics": {
+            "window_valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "window_invalid_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "window_mux_rounds": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "probe_latency_ns": [
+              153.0,
+              189.0,
+              181.0,
+              141.0,
+              190.0
+            ],
+            "pmu.cycles.count": [
+              831.6,
+              914.2,
+              894.9,
+              828.0,
+              933.1
+            ],
+            "pmu.cycles.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              20.0,
+              14.8,
+              16.5,
+              16.5,
+              17.7
+            ],
+            "pmu.l1d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              8.6,
+              11.4,
+              11.0,
+              8.6,
+              10.5
+            ],
+            "pmu.l2d_tlb_refill.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.l2d_tlb.count": [
+              14.5,
+              14.8,
+              15.0,
+              14.3,
+              14.3
+            ],
+            "pmu.l2d_tlb.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.dtlb_walk.count": [
+              8.6,
+              11.4,
+              11.0,
+              8.6,
+              10.5
+            ],
+            "pmu.dtlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ],
+            "pmu.itlb_walk.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.itlb_walk.valid_rounds": [
+              19.0,
+              19.0,
+              19.0,
+              19.0,
+              19.0
+            ]
+          },
+          "raw_sha256": [
+            {
+              "sample_index": 0,
+              "sha256": "f397a3c1965940ede139abcbe33f5523d2d2b0f55150fa4eeeb5f40f24f5715e",
+              "size_bytes": 899
+            },
+            {
+              "sample_index": 1,
+              "sha256": "ed0cd55554957fc882b227d73cb327f4404efd807bde4da05f9f24b976247ad1",
+              "size_bytes": 900
+            },
+            {
+              "sample_index": 2,
+              "sha256": "6a47c4a24822b6cf93509ff8270a52cabc65f24c599c9b248d1a0979807932b3",
+              "size_bytes": 901
+            },
+            {
+              "sample_index": 3,
+              "sha256": "20415071c6c3e6294439f1c019e5fc83df6016be76429d80c285f4fceffafff9",
+              "size_bytes": 895
+            },
+            {
+              "sample_index": 4,
+              "sha256": "2b66113a0d0f3a99431a82892d7018aa29e73bb92683633dddea290e5336d436",
+              "size_bytes": 897
+            }
+          ],
+          "source_dirty": true,
+          "temperature_before_c": 41.5,
+          "temperature_after_c": 42.0,
+          "wall_seconds": 5.5974555420689285,
+          "input_spec_sha256": "679b71587a325a93bec452bae02a2f8447b256f12af16405af49972ac09a6427"
+        }
+      ],
+      "process_count": 80,
+      "wall_seconds_sum": 85.4116946645081
+    }
+  ],
+  "audit": {
+    "process_count": 185,
+    "valid_round_count": 3515,
+    "raw_sha_size_reparse_realized_metrics_match": true,
+    "max_abs_refill_minus_data_instruction_walk": 0.0,
+    "all_conditions_environment_valid": true,
+    "all_windows_19_valid_0_invalid_0_mux": true
+  }
+}

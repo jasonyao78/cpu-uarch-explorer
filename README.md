@@ -1,6 +1,6 @@
 # cpu-uarch-explorer
 
-**r2 当前进展（2026-10-09）**：软件集成/几何修复后，原正式A1的L1因环境阻断未完成，未产正式H*。用户已确认原上板Agent停止，由当前Agent端到端接管；现完成两target、反序的50进程TLB三轴探索，获得H1型初步行为支持，后续先排查窗口背景并推进ALU/FPU短探针。现有正式合同保持独立，m0b不恢复开发。见[探索结果](docs/reviews/2026-10-09-sm8650-bit-axes-exploration-results.md)及[路线复审](docs/reviews/2026-10-09-probe-first-reassessment.md)。
+**r2 当前进展（2026-10-09）**：当前Agent端到端独占设备。两target三轴探索后，已完成185进程的TLB反证与局部扫描：匹配页表footprint的集中/分散对照保持分离，数据walk中位响应跨W8→W9；W8单样本已高walk，故只称有效转折，未证明物理ways或正式H*。ROB并行完成必读材料与骨架批判性审计，mini-JIT/依赖图可保留，但R1–R3和双锚点协议仍阻塞采数。m0b不恢复开发；原48/48/32合同、旧frozen及未完成L1保持独立。见[TLB结果](docs/reviews/2026-10-09-sm8650-tlb-falsification-results.md)、[ROB吸收裁定](docs/reviews/2026-10-09-rob-probe-critical-reuse.md)。
 
 跨 ISA、跨 OS 的 CPU 微架构探索平台：真实设备微架构探测 → 统一实验协议与数据模型 → gem5 O3 建模与实机校准 → 综合 Benchmark 验证 → ARM / x86 / RISC-V 对比。
 
