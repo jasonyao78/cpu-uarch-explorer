@@ -1,0 +1,76 @@
+{
+  "reviewed_heads": {
+    "m0b": "1e5e99d54836d8b0c46d38925318b72195ff6343",
+    "r2": "ac7ffc7a3d0b8f7f0f69995b251a9465cb67bb99",
+    "main": "2fa8d5d2fbc99a7a03c79634e47efcde23035e2c"
+  },
+  "requested_r2_receipt": "ecbfefc8f9a8f6173afaeb4281feb7834288cb3b",
+  "actual_r2_extra_commit": "ac7ffc7 changes only docs/glossary.md",
+  "source_sha256": {
+    "analysis/sm8650_tlb_a1.py": "c7978c4fced68888f1f93e17cc6641df6a33f03a7110015dcad43f8fbd08fc95",
+    "analysis/tests/test_sm8650_tlb_a1.py": "b6c07e552a12746b99985845f49b9cc5d4c9fce6282245852bd93280844036df"
+  },
+  "test_commands": [
+    {
+      "name": "analysis",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "analysis/tests",
+        "-t",
+        "."
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "exit_code": 0
+    },
+    {
+      "name": "a1-tests",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "analysis.tests.test_sm8650_tlb_a1"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "exit_code": 0
+    }
+  ],
+  "diagnostics_command": [
+    "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+    "scripts/review_rpa_r5_20261008.py",
+    "--tree",
+    "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+    "--r2-tree",
+    "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+    "--main-tree",
+    "/Users/michaelyao/workspace/cpu-uarch-explorer",
+    "--out",
+    "/private/tmp/rpa-r5-diagnostics.json"
+  ],
+  "diagnostics_exit_code": 0,
+  "boundaries": {
+    "adb_phone_perf_executed": false,
+    "executor": "fake; argv never executed",
+    "records": 128,
+    "synthetic_observations": 1280,
+    "raw_policy": "temporary synthetic raw fixtures deleted, no raw data committed",
+    "historical_runner_ctest_ndk_regression": "not rerun; production diff only two A1 Python files"
+  },
+  "plan_sha256": {
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json": "2d9aaf702dff4dd498c8600e2021405aaa74ae40e82d3be9f87c92fd903c382b",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json": "db0c20cd62d43e76d9a684cf18946b2bc3717af8dd2efe19ed6343a1a6231cfc",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json": "89092fc94a2a54e27db46f4311e8d49143ae6b3f353133275b8d7addc51ba85b"
+  },
+  "task_sha256": "36aa86b2734046541a06dd6a5085bae4bb4d14a0da020a507c63ecd910199f3a",
+  "artifact_sha256": {
+    "docs/reviews/2026-10-08-r5-review.md": "26fef0bbc8e05b13286a240bcfcedc19907127cdb262993291e1bd44cadeaabf",
+    "scripts/review_rpa_r5_20261008.py": "cbbadc651650b6c41ba2d46afc939aace166f0e1fa11f1899109962c3d21594a",
+    "docs/reviews/evidence/2026-10-08-r5/diagnostics.json": "d052ca8786f510a41da06a911671953936d4ba3e9b38d2e26b176b28bc0faac6",
+    "docs/reviews/evidence/2026-10-08-r5/analysis.log": "9bbc9ffabab0e05e4331f0d4667b4556eae5489f4d832d6a9cadff5b24c58f39",
+    "docs/reviews/evidence/2026-10-08-r5/a1-tests.log": "41645b5ca66dc4b40f6396f1bfab96ffe6d623dc1211ff9c47df32caac741274"
+  }
+}

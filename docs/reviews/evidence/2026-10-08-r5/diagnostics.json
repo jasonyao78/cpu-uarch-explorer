@@ -1,0 +1,593 @@
+{
+  "heads": {
+    "m0b": "1e5e99d54836d8b0c46d38925318b72195ff6343",
+    "r2": "ac7ffc7a3d0b8f7f0f69995b251a9465cb67bb99",
+    "main": "2fa8d5d2fbc99a7a03c79634e47efcde23035e2c"
+  },
+  "scope": "Read-only R5 review: real planner/adapter/engine with a fake executor.\n\nEvery metric is synthetic. No binary, adb, phone, or perf is executed. Temporary\nraw fixtures are deleted; only diagnostic summaries are saved. Exit 0 denotes\ncompleted diagnostics, never approval of the implementation under review.\n",
+  "m0b_changed_files_since_round4": [
+    "analysis/sm8650_tlb_a1.py",
+    "analysis/tests/test_sm8650_tlb_a1.py"
+  ],
+  "source_sha256": {
+    "analysis/sm8650_tlb_a1.py": "c7978c4fced68888f1f93e17cc6641df6a33f03a7110015dcad43f8fbd08fc95",
+    "analysis/tests/test_sm8650_tlb_a1.py": "b6c07e552a12746b99985845f49b9cc5d4c9fce6282245852bd93280844036df"
+  },
+  "plan_cases": {
+    "l1-main": 48,
+    "l2-repro": 48,
+    "l3-target": 32
+  },
+  "frozen": {
+    "frozen": true,
+    "on_threshold": 2.0,
+    "floor_median": 0.2,
+    "floor_mad": 0.2,
+    "validated": "synthetic-suite"
+  },
+  "left_censor": {
+    "kind": "left-censored",
+    "onset": [
+      null,
+      6
+    ],
+    "reason": "no below-floor observation on low side"
+  },
+  "left_censor_propagation": {
+    "hypothesis": 1,
+    "verdict": "suspect",
+    "classes": {
+      "-1": {
+        "kind": "left-censored",
+        "onset": [
+          null,
+          6
+        ],
+        "reason": "no below-floor observation on low side"
+      },
+      "0": {
+        "kind": "left-censored",
+        "onset": [
+          null,
+          6
+        ],
+        "reason": "no below-floor observation on low side"
+      },
+      "1": {
+        "kind": "left-censored",
+        "onset": [
+          null,
+          6
+        ],
+        "reason": "no below-floor observation on low side"
+      }
+    },
+    "predicted_hw_sets": [
+      7
+    ]
+  },
+  "missing_scope": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "a1: L1 coverage incomplete, missing scopes [1]"
+  },
+  "l3": {
+    "empty": {
+      "ok": false,
+      "exception": "TlbError",
+      "message": "a1: L3 requires 4 targets, got 0"
+    },
+    "one": {
+      "ok": false,
+      "exception": "TlbError",
+      "message": "a1: L3 requires 4 targets, got 1"
+    },
+    "wrong_four_targets": {
+      "ok": true,
+      "value": {
+        "consistent": true,
+        "verdicts": {
+          "7": "supported",
+          "42": "supported",
+          "100": "supported",
+          "201": "supported"
+        },
+        "targets": [
+          7,
+          42,
+          100,
+          201
+        ]
+      }
+    },
+    "correct_four_targets": {
+      "ok": true,
+      "value": {
+        "consistent": true,
+        "verdicts": {
+          "7": "supported",
+          "42": "supported",
+          "100": "supported",
+          "200": "supported"
+        },
+        "targets": [
+          7,
+          42,
+          100,
+          200
+        ]
+      }
+    }
+  },
+  "stop_rejected": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "a1: thresholds not frozen: floor-noisy"
+  },
+  "empty_records": {
+    "ok": true,
+    "value": {
+      "per_hypothesis": {},
+      "on_threshold": 2.0,
+      "n_records": 0
+    }
+  },
+  "fake_runner_summary": {
+    "records": 128,
+    "process_observations": 1280,
+    "all_status_ok": true,
+    "note": "L1 is sharp, L2 replication deliberately never on, L3 control is high"
+  },
+  "l1_only_without_l2_l3": {
+    "per_hypothesis": {
+      "1": {
+        "hypothesis": 1,
+        "verdict": "supported",
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "2": {
+        "hypothesis": 2,
+        "verdict": "supported",
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "3": {
+        "hypothesis": 3,
+        "verdict": "supported",
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "4": {
+        "hypothesis": 4,
+        "verdict": "supported",
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 48
+  },
+  "full128_forward": {
+    "per_hypothesis": {
+      "1": {
+        "hypothesis": 1,
+        "verdict": "suspect",
+        "classes": {
+          "-1": {
+            "kind": "right-censored",
+            "onset": [
+              8,
+              null
+            ],
+            "reason": "onset at or near last window; platform unobserved"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "2": {
+        "hypothesis": 2,
+        "verdict": "suspect",
+        "classes": {
+          "-1": {
+            "kind": "right-censored",
+            "onset": [
+              8,
+              null
+            ],
+            "reason": "onset at or near last window; platform unobserved"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "3": {
+        "hypothesis": 3,
+        "verdict": "suspect",
+        "classes": {
+          "-1": {
+            "kind": "right-censored",
+            "onset": [
+              8,
+              null
+            ],
+            "reason": "onset at or near last window; platform unobserved"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "4": {
+        "hypothesis": 4,
+        "verdict": "suspect",
+        "classes": {
+          "-1": {
+            "kind": "right-censored",
+            "onset": [
+              8,
+              null
+            ],
+            "reason": "onset at or near last window; platform unobserved"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 128
+  },
+  "full128_l3_call_count": 0,
+  "full128_reordered": {
+    "per_hypothesis": {
+      "1": {
+        "hypothesis": 1,
+        "verdict": "supported",
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "2": {
+        "hypothesis": 2,
+        "verdict": "supported",
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "3": {
+        "hypothesis": 3,
+        "verdict": "supported",
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "4": {
+        "hypothesis": 4,
+        "verdict": "supported",
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 128
+  },
+  "threshold_pipeline": {
+    "per_hypothesis": {
+      "1": {
+        "hypothesis": 1,
+        "verdict": "suspect",
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 12
+  },
+  "threshold_pipeline_classifier_kwargs": [
+    {},
+    {},
+    {}
+  ],
+  "direct_classify_selected_two": {
+    "kind": "sharp",
+    "onset": 8,
+    "transition_steps": 0,
+    "platform_median": 2.5
+  },
+  "direct_classify_three": {
+    "kind": "degraded",
+    "onset": null,
+    "reason": "never-reaches-on-threshold"
+  },
+  "under_sampled_one_process_per_case": {
+    "per_hypothesis": {
+      "1": {
+        "hypothesis": 1,
+        "verdict": "supported",
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 12
+  },
+  "audit_gates": {
+    "wrong_sum": {
+      "ok": true,
+      "value": [
+        true,
+        "ok"
+      ]
+    },
+    "wrong_dimension": {
+      "ok": true,
+      "value": [
+        true,
+        "ok"
+      ]
+    },
+    "missing_actual_hi": {
+      "ok": true,
+      "value": [
+        true,
+        "ok"
+      ]
+    }
+  },
+  "task_diff_since_round4": "",
+  "prior_requirement_lines": [
+    "- `check_l3_consistency({})` 和只有 target7 的输入均返回 consistent=true。缺少预注册的四个 target 被当成合格一致性。只比较 verdict 字符串也未定义 W={8,12} 的实际比较量。",
+    "- 缺少 scope1 时 L1 helper 仍可返回 supported。当前仅交付分散纯函数，尚无 records→审计→每case统计→L1/L2/L3覆盖校验→H* 的完整入口；检索生产 analysis/scripts 未找到调用该模块的组合路径。纯函数可以是 API，无需强制 CLI，但需要一个明确承担全链合同的顶层函数/调用路径。",
+    "",
+    "**关闭条件**：把实际 record 接到必经 gate 和统计路径；按约定验证请求/realized 维数、总和、类型、实际高字段及有效样本。高字段不纯的隔离数据在依赖折叠预测时命名降级，或提供足以证明所选地址纯度的更细审计。显式校验scope、W、L2种子与四target的覆盖；缺失/拒绝不得变成通过。L3 两点比较应写出独立的比较量/容差。交付 fake runner→record→完整 A1 判定的正负金样，而不只是逐函数断言。"
+  ]
+}
