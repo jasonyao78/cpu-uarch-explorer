@@ -5,8 +5,7 @@ import unittest
 from analysis.sm8650_tlb import TlbError
 from analysis.sm8650_tlb_a1 import (adjudicate_h, check_l3_consistency,
                                     classify_onset, freeze_thresholds,
-                                    gate_record, predicted_hw_sets,
-                                    run_a1_adjudication)
+                                    gate_record, predicted_hw_sets, run_a1_adjudication)
 
 
 def _record(scope=-1, regions=4, nodes=None, pure=1, consistent=None):
@@ -171,3 +170,53 @@ class TestRound4(unittest.TestCase):
     def test_run_a1_requires_frozen(self):
         with self.assertRaisesRegex(TlbError, "not frozen"):
             run_a1_adjudication([], {"frozen": False, "stop": "floor-noisy"})
+
+
+def _chain_record(h, scope, seed, target, window, value, l3_target=False):
+    params = {"set_hypothesis": h, "set_region_scope": scope, "seed": seed,
+              "set_window": window, "set_regions": 4}
+    if l3_target:
+        params["set_target"] = target
+    return {"params": params,
+            "probe": {"realized": {
+                "set_target_region_nodes": (
+                    [3, 3, 3, 3] if scope < 0
+                    else [0] * scope + [12] + [0] * (3 - scope)),
+                "set_region_vpn_hi_pure": 1}},
+            "metrics": [{"name": "pmu.l2d_tlb_refill.count", "value": value}]}
+
+
+class TestFullChain(unittest.TestCase):
+    FROZEN = {"frozen": True, "on_threshold": 2.0}
+
+    def _l1_l2(self):
+        recs = []
+        for seed in (42, 1337):
+            for scope in (-1, 0, 1):
+                for w, v in ((6, 0.2), (8, 2.5), (10, 6.5), (12, 7.0)):
+                    recs.append(_chain_record(1, scope, seed, 7, w, v))
+        return recs
+
+    def test_permutation_invariance(self):
+        import random
+        a = run_a1_adjudication(self._l1_l2(), self.FROZEN)
+        recs = self._l1_l2()
+        random.seed(7); random.shuffle(recs)
+        b = run_a1_adjudication(recs, self.FROZEN)
+        self.assertEqual(a, b)
+        self.assertEqual(a["per_hypothesis"][1]["verdict"], "supported")
+
+    def test_frozen_threshold_propagates(self):
+        # on=2.0 贯穿：8 档 4.0 在 on=2.0 下判 on、on=3.0 下不判 → 曲线形态随冻结值变
+        recs = self._l1_l2()
+        r2 = run_a1_adjudication(recs, {"frozen": True, "on_threshold": 2.0})
+        r3 = run_a1_adjudication(recs, {"frozen": True, "on_threshold": 3.0})
+        self.assertEqual(r2["on_threshold"], 2.0)
+        self.assertNotEqual(
+            r2["per_hypothesis"][1]["classes"],
+            r3["per_hypothesis"][1]["classes"])
+
+    def test_missing_seed_layer_rejected(self):
+        recs = [r for r in self._l1_l2() if r["params"]["seed"] == 42]
+        with self.assertRaisesRegex(TlbError, "2 seeds"):
+            run_a1_adjudication(recs, self.FROZEN)

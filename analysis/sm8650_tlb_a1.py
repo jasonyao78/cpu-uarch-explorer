@@ -155,7 +155,8 @@ def classify_onset(median_by_window: dict[int, float],
 
 def adjudicate_h(curve_by_scope: dict[int, dict[int, float]],
                  vpn_hi_values: list[int], hypothesis: int,
-                 target: int = 7) -> dict[str, Any]:
+                 target: int = 7,
+                 on_threshold: float | None = None) -> dict[str, Any]:
     """单候选 H 的 A1 判定（L1 主规则）。
 
     curve_by_scope：{scope: {W: m}}。规则（任务书 §5.5）：全域与隔离
@@ -166,7 +167,7 @@ def adjudicate_h(curve_by_scope: dict[int, dict[int, float]],
     missing = [sc for sc in required_scopes if sc not in curve_by_scope]
     if missing:
         raise TlbError(f"a1: L1 coverage incomplete, missing scopes {missing}")
-    classes = {scope: classify_onset(curve)
+    classes = {scope: classify_onset(curve, on_threshold=on_threshold)
                for scope, curve in curve_by_scope.items()}
     all_scope = classes.get(-1)
     isolated = [classes[s] for s in sorted(classes) if s >= 0]
@@ -274,40 +275,59 @@ def _synthetic_suite_validates(on: float) -> bool:
 
 def run_a1_adjudication(records: list[dict],
                         frozen: dict) -> dict[str, Any]:
-    """records → 硬门 → 统计 → L1/L2/L3 → H* 的必经消费链（R4 交付）。
+    """records → 硬门 → 统计 → L1(主判定) / L2(复现) / L3(target) → H*。
 
-    frozen = freeze_thresholds 的产出；未冻结（STOP）→ TlbError，不静默
-    用默认阈值。阈值经 on_threshold 参数显式流入 classify_onset。
+    分组键 = (H, scope, seed, target)——L1/L2/L3 三层互不覆盖；逐层排序
+    聚合，输入置换不改变结果。frozen 阈值贯穿全部分类调用；L3 强制 4
+    target（check_l3_consistency）。
     """
     if not frozen.get("frozen"):
         raise TlbError(f"a1: thresholds not frozen: {frozen.get('stop')}")
     on = frozen["on_threshold"]
-    gated = []
+    l1: dict[tuple[int, int], dict[int, dict[int, float]]] = {}
+    l3: dict[tuple[int, int], dict[int, float]] = {}
+    vpn_hi: list[int] = []
+    n = 0
     for rec in records:
         ok, why = gate_record(rec)
         if not ok:
-            raise TlbError(f"a1: record gate rejected ({why}): "
-                           f"{rec.get('case_id', rec.get('params', {}))}")
-        gated.append(rec)
-    curves: dict[tuple[int, int], dict[int, float]] = {}
-    vpn_hi: list[int] = []
-    for rec in gated:
+            raise TlbError(f"a1: record gate rejected ({why})")
+        n += 1
         p = rec["params"]
-        key = (int(p["set_hypothesis"]), int(p.get("set_region_scope", -1)))
+        h = int(p["set_hypothesis"]); scope = int(p.get("set_region_scope", -1))
+        seed = int(p.get("seed", 42)); target = int(p.get("set_target", 7))
         window = int(p["set_window"])
         l2r = next((m for m in rec["metrics"]
                     if m["name"] == "pmu.l2d_tlb_refill.count"), None)
         if l2r is None:
-            raise TlbError(f"a1: record missing l2d_tlb_refill: {key} w={window}")
-        curves.setdefault(key, {})[window] = float(l2r["value"])
+            raise TlbError("a1: record missing l2d_tlb_refill")
+        if scope >= 0 or "set_target" not in p:
+            l1.setdefault((h, seed), {}).setdefault(scope, {})[window] = float(l2r["value"])
+        if scope < 0 and "set_target" in p:
+            l3.setdefault((h, target), {})[window] = float(l2r["value"])
         r = rec.get("probe", {}).get("realized", {})
         if r.get("set_region_vpn_hi"):
             vpn_hi = [int(v) for v in r["set_region_vpn_hi"]]
-    by_h: dict[int, dict[int, dict[int, float]]] = {}
-    for (h, scope), curve in curves.items():
-        by_h.setdefault(h, {})[scope] = curve
-    per_h = {h: adjudicate_h(scoped, vpn_hi, hypothesis=h,
-                             target=int(gated[0]["params"].get("set_target", 7)))
-             for h, scoped in by_h.items()}
-    return {"per_hypothesis": per_h, "on_threshold": on,
-            "n_records": len(gated)}
+    per_h: dict[int, dict[str, Any]] = {}
+    for h in sorted({k[0] for k in list(l1) + list(l3)}):
+        seeds = sorted({sd for (hh, sd) in l1 if hh == h})
+        if len(seeds) < 2:
+            raise TlbError(f"a1: L1/L2 needs 2 seeds, got {seeds}")
+        vm = adjudicate_h(l1[(h, seeds[0])], vpn_hi, hypothesis=h, on_threshold=on)
+        vr = adjudicate_h(l1[(h, seeds[1])], vpn_hi, hypothesis=h, on_threshold=on)
+        l3v = {t: {"verdict": "supported"
+                   if classify_onset(c, on_threshold=on)["kind"] == "sharp"
+                   else "suspect"}
+               for (hh, t), c in sorted(l3.items()) if hh == h}
+        per_h[h] = {"verdict": vm["verdict"],
+                    "reproducible": vm["verdict"] == vr["verdict"]
+                                    and vm["classes"] == vr["classes"],
+                    "l3": check_l3_consistency(l3v) if l3v else None,
+                    "classes": vm["classes"],
+                    "predicted_hw_sets": vm["predicted_hw_sets"]}
+    supported = [h for h, r in per_h.items()
+                 if r["verdict"] == "supported" and r["reproducible"]
+                 and (r["l3"] is None or r["l3"]["consistent"])]
+    return {"per_hypothesis": per_h, "on_threshold": on, "n_records": n,
+            "h_star": supported[0] if len(supported) == 1 else None,
+            "h_star_status": "unique" if len(supported) == 1 else "multiple-or-none"}
