@@ -1,6 +1,6 @@
 # SM8650 Cortex-X4 TLB 层级探测 · 第二次战役（r2）任务书 v1.1
 
-> 版本：v1.7（2026-10-07 夜；…→ v1.6（PA-01..09 修复）→ **v1.7（RPA-01..05 修复 + A3 后置 + A1 三层矩阵 128 cases 已生成 plan 验证，m0b `d0ff946`/`95fa2a9`）**，处置见 §10.3）
+> 版本：v1.8（2026-10-08；…→ v1.7（RPA-01..05 修复 + A1 三层矩阵）→ **v1.8（评审第三轮三项阻塞修复：warmup 入 digest + 合并单元一致性守卫、A1 判据消费入口模块、金样 CTest 注册补提交，m0b `5ccb841`）**，处置见 §10.3）
 
 ## 1. 任务契约与有限终点
 
@@ -171,7 +171,9 @@
 
 **scope 特定审计门**（修 RPA-05 矛盾）：expected_active = (scope<0 ? set_regions : 1)；门按每 record 的请求 scope + realized 判定——隔离 case 不再被全域硬门误杀；附加 `domain_consistent==true` 与审计不变量（adapter 侧已 fail-closed）。
 
-**量化 onset 判定（"锐/退化"操作定义，候选阈值随首块标定复核）**：
+**判据消费入口（评审第三轮要求，已交付 m0b `5ccb841`）**：`analysis/sm8650_tlb_a1.py`——realized 硬门（gate_record：混域/scope 特定 active/purity/审计）、实际 VA 预测分区（predicted_hw_sets，按 realized `set_region_vpn_hi` 计算）、量化 onset 分类（classify_onset）、单 H 判定（adjudicate_h）、L3 一致性（check_l3_consistency），全部带合成金样。**阈值确定程序**（两阶段预注册）：程序与判据结构现已冻结（见下）；唯二数值（on 阈值 3.0/轮、过渡/平台比）为候选值——A1 首块标定（2-case 标定复测块）采集后，用标定块 + 合成曲线推演复核数值并冻结，**标定数据与正式判定数据隔离**（标定块不进入 H* 判定的 onset 曲线，只用于数值冻结与门限验证），冻结后任务书留修订痕。
+
+**量化 onset 判定（"锐/退化"操作定义，数值随首块标定按上程序冻结）：**
 - 输入：每 case 10 进程 per-round 均值的中位 m(W)；
 - **锐 onset**：存在 W*，m 从 <1.0 到 ≥3.0 的过渡宽度 ≤2 个 W 档，且其后平台 ≥ 过渡峰值的 80%；
 - **退化**：全程 <3.0/轮，或过渡宽度 >4 档，或平台缺失；
