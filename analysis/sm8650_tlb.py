@@ -163,17 +163,18 @@ _TLB_SET_IDENTITY_KEYS = (
 # 2026-10-07-rpa01-05-fix-design.md §3）：
 #   buffer_kb/seed → 键维度；loads/stride → ring_passes 键维度；
 #   base_pages/thp/hugepage → 实际 backing 由 page_policy_actual 承载；
-#   warmup/warmup_passes/pmu_events → runner 协议参数（归档记录普遍携带，
-#     已实证：战役 coarse run params 八键全协议性）——不排除会全员触发
-#     守卫、历史图表与 cohort 路径全拒。
-# 不在排除集的一切（loads_per_slot/min_loads/chains/set_*/任何未来新
-# 维度/descriptor 对象）进 residual_digest → 出口可见、守卫可拒、白名单
-# 不再扩。已知边界：warmup_passes 纯合成反例（同 loads 异 passes）按协议
-# 一致数据对待——真实协议里 passes⇒loads 派生，实现配派生一致性检查；
-# 若评审要求严格化，单参数翻转（移出排除集）+ 守卫改一致性语义即可。
+#   warmup/warmup_passes → **不排除**（评审第三轮推翻我方立场：planner
+#     可合法生成同 loads 异 -w 的两个 case——"只能来自伪造记录"前提不
+#     成立）。已实证钉死数据安全：cohort 合并单元（buffer×backing）内
+#     warmup = f(passes, buffer) 恒均匀；THP B/T 合并对 warmup_passes=2
+#     双方一致 → 守卫用**一致性语义**（见 _check_identity_uniform）时
+#     历史路径不受影响。
+# 不在排除集的一切（warmup/warmup_passes/loads_per_slot/min_loads/
+# chains/set_*/任何未来新维度/descriptor 对象）进 residual_digest →
+# 出口可见、守卫按一致性语义可拒、白名单不再扩。
 _IDENTITY_PROTOCOL_PARAM_KEYS = frozenset(
     {"buffer_kb", "seed", "page_policy_actual", "loads", "stride",
-     "warmup", "warmup_passes", "base_pages", "thp", "hugepage",
+     "base_pages", "thp", "hugepage",
      "pmu_events", *_IDENTITY_PARAM_KEYS, *_TLB_SET_IDENTITY_KEYS})
 
 
@@ -1195,6 +1196,10 @@ def grade_thp_cohorts(rows: Iterable[dict]) -> dict:
     by_cohort: dict[tuple[int, str], dict[int, list[dict]]] = defaultdict(
         lambda: defaultdict(list)
     )
+    # MB-04/RPA-04：身份一致性守卫的粒度 = 合并单元 (buffer × backing)——
+    # warmup=f(passes,buffer) 按 buffer 合法不同，跨 buffer 不比较；单元内
+    # 非一致（不同实验条件）→ 命名拒绝。
+    unit_identity: dict[tuple[int, str], str] = {}
     for row in rows:
         context = f"grade_thp_cohorts/buffer={row.get('buffer_kb')}KiB"
         buffer_kb = row.get("buffer_kb")
@@ -1215,17 +1220,21 @@ def grade_thp_cohorts(rows: Iterable[dict]) -> dict:
                     raise TlbError(
                         f"{context}: sample missing numeric {field_name}"
                     )
-        # REV-M0-BATCH MB-04：cohort 是战役固定路径——拒绝非 legacy 身份
-        # 的实验条件（K 分布/offset 等），禁止无声跨条件合并；条件化
-        # cohort 走未来的显式预注册汇总规则。
-        ident = row.get("identity")
-        if ident and any(value is not None for value in ident.values()):
+        # MB-04/RPA-04（评审第三轮）：身份**一致性**守卫——相同条件合并
+        # 合法，不同条件命名拒绝（"按完整身份分系列/比较，或命名拒绝"）。
+        # 历史数据安全性已实证：单元内 warmup=f(passes,buffer) 恒均匀
+        # （THP B/T 合并对 warmup_passes=2 双方一致）。
+        ident = row.get("identity") or {}
+        canonical = json.dumps(ident, sort_keys=True)
+        unit_key = (buffer_kb, cohort)
+        prior = unit_identity.setdefault(unit_key, canonical)
+        if prior != canonical:
             raise TlbError(
-                f"{context}: non-legacy identity {ident} — THP cohort "
-                "grading requires uniform legacy identity (MB-04); "
+                f"{context}: non-uniform identity within merge unit "
+                f"{unit_key} — {ident} != prior (MB-04/RPA-04); "
                 "conditioned cohorts need an explicit preregistered rule"
             )
-        by_cohort[(buffer_kb, cohort)][seed].extend(samples)
+        by_cohort[unit_key][seed].extend(samples)
     cohorts = []
     for (buffer_kb, cohort), by_seed in sorted(
         by_cohort.items(), key=lambda item: (item[0][0], _BACKING_ORDER[item[0][1]])

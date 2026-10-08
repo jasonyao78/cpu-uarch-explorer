@@ -677,23 +677,26 @@ class TestDescriptorCanonicalIdentity(unittest.TestCase):
         result = analyze_records([a, b], "run-a")
         self.assertEqual(len(result.groups), 1)
 
-    def test_protocol_params_digest_none_downstream_accepts(self):
-        # RPA-04 兼容面：协议反射参数（loads/stride/base_pages…）不触发
-        # digest → legacy 数据出口不变、守卫不拒
-        a = _record()
-        a["params"]["base_pages"] = 1
-        b = _record()
-        b["params"]["loads"] = 999999
-        result = analyze_records([a, b], "run-a")
-        digests = {g["identity"]["residual_digest"] for g in result.groups}
-        # base_pages=1 被排除集吸收；loads 不同 → ring_passes 不同组，
-        # 两组 digest 均为 None（warmup=0/warmup_passes 缺省等协议参数全排除）
-        self.assertTrue(all(d is None for d in digests))
+    def test_protocol_reflected_params_not_in_digest(self):
+        # RPA-04：键维度已反射的协议参数（loads→ring_passes、
+        # base_pages/thp→page_policy_actual）不进 digest。warmup_passes
+        # 进 digest（评审第三轮）→ legacy digest 非 None，但合并单元内
+        # 恒均匀（已实证 THP B/T 对一致）→ 一致性守卫接受历史 cohort。
         from analysis.sm8650_tlb import grade_thp_cohorts
-        subset = [g for g in result.groups
-                  if g["page_policy_actual"] == "base"]
-        if subset:
-            grade_thp_cohorts(subset)  # 不抛 = 守卫未误拒
+        # digest None 情形：params 全部落在键维度/协议反射集（无 warmup*）
+        minimal = _record()
+        del minimal["params"]["warmup_passes"]
+        result0 = analyze_records([minimal], "run-a")
+        self.assertIsNone(result0.groups[0]["identity"]["residual_digest"])
+        a = _record()
+        b = _record()
+        b["params"]["loads"] = 999999   # ring_passes 不同 → 不同组
+        result = analyze_records([a, b], "run-a")
+        b2 = _record()
+        result2 = analyze_records([a, b2], "run-a")
+        self.assertTrue(all(
+            g["identity"]["residual_digest"] is not None for g in result2.groups))
+        grade_thp_cohorts(result2.groups)  # 均匀 → 接受
 
     def test_semantic_residual_digest_exported_and_rejected(self):
         # RPA-04 反例：loads_per_slot 差异 → digest 非 None → identity 出口
@@ -710,20 +713,20 @@ class TestDescriptorCanonicalIdentity(unittest.TestCase):
         with self.assertRaisesRegex(TlbError, "MB-04"):
             grade_thp_cohorts(result.groups)
 
-    def test_warmup_passes_boundary_documented(self):
-        # RPA-04 已知边界（设计稿 §3 末尾，回执明示 + 翻转选项）：
-        # warmup_passes 属协议反射参数（归档记录普遍携带）→ digest None。
-        # 真实协议里 passes⇒loads 派生（plan 硬拒双协议声明），同 loads 异
-        # passes 的合成输入按协议一致数据对待——评审若要求严格化，单参数
-        # 移出排除集 + 守卫改一致性语义（回执登记的开放决定）。
+    def test_warmup_counterexample_rejected(self):
+        # RPA-04 评审第三轮反例（我方原立场被推翻后修正）：同 loads 异
+        # warmup（-w 16384/32768，planner 可合法生成）→ digest 不同 →
+        # 一致性守卫命名拒绝，不再无声合并。
+        from analysis.sm8650_tlb import grade_thp_cohorts
         a = _record()
-        a["params"]["warmup_passes"] = 2
-        b = _record()
-        b["params"]["warmup_passes"] = 4
-        b["loads"] = 4 * (512 * 1024 // 64)   # 与 passes 派生一致的合法记录
+        a["params"]["warmup"] = 16384
+        b = _record(seed=1337)
+        b["params"]["warmup"] = 32768
         result = analyze_records([a, b], "run-a")
-        self.assertTrue(all(
-            g["identity"]["residual_digest"] is None for g in result.groups))
+        digests = {g["identity"]["residual_digest"] for g in result.groups}
+        self.assertTrue(all(d is not None for d in digests))
+        with self.assertRaisesRegex(TlbError, "MB-04"):
+            grade_thp_cohorts(result.groups)
 
     def test_tlb_identity_exported_and_downstream_rejects(self):
         # PA-01 端到端：set_hypothesis 差异 → 分组、导出 identity 含该维、
@@ -839,12 +842,23 @@ class TestRevM0BatchRegression(unittest.TestCase):
             rec["metrics"] = [m for m in rec["metrics"] if m["name"] != name]
         return run
 
-    def test_mb04_cohort_rejects_nonlegacy_identity(self):
-        record = _record()
-        record["params"]["chains"] = 2
-        result = analyze_records([record], "run-a")
+    def test_mb04_cohort_rejects_nonuniform_identity(self):
+        # MB-04/RPA-04（评审第三轮）：一致性语义——同条件合法合并，
+        # 不同条件命名拒绝
+        a = _record()
+        a["params"]["chains"] = 2
+        b = _record(seed=1337)   # 同 buffer 异 seed 异条件 = 合并单元威胁
+        b["params"]["chains"] = 4
+        result = analyze_records([a, b], "run-a")
         with self.assertRaisesRegex(TlbError, "MB-04"):
             grade_thp_cohorts(result.groups)
+        # 单条件均匀：合法
+        result2 = analyze_records([a, _record()], "run-a")
+        result2.groups[0]["params"] if False else None
+        rec2 = _record()
+        rec2["params"]["chains"] = 2
+        result2 = analyze_records([a, rec2], "run-a")
+        grade_thp_cohorts(result2.groups)
 
 
     def test_c2_mixed_contract_same_identity_separates_groups(self):
