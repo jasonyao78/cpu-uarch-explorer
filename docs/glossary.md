@@ -28,6 +28,7 @@
 | Q-A~Q-D | 四个科学问题：分布效应 / L2 冲突 / 索引哈希 / 翻译并行占用 | 任务书 §1.2 |
 | B1 / B2 | Q-B 的两个并列估计量：B1 同 set 自冲突曲线（默认主）；B2 单 victim 驱逐概率（切换有三条合格门） | 任务书 §1.2 Q-B |
 | H1~H4 | VPN→set 哈希候选：位选 / 相邻 XOR / 高位折叠 / 三字段 XOR | 原型头注、任务书 §1.2 Q-C |
+| 双假设预测（C,M） | A1 判据把**收集假设 C 与被检验模型 M 分列**预测硬件 set：同构→`{t}`、差一个高位折叠→`{t⊕hi}`、其余→多 set（onset 退化）；混淆 C/M 会错杀真模型/错留假模型（RV2-02 修复） | m0b `analysis/sm8650_tlb_a1.py` `predicted_hw_sets` |
 | set/way | 组相联结构；L2 TLB = **8 way × 256 set**（X4 TRM 地面真值，不测） | 任务书 §1.2 |
 | 0x05 / 0x2d / 0x2f | 三个 TLB 门控事件：L1 refill / L2 refill / L2 lookup；0x2f 于 2026-10-01 复验升级 | `configs/pmu-event-registry.json` |
 | 事件资格化 | 事件按**作用域**发资格（QUALIFIED / SEMANTICS_UNVERIFIED），长链有资格 ≠ 短窗有资格 | 任务书 §3.1 |
