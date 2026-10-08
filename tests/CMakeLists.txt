@@ -19,6 +19,12 @@ add_executable(tlb_set_collect_golden
 target_link_libraries(tlb_set_collect_golden PRIVATE probe_common)
 add_test(NAME tlb_set_collect_golden COMMAND tlb_set_collect_golden)
 
+# 真机 pilot 跨窗反例：共享生产布局、全部页偏移、宿主预约与实际采集配额。
+add_executable(tlb_set_layout_golden
+               ${CMAKE_SOURCE_DIR}/probes/tests/tlb_set_layout_golden.cpp)
+target_link_libraries(tlb_set_layout_golden PRIVATE probe_common)
+add_test(NAME tlb_set_layout_golden COMMAND tlb_set_layout_golden)
+
 add_test(NAME ptr_chase_valid_small COMMAND ${PT} -b 64 -s 64 -n 8000)
 set_tests_properties(ptr_chase_valid_small PROPERTIES
     PASS_REGULAR_EXPRESSION "latency_ns=[0-9]+\\.[0-9]+")

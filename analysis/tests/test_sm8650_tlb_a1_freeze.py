@@ -53,6 +53,11 @@ class TestA1FreezeArtifact(unittest.TestCase):
                 with self.assertRaisesRegex(TlbError, 'unavailable'):
                     run_a1_adjudication(self.records, frozen)
 
+    def test_region_layout_is_a_freeze_dependency(self):
+        # 区域选址变更会改变模型激励，不能绕过冻结工件的代码漂移检查。
+        from analysis.sm8650_tlb_a1_freeze import CODE_PATHS
+        self.assertIn('probes/common/tlb_set_layout.h', CODE_PATHS)
+
     def test_configuration_and_code_drift(self):
         import shutil
         from analysis.tests.a1_production_fixture import freeze_fixture
@@ -65,7 +70,9 @@ class TestA1FreezeArtifact(unittest.TestCase):
                 dest = root / rel
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(REPO_ROOT / rel, dest)
-            for rel, reason in ((CODE_PATHS[0], 'code_sha256'), (CONFIG_PATHS[0], 'config_sha256')):
+            for rel, reason in ((CODE_PATHS[0], 'code_sha256'),
+                                ('probes/common/tlb_set_layout.h', 'code_sha256'),
+                                (CONFIG_PATHS[0], 'config_sha256')):
                 path = root / rel
                 original = path.read_bytes()
                 path.write_bytes(original + b'\n')

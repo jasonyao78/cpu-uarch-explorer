@@ -9,6 +9,7 @@
 #include <sys/mman.h>
 
 #include "tlb_set_collect.h"
+#include "tlb_set_layout.h"
 
 namespace tlc = tlb_set_collect;
 
@@ -17,15 +18,13 @@ static int failures = 0;
     if (!(cond)) { std::fprintf(stderr, "FAIL: %s\n", msg); ++failures; } \
 } while (0)
 
-// 与探针同款的四区域预约布局（PROT_NONE，不解引用）：region k 起点 =
-// k*256MiB + k*8 页
+// 与探针同源的预约内对齐布局；不解引用，完整原预约长度用于回收。
 struct Layout {
-    char* res;
+    char* res = nullptr;
+    size_t total = 0;
     std::vector<tlc::Region> regions;
     explicit Layout(int n_regions, size_t pool_pages) {
-        const size_t stride = 65536;  // 256MiB / 4KiB
-        const size_t total = (n_regions > 1 ? (size_t)(n_regions - 1) * stride : 0)
-                             + pool_pages + 64;
+        if (!tlb_set_layout::reservation_pages(n_regions, pool_pages, &total)) return;
         res = static_cast<char*>(mmap(nullptr, total * 4096u, PROT_NONE,
                                       MAP_PRIVATE | MAP_ANONYMOUS
 #ifdef MAP_NORESERVE
@@ -33,13 +32,12 @@ struct Layout {
 #endif
                                       , -1, 0));
         if (res == MAP_FAILED) { std::perror("mmap"); return; }
-        const size_t per = pool_pages / (size_t)n_regions;
-        for (int k = 0; k < n_regions; ++k) {
-            const size_t off = (size_t)k * stride + (size_t)k * 8;
-            regions.push_back({res + off * 4096u, per});
-        }
+        tlb_set_layout::make_regions(reinterpret_cast<uintptr_t>(res), total,
+                                     n_regions, pool_pages, &regions);
     }
-    ~Layout() { if (res && res != MAP_FAILED) munmap(res, 1); }
+    ~Layout() {
+        if (res && res != MAP_FAILED) munmap(res, total * 4096u);
+    }
 };
 
 static int active_count(const std::vector<int>& v) {
@@ -117,11 +115,12 @@ int main() {
         CHECK(counts[(size_t)k] == 12, "isolated fills only own slot");
         CHECK(active_count(counts) == 1, "isolated active == 1");
     }
-    // 场景 5：跨界布局——region 基址不落在 256MiB 边界时 vpn_hi 仍逐区域
-    // 恒定（64MiB < 256MiB 单区域不跨窗口），且审计不受影响
+    // 场景 5：窗口内平移——共享布局已保证池不跨窗；收集器按实际地址
+    // 计算索引，合法的额外窗口内偏移不改变区域槽位审计。跨窗反例另由
+    // probes/tests/tlb_set_layout_golden.cpp 的全部页偏移覆盖。
     {
         Layout lo(4, 65536);
-        // 人为把 region 1 基址挪到非对齐偏移（+1234 页，仍 < 256MiB 跨度内）
+        // 对齐后再平移 1234 页，此处池末端仍在同一 256MiB 窗口内。
         lo.regions[1].base += 1234 * 4096u;
         std::vector<uintptr_t> vas;
         std::vector<int> counts(4, 0);

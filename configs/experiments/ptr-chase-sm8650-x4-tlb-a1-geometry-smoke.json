@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "protocol_version": "1.2",
+  "harness": "portable",
+  "parameters": [
+    {
+      "name": "set_hypothesis",
+      "type": "int"
+    },
+    {
+      "name": "set_target",
+      "type": "int",
+      "default": 7
+    },
+    {
+      "name": "set_window",
+      "type": "int"
+    },
+    {
+      "name": "set_rounds",
+      "type": "int",
+      "default": 20
+    },
+    {
+      "name": "set_pool_pages",
+      "type": "int",
+      "default": 65536
+    },
+    {
+      "name": "set_filler_pages",
+      "type": "int",
+      "default": 512
+    },
+    {
+      "name": "set_regions",
+      "type": "int",
+      "default": 4
+    },
+    {
+      "name": "set_region_scope",
+      "type": "int",
+      "default": -1
+    },
+    {
+      "name": "repetitions",
+      "type": "int",
+      "default": 2
+    },
+    {
+      "name": "base_pages",
+      "type": "int",
+      "default": 1
+    },
+    {
+      "name": "seed",
+      "type": "int",
+      "default": 42
+    },
+    {
+      "name": "pmu_events",
+      "type": "pmu-event-list",
+      "default": [
+        {
+          "name": "cycles",
+          "type": 8,
+          "config": "0x11"
+        },
+        {
+          "name": "l1d_tlb_refill",
+          "type": 8,
+          "config": "0x05"
+        },
+        {
+          "name": "l2d_tlb_refill",
+          "type": 8,
+          "config": "0x2d"
+        },
+        {
+          "name": "l2d_tlb",
+          "type": 8,
+          "config": "0x2f"
+        }
+      ]
+    }
+  ],
+  "preconditions": [
+    "--environment-profile charging-thermal；逐record before/after合格；r2 clean source与新探针两端SHA一致",
+    "probes/common/tlb_set_layout.h 预约内对齐；逐进程完整realized、purity=1、active/节点配额与scope精确匹配",
+    "仅设备几何资格；不进入freeze或正式A1裁定；任一失败停块，不筛掉失败样本继续宣布合格"
+  ],
+  "metrics": [
+    {
+      "name": "pmu.cycles.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l1d_tlb_refill.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l2d_tlb_refill.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "pmu.l2d_tlb.count",
+      "unit": "events",
+      "statistic": "median"
+    },
+    {
+      "name": "window_valid_rounds",
+      "unit": "rounds",
+      "statistic": "median"
+    },
+    {
+      "name": "window_mux_rounds",
+      "unit": "rounds",
+      "statistic": "median"
+    }
+  ],
+  "id": "ptr-chase-sm8650-x4-tlb-a1-geometry-smoke",
+  "title": "A1 几何资格冒烟：H×scope，12 cases / 24进程；非正式证据",
+  "execution": {
+    "probe": "ptr_chase",
+    "probe_shape": "tlb_set",
+    "controls": [
+      "x4-prime"
+    ],
+    "params": {
+      "repetitions": 2
+    },
+    "sweep": {
+      "set_hypothesis": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "set_region_scope": [
+        -1,
+        0,
+        1
+      ],
+      "set_window": [
+        12
+      ]
+    },
+    "fixed_params": [
+      "set_target",
+      "set_rounds",
+      "set_pool_pages",
+      "set_filler_pages",
+      "set_regions",
+      "base_pages",
+      "seed",
+      "pmu_events"
+    ]
+  },
+  "notes": "BOARD-A1-GEOMETRY-20261008：集成交接 docs/runbooks/2026-10-08-sm8650-a1-integrated-handoff.md；12×2资格冒烟，正式仍48/48/32×10。",
+  "analysis_role": "GEOMETRY_SMOKE"
+}

@@ -29,7 +29,8 @@ CODE_PATHS = tuple(sorted([
     'runner/resolve.py', 'runner/records.py', 'runner/statistics.py',
     'runner/environment/policy.py', 'runner/environment/android_state.py',
     'probes/cache-mem/ptr_chase.cpp', 'probes/common/perf_window.h',
-    'probes/common/tlb_set_collect.h', 'probes/common/page_policy.h',
+    'probes/common/tlb_set_collect.h', 'probes/common/tlb_set_layout.h',
+    'probes/common/page_policy.h',
     'probes/platform/linux/perf_counter.cpp', 'probes/platform/linux/perf_counter.h',
 ]))
 RUN_FILES = ('records.jsonl', 'run-manifest.json', 'artifacts.jsonl')

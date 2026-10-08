@@ -228,12 +228,13 @@ void usage(const char* prog) {
 // （probes/common/tlb_set_collect.h），评审"生产函数提取复现"法的
 // 直接对象——修复必须落在共享代码上，金样才与探针同源。
 #include "tlb_set_collect.h"
+#include "tlb_set_layout.h"
 
 namespace tlc = tlb_set_collect;
+namespace tll = tlb_set_layout;
 
 constexpr uint32_t kTlbSets = tlc::kSets;  // X4 TRM Table 9-32（探测目标 set 空间）
 constexpr uint32_t kTlbWaysTruth = 8;  // X4 TRM Table 5-1（判读参考线，非探针假设）
-constexpr size_t kRegionStridePages = 65536;  // 2^28 B = 256MiB：相邻区域 VPN[23:16] 不同
 
 struct SetModeOptions {
     int hypothesis = 0;        // 1..4（必填）
@@ -291,38 +292,34 @@ int run_tlb_set_mode(const char* prog, const SetModeOptions& opt,
         return 1;
     }
 
-    // ---- 目标池：多区域 VA 预约（F4）----
-    // 区域 k 起点 = k*256MiB + k*8 页（奇数页偏移打破对齐）。预约 PROT_NONE
-    // 不提交内存，mprotect 逐区域 RW 只提交实际池页。
+    // ---- 目标池：多区域 VA 预约（F4 / BOARD-A1-GEOMETRY-20261008）----
+    // 预约内对齐到 256MiB，保留区域 k 的 k*256MiB+k*8 页相对偏移。
+    // 对齐余量只预约不提交；禁止用 MAP_FIXED 覆盖外部映射。共享布局与
+    // 黄金测试见 probes/common/tlb_set_layout.h；保留原始起点/全长回收。
     std::vector<tlc::Region> regions;
     char* reservation = nullptr;
     size_t reservation_pages = 0;
     const char* set_domain = "single-region";
     if (opt.regions > 1) {
-        reservation_pages = static_cast<size_t>(opt.regions - 1)
-                                * kRegionStridePages
-                            + opt.pool_pages + 64;
+        if (!tll::reservation_pages(opt.regions, opt.pool_pages, &reservation_pages)) {
+            std::fprintf(stderr, "error: invalid multi-region geometry: pool must fit pure vpn-hi windows\n");
+            return 1;
+        }
         reservation = static_cast<char*>(mmap(
             nullptr, reservation_pages * 4096u, PROT_NONE,
             MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0));
         if (reservation != MAP_FAILED) {
-            const size_t per = opt.pool_pages / static_cast<size_t>(opt.regions);
-            bool ok = per >= 2;
-            for (int k = 0; ok && k < opt.regions; ++k) {
-                const size_t off = static_cast<size_t>(k) * kRegionStridePages
-                                   + static_cast<size_t>(k) * 8;
-                const size_t sz = (k == opt.regions - 1)
-                    ? opt.pool_pages - per * static_cast<size_t>(opt.regions - 1)
-                    : per;
-                if (off + sz > reservation_pages) { ok = false; break; }
-                char* base = reservation + off * 4096u;
-                if (mprotect(base, sz * 4096u, PROT_READ | PROT_WRITE) != 0) {
+            bool ok = tll::make_regions(reinterpret_cast<uintptr_t>(reservation),
+                                       reservation_pages, opt.regions,
+                                       opt.pool_pages, &regions);
+            for (const auto& region : regions) {
+                if (mprotect(region.base, region.pages * 4096u,
+                             PROT_READ | PROT_WRITE) != 0) {
                     ok = false; break;
                 }
 #ifdef MADV_NOHUGEPAGE
-                madvise(base, sz * 4096u, MADV_NOHUGEPAGE);
+                madvise(region.base, region.pages * 4096u, MADV_NOHUGEPAGE);
 #endif
-                regions.push_back({base, sz});
             }
             if (!ok) {
                 munmap(reservation, reservation_pages * 4096u);
@@ -331,6 +328,8 @@ int run_tlb_set_mode(const char* prog, const SetModeOptions& opt,
             } else {
                 set_domain = "multi-region";
             }
+        } else {
+            reservation = nullptr;
         }
     }
     if (regions.empty()) {
@@ -658,9 +657,9 @@ int run_tlb_set_mode(const char* prog, const SetModeOptions& opt,
             std::printf("%s%d", i == 0 ? "" : ",", t2_region_nodes[i]);
     }
     // 实际高字段（RPA-05：预测表按实际 VA 计算，区域编号 k ≠ 实际 vpn_hi）。
-    // purity：区域内每页 vpn_hi 与基址一致（64MiB 区域基址不对齐时可能
-    // 跨 256MiB 窗口——已实证 25% 随机基址跨界）；purity=0 → 折叠类 H
-    // 判别降级（命名，不静默）。
+    // purity 审计整个区域池而非仅实际入链页；对齐布局应恒为1，但输出端
+    // 仍独立计算，不能以请求或布局成功替代实际地址核验。所有 scope 的
+    // purity=0 均由正式入口拒绝，旧 pilot 的“仅折叠类降级”不再适用。
     bool vpn_hi_pure = true;
     std::printf(" set_region_vpn_hi=");
     for (size_t i = 0; i < regions.size(); ++i) {
