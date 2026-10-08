@@ -4,7 +4,7 @@
 journal 先于任何变更写入（先记账后动手）：每条 mutation 记录
 requested/before/after 三值——restore 永远拿 before 实际值回写，
 不依赖"系统默认值"这种会漂移的假设。状态机白名单拒绝非法迁移；
-终态（restored/restore-failed/apply-failed）不可变。
+终态（restored/apply-failed）不可变；restore-failed 可重试。
 
 存储：data/private/env-journals/<tx_id>.json（私有层，永不入库）；
 原子写 tmp→fsync→replace→dir fsync（OI-9 蓝图 ResultStore 同款）。

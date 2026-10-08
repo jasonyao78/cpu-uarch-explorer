@@ -454,5 +454,120 @@ class TestRemoteFlockScript(unittest.TestCase):
         self.assertIn("rm -f", script)          # acquire 前清残留旗标
 
 
+class RestorePressureExecutor(FakeMultiPolicyAdbExecutor):
+    """真实 Android 控制器替身：恢复时注入外部限频或中断。"""
+
+    def __init__(self):
+        super().__init__()
+        self.cap_active = False
+        self.interrupt_restore = False
+
+    def execute(self, argv, command_prefix=()):
+        restoring = "cpu_uarch_cpufreq_restore_v1" in " ".join(map(str, argv))
+        if restoring and self.interrupt_restore:
+            raise KeyboardInterrupt("interrupted during restore")
+        result = super().execute(argv, command_prefix)
+        if restoring and self.cap_active:
+            self.policies["policy7"]["max_khz"] = 2496000
+        return result
+
+
+class TestRestoreDurability(unittest.TestCase):
+    """BOARD-A1-THERMAL：重启回读恢复失败，并重放被中断的恢复。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.store = JournalStore(Path(self.tmp.name))
+        self.executor = RestorePressureExecutor()
+        self.lock = FakeLock()
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _run(self, work):
+        return execute_environment_tx(
+            PLATFORM, ["governor=performance"], work, allow_mutation=True,
+            store=self.store, executor=self.executor, lock=self.lock)
+
+    def _reloaded(self):
+        fresh = JournalStore(Path(self.tmp.name))
+        return fresh, fresh.load(next(fresh.root.glob("*.json")).stem)
+
+    def _cap(self):
+        self.executor.cap_active = True
+        return {"ok": 14, "failed": 34}
+
+    def test_normal_work_restore_failure_is_durable_and_retryable(self):
+        with self.assertRaises(EnvironmentError_) as caught:
+            self._run(self._cap)
+        self.assertEqual(caught.exception.code, "env-restore-failed")
+        fresh, journal = self._reloaded()
+        self.assertEqual(journal.state, "restore-failed")
+        self.assertTrue(self.lock.released)
+        self.assertEqual(self.executor.policies["policy7"]["governor"], "powersave")
+        with self.assertRaises(EnvironmentError_) as blocked:
+            self._run(lambda: self.fail("unfinished recovery must block work"))
+        self.assertEqual(blocked.exception.code, "env-unfinished-tx")
+        self.executor.cap_active = False
+        restore_transaction(journal.tx_id, PLATFORM, store=fresh,
+                            executor=self.executor, lock=FakeLock())
+        self.assertEqual(fresh.load(journal.tx_id).state, "restored")
+        self.assertEqual(fresh.unfinished(), [])
+        self.assertEqual(self.executor.policies["policy7"]["max_khz"], 2745600)
+
+    def test_explicit_restore_failure_is_durable_after_restart(self):
+        with self.assertRaises(EnvironmentError_):
+            self._run(self._cap)
+        fresh, journal = self._reloaded()
+        # 从独立的 applied 现场开始，不能让正常路径已存的 restore-failed
+        # 掩盖显式 restore 漏 save；before/after 来自真实控制器事务。
+        journal.state = "applied"
+        fresh.save(journal)
+        with self.assertRaises(EnvironmentError_):
+            restore_transaction(journal.tx_id, PLATFORM, store=fresh,
+                                executor=self.executor, lock=FakeLock())
+        self.assertEqual(self._reloaded()[1].state, "restore-failed")
+
+    def test_interrupted_restore_can_resume_from_persisted_restoring(self):
+        def failed_work():
+            self.executor.interrupt_restore = True
+            raise RuntimeError("work failed first")
+        with self.assertRaises(KeyboardInterrupt):
+            self._run(failed_work)
+        fresh, journal = self._reloaded()
+        self.assertEqual(journal.state, "restoring")
+        self.executor.interrupt_restore = False
+        restore_transaction(journal.tx_id, PLATFORM, store=fresh,
+                            executor=self.executor, lock=FakeLock())
+        self.assertEqual(fresh.load(journal.tx_id).state, "restored")
+
+    def test_reconcile_reloads_failure_and_can_finish_after_cap_clears(self):
+        from runner.environment import reconcile_unfinished
+        with self.assertRaises(EnvironmentError_):
+            self._run(self._cap)
+        fresh, journal = self._reloaded()
+        pending = reconcile_unfinished(PLATFORM, store=fresh, executor=self.executor)
+        self.assertEqual([j.state for j in pending], ["restore-failed"])
+        self.assertEqual(fresh.load(journal.tx_id).state, "restore-failed")
+        self.executor.cap_active = False
+        self.assertEqual(reconcile_unfinished(PLATFORM, store=fresh,
+                                             executor=self.executor), [])
+        self.assertEqual(fresh.load(journal.tx_id).state, "restored")
+
+
+    def test_created_journal_closes_without_device_mutation(self):
+        from runner.environment import reconcile_unfinished
+        journal = self.store.new("fake-01")
+        self.store.save(journal)
+        before = {p: dict(v) for p, v in self.executor.policies.items()}
+        self.assertEqual(reconcile_unfinished(PLATFORM, store=self.store,
+                                             executor=self.executor), [])
+        self.assertEqual(self.store.load(journal.tx_id).state, "apply-failed")
+        self.assertEqual(self.executor.policies, before)
+        restore_transaction(journal.tx_id, PLATFORM, store=self.store,
+                            executor=self.executor, lock=FakeLock())
+        self.assertEqual(self.store.load(journal.tx_id).state, "apply-failed")
+
+
 if __name__ == "__main__":
     unittest.main()

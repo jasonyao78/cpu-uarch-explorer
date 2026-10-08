@@ -141,7 +141,13 @@ def _apply_all(executor, journal: Journal, specs: list[str], store: JournalStore
 
 
 def _restore_all(executor, journal: Journal) -> None:
-    journal.transition("restoring")
+    # BOARD-A1-THERMAL-20261008：created 尚无 apply intent，不触碰设备；
+    # restoring 可能来自恢复中断后的持久现场，须允许幂等重放。
+    if journal.state == "created":
+        journal.transition("apply-failed")
+        return
+    if journal.state != "restoring":
+        journal.transition("restoring")
     failures = []
     for m in reversed(journal.mutations):  # 逆序恢复（GB10 模型）
         if not m.apply_started:
@@ -165,7 +171,8 @@ def execute_environment_tx(platform: dict, specs: list[str], work, *,
     """应用 specs → 执行 work() → 恢复。返回 run 汇总（work 的返回值）。
 
     门控：--allow-mutation 缺失直接拒绝（CLI 负责传）；存在未完成事务
-    直接拒绝（journal 互斥）。任何路径都保证 journal 落盘到终态。"""
+    直接拒绝（journal 互斥）。退出时持久化最新状态；恢复再中断时
+    保留 restoring，后续按 apply_started 幂等重放。"""
     if not allow_mutation:
         raise EnvironmentError_("env-mutation-not-allowed",
                                 "host mutation requires explicit --allow-mutation")
@@ -206,8 +213,11 @@ def execute_environment_tx(platform: dict, specs: list[str], work, *,
             finally:
                 store.save(journal)
             raise
-        _restore_all(executor, journal)
-        store.save(journal)
+        try:
+            _restore_all(executor, journal)
+        finally:
+            # 恢复验证失败也必须落盘，不能只留下旧 applied 假象。
+            store.save(journal)
         return result
     finally:
         lock.release()
@@ -216,17 +226,19 @@ def execute_environment_tx(platform: dict, specs: list[str], work, *,
 def restore_transaction(tx_id: str, platform: dict, *, store: JournalStore | None = None,
                         executor=None, lock=None) -> None:
     """崩溃后人工重放：按 journal 的 before 值逆序恢复（幂等：仅处理
-    after 已写入的 mutation；已 restored 的 journal 直接返回）。"""
+    apply 已开始的 mutation；已 restored/apply-failed 的 journal 直接返回）。"""
     store = store or default_store()
     journal = store.load(tx_id)
-    if journal.state == "restored":
+    if journal.state in ("restored", "apply-failed"):
         return
     executor = executor or make_executor(platform)
     lock = lock if lock is not None else _default_lock(platform)
     lock.acquire()
     try:
-        _restore_all(executor, journal)
-        store.save(journal)
+        try:
+            _restore_all(executor, journal)
+        finally:
+            store.save(journal)
     finally:
         lock.release()
 
@@ -237,8 +249,8 @@ def reconcile_unfinished(platform: dict, *, store: JournalStore | None = None,
     实证——kill -INT 留下的 applied/applying 事务在下次运行前被 restore，
     而不是永远硬拒绝）。恢复失败的事务保持未完结并返回，由调用方拒绝运行。
 
-    状态语义：applied=中断于测量中（直接逆序恢复）；applying=中断于
-    apply 中（先落 applied 标记再过恢复路径，after 为空的 mutation 不动）。"""
+    状态语义：created 尚无变更，关闭为 apply-failed；applied/applying/
+    restoring/restore-failed 均按 apply_started 保守逆序恢复，不依赖 after。"""
     store = store or default_store()
     executor = executor or make_executor(platform)
     lock = _default_lock(platform)
