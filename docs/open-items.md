@@ -298,3 +298,14 @@
 - **继承合同**：R3-C/R5-C完整W/有效样本/实际hi/请求-realized审计与重复策略，R5-D正文/冻结配置-代码-标定数据锚定继续原关闭条件；任务书本轮未修订。本轮未重测旧防御反例，既有A3及P2后置项沿原触发条件保留。
 - **证据/边界**：本轮独立analysis185/185、A1 loader27/27；使用真实planner/runner/adapter/writer/loader，仅外部执行/二进制登记/Git来源替换为mock。全部新增数值为合成软件诊断，无adb/手机/perf执行；不声称本轮runner/CTest/NDK/旧runs重放。
 - **行动链**：贯通权威manifest层来源→选择并注册可识别L3合同→真实计划写盘/读盘端到端正负及置换→正文/冻结产物/证据更正→新基线复核→整树集成→上板Agent独立标定及正式矩阵。本次仅提交自有评审产物与本段台账，远程分支不处理。
+
+
+## REV-RPA-R8-20261008 第八轮复核
+
+- **输入/归属**：r2 `e02cc3d`、任务书仍v1.8.2、m0b `0840b6e`、main `2fa8d5d`；[第八轮复核](reviews/2026-10-08-r8-review.md)。**不通过，RV2-02未关闭，Phase A正式冻结不确认。**
+- **已修子项**：R7-B两点L3不可达性关闭，限附加形态一致性；诊断性补manifest来源后真实128条可得H*=1，全部below/单target冲突拒绝、缺target命名报错。既有RV2-01/03、R3-A、R4-B、R5-T、R6-C关闭维持。
+- **P1延续 / 正式矩阵前关闭**：R7-A没有进入提交——0840b6e仅两个analysis文件，真实runner仍只向manifest写experiment_id；实际128条/1280合成观测0条含record级ID，入口unknown layer。R3-C/R6-B准确覆盖仍未修：合法协议的target201替换200、W100/200替换8/12均获H*=1；分别由邻接错误plan经真实runner/adapter生产，不能以数量/任意两点代替预注册合同。
+- **证据口径**：新增测试128个planner case数量属实；但record仍手工构造且读回补ID，spy显示run_plan/_run_case均0调用，88条realized节点总和不符请求W，不能称实际producer链通过。纯函数合成曲线保留；record级端到端须用真实producer，仅mock外部执行。
+- **继承与触发**：R5-D正文/冻结配置-代码-标定数据锚定，R3-C/R5-C有效样本/实际hi/最终审计/重复处理继续原合同；任务书未同步两点规则，入口docstring仍写sharp/onset规则。高→低误标签为both-below为P2（保守拒绝），随两点规则正文同步修订。既有A3/P2后置触发不变。
+- **证据边界**：独立analysis187/187、runner192/192、A1 loader29/29；正式128条生产/读盘诊断与两个邻接错误plan全部fake外部执行，无adb/手机二进制/perf。未复跑CTest/NDK/历史runs。本次仅提交自有评审文档、脚本、证据与本段台账。
+- **分支终点与行动链**：真实来源接线→真实producer正负例及精确覆盖→正文/冻结审计合同→新基线验收→m0b合入codex/sm8650-tlb-hierarchy-r2、main相关变更核对及整树回归→结束m0b开发、设备工作由r2/上板Agent承接。worktree按干净/无依赖/数据处置回收；分支删除须main集成+完整测试+推送，用户暂不处理远程期间保留引用，不因此延长开发使命。本轮没有执行集成/回收/删除。

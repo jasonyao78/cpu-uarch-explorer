@@ -1,0 +1,804 @@
+{
+  "heads": {
+    "m0b": "0840b6e09802ada863d20d799d9271e273539806",
+    "r2": "686dc418cd953c09d0ac95416636eeb2096449b9",
+    "main": "2fa8d5d2fbc99a7a03c79634e47efcde23035e2c"
+  },
+  "scope": "Read-only R8 review: real planner/adapter/engine with a fake executor.\n\nEvery metric is synthetic. No binary, adb, phone, or perf is executed. Temporary\nraw fixtures are deleted; only diagnostic summaries are saved. Exit 0 denotes\ncompleted diagnostics, never approval of the implementation under review.\n",
+  "source_sha256": {
+    "analysis/sm8650_tlb_a1.py": "17671e674d268ad45d62771e8b104f505cc5400d77cc0fecdcce6917ce36365f",
+    "analysis/tests/test_sm8650_tlb_a1.py": "3babff6b24562d329279759c9ff82494aa3cc88c4944d6c5d0d7a159c831ba27",
+    "analysis/load.py": "63cbfa1d903b679a2c5423c043dd9d45b5b57fd64be6d5af985915bafd1ff2c2",
+    "runner/engine.py": "1884e78382def7e813e8ae530311421b9f07e7cfd8453dc13aed9b1fb9d3da15",
+    "runner/schema/README.md": "7cd1007b1420432c24cd9fcaa2920e629bb730ffc8f5df89bbd0efb77dc09b43",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json": "2d9aaf702dff4dd498c8600e2021405aaa74ae40e82d3be9f87c92fd903c382b",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json": "db0c20cd62d43e76d9a684cf18946b2bc3717af8dd2efe19ed6343a1a6231cfc",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json": "89092fc94a2a54e27db46f4311e8d49143ae6b3f353133275b8d7addc51ba85b"
+  },
+  "commit_changed_files": [
+    "analysis/sm8650_tlb_a1.py",
+    "analysis/tests/test_sm8650_tlb_a1.py"
+  ],
+  "r2_changed_files": [
+    "docs/reviews/2026-10-08-r8-response.md"
+  ],
+  "plan_cases": {
+    "l1-main": 48,
+    "l2-repro": 48,
+    "l3-target": 32
+  },
+  "plan_windows": {
+    "l1-main": [
+      6,
+      8,
+      10,
+      12
+    ],
+    "l2-repro": [
+      6,
+      8,
+      10,
+      12
+    ],
+    "l3-target": [
+      8,
+      12
+    ]
+  },
+  "frozen": {
+    "frozen": true,
+    "on_threshold": 2.0,
+    "floor_median": 0.2,
+    "floor_mad": 0.2,
+    "validated": "synthetic-suite"
+  },
+  "real_pipeline_summary": {
+    "records": 128,
+    "process_observations": 1280,
+    "all_status_ok": true,
+    "manifest_experiment_id": {
+      "l1-main": "ptr-chase-sm8650-x4-tlb-a1-l1-main",
+      "l2-repro": "ptr-chase-sm8650-x4-tlb-a1-l2-repro",
+      "l3-target": "ptr-chase-sm8650-x4-tlb-a1-l3-target"
+    },
+    "record_experiment_id_present_by_layer": {
+      "l1-main": 0,
+      "l2-repro": 0,
+      "l3-target": 0
+    },
+    "all_existing_gates_pass": true,
+    "synthetic_response_model": "H1 sharp on L1/L2; other H flat below floor"
+  },
+  "persisted_loaded_128": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "a1: unknown layer from experiment_id ''"
+  },
+  "diagnostic_only_manifest_enriched_128": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3_pass": true,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "2": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "3": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "4": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 128,
+    "h_star": 1,
+    "h_star_status": "unique"
+  },
+  "diagnostic_only_128_permutation_equal": true,
+  "diagnostic_only_128_canonical_json_equal": true,
+  "two_point_truth_table": {
+    "below_below": "both-below",
+    "below_above": "crossing",
+    "above_above": "both-above",
+    "above_below": "both-below"
+  },
+  "diagnostic_only_l3_all_low": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "2": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "3": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "4": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 128,
+    "h_star": null,
+    "h_star_status": "multiple-or-none"
+  },
+  "diagnostic_only_l3_one_bad_target": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "2": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "3": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "4": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 128,
+    "h_star": null,
+    "h_star_status": "multiple-or-none"
+  },
+  "diagnostic_only_l3_missing_target": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "a1: L3 needs 4 targets, got 3"
+  },
+  "diagnostic_only_wrong_fourth_target": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3_pass": true,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "2": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "3": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "4": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 128,
+    "h_star": 1,
+    "h_star_status": "unique"
+  },
+  "diagnostic_only_wrong_two_windows": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3_pass": true,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "2": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "3": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "4": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 128,
+    "h_star": 1,
+    "h_star_status": "unique"
+  },
+  "neighboring_plan_coverage_inputs": {
+    "wrong_fourth_target": {
+      "l3_records": 32,
+      "fake_calls": 320,
+      "all_status_ok": true,
+      "targets": [
+        7,
+        42,
+        100,
+        201
+      ],
+      "windows": [
+        8,
+        12
+      ]
+    },
+    "wrong_two_windows": {
+      "l3_records": 32,
+      "fake_calls": 320,
+      "all_status_ok": true,
+      "targets": [
+        7,
+        42,
+        100,
+        200
+      ],
+      "windows": [
+        100,
+        200
+      ]
+    }
+  },
+  "owner_128_fixture_summary": {
+    "records": 128,
+    "run_plan_calls": 0,
+    "_run_case_calls": 0,
+    "experiment_id_present": 128,
+    "region_nodes_sum_differs_from_requested_window": 88
+  },
+  "owner_128_positive": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3_pass": true,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "2": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "3": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "4": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 3.0,
+    "n_records": 128,
+    "h_star": 1,
+    "h_star_status": "unique"
+  },
+  "owner_128_full_result_permutation_equal": true,
+  "old_handmade_fixture_records": 32,
+  "task_diff_since_r7_review": ""
+}

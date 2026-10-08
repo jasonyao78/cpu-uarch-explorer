@@ -1,0 +1,139 @@
+{
+  "heads": {
+    "m0b": "0840b6e09802ada863d20d799d9271e273539806",
+    "r2": "686dc418cd953c09d0ac95416636eeb2096449b9",
+    "main": "2fa8d5d2fbc99a7a03c79634e47efcde23035e2c"
+  },
+  "commit_changed_files": [
+    "analysis/sm8650_tlb_a1.py",
+    "analysis/tests/test_sm8650_tlb_a1.py"
+  ],
+  "r2_changed_files": [
+    "docs/reviews/2026-10-08-r8-response.md"
+  ],
+  "plan_cases": {
+    "l1-main": 48,
+    "l2-repro": 48,
+    "l3-target": 32
+  },
+  "plan_windows": {
+    "l1-main": [
+      6,
+      8,
+      10,
+      12
+    ],
+    "l2-repro": [
+      6,
+      8,
+      10,
+      12
+    ],
+    "l3-target": [
+      8,
+      12
+    ]
+  },
+  "real_pipeline_summary": {
+    "records": 128,
+    "process_observations": 1280,
+    "all_status_ok": true,
+    "manifest_experiment_id": {
+      "l1-main": "ptr-chase-sm8650-x4-tlb-a1-l1-main",
+      "l2-repro": "ptr-chase-sm8650-x4-tlb-a1-l2-repro",
+      "l3-target": "ptr-chase-sm8650-x4-tlb-a1-l3-target"
+    },
+    "record_experiment_id_present_by_layer": {
+      "l1-main": 0,
+      "l2-repro": 0,
+      "l3-target": 0
+    },
+    "all_existing_gates_pass": true,
+    "synthetic_response_model": "H1 sharp on L1/L2; other H flat below floor"
+  },
+  "persisted_loaded_128": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "a1: unknown layer from experiment_id ''"
+  },
+  "owner_128_fixture_summary": {
+    "records": 128,
+    "run_plan_calls": 0,
+    "_run_case_calls": 0,
+    "experiment_id_present": 128,
+    "region_nodes_sum_differs_from_requested_window": 88
+  },
+  "two_point_truth_table": {
+    "below_below": "both-below",
+    "below_above": "crossing",
+    "above_above": "both-above",
+    "above_below": "both-below"
+  },
+  "diagnostic_only_128_permutation_equal": true,
+  "owner_128_full_result_permutation_equal": true,
+  "diagnostic_only_manifest_enriched_128": {
+    "n_records": 128,
+    "h_star": 1,
+    "h_star_status": "unique",
+    "h1": {
+      "verdict": "supported",
+      "reproducible": true,
+      "l3_pass": true
+    }
+  },
+  "diagnostic_only_l3_all_low": {
+    "n_records": 128,
+    "h_star": null,
+    "h_star_status": "multiple-or-none",
+    "h1": {
+      "verdict": "supported",
+      "reproducible": true,
+      "l3_pass": false
+    }
+  },
+  "diagnostic_only_l3_one_bad_target": {
+    "n_records": 128,
+    "h_star": null,
+    "h_star_status": "multiple-or-none",
+    "h1": {
+      "verdict": "supported",
+      "reproducible": true,
+      "l3_pass": false
+    }
+  },
+  "diagnostic_only_wrong_fourth_target": {
+    "n_records": 128,
+    "h_star": 1,
+    "h_star_status": "unique",
+    "h1": {
+      "verdict": "supported",
+      "reproducible": true,
+      "l3_pass": true
+    }
+  },
+  "diagnostic_only_wrong_two_windows": {
+    "n_records": 128,
+    "h_star": 1,
+    "h_star_status": "unique",
+    "h1": {
+      "verdict": "supported",
+      "reproducible": true,
+      "l3_pass": true
+    }
+  },
+  "owner_128_positive": {
+    "n_records": 128,
+    "h_star": 1,
+    "h_star_status": "unique",
+    "h1": {
+      "verdict": "supported",
+      "reproducible": true,
+      "l3_pass": true
+    }
+  },
+  "diagnostic_only_l3_missing_target": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "a1: L3 needs 4 targets, got 3"
+  }
+}
