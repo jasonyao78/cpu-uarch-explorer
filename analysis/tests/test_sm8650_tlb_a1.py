@@ -172,12 +172,12 @@ class TestRound4(unittest.TestCase):
             run_a1_adjudication([], {"frozen": False, "stop": "floor-noisy"})
 
 
-def _chain_record(h, scope, seed, target, window, value, l3_target=False):
+def _chain_record(h, scope, seed, target, window, value, exp="x-a1-l1"):
+    # 生产形态：records 全带 set_target 默认键，归层靠 experiment_id
     params = {"set_hypothesis": h, "set_region_scope": scope, "seed": seed,
+              "set_target": target,
               "set_window": window, "set_regions": 4}
-    if l3_target:
-        params["set_target"] = target
-    return {"params": params,
+    return {"experiment_id": exp, "params": params,
             "probe": {"realized": {
                 "set_target_region_nodes": (
                     [3, 3, 3, 3] if scope < 0
@@ -191,16 +191,21 @@ class TestFullChain(unittest.TestCase):
 
     def _l1_l2(self):
         recs = []
-        for seed in (42, 1337):
+        for seed, exp in ((42, "x-a1-l1-main"), (1337, "x-a1-l2-repro")):
             for scope in (-1, 0, 1):
                 for w, v in ((6, 0.2), (8, 2.5), (10, 6.5), (12, 7.0)):
-                    recs.append(_chain_record(1, scope, seed, 7, w, v))
+                    recs.append(_chain_record(1, scope, seed, 7, w, v, exp=exp))
         return recs
+
+    def _l3(self, h=1):
+        return [_chain_record(h, -1, 42, t, w, v, exp="x-a1-l3-target")
+                for t in (7, 42, 100, 200)
+                for w, v in ((6, 0.2), (8, 2.5), (10, 6.5), (12, 7.0))]
 
     def test_permutation_invariance(self):
         import random
-        a = run_a1_adjudication(self._l1_l2(), self.FROZEN)
-        recs = self._l1_l2()
+        a = run_a1_adjudication(self._l1_l2() + self._l3(), self.FROZEN)
+        recs = self._l1_l2() + self._l3()
         random.seed(7); random.shuffle(recs)
         b = run_a1_adjudication(recs, self.FROZEN)
         self.assertEqual(a, b)
@@ -208,7 +213,7 @@ class TestFullChain(unittest.TestCase):
 
     def test_frozen_threshold_propagates(self):
         # on=2.0 贯穿：8 档 4.0 在 on=2.0 下判 on、on=3.0 下不判 → 曲线形态随冻结值变
-        recs = self._l1_l2()
+        recs = self._l1_l2() + self._l3()
         r2 = run_a1_adjudication(recs, {"frozen": True, "on_threshold": 2.0})
         r3 = run_a1_adjudication(recs, {"frozen": True, "on_threshold": 3.0})
         self.assertEqual(r2["on_threshold"], 2.0)
@@ -217,6 +222,27 @@ class TestFullChain(unittest.TestCase):
             r3["per_hypothesis"][1]["classes"])
 
     def test_missing_seed_layer_rejected(self):
-        recs = [r for r in self._l1_l2() if r["params"]["seed"] == 42]
+        recs = [r for r in self._l1_l2() + self._l3() if r["params"]["seed"] == 42]
         with self.assertRaisesRegex(TlbError, "2 seeds"):
             run_a1_adjudication(recs, self.FROZEN)
+
+    def test_missing_l3_rejected(self):
+        with self.assertRaisesRegex(TlbError, "4 targets"):
+            run_a1_adjudication(self._l1_l2(), self.FROZEN)
+
+    def test_l3_uniform_suspect_not_passed(self):
+        # 四 target 全退化 → l3_pass=False → 无 H*
+        bad_l3 = [_chain_record(1, -1, 42, t, w, 0.3, exp="x-a1-l3-target")
+                  for t in (7, 42, 100, 200)
+                  for w in (8, 10, 12)]
+        r = run_a1_adjudication(self._l1_l2() + bad_l3, self.FROZEN)
+        self.assertIsNone(r["h_star"])
+
+    def test_l2_onset_match_ignores_platform_noise(self):
+        # 平台中位微差（6.75 vs 6.85）不影响复现判定（onset 比较）
+        recs = self._l1_l2() + self._l3()
+        for r in recs:
+            if r["experiment_id"].endswith("l2-repro") and r["params"]["set_window"] == 12:
+                r["metrics"][0]["value"] = 7.2
+        out = run_a1_adjudication(recs, self.FROZEN)
+        self.assertTrue(out["per_hypothesis"][1]["reproducible"])

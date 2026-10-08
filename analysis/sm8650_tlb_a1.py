@@ -273,13 +273,23 @@ def _synthetic_suite_validates(on: float) -> bool:
             and weak["kind"] == "degraded" and cens["kind"] == "right-censored")
 
 
+def _layer_of(rec: dict) -> str:
+    exp = str(rec.get("experiment_id", ""))
+    for tag, layer in (("a1-l3", "l3"), ("a1-l2", "l2"), ("a1-l1", "l1")):
+        if tag in exp:
+            return layer
+    raise TlbError(f"a1: unknown layer from experiment_id {exp!r}")
+
+
 def run_a1_adjudication(records: list[dict],
                         frozen: dict) -> dict[str, Any]:
-    """records → 硬门 → 统计 → L1(主判定) / L2(复现) / L3(target) → H*。
+    """records → 硬门 → L1(主判定) / L2(复现) / L3(target) → H*。
 
-    分组键 = (H, scope, seed, target)——L1/L2/L3 三层互不覆盖；逐层排序
-    聚合，输入置换不改变结果。frozen 阈值贯穿全部分类调用；L3 强制 4
-    target（check_l3_consistency）。
+    归层 = record.experiment_id（生产配置三实验各带 a1-l1/l2/l3 标签；
+    不再用 set_target 存在性推断——生产记录全部带 set_target 默认键）。
+    L2 复现判据 = onset 相等（|ΔW*|≤1），不比较平台中位等噪声项。
+    L3 通过 = 4 target 齐备且全部判 sharp 且 onset 相互 ≤1——
+    "一致地 suspect"不放行（R7）。
     """
     if not frozen.get("frozen"):
         raise TlbError(f"a1: thresholds not frozen: {frozen.get('stop')}")
@@ -295,15 +305,16 @@ def run_a1_adjudication(records: list[dict],
         n += 1
         p = rec["params"]
         h = int(p["set_hypothesis"]); scope = int(p.get("set_region_scope", -1))
-        seed = int(p.get("seed", 42)); target = int(p.get("set_target", 7))
-        window = int(p["set_window"])
+        target = int(p.get("set_target", 7)); window = int(p["set_window"])
         l2r = next((m for m in rec["metrics"]
                     if m["name"] == "pmu.l2d_tlb_refill.count"), None)
         if l2r is None:
             raise TlbError("a1: record missing l2d_tlb_refill")
-        if scope >= 0 or "set_target" not in p:
+        layer = _layer_of(rec)
+        if layer in ("l1", "l2"):
+            seed = int(p.get("seed", 42))
             l1.setdefault((h, seed), {}).setdefault(scope, {})[window] = float(l2r["value"])
-        if scope < 0 and "set_target" in p:
+        else:
             l3.setdefault((h, target), {})[window] = float(l2r["value"])
         r = rec.get("probe", {}).get("realized", {})
         if r.get("set_region_vpn_hi"):
@@ -315,19 +326,29 @@ def run_a1_adjudication(records: list[dict],
             raise TlbError(f"a1: L1/L2 needs 2 seeds, got {seeds}")
         vm = adjudicate_h(l1[(h, seeds[0])], vpn_hi, hypothesis=h, on_threshold=on)
         vr = adjudicate_h(l1[(h, seeds[1])], vpn_hi, hypothesis=h, on_threshold=on)
-        l3v = {t: {"verdict": "supported"
-                   if classify_onset(c, on_threshold=on)["kind"] == "sharp"
-                   else "suspect"}
-               for (hh, t), c in sorted(l3.items()) if hh == h}
-        per_h[h] = {"verdict": vm["verdict"],
-                    "reproducible": vm["verdict"] == vr["verdict"]
-                                    and vm["classes"] == vr["classes"],
-                    "l3": check_l3_consistency(l3v) if l3v else None,
+        def _w(cls):
+            o = cls["onset"]
+            return o[0] if isinstance(o, tuple) else o
+        w_m = _w(vm["classes"][-1]) if -1 in vm["classes"] else None
+        w_r = _w(vr["classes"][-1]) if -1 in vr["classes"] else None
+        reproducible = (vm["verdict"] == vr["verdict"]
+                        and w_m is not None and w_r is not None
+                        and abs(w_m - w_r) <= 1)
+        l3_curves = {t: c for (hh, t), c in sorted(l3.items()) if hh == h}
+        if len(l3_curves) < 4:
+            raise TlbError(f"a1: L3 needs 4 targets, got {len(l3_curves)}")
+        l3_cls = {t: classify_onset(c, on_threshold=on)
+                  for t, c in l3_curves.items()}
+        l3_pass = (all(c["kind"] == "sharp" for c in l3_cls.values())
+                   and max(_w(c) for c in l3_cls.values())
+                       - min(_w(c) for c in l3_cls.values()) <= 1)
+        per_h[h] = {"verdict": vm["verdict"], "reproducible": reproducible,
+                    "l3_pass": l3_pass,
                     "classes": vm["classes"],
                     "predicted_hw_sets": vm["predicted_hw_sets"]}
     supported = [h for h, r in per_h.items()
                  if r["verdict"] == "supported" and r["reproducible"]
-                 and (r["l3"] is None or r["l3"]["consistent"])]
+                 and r["l3_pass"]]
     return {"per_hypothesis": per_h, "on_threshold": on, "n_records": n,
             "h_star": supported[0] if len(supported) == 1 else None,
             "h_star_status": "unique" if len(supported) == 1 else "multiple-or-none"}
