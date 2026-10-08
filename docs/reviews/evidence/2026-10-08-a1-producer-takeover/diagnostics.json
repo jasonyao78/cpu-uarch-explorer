@@ -1,0 +1,213 @@
+{
+  "scope": "Verify the R7-A takeover fix with real software and synthetic external I/O.\n\nNo adb, target binary or PMU is executed. No records are hand-built or enriched.\nExit 0 only verifies the stated software checks, not global RV2-02 closure or\napproval of Phase A's frozen calibration/measurement contract.\n",
+  "source_head": "0a27eba1a185618855a4081cd27dc21245e97e35",
+  "source_sha256": {
+    "runner/engine.py": "650060b59654e0e07de0e3fb209013fe8f198bac677861b977d1870541746dd5",
+    "runner/schema/README.md": "3b1c1798f3604d8ef2cd3f59024a8fd5d56b2907630e031864aeec186735d713",
+    "runner/tests/test_engine_experiment_identity.py": "5dc14811d556433473644584dceb122ea7d746d630d3a2242d88ea6c4efe09c7",
+    "runner/tests/tlb_set_fixtures.py": "1bef178537d322f236d1ffd6831fd16aa2039e1917a35bd8cfaf1cbcdd6acfff",
+    "analysis/sm8650_tlb_a1.py": "e0a24bcba85d954dbbffc8c6865976bfa541a1f08e1fc86f56f974c5af3caa2e",
+    "analysis/tests/test_sm8650_tlb_a1.py": "bc30a89e1b1fee358e4c844657b1fe10731b00578663034d74442b686212e6be",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json": "2d9aaf702dff4dd498c8600e2021405aaa74ae40e82d3be9f87c92fd903c382b",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json": "db0c20cd62d43e76d9a684cf18946b2bc3717af8dd2efe19ed6343a1a6231cfc",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json": "89092fc94a2a54e27db46f4311e8d49143ae6b3f353133275b8d7addc51ba85b"
+  },
+  "layers": {
+    "l1-main": {
+      "summary": {
+        "total": 48,
+        "ok": 48,
+        "failed": 0,
+        "skipped": 0,
+        "unsupported": 0
+      },
+      "fake_probe_calls": 480,
+      "record_ids_present": 48,
+      "manifest_experiment_id": "ptr-chase-sm8650-x4-tlb-a1-l1-main"
+    },
+    "l2-repro": {
+      "summary": {
+        "total": 48,
+        "ok": 48,
+        "failed": 0,
+        "skipped": 0,
+        "unsupported": 0
+      },
+      "fake_probe_calls": 480,
+      "record_ids_present": 48,
+      "manifest_experiment_id": "ptr-chase-sm8650-x4-tlb-a1-l2-repro"
+    },
+    "l3-target": {
+      "summary": {
+        "total": 32,
+        "ok": 32,
+        "failed": 0,
+        "skipped": 0,
+        "unsupported": 0
+      },
+      "fake_probe_calls": 320,
+      "record_ids_present": 32,
+      "manifest_experiment_id": "ptr-chase-sm8650-x4-tlb-a1-l3-target"
+    }
+  },
+  "total_ok_records": 128,
+  "fake_probe_observations": 1280,
+  "synthetic_frozen": {
+    "frozen": true,
+    "on_threshold": 2.0,
+    "floor_median": 0.2,
+    "floor_mad": 0.2,
+    "validated": "synthetic-suite"
+  },
+  "synthetic_adjudication": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3_pass": true,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.5
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "2": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "3": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      },
+      "4": {
+        "verdict": "suspect",
+        "reproducible": false,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "0": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          },
+          "1": {
+            "kind": "degraded",
+            "onset": null,
+            "reason": "never-reaches-on-threshold"
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 128,
+    "h_star": 1,
+    "h_star_status": "unique"
+  },
+  "full_result_permutation_equal": true,
+  "canonical_json_permutation_equal": true,
+  "neighboring_plan_rejections": {
+    "target_201": {
+      "producer_summary": {
+        "total": 32,
+        "ok": 32,
+        "failed": 0,
+        "skipped": 0,
+        "unsupported": 0
+      },
+      "fake_probe_calls": 320,
+      "exception": "TlbError",
+      "message": "a1: L3 exact coverage violation: got [7, 42, 100, 201] != expected [7, 42, 100, 200]"
+    },
+    "windows_100_200": {
+      "producer_summary": {
+        "total": 32,
+        "ok": 32,
+        "failed": 0,
+        "skipped": 0,
+        "unsupported": 0
+      },
+      "fake_probe_calls": 320,
+      "exception": "TlbError",
+      "message": "a1: L3 window grid violation: got [100, 200] != expected [8, 12]"
+    }
+  },
+  "malformed_output": {
+    "summary": {
+      "total": 32,
+      "ok": 0,
+      "failed": 32,
+      "skipped": 0,
+      "unsupported": 0
+    },
+    "fake_probe_calls": 320,
+    "failed_record_ids_present": 32
+  },
+  "outcome": "PASS for R7-A/R9 software closure; no global Phase A approval"
+}

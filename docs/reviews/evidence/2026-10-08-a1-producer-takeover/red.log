@@ -1,0 +1,26 @@
+test_success_records_persist_plan_identity (runner.tests.test_engine_experiment_identity.TestEngineExperimentIdentity.test_success_records_persist_plan_identity) ... FAIL
+test_full_128_positive (analysis.tests.test_sm8650_tlb_a1.TestProductionChain.test_full_128_positive) ... FAIL
+
+======================================================================
+FAIL: test_success_records_persist_plan_identity (runner.tests.test_engine_experiment_identity.TestEngineExperimentIdentity.test_success_records_persist_plan_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/runner/tests/test_engine_experiment_identity.py", line 38, in test_success_records_persist_plan_identity
+    self.assertEqual(record.get("experiment_id"), plan.experiment_id)
+AssertionError: None != 'ptr-chase-sm8650-x4-tlb-a1-l3-target'
+
+======================================================================
+FAIL: test_full_128_positive (analysis.tests.test_sm8650_tlb_a1.TestProductionChain.test_full_128_positive)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1.py", line 299, in test_full_128_positive
+    records = self._build(tmp)
+              ^^^^^^^^^^^^^^^^
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1.py", line 283, in _build
+    self.assertEqual(record.get("experiment_id"), plan.experiment_id)
+AssertionError: None != 'ptr-chase-sm8650-x4-tlb-a1-l1-main'
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.276s
+
+FAILED (failures=2)

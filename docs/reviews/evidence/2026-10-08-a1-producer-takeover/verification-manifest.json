@@ -1,0 +1,147 @@
+{
+  "review_baseline": "b0f287f12829819f1e6f5acbf3c9fdd53ff36c71",
+  "fixed_source": "0a27eba1a185618855a4081cd27dc21245e97e35",
+  "r2_head_before_response": "d98a829c35be2807a03ec69f69e5f2a23fac7347",
+  "scope": "R7-A/R9 software production identity and non-vacuous producer evidence; synthetic external I/O only",
+  "commands": [
+    {
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "phase": "RED: new tests with b0f287f engine unchanged",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "runner.tests.test_engine_experiment_identity.TestEngineExperimentIdentity.test_success_records_persist_plan_identity",
+        "analysis.tests.test_sm8650_tlb_a1.TestProductionChain.test_full_128_positive",
+        "-v"
+      ],
+      "exit_code": 1,
+      "expected": "two AssertionError failures on missing persisted experiment_id",
+      "log": "red.log"
+    },
+    {
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "analysis/tests",
+        "-t",
+        "."
+      ],
+      "exit_code": 0,
+      "tests": 191,
+      "log": "analysis.log"
+    },
+    {
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "argv": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "runner/tests",
+        "-t",
+        "."
+      ],
+      "exit_code": 0,
+      "tests": 195,
+      "log": "runner.log"
+    },
+    {
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "argv": [
+        "python",
+        "-m",
+        "analysis.tests.test_sm8650_tlb_a1"
+      ],
+      "exit_code": 0,
+      "tests": 33,
+      "log": "a1-module.log"
+    },
+    {
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "argv": [
+        "python",
+        "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/scripts/verify_r7a_takeover_20261008.py",
+        "--tree",
+        "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+        "--out",
+        "/tmp/sm8650-tlb-takeover/diagnostics.json"
+      ],
+      "exit_code": 0,
+      "log": "diagnostics.log"
+    }
+  ],
+  "python_executable": "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "source_sha256": {
+    "runner/engine.py": "650060b59654e0e07de0e3fb209013fe8f198bac677861b977d1870541746dd5",
+    "runner/schema/README.md": "3b1c1798f3604d8ef2cd3f59024a8fd5d56b2907630e031864aeec186735d713",
+    "runner/tests/test_engine_experiment_identity.py": "5dc14811d556433473644584dceb122ea7d746d630d3a2242d88ea6c4efe09c7",
+    "runner/tests/tlb_set_fixtures.py": "1bef178537d322f236d1ffd6831fd16aa2039e1917a35bd8cfaf1cbcdd6acfff",
+    "analysis/sm8650_tlb_a1.py": "e0a24bcba85d954dbbffc8c6865976bfa541a1f08e1fc86f56f974c5af3caa2e",
+    "analysis/tests/test_sm8650_tlb_a1.py": "bc30a89e1b1fee358e4c844657b1fe10731b00578663034d74442b686212e6be",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json": "2d9aaf702dff4dd498c8600e2021405aaa74ae40e82d3be9f87c92fd903c382b",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json": "db0c20cd62d43e76d9a684cf18946b2bc3717af8dd2efe19ed6343a1a6231cfc",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json": "89092fc94a2a54e27db46f4311e8d49143ae6b3f353133275b8d7addc51ba85b"
+  },
+  "compatibility_check": {
+    "head": "6f433e312783ae9bf0569ae292f463318c524313",
+    "analysis": 191,
+    "runner": 197,
+    "logs": [
+      "analysis-current.log",
+      "runner-current.log",
+      "diagnostics-current.log"
+    ],
+    "diagnostics": "diagnostics-current.json",
+    "exit_codes": [
+      0,
+      0,
+      0
+    ],
+    "source_sha256": {
+      "runner/engine.py": "004c7954bb8e94db29565b60c5aeebf5aa43d323fd92ed48661b4dfd9ecb4d0f",
+      "runner/schema/README.md": "3b1c1798f3604d8ef2cd3f59024a8fd5d56b2907630e031864aeec186735d713",
+      "runner/tests/test_engine_experiment_identity.py": "5dc14811d556433473644584dceb122ea7d746d630d3a2242d88ea6c4efe09c7",
+      "runner/tests/tlb_set_fixtures.py": "1bef178537d322f236d1ffd6831fd16aa2039e1917a35bd8cfaf1cbcdd6acfff",
+      "analysis/sm8650_tlb_a1.py": "e0a24bcba85d954dbbffc8c6865976bfa541a1f08e1fc86f56f974c5af3caa2e",
+      "analysis/tests/test_sm8650_tlb_a1.py": "bc30a89e1b1fee358e4c844657b1fe10731b00578663034d74442b686212e6be",
+      "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json": "2d9aaf702dff4dd498c8600e2021405aaa74ae40e82d3be9f87c92fd903c382b",
+      "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json": "db0c20cd62d43e76d9a684cf18946b2bc3717af8dd2efe19ed6343a1a6231cfc",
+      "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json": "89092fc94a2a54e27db46f4311e8d49143ae6b3f353133275b8d7addc51ba85b"
+    }
+  },
+  "script_sha256": "c5c4ca2e7be98ff078651b6ceb9ab84ac764aa616740310230dfc2b21dc1112a",
+  "evidence_sha256": {
+    "red.log": "126a8654e2d83229663ade9ed4d903ba0f984f72ed3adc36b618c986b86f64a3",
+    "analysis.log": "9cded875399346fea46f0da5c1a8ce9e6219959dd2c2b36474c0169a71bd4beb",
+    "runner.log": "713511235a460d7558b7f2cb11a59de262fcdb4eae248c2dd65daeb25fb2200f",
+    "a1-module.log": "d6bb4b5e16b6ede255594d4f9746ebb7de7e437aa990ab1d388a203b961494fa",
+    "diagnostics.json": "2374ea9f8f01ae31155e4fdfbf1cec6393331a1749788c8a81594fb439a8672e",
+    "diagnostics.log": "5aa89615fcceca917e3f007615f1b31ff2f76adf26eb4c128cd2da2954d62220",
+    "analysis-current.log": "effeee42ae05c4a5b99d4f98592cb495c14f001c787a657542557dc04899dd01",
+    "runner-current.log": "3629382e68587821c3bfcf0b2bfacaa5b915c9f41f61f17aa225b44f4a06d92d",
+    "diagnostics-current.json": "259e761b2b61d4e520ec8b9e134276198cdecf0e99f8033e96d150ad5220bbf7",
+    "diagnostics-current.log": "5aa89615fcceca917e3f007615f1b31ff2f76adf26eb4c128cd2da2954d62220"
+  },
+  "not_run": [
+    "adb",
+    "phone binary",
+    "perf",
+    "NDK build",
+    "CTest",
+    "old campaign replay",
+    "main integration"
+  ],
+  "deferred_contracts": [
+    "R3-C/R5-C final audit, valid observations, complete identity and duplicate policy",
+    "R5-D frozen config/code/calibration-data anchors and task text alignment"
+  ]
+}
