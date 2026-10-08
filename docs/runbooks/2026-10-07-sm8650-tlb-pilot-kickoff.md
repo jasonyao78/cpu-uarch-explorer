@@ -13,7 +13,17 @@
 
 ## 1. 代码基线与构建
 
-- 分支 `codex/sm8650-tlb-r2-m0b` @ **`b0f287f`**（worktree `~/workspace/cpu-uarch-explorer-tlb-r2-m0b`，`git pull --ff-only`）。
+**两个 worktree 都要同步（各管一件事，缺一不可）**：
+
+| worktree | 分支 | 同步到 | 作用 |
+|---|---|---|---|
+| `~/workspace/cpu-uarch-explorer-tlb-r2-m0b` | `codex/sm8650-tlb-r2-m0b` | **`b0f287f`** | **执行在这里**——R9 修复（runner 逐 record 写 `experiment_id`，判据归层依赖该字段）。旧代码产出的数据入口直接拒 |
+| `~/workspace/cpu-uarch-explorer-tlb-r2` | `codex/sm8650-tlb-hierarchy-r2` | **`dbd8ca1`** | 本 kickoff 文档住这里——同步后读到的才是当前基线说明 |
+
+```bash
+cd ~/workspace/cpu-uarch-explorer-tlb-r2-m0b && git pull --ff-only   # 代码 → b0f287f
+cd ~/workspace/cpu-uarch-explorer-tlb-r2 && git pull --ff-only       # 文档 → dbd8ca1
+```
 - **record 级 `experiment_id`**：从该提交起 runner 逐 record 写入——判据入口归层依赖它，**回传前必须抽查一条 record 含此字段**；探针 C++ 未变，二进制 sha256 前缀应仍为 `1e03a658`，不符则用 §3 recipe 重编（[recipe 验证记录](2026-10-01-sm8650-tlb-r2-preboard.md)）。
 - venv 用主树：`.venv/bin/python`。
 
