@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Phase A A1 判据消费入口（任务书 v1.7 §5.5 的代码形态）。
+"""Phase A A1 判据消费入口（任务书 §5.5 的代码形态）。
 
 评审第三轮阻塞项 2 的交付：阈值确定程序、realized 硬门、purity 门、
 实际 VA 预测分区、量化 onset 分类、L3 一致性——全部在此模块以纯函数
@@ -10,14 +10,15 @@
 """
 from __future__ import annotations
 
+import math
+
 from typing import Any
 
 from .sm8650_tlb import TlbError
-from .sm8650_tlb_a1_contract import (bind_formal_records, canonical,
-    geometry_gate, realized_processes)
+from .sm8650_tlb_a1_contract import bind_formal_records, geometry_gate
 
-# 量化 onset 候选阈值（任务书 v1.7 §5.5：随首块标定复核后正式冻结；
-# 程序已固定，数值是唯二待标定项）
+# 固定规则：floor=1、平台比例=0.8；仅 on 由专用标定块选网格后冻结。
+# ONSET_ON 的默认值只供纯函数使用，正式入口必经锚定 frozen 工件。
 ONSET_FLOOR_PER_ROUND = 1.0     # 低于此值为"未起"
 ONSET_ON_PER_ROUND = 3.0        # 达到此值为"起"（候选操作阈值）
 SHARP_MAX_TRANSITION_STEPS = 2  # 锐：floor→on 过渡宽度（W 档数）
@@ -201,8 +202,9 @@ def freeze_thresholds(floor_samples: list[float],
     失败则取下一档网格值。
     """
     import statistics
-    if not floor_samples:
-        raise TlbError("a1: freeze_thresholds needs floor samples")
+    if (not floor_samples or any(type(v) not in (int, float) or not math.isfinite(v) for v in floor_samples)
+            or type(scatter_mid) not in (int, float) or not math.isfinite(scatter_mid)):
+        raise TlbError("a1: freeze_thresholds needs finite floor/scatter samples")
     floor_med = statistics.median(floor_samples)
     floor_mad = statistics.median([abs(v - floor_med) for v in floor_samples])
     if floor_mad > _FLOOR_NOISE_STOP:
@@ -250,8 +252,10 @@ def run_a1_adjudication(records: list[dict], frozen: dict,
         raise TlbError(f"a1: thresholds not frozen: {frozen}")
     if expected_l3_targets != (7, 42, 100, 200) or expected_l3_windows != (8, 12):
         raise TlbError("a1: registered formal coverage cannot be overridden")
-    on = frozen["on_threshold"]
+    from .sm8650_tlb_a1_freeze import verify_frozen_artifact
     bound = bind_formal_records(records)
+    verify_frozen_artifact(frozen, records)
+    on = frozen["on_threshold"]
     curves, high_fields, audit = {}, {}, []
     for case, record, metrics in bound:
         p = case.params

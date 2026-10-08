@@ -47,7 +47,7 @@ def synthetic_stdout(case):
               for out, param in PtrChaseAdapter._TLB_SET_DESCRIPTOR_MAP
               if param in params}
     valid_rounds = str(params["set_rounds"] - 1)  # production excludes cold round 0
-    fields.update(mode="tlbset", page_kb="4", scatter="0",
+    fields.update(mode="tlbset", page_kb="4", scatter=str(params.get("set_scatter", 0)),
         set_domain="multi-region", set_active_regions=str(sum(n > 0 for n in nodes)),
         set_target_region_nodes=",".join(map(str, nodes)),
         set_region_vpn_hi="5,6,7,8", set_region_vpn_hi_pure="1",
@@ -101,10 +101,25 @@ def run_synthetic_plan(plan, platform, run_dir, output_filter=None):
     assert successful/failed record counts before asserting record fields.
     Does not patch _run_case, parsing, writing, loading or experiment identity.
     """
+    # 模拟外部状态采集，保留真实环境 policy 判定与 engine before/after 写盘。
+    policy = platform['environment_profiles']['charging-thermal']['measurement_environment']
+    platform = {**platform, 'measurement_environment': policy}
+    state = {'schema_version': '1.0',
+        'cpufreq': {p: {'governor': 'performance', 'min_khz': 672000,
+                       'max_khz': limit, 'cur_khz': limit}
+                    for p, limit in policy['preconditions']['cpufreq_max_khz'].items()},
+        'power': {'wakefulness': 'Dozing', 'powered': True, 'screen_on': False},
+        'device_idle': {'force_idle': False, 'state': 'ACTIVE', 'light_state': 'ACTIVE', 'charging': True},
+        'airplane_mode': False, 'camera': {'active': False, 'active_clients_raw': '[]'},
+        'thermal': {'status': 0, 'max_cpu_c': 50.0, 'cpu_sensors_c': {'CPU7': 50.0}},
+        'services': {'mi_thermald': 'running'}, 'loadavg': {'one': 1.0, 'five': 1.0, 'fifteen': 1.0}}
     executor = SyntheticExecutor(plan, platform, output_filter)
+    def register(store, executor, platform, probe, git):
+        return ('/SYNTHETIC-UNEXECUTED', store.register_probe_binary_digest(
+            '/SYNTHETIC-UNEXECUTED', 'f' * 64, git['commit'], git['dirty']))
     with mock.patch.object(engine, "make_executor", return_value=executor), \
-         mock.patch.object(engine, "_register_probe", return_value=(
-             "/SYNTHETIC-UNEXECUTED", {"sha256": "f" * 64})), \
+         mock.patch.object(engine, "_register_probe", side_effect=register), \
+         mock.patch.object(engine, "collect_environment_state", return_value=state), \
          mock.patch.object(engine, "git_provenance", return_value={
              "commit": "0" * 40, "dirty": False}), \
          contextlib.redirect_stdout(io.StringIO()):

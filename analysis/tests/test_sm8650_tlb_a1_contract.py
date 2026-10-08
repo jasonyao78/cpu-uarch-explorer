@@ -12,6 +12,7 @@ import random
 import tempfile
 import unittest
 
+from analysis.tests.a1_production_fixture import freeze_fixture
 from analysis.load import load_run
 from analysis.sm8650_tlb import TlbError
 from analysis.sm8650_tlb_a1 import (classify_l3_two_point, classify_onset,
@@ -44,7 +45,7 @@ class TestA1FinalContract(unittest.TestCase):
         cls.tmp = tempfile.TemporaryDirectory()
         cls.addClassCleanup(cls.tmp.cleanup)
         cls.records = produce_a1(cls.tmp.name)
-        cls.frozen = freeze_thresholds([0.0, 0.2, 0.0, 0.4, 0.2], 0.0)
+        cls.frozen = freeze_fixture(Path(cls.tmp.name) / 'calibration')
 
     def assert_rejected(self, change, reason):
         records = copy.deepcopy(self.records)

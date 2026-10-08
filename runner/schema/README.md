@@ -100,3 +100,14 @@ Runner 在 plan 期归一化为整数，probe 以重复的
 `record.schema.json`（v1，2026-09-23 基线）：已被 v2 取代，保留作历史参考，新记录一律用 v2。
 
 Runner 层实现（targets 适配、采集、落盘）按 ADR-0006 的组合式结构落地（BuildProfile/Transport/Executor/PlatformControl/Collector/Parser，见 OI-8）。
+
+### A1 两阶段阈值冻结（2026-10-08）
+
+专用 ExperimentSpec 顶层扩展 `analysis_role: "CALIBRATION"` 声明标定角色，
+具体条件身份由登记的 calibration-floor/scatter 配置完整展开。此字段不
+改变通用 runner 调度或旧读者；正式入口按精确 experiment_id 分层。
+`analysis/sm8650_tlb_a1_freeze.py` 定义独立分析工件 `a1-freeze-v1`
+（不是 run-record schema）：携带规则、决策、配置/代码摘要、两块标定的
+records/manifest/artifacts 摘要与记录/raw 引用、二进制/源码/环境谱系、
+自身摘要。`analysis/sm8650_tlb_a1_cli.py` 提供 freeze/adjudicate 文件入口。
+手工 frozen 布尔值无消费资格；STOP 工件可留审计但拒绝正式判定。

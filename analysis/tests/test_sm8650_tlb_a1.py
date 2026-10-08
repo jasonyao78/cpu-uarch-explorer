@@ -221,41 +221,47 @@ class TestProductionChain(unittest.TestCase):
 
     def test_full_128_positive(self):
         import tempfile
+        from pathlib import Path
+        from analysis.tests.a1_production_fixture import freeze_fixture
         with tempfile.TemporaryDirectory() as tmp:
             records = self._build(tmp)
-        frozen = freeze_thresholds([0.0, 0.2, 0.0, 0.4, 0.2], scatter_mid=0.0)
-        out = run_a1_adjudication(records, frozen)
-        self.assertEqual(out["n_records"], 128)
-        self.assertEqual(out["h_star"], 1)  # synthetic response, not a hardware conclusion
+            frozen = freeze_fixture(Path(tmp) / 'calibration')
+            out = run_a1_adjudication(records, frozen)
+            self.assertEqual(out['n_records'], 128)
+            self.assertEqual(out['h_star'], 1)  # synthetic, not a hardware conclusion
 
     def test_permutation_invariant_full(self):
-        import json
-        import random
-        import tempfile
+        import json, random, tempfile
+        from pathlib import Path
+        from analysis.tests.a1_production_fixture import freeze_fixture
         with tempfile.TemporaryDirectory() as tmp:
             records = self._build(tmp)
-        frozen = freeze_thresholds([0.0, 0.2, 0.0, 0.4, 0.2], scatter_mid=0.0)
-        baseline = run_a1_adjudication(records, frozen)
-        random.Random(3).shuffle(records)
-        shuffled = run_a1_adjudication(records, frozen)
-        self.assertEqual(baseline["h_star"], 1)
-        self.assertEqual(shuffled, baseline)
-        self.assertEqual(json.dumps(shuffled, sort_keys=True, separators=(",", ":")),
-                         json.dumps(baseline, sort_keys=True, separators=(",", ":")))
+            frozen = freeze_fixture(Path(tmp) / 'calibration')
+            baseline = run_a1_adjudication(records, frozen)
+            random.Random(3).shuffle(records)
+            shuffled = run_a1_adjudication(records, frozen)
+            self.assertEqual(baseline['h_star'], 1)
+            self.assertEqual(json.dumps(shuffled, sort_keys=True), json.dumps(baseline, sort_keys=True))
 
     def test_neighboring_target_plan_is_rejected(self):
         import tempfile
+        from pathlib import Path
+        from analysis.tests.a1_production_fixture import freeze_fixture
         with tempfile.TemporaryDirectory() as tmp:
-            records = self._build(tmp, ("set_target", {200: 201}))
-        with self.assertRaisesRegex(TlbError, "exact coverage"):
-            run_a1_adjudication(records, freeze_thresholds([0.0, 0.2, 0.0], 0.0))
+            records = self._build(tmp, ('set_target', {200: 201}))
+            frozen = freeze_fixture(Path(tmp) / 'calibration')
+            with self.assertRaisesRegex(TlbError, 'exact coverage'):
+                run_a1_adjudication(records, frozen)
 
     def test_neighboring_window_plan_is_rejected(self):
         import tempfile
+        from pathlib import Path
+        from analysis.tests.a1_production_fixture import freeze_fixture
         with tempfile.TemporaryDirectory() as tmp:
-            records = self._build(tmp, ("set_window", {8: 100, 12: 200}))
-        with self.assertRaisesRegex(TlbError, "window grid"):
-            run_a1_adjudication(records, freeze_thresholds([0.0, 0.2, 0.0], 0.0))
+            records = self._build(tmp, ('set_window', {8: 100, 12: 200}))
+            frozen = freeze_fixture(Path(tmp) / 'calibration')
+            with self.assertRaisesRegex(TlbError, 'window grid'):
+                run_a1_adjudication(records, frozen)
 
 
 if __name__ == "__main__":
