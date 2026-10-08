@@ -255,9 +255,25 @@ Q-A/Q-B/Q-C/Q-D 判据同 §1.2 各问；另冻结（F8/F9）：
 | R1–R3 ROB 骨架确定性缺陷 | **属实（已复核）**；ROB 项目文件（main `9a2642c`，r2 基线之外），**不代修**——已由评审登记 REV-TLB-R2-20260930，ROB 项目关闭条件前置 |
 | R4 INST_SPEC/RETIRED 口径 | §1.3 非目标预登记 + 执行端设计文档约束 |
 
+### 10.3.1 关键文件路径索引（2026-10-08 起任务书引用一律带路径）
+
+| 对象 | 路径（相对各分支 worktree 根） |
+|---|---|
+| A1 判据消费链 | `analysis/sm8650_tlb_a1.py`（m0b；测试 `analysis/tests/test_sm8650_tlb_a1.py`） |
+| 主分析器/身份契约 | `analysis/sm8650_tlb.py`（m0b）；图表消费 `analysis/tlb_figures.py`（main） |
+| 探针 set 模式 | `probes/cache-mem/ptr_chase.cpp` + 共享收集器 `probes/common/tlb_set_collect.h`（m0b） |
+| runner 消费契约 | `runner/plan.py` / `runner/adapters/ptr_chase.py` / `runner/engine.py`（m0b） |
+| A1 三层配置 | `configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json` / `-a1-l2-repro.json` / `-a1-l3-target.json`（m0b） |
+| 标定/锚点配置 | `configs/experiments/ptr-chase-sm8650-x4-tlb-pilot-g03-empty.json` / `-g03-noconflict.json` / `-tlb-anchor.json`（m0b） |
+| 平台/充电态协议 | `configs/platforms/redmi-k70pro-01.json`（environment_profiles.charging-thermal，m0b） |
+| 上板执行包 | `docs/runbooks/2026-10-07-sm8650-tlb-pilot-kickoff.md`（r2，v2） |
+| 上板前清单 | `docs/runbooks/2026-10-01-sm8650-tlb-r2-preboard.md`（r2） |
+| 评审复核脚本 | `scripts/review_mb06_phasea_20261007.py` / `review_pa_response_20261007.py`（r2；适配见回执 §0：权威 = m0b `probes/common/tlb_set_collect.h`） |
+| 修复设计稿 | `docs/design/2026-10-07-rpa01-05-fix-design.md`（r2） |
+
 ### 10.4 分支生命周期与合入策略（2026-10-08 用户拍板固化为 v1.8.2 增补）
 
-**合入链（单向，不跳级）**：`codex/sm8650-tlb-r2-m0b`（代码增量层）→ `codex/sm8650-tlb-hierarchy-r2`（任务书+评审线程层）→ `main`（共享主干）。
+**合入链（单向，不跳级）**：`codex/sm8650-tlb-r2-m0b`（代码增量层，worktree `~/workspace/cpu-uarch-explorer-tlb-r2-m0b`）→ `codex/sm8650-tlb-hierarchy-r2`（任务书+评审线程层，worktree `~/workspace/cpu-uarch-explorer-tlb-r2`）→ `main`（共享主干，worktree `~/workspace/cpu-uarch-explorer`）。
 
 | 阶段 | 触发 | 动作 |
 |---|---|---|
