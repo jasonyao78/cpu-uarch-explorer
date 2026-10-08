@@ -1,0 +1,92 @@
+{
+  "review_inputs": {
+    "r2": "1b47948",
+    "m0b": "5ccb841",
+    "main": "2fa8d5d",
+    "task_version": "v1.8"
+  },
+  "scope": "Software, synthetic and archived public data only. No adb or target execution.",
+  "verdict": {
+    "RV2-01": "closed",
+    "RV2-02": "open",
+    "RV2-03": "closed",
+    "v1.8_formal_freeze": "rejected"
+  },
+  "checks": {
+    "runner": {
+      "command": "python -m unittest discover -s runner/tests -t .",
+      "exit_code": 0,
+      "tests": 192
+    },
+    "m0b_analysis": {
+      "command": "python -m unittest discover -s analysis/tests -t .",
+      "exit_code": 0,
+      "tests": 169
+    },
+    "main_analysis": {
+      "command": "python -m unittest discover -s analysis/tests -t .",
+      "exit_code": 0,
+      "tests": 171
+    },
+    "clean_ctest": {
+      "source": "git archive 5ccb841 CMakeLists.txt CMakePresets.json probes tests",
+      "commands": [
+        "cmake --preset macos-arm64-release",
+        "cmake --build --preset macos-arm64-release",
+        "ctest --preset macos-arm64-release"
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "tests": 20
+    },
+    "ndk": {
+      "compiler": "NDK 27.2.12479018 aarch64-linux-android29-clang++",
+      "args": [
+        "-std=c++17",
+        "-fsyntax-only",
+        "-DCPU_UARCH_HAVE_LINUX_PERF=1",
+        "-I",
+        "probes/common",
+        "-I",
+        "probes/platform/linux",
+        "probes/cache-mem/ptr_chase.cpp",
+        "probes/tests/perf_window_golden.cpp",
+        "probes/tests/tlb_set_collect_golden.cpp"
+      ],
+      "exit_code": 0
+    },
+    "main_overlay": {
+      "tests": 25,
+      "failures": 0,
+      "errors": 0
+    },
+    "archived_real_render": {
+      "figure_equal": {
+        "refill-density.svg": true,
+        "walk-onset.svg": true,
+        "latency-cycles.svg": true,
+        "thp-cohort.svg": true
+      },
+      "report_equal": true,
+      "combined_BT_cohort_equal": true
+    },
+    "diagnostics": {
+      "exit_code": 0,
+      "meaning": "diagnostics completed; review FAIL",
+      "dependency": "r2 scripts/review_rpa_v2_20261007.py from 17a09ab; round3 overrides committed CTest reference to 5ccb841",
+      "legacy_digest_none_field": "retained historical diagnostic; now expected false because warmup is included"
+    }
+  },
+  "files": {
+    "review_rpa_round3_20261008.py": "cee074d343fe589d98f916b7f1adfd56586de3de3673cbe9dc9995308a49fa88",
+    "diagnostics.json": "52c3cb91d3b5f9e4c621ba9698c9300f14bf3f4643293e8125c590243976bbb7",
+    "runner.log": "2b953d441cbf367b35d8aa3f2b6c94845192d3580ab1630a0a45dca37baf8085",
+    "analysis.log": "d0dbb2758e87ba4e9a84bbe3ffa32780be3a4042907b939ae390b81fa7e6766b",
+    "main-analysis.log": "46ad4e1bac69c33994d2f4d54ad6da2b80c6a9c56664226c64ca73f9cbcf8dc0",
+    "clean-ctest.log": "8046e30af3fad83a37af1c550bccfa06ccacbdce739d2e385b969602bce58aad",
+    "ndk-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

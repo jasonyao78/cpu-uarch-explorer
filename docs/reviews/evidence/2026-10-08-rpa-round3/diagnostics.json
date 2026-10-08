@@ -1,0 +1,1449 @@
+{
+  "scope": "Read-only RPA v2 review: production header, real plans, synthetic consumers.\n\nNo adb or target-device execution. Synthetic metric values are fixtures, never\nhardware evidence. Exit zero means diagnostics ran, not review approval.\n",
+  "heads": {
+    "m0b": "5ccb8414ec077182e69400be81b1789c0f80a506",
+    "main": "2fa8d5d2fbc99a7a03c79634e47efcde23035e2c",
+    "r2": "1b4794854d778de12cacdf26234663736fd5cb8f"
+  },
+  "m0b_dirty": "",
+  "collector_authority": {
+    "included": true,
+    "namespace_alias": true,
+    "cpp_duplicate_definition": false,
+    "header_functions": [
+      "set_index",
+      "collect_set_addrs",
+      "collect_scatter_addrs"
+    ]
+  },
+  "real_plan_warmup": [
+    {
+      "case_id": "exp:c0:b512K-s64B-warmup_passes2",
+      "params": {
+        "buffer_kb": 512,
+        "loads": 4194304,
+        "stride": 64,
+        "warmup": 16384,
+        "warmup_passes": 2
+      },
+      "argv": [
+        "-b",
+        "512",
+        "-s",
+        "64",
+        "-n",
+        "4194304",
+        "-w",
+        "16384"
+      ]
+    },
+    {
+      "case_id": "exp:c0:b512K-s64B-warmup_passes4",
+      "params": {
+        "buffer_kb": 512,
+        "loads": 4194304,
+        "stride": 64,
+        "warmup": 32768,
+        "warmup_passes": 4
+      },
+      "argv": [
+        "-b",
+        "512",
+        "-s",
+        "64",
+        "-n",
+        "4194304",
+        "-w",
+        "32768"
+      ]
+    }
+  ],
+  "real_plan_warmup_consumers": {
+    "input_records": 2,
+    "groups": 2,
+    "group_samples": [
+      2,
+      2
+    ],
+    "identities": [
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": null,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null,
+        "residual_digest": "ee00baf9db46"
+      },
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": null,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null,
+        "residual_digest": "3aa96cd97fce"
+      }
+    ],
+    "cohort": {
+      "ok": false,
+      "exception": "TlbError",
+      "message": "grade_thp_cohorts/buffer=512KiB: non-uniform identity within merge unit (512, 'base') — {'chain_distribution': None, 'node_offset_policy': None, 'chains': None, 'mapping_span_kb': None, 'set_hypothesis': None, 'set_target': None, 'set_target2': None, 'set_window': None, 'set_scatter': None, 'set_region_scope': None, 'set_nsets': None, 'residual_digest': '3aa96cd97fce'} != prior (MB-04/RPA-04); conditioned cohorts need an explicit preregistered rule"
+    },
+    "chart": {
+      "ok": false,
+      "exception": "TlbError",
+      "message": "SYNTHETIC-real-plan-warmup: 非一致 identity（MB-04/RPA-04：扫描曲线禁止跨条件合并；buffer=512KiB，identity={'chain_distribution': None, 'node_offset_policy': None, 'chains': None, 'mapping_span_kb': None, 'set_hypothesis': None, 'set_target': None, 'set_target2': None, 'set_window': None, 'set_scatter': None, 'set_region_scope': None, 'set_nsets': None, 'residual_digest': '3aa96cd97fce'}）"
+    }
+  },
+  "identity_set_hypothesis": {
+    "groups": 2,
+    "identity": [
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": 1,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null,
+        "residual_digest": "c03e07dffc36"
+      },
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": 2,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null,
+        "residual_digest": "c03e07dffc36"
+      }
+    ],
+    "chart": {
+      "ok": false,
+      "exception": "TlbError",
+      "message": "SYNTHETIC-set_hypothesis: 非一致 identity（MB-04/RPA-04：扫描曲线禁止跨条件合并；buffer=512KiB，identity={'chain_distribution': None, 'node_offset_policy': None, 'chains': None, 'mapping_span_kb': None, 'set_hypothesis': 2, 'set_target': None, 'set_target2': None, 'set_window': None, 'set_scatter': None, 'set_region_scope': None, 'set_nsets': None, 'residual_digest': 'c03e07dffc36'}）"
+    },
+    "cohort": {
+      "ok": false,
+      "exception": "TlbError",
+      "message": "grade_thp_cohorts/buffer=512KiB: non-uniform identity within merge unit (512, 'base') — {'chain_distribution': None, 'node_offset_policy': None, 'chains': None, 'mapping_span_kb': None, 'set_hypothesis': 2, 'set_target': None, 'set_target2': None, 'set_window': None, 'set_scatter': None, 'set_region_scope': None, 'set_nsets': None, 'residual_digest': 'c03e07dffc36'} != prior (MB-04/RPA-04); conditioned cohorts need an explicit preregistered rule"
+    }
+  },
+  "identity_loads_per_slot": {
+    "groups": 2,
+    "identity": [
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": null,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null,
+        "residual_digest": "6d5e6a247509"
+      },
+      {
+        "chain_distribution": null,
+        "node_offset_policy": null,
+        "chains": null,
+        "mapping_span_kb": null,
+        "set_hypothesis": null,
+        "set_target": null,
+        "set_target2": null,
+        "set_window": null,
+        "set_scatter": null,
+        "set_region_scope": null,
+        "set_nsets": null,
+        "residual_digest": "465d070974a1"
+      }
+    ],
+    "chart": {
+      "ok": false,
+      "exception": "TlbError",
+      "message": "SYNTHETIC-loads_per_slot: 非一致 identity（MB-04/RPA-04：扫描曲线禁止跨条件合并；buffer=512KiB，identity={'chain_distribution': None, 'node_offset_policy': None, 'chains': None, 'mapping_span_kb': None, 'set_hypothesis': None, 'set_target': None, 'set_target2': None, 'set_window': None, 'set_scatter': None, 'set_region_scope': None, 'set_nsets': None, 'residual_digest': '465d070974a1'}）"
+    },
+    "cohort": {
+      "ok": false,
+      "exception": "TlbError",
+      "message": "grade_thp_cohorts/buffer=512KiB: non-uniform identity within merge unit (512, 'base') — {'chain_distribution': None, 'node_offset_policy': None, 'chains': None, 'mapping_span_kb': None, 'set_hypothesis': None, 'set_target': None, 'set_target2': None, 'set_window': None, 'set_scatter': None, 'set_region_scope': None, 'set_nsets': None, 'residual_digest': '465d070974a1'} != prior (MB-04/RPA-04); conditioned cohorts need an explicit preregistered rule"
+    }
+  },
+  "a1_plans": {
+    "l1-main": {
+      "cases": 48,
+      "seeds": [
+        42
+      ],
+      "targets": [
+        7
+      ],
+      "scopes": [
+        -1,
+        0,
+        1
+      ],
+      "windows": [
+        6,
+        8,
+        10,
+        12
+      ],
+      "repetitions": [
+        10
+      ]
+    },
+    "l2-repro": {
+      "cases": 48,
+      "seeds": [
+        1337
+      ],
+      "targets": [
+        7
+      ],
+      "scopes": [
+        -1,
+        0,
+        1
+      ],
+      "windows": [
+        6,
+        8,
+        10,
+        12
+      ],
+      "repetitions": [
+        10
+      ]
+    },
+    "l3-target": {
+      "cases": 32,
+      "seeds": [
+        42
+      ],
+      "targets": [
+        7,
+        42,
+        100,
+        200
+      ],
+      "scopes": [
+        -1
+      ],
+      "windows": [
+        8,
+        12
+      ],
+      "repetitions": [
+        10
+      ]
+    }
+  },
+  "engine_uniform": {
+    "ok": true,
+    "value": {
+      "status": "ok",
+      "realized": {
+        "mode": "tlbset",
+        "set_domain": "multi-region",
+        "page_kb": "4",
+        "set_region_vpn_hi": [
+          90,
+          91,
+          92,
+          93
+        ],
+        "set_region_vpn_hi_pure": 1,
+        "set_target_region_nodes": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "set_hypothesis": 1,
+        "set_target": 7,
+        "set_window": 8,
+        "set_rounds": 20,
+        "set_regions": 4,
+        "set_region_scope": -1,
+        "set_nsets": 0,
+        "set_active_regions": 4,
+        "seed": 42
+      },
+      "failure": null,
+      "metrics_empty": false
+    }
+  },
+  "engine_mixed": {
+    "ok": true,
+    "value": {
+      "status": "ok",
+      "realized": {
+        "domain_consistent": false,
+        "samples": [
+          {
+            "sample_index": 0,
+            "raw_sample_ref": "raw-samples:SYNTHETIC-realized.s0",
+            "realized": {
+              "mode": "tlbset",
+              "set_domain": "multi-region",
+              "page_kb": "4",
+              "set_region_vpn_hi": [
+                90,
+                91,
+                92,
+                93
+              ],
+              "set_region_vpn_hi_pure": 1,
+              "set_target_region_nodes": [
+                2,
+                2,
+                2,
+                2
+              ],
+              "set_hypothesis": 1,
+              "set_target": 7,
+              "set_window": 8,
+              "set_rounds": 20,
+              "set_regions": 4,
+              "set_region_scope": -1,
+              "set_nsets": 0,
+              "set_active_regions": 4,
+              "seed": 42
+            }
+          },
+          {
+            "sample_index": 1,
+            "raw_sample_ref": "raw-samples:SYNTHETIC-realized.s1",
+            "realized": {
+              "mode": "tlbset",
+              "set_domain": "single-region-fallback",
+              "page_kb": "4",
+              "set_region_vpn_hi": [
+                90,
+                91,
+                92,
+                93
+              ],
+              "set_region_vpn_hi_pure": 1,
+              "set_target_region_nodes": [
+                8,
+                0,
+                0,
+                0
+              ],
+              "set_hypothesis": 1,
+              "set_target": 7,
+              "set_window": 8,
+              "set_rounds": 20,
+              "set_regions": 4,
+              "set_region_scope": -1,
+              "set_nsets": 0,
+              "set_active_regions": 1,
+              "seed": 42
+            }
+          },
+          {
+            "sample_index": 2,
+            "raw_sample_ref": "raw-samples:SYNTHETIC-realized.s2",
+            "realized": {
+              "mode": "tlbset",
+              "set_domain": "single-region-fallback",
+              "page_kb": "4",
+              "set_region_vpn_hi": [
+                90,
+                91,
+                92,
+                93
+              ],
+              "set_region_vpn_hi_pure": 1,
+              "set_target_region_nodes": [
+                8,
+                0,
+                0,
+                0
+              ],
+              "set_hypothesis": 1,
+              "set_target": 7,
+              "set_window": 8,
+              "set_rounds": 20,
+              "set_regions": 4,
+              "set_region_scope": -1,
+              "set_nsets": 0,
+              "set_active_regions": 1,
+              "seed": 42
+            }
+          }
+        ]
+      },
+      "failure": null,
+      "metrics_empty": false
+    }
+  },
+  "engine_bad_integer": {
+    "ok": true,
+    "value": {
+      "status": "failed",
+      "realized": null,
+      "failure": {
+        "reason": "realized-parse-error",
+        "detail": "realized set_active_regions: not an integer: 'oops' | ok_samples=0/1"
+      },
+      "metrics_empty": true
+    }
+  },
+  "engine_bad_token": {
+    "ok": true,
+    "value": {
+      "status": "failed",
+      "realized": null,
+      "failure": {
+        "reason": "realized-parse-error",
+        "detail": "realized set_target_region_nodes: invalid token 'bad' | ok_samples=0/1"
+      },
+      "metrics_empty": true
+    }
+  },
+  "realized_checks": {
+    "matching": {
+      "ok": true,
+      "value": {
+        "mode": "tlbset",
+        "set_domain": "multi-region",
+        "page_kb": "4",
+        "set_region_vpn_hi": [
+          90,
+          91,
+          92,
+          93
+        ],
+        "set_region_vpn_hi_pure": 1,
+        "set_target_region_nodes": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "set_hypothesis": 1,
+        "set_target": 7,
+        "set_window": 8,
+        "set_rounds": 20,
+        "set_regions": 4,
+        "set_region_scope": -1,
+        "set_nsets": 0,
+        "set_active_regions": 4,
+        "seed": 42
+      }
+    },
+    "bad_sum": {
+      "ok": false,
+      "exception": "ParseError",
+      "message": "realized target node sum 9 != window*nsets 8"
+    },
+    "bad_active": {
+      "ok": false,
+      "exception": "ParseError",
+      "message": "realized set_active_regions 3 != nonzero slots 4"
+    },
+    "legacy_for_tlb_request": {
+      "ok": false,
+      "exception": "ParseError",
+      "message": "descriptor shape mismatch: requested tlb_set but probe output has no mode=tlbset (mode=None)"
+    },
+    "seed_drift": {
+      "ok": false,
+      "exception": "ParseError",
+      "message": "tlb-set descriptor mismatch: seed='99' != requested seed=42"
+    }
+  },
+  "native_compile": {
+    "rc": 0,
+    "stderr": ""
+  },
+  "native_header_selection": "quota x=1007 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=1042 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=1100 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=1200 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=2007 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=2042 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=2100 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=2200 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=3007 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=3042 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=3100 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=3200 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=4007 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=4042 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=4100 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nquota x=4200 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nsame_as_iso0=0\nnsets x=4 nodes=48 slots=4 sum=48 active=4 counts=12,12,12,12,\nnsets x=96 nodes=1152 slots=4 sum=1152 active=4 counts=288,288,288,288,\nnsets x=256 nodes=3072 slots=4 sum=3072 active=4 counts=768,768,768,768,\nisolation x=0 nodes=12 slots=4 sum=12 active=1 counts=12,0,0,0,\nisolation x=1 nodes=12 slots=4 sum=12 active=1 counts=0,12,0,0,\nisolation x=2 nodes=12 slots=4 sum=12 active=1 counts=0,0,12,0,\nisolation x=3 nodes=12 slots=4 sum=12 active=1 counts=0,0,0,12,\nT x=7 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nT2 x=42 nodes=12 slots=4 sum=12 active=4 counts=3,3,3,3,\nscatter x=8 nodes=8 slots=4 sum=8 active=4 counts=2,2,2,2,\ncross region_pure=0 selected_cross=1\n",
+  "legacy_replay": [
+    {
+      "run": "20260929T143631Z-ptr-chase-sm8650-x4-tlb-ctrl",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T144937Z-ptr-chase-sm8650-x4-tlb-ctrl-g1",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T145255Z-ptr-chase-sm8650-x4-tlb-ctrl-g2",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T145432Z-ptr-chase-sm8650-x4-tlb-ctrl-g4",
+      "records": 4,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T145551Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T145659Z-ptr-chase-sm8650-x4-tlb-overhead",
+      "records": 24,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T150212Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp-walk",
+      "records": 1,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T181512Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T181521Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T181716Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T182214Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T182223Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T182418Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T235909Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T235918Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T235927Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T235938Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T235948Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260929T235957Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T004833Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+      "records": 26,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T005033Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T010800Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+      "records": 32,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T011025Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T011631Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T011639Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T011814Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T012107Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T012117Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T012253Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T012815Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T012824Z-ptr-chase-sm8650-x4-tlb-assoc-g2",
+      "records": 6,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T012852Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T012902Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T012912Z-ptr-chase-sm8650-x4-tlb-assoc-g3",
+      "records": 6,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T012939Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T013628Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T013636Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "records": 12,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T013724Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T013733Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T013743Z-ptr-chase-sm8650-x4-tlb-thp-madvise",
+      "records": 12,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T013829Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T014005Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T014014Z-ptr-chase-sm8650-x4-tlb-thp-base",
+      "records": 12,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T014103Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T051530Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T051540Z-ptr-chase-sm8650-x4-tlb-dense-long",
+      "records": 12,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20260930T051715Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20261007T111626Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    },
+    {
+      "run": "20261007T111952Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "records": 2,
+      "legacy_digest_none": false,
+      "normalized_equal": true,
+      "cohort_equal": true
+    }
+  ],
+  "legacy_warmup_values": {
+    "2": 295
+  },
+  "main_overlay": {
+    "tests": 25,
+    "failures": 0,
+    "errors": 0,
+    "log": ".........................\n----------------------------------------------------------------------\nRan 25 tests in 0.085s\n\nOK\n"
+  },
+  "golden_ctest_registration": {
+    "commit": "5ccb841",
+    "committed": true,
+    "working_tree": true,
+    "diff": ""
+  },
+  "a3_tracking": {
+    "r2": true,
+    "m0b": false
+  },
+  "a1_consumer_source_hits": [
+    "analysis/sm8650_tlb_a1.py"
+  ],
+  "a1_onset_counterexamples": {
+    "stable_sharp": {
+      "input": {
+        "6": 0.2,
+        "8": 4.0,
+        "10": 6.5,
+        "12": 7.0
+      },
+      "result": {
+        "ok": true,
+        "value": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        }
+      }
+    },
+    "tail_only_37_5pct_of_peak": {
+      "input": {
+        "6": 0.2,
+        "8": 8.0,
+        "10": 3.0,
+        "12": 3.0
+      },
+      "result": {
+        "ok": true,
+        "value": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 8.0
+        }
+      }
+    },
+    "tail_below_on_above_floor": {
+      "input": {
+        "6": 0.2,
+        "8": 4.0,
+        "10": 1.5,
+        "12": 1.5
+      },
+      "result": {
+        "ok": true,
+        "value": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 4.0
+        }
+      }
+    },
+    "left_censored_all_high": {
+      "input": {
+        "6": 4.0,
+        "8": 4.0,
+        "10": 4.0,
+        "12": 4.0
+      },
+      "result": {
+        "ok": true,
+        "value": {
+          "kind": "sharp",
+          "onset": 6,
+          "transition_steps": 0,
+          "platform_peak": 4.0
+        }
+      }
+    },
+    "right_censored_last_point": {
+      "input": {
+        "6": 0.1,
+        "8": 0.2,
+        "10": 0.5,
+        "12": 4.0
+      },
+      "result": {
+        "ok": true,
+        "value": {
+          "kind": "sharp",
+          "onset": 12,
+          "transition_steps": 0,
+          "platform_peak": 4.0
+        }
+      }
+    },
+    "only_one_point": {
+      "input": {
+        "12": 4.0
+      },
+      "result": {
+        "ok": true,
+        "value": {
+          "kind": "sharp",
+          "onset": 12,
+          "transition_steps": 0,
+          "platform_peak": 4.0
+        }
+      }
+    }
+  },
+  "a1_identical_sharp_all_scopes": {
+    "1": {
+      "hypothesis": 1,
+      "verdict": "supported",
+      "classes": {
+        "-1": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        },
+        "0": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        },
+        "1": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        }
+      },
+      "predicted_hw_sets": [
+        7
+      ]
+    },
+    "2": {
+      "hypothesis": 2,
+      "verdict": "supported",
+      "classes": {
+        "-1": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        },
+        "0": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        },
+        "1": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        }
+      },
+      "predicted_hw_sets": [
+        7
+      ]
+    },
+    "3": {
+      "hypothesis": 3,
+      "verdict": "inconsistent",
+      "classes": {
+        "-1": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        },
+        "0": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        },
+        "1": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        }
+      },
+      "predicted_hw_sets": [
+        0,
+        1,
+        2,
+        15
+      ]
+    },
+    "4": {
+      "hypothesis": 4,
+      "verdict": "inconsistent",
+      "classes": {
+        "-1": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        },
+        "0": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        },
+        "1": {
+          "kind": "sharp",
+          "onset": 8,
+          "transition_steps": 0,
+          "platform_peak": 7.0
+        }
+      },
+      "predicted_hw_sets": [
+        0,
+        1,
+        2,
+        15
+      ]
+    }
+  },
+  "a1_missing_scope_one": {
+    "hypothesis": 1,
+    "verdict": "supported",
+    "classes": {
+      "-1": {
+        "kind": "sharp",
+        "onset": 8,
+        "transition_steps": 0,
+        "platform_peak": 7.0
+      },
+      "0": {
+        "kind": "sharp",
+        "onset": 8,
+        "transition_steps": 0,
+        "platform_peak": 7.0
+      }
+    },
+    "predicted_hw_sets": [
+      7
+    ]
+  },
+  "a1_l3_counterexamples": {
+    "empty": {
+      "consistent": true,
+      "verdicts": {},
+      "targets": []
+    },
+    "one_target": {
+      "consistent": true,
+      "verdicts": {
+        "7": "supported"
+      },
+      "targets": [
+        7
+      ]
+    },
+    "four_targets_different_onsets": {
+      "consistent": true,
+      "verdicts": {
+        "7": "supported",
+        "42": "supported",
+        "100": "supported",
+        "200": "supported"
+      },
+      "targets": [
+        7,
+        42,
+        100,
+        200
+      ]
+    }
+  },
+  "a1_gate_counterexamples": {
+    "valid": {
+      "ok": true,
+      "value": [
+        true,
+        "ok"
+      ]
+    },
+    "wrong_node_sum": {
+      "ok": true,
+      "value": [
+        true,
+        "ok"
+      ]
+    },
+    "wrong_node_dimension": {
+      "ok": true,
+      "value": [
+        true,
+        "ok"
+      ]
+    },
+    "missing_actual_high_fields": {
+      "ok": true,
+      "value": [
+        true,
+        "ok"
+      ]
+    },
+    "isolated_impure": {
+      "ok": true,
+      "value": [
+        true,
+        "ok"
+      ]
+    },
+    "mixed_domain": {
+      "ok": true,
+      "value": [
+        false,
+        "mixed-domain"
+      ]
+    }
+  },
+  "a1_prediction_compile": {
+    "rc": 0,
+    "stderr": ""
+  },
+  "a1_production_collector_truth": [
+    {
+      "collector": 1,
+      "hardware_model": 1,
+      "nodes": 12,
+      "hw_sets": [
+        7
+      ]
+    },
+    {
+      "collector": 1,
+      "hardware_model": 2,
+      "nodes": 12,
+      "hw_sets": [
+        6,
+        7,
+        17,
+        44
+      ]
+    },
+    {
+      "collector": 1,
+      "hardware_model": 3,
+      "nodes": 12,
+      "hw_sets": [
+        0,
+        1,
+        2,
+        15
+      ]
+    },
+    {
+      "collector": 1,
+      "hardware_model": 4,
+      "nodes": 12,
+      "hw_sets": [
+        0,
+        1,
+        2,
+        14,
+        20,
+        22,
+        23,
+        25,
+        36,
+        41,
+        42,
+        43
+      ]
+    },
+    {
+      "collector": 2,
+      "hardware_model": 1,
+      "nodes": 12,
+      "hw_sets": [
+        6,
+        7,
+        17,
+        44
+      ]
+    },
+    {
+      "collector": 2,
+      "hardware_model": 2,
+      "nodes": 12,
+      "hw_sets": [
+        7
+      ]
+    },
+    {
+      "collector": 2,
+      "hardware_model": 3,
+      "nodes": 12,
+      "hw_sets": [
+        0,
+        1,
+        2,
+        14,
+        20,
+        22,
+        23,
+        25,
+        36,
+        41,
+        42,
+        43
+      ]
+    },
+    {
+      "collector": 2,
+      "hardware_model": 4,
+      "nodes": 12,
+      "hw_sets": [
+        0,
+        1,
+        2,
+        15
+      ]
+    },
+    {
+      "collector": 3,
+      "hardware_model": 1,
+      "nodes": 12,
+      "hw_sets": [
+        0,
+        1,
+        2,
+        15
+      ]
+    },
+    {
+      "collector": 3,
+      "hardware_model": 2,
+      "nodes": 12,
+      "hw_sets": [
+        0,
+        1,
+        2,
+        14,
+        20,
+        22,
+        23,
+        25,
+        36,
+        41,
+        42,
+        43
+      ]
+    },
+    {
+      "collector": 3,
+      "hardware_model": 3,
+      "nodes": 12,
+      "hw_sets": [
+        7
+      ]
+    },
+    {
+      "collector": 3,
+      "hardware_model": 4,
+      "nodes": 12,
+      "hw_sets": [
+        6,
+        7,
+        17,
+        44
+      ]
+    },
+    {
+      "collector": 4,
+      "hardware_model": 1,
+      "nodes": 12,
+      "hw_sets": [
+        0,
+        1,
+        2,
+        14,
+        20,
+        22,
+        23,
+        25,
+        36,
+        41,
+        42,
+        43
+      ]
+    },
+    {
+      "collector": 4,
+      "hardware_model": 2,
+      "nodes": 12,
+      "hw_sets": [
+        0,
+        1,
+        2,
+        15
+      ]
+    },
+    {
+      "collector": 4,
+      "hardware_model": 3,
+      "nodes": 12,
+      "hw_sets": [
+        6,
+        7,
+        17,
+        44
+      ]
+    },
+    {
+      "collector": 4,
+      "hardware_model": 4,
+      "nodes": 12,
+      "hw_sets": [
+        7
+      ]
+    },
+    {
+      "isolated_crossing": true,
+      "actual_hi": [
+        90,
+        91
+      ],
+      "collector_H1_under_hardware_H3_sets": [
+        92,
+        93
+      ]
+    }
+  ],
+  "a1_self_consistency": [
+    {
+      "collector": 1,
+      "actual_same_model_sets": [
+        7
+      ],
+      "consumer_prediction": [
+        7
+      ]
+    },
+    {
+      "collector": 2,
+      "actual_same_model_sets": [
+        7
+      ],
+      "consumer_prediction": [
+        7
+      ]
+    },
+    {
+      "collector": 3,
+      "actual_same_model_sets": [
+        7
+      ],
+      "consumer_prediction": [
+        0,
+        1,
+        2,
+        15
+      ]
+    },
+    {
+      "collector": 4,
+      "actual_same_model_sets": [
+        7
+      ],
+      "consumer_prediction": [
+        0,
+        1,
+        2,
+        15
+      ]
+    }
+  ],
+  "archived_real_render": {
+    "figure_equal": {
+      "refill-density.svg": true,
+      "walk-onset.svg": true,
+      "latency-cycles.svg": true,
+      "thp-cohort.svg": true
+    },
+    "report_equal": true,
+    "combined_BT_cohort_equal": true
+  },
+  "a1_entry_callers": []
+}
