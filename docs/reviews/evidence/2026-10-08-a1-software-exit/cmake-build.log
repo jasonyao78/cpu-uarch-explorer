@@ -1,0 +1,11 @@
+[ 20%] Built target timer_resolution
+[ 40%] Built target qos_steering
+[ 50%] Building CXX object probes/cache-mem/CMakeFiles/ptr_chase.dir/ptr_chase.cpp.o
+[ 60%] Linking CXX executable ptr_chase
+[ 60%] Built target ptr_chase
+[ 70%] Building CXX object tests/CMakeFiles/perf_window_golden.dir/__/probes/tests/perf_window_golden.cpp.o
+[ 80%] Linking CXX executable perf_window_golden
+[ 80%] Built target perf_window_golden
+[ 90%] Building CXX object tests/CMakeFiles/tlb_set_collect_golden.dir/__/probes/tests/tlb_set_collect_golden.cpp.o
+[100%] Linking CXX executable tlb_set_collect_golden
+[100%] Built target tlb_set_collect_golden

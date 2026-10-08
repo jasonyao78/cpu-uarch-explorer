@@ -1,0 +1,293 @@
+test_complete_identity_and_layer_role (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_complete_identity_and_layer_role) ... 
+  test_complete_identity_and_layer_role (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_complete_identity_and_layer_role) (mutation=<function TestA1FinalContract.test_complete_identity_and_layer_role.<locals>.<lambda> at 0x108fef240>) ... FAIL
+  test_complete_identity_and_layer_role (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_complete_identity_and_layer_role) (mutation=<function TestA1FinalContract.test_complete_identity_and_layer_role.<locals>.<lambda> at 0x108feef20>) ... FAIL
+  test_complete_identity_and_layer_role (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_complete_identity_and_layer_role) (mutation=<function TestA1FinalContract.test_complete_identity_and_layer_role.<locals>.<lambda> at 0x108fef060>) ... FAIL
+  test_complete_identity_and_layer_role (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_complete_identity_and_layer_role) (mutation=<function TestA1FinalContract.test_complete_identity_and_layer_role.<locals>.<lambda> at 0x108fef1a0>) ... FAIL
+test_duplicate_record_rejected_even_if_identical (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_duplicate_record_rejected_even_if_identical) ... FAIL
+test_event_and_round_qualification_required (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_event_and_round_qualification_required) ... 
+  test_event_and_round_qualification_required (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_event_and_round_qualification_required) (change=<function TestA1FinalContract.test_event_and_round_qualification_required.<locals>.missing at 0x108fd2200>) ... FAIL
+  test_event_and_round_qualification_required (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_event_and_round_qualification_required) (change=<function TestA1FinalContract.test_event_and_round_qualification_required.<locals>.invalid_rounds at 0x108fd2020>) ... FAIL
+test_failed_record_and_nonfinite_value_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_failed_record_and_nonfinite_value_rejected) ... FAIL
+test_full_producer_positive_and_permutation (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_full_producer_positive_and_permutation) ... ok
+test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) ... 
+  test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_target_region_nodes', value=[True, 2, 2, 1]) ... FAIL
+  test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_target_region_nodes', value=[2, 2, 2, 2]) ... FAIL
+  test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_region_vpn_hi', value=None) ... FAIL
+  test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_region_vpn_hi', value=[5, 6, 7]) ... FAIL
+  test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_region_vpn_hi', value=[5, 6, 7, 256]) ... FAIL
+  test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_region_vpn_hi', value=[5, 5, 5, 5]) ... FAIL
+  test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_region_vpn_hi_pure', value=True) ... FAIL
+  test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_active_regions', value=3) ... FAIL
+  test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_domain', value='single-region-fallback') ... FAIL
+test_median_must_match_observations (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_median_must_match_observations) ... FAIL
+test_missing_and_duplicate_observation_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_missing_and_duplicate_observation_rejected) ... 
+  test_missing_and_duplicate_observation_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_missing_and_duplicate_observation_rejected) (change=<function TestA1FinalContract.test_missing_and_duplicate_observation_rejected.<locals>.missing at 0x108adf9c0>) ... FAIL
+  test_missing_and_duplicate_observation_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_missing_and_duplicate_observation_rejected) (change=<function TestA1FinalContract.test_missing_and_duplicate_observation_rejected.<locals>.duplicate at 0x108fefd80>) ... FAIL
+test_missing_window_and_hypothesis_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_missing_window_and_hypothesis_rejected) ... 
+  test_missing_window_and_hypothesis_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_missing_window_and_hypothesis_rejected) (predicate=<function TestA1FinalContract.test_missing_window_and_hypothesis_rejected.<locals>.<lambda> at 0x108fefc40>) ... FAIL
+  test_missing_window_and_hypothesis_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_missing_window_and_hypothesis_rejected) (predicate=<function TestA1FinalContract.test_missing_window_and_hypothesis_rejected.<locals>.<lambda> at 0x108fee700>) ... FAIL
+test_per_case_and_per_process_va_are_retained (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_per_case_and_per_process_va_are_retained) ... ERROR
+test_l3_falling_has_own_rejection_label (analysis.tests.test_sm8650_tlb_a1_contract.TestA1ShapeEdges.test_l3_falling_has_own_rejection_label) ... FAIL
+test_platform_uses_all_observations_without_threshold_filter (analysis.tests.test_sm8650_tlb_a1_contract.TestA1ShapeEdges.test_platform_uses_all_observations_without_threshold_filter) ... FAIL
+test_valid_va_reallocation_is_not_a_mixed_domain (runner.tests.test_engine_experiment_identity.TestEngineExperimentIdentity.test_valid_va_reallocation_is_not_a_mixed_domain) ... FAIL
+
+======================================================================
+ERROR: test_per_case_and_per_process_va_are_retained (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_per_case_and_per_process_va_are_retained)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 152, in test_per_case_and_per_process_va_are_retained
+    out = run_a1_adjudication(records, self.frozen)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/sm8650_tlb_a1.py", line 307, in run_a1_adjudication
+    raise TlbError(f"a1: record gate rejected ({why})")
+analysis.sm8650_tlb.TlbError: a1: record gate rejected (mixed-domain)
+
+======================================================================
+FAIL: test_complete_identity_and_layer_role (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_complete_identity_and_layer_role) (mutation=<function TestA1FinalContract.test_complete_identity_and_layer_role.<locals>.<lambda> at 0x108fef240>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 89, in test_complete_identity_and_layer_role
+    self.assert_rejected(lambda rs: mutation(rs[0]), 'identity|descriptor')
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_complete_identity_and_layer_role (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_complete_identity_and_layer_role) (mutation=<function TestA1FinalContract.test_complete_identity_and_layer_role.<locals>.<lambda> at 0x108feef20>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 89, in test_complete_identity_and_layer_role
+    self.assert_rejected(lambda rs: mutation(rs[0]), 'identity|descriptor')
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_complete_identity_and_layer_role (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_complete_identity_and_layer_role) (mutation=<function TestA1FinalContract.test_complete_identity_and_layer_role.<locals>.<lambda> at 0x108fef060>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 89, in test_complete_identity_and_layer_role
+    self.assert_rejected(lambda rs: mutation(rs[0]), 'identity|descriptor')
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_complete_identity_and_layer_role (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_complete_identity_and_layer_role) (mutation=<function TestA1FinalContract.test_complete_identity_and_layer_role.<locals>.<lambda> at 0x108fef1a0>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 89, in test_complete_identity_and_layer_role
+    self.assert_rejected(lambda rs: mutation(rs[0]), 'identity|descriptor')
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_duplicate_record_rejected_even_if_identical (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_duplicate_record_rejected_even_if_identical)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 65, in test_duplicate_record_rejected_even_if_identical
+    self.assert_rejected(lambda rs: rs.append(copy.deepcopy(rs[0])), 'duplicate')
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_event_and_round_qualification_required (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_event_and_round_qualification_required) (change=<function TestA1FinalContract.test_event_and_round_qualification_required.<locals>.missing at 0x108fd2200>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 116, in test_event_and_round_qualification_required
+    self.assert_rejected(change, 'metric|round|median')
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_event_and_round_qualification_required (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_event_and_round_qualification_required) (change=<function TestA1FinalContract.test_event_and_round_qualification_required.<locals>.invalid_rounds at 0x108fd2020>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 116, in test_event_and_round_qualification_required
+    self.assert_rejected(change, 'metric|round|median')
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_failed_record_and_nonfinite_value_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_failed_record_and_nonfinite_value_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 119, in test_failed_record_and_nonfinite_value_rejected
+    self.assert_rejected(lambda rs: rs[0].__setitem__('status', 'failed'), 'status')
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_target_region_nodes', value=[True, 2, 2, 1])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 143, in test_geometry_missing_malformed_or_inconsistent_rejected
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : ok
+
+======================================================================
+FAIL: test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_target_region_nodes', value=[2, 2, 2, 2])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 143, in test_geometry_missing_malformed_or_inconsistent_rejected
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : ok
+
+======================================================================
+FAIL: test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_region_vpn_hi', value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 143, in test_geometry_missing_malformed_or_inconsistent_rejected
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : ok
+
+======================================================================
+FAIL: test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_region_vpn_hi', value=[5, 6, 7])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 143, in test_geometry_missing_malformed_or_inconsistent_rejected
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : ok
+
+======================================================================
+FAIL: test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_region_vpn_hi', value=[5, 6, 7, 256])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 143, in test_geometry_missing_malformed_or_inconsistent_rejected
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : ok
+
+======================================================================
+FAIL: test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_region_vpn_hi', value=[5, 5, 5, 5])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 143, in test_geometry_missing_malformed_or_inconsistent_rejected
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : ok
+
+======================================================================
+FAIL: test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_region_vpn_hi_pure', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 143, in test_geometry_missing_malformed_or_inconsistent_rejected
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : ok
+
+======================================================================
+FAIL: test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_active_regions', value=3)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 143, in test_geometry_missing_malformed_or_inconsistent_rejected
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : ok
+
+======================================================================
+FAIL: test_geometry_missing_malformed_or_inconsistent_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_geometry_missing_malformed_or_inconsistent_rejected) (key='set_domain', value='single-region-fallback')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 143, in test_geometry_missing_malformed_or_inconsistent_rejected
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : ok
+
+======================================================================
+FAIL: test_median_must_match_observations (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_median_must_match_observations)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 105, in test_median_must_match_observations
+    self.assert_rejected(change, 'median')
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_missing_and_duplicate_observation_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_missing_and_duplicate_observation_rejected) (change=<function TestA1FinalContract.test_missing_and_duplicate_observation_rejected.<locals>.missing at 0x108adf9c0>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 99, in test_missing_and_duplicate_observation_rejected
+    self.assert_rejected(change, 'observations|sample')
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_missing_and_duplicate_observation_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_missing_and_duplicate_observation_rejected) (change=<function TestA1FinalContract.test_missing_and_duplicate_observation_rejected.<locals>.duplicate at 0x108fefd80>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 99, in test_missing_and_duplicate_observation_rejected
+    self.assert_rejected(change, 'observations|sample')
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_missing_window_and_hypothesis_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_missing_window_and_hypothesis_rejected) (predicate=<function TestA1FinalContract.test_missing_window_and_hypothesis_rejected.<locals>.<lambda> at 0x108fefc40>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 76, in test_missing_window_and_hypothesis_rejected
+    self.assert_rejected(lambda rs: rs.__setitem__(slice(None),
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_missing_window_and_hypothesis_rejected (analysis.tests.test_sm8650_tlb_a1_contract.TestA1FinalContract.test_missing_window_and_hypothesis_rejected) (predicate=<function TestA1FinalContract.test_missing_window_and_hypothesis_rejected.<locals>.<lambda> at 0x108fee700>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 76, in test_missing_window_and_hypothesis_rejected
+    self.assert_rejected(lambda rs: rs.__setitem__(slice(None),
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 52, in assert_rejected
+    with self.assertRaisesRegex(TlbError, reason):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+======================================================================
+FAIL: test_l3_falling_has_own_rejection_label (analysis.tests.test_sm8650_tlb_a1_contract.TestA1ShapeEdges.test_l3_falling_has_own_rejection_label)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 168, in test_l3_falling_has_own_rejection_label
+    self.assertEqual(classify_l3_two_point({8: 4.0, 12: 0.2}, 2.0), 'falling')
+AssertionError: 'both-below' != 'falling'
+- both-below
++ falling
+
+
+======================================================================
+FAIL: test_platform_uses_all_observations_without_threshold_filter (analysis.tests.test_sm8650_tlb_a1_contract.TestA1ShapeEdges.test_platform_uses_all_observations_without_threshold_filter)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_contract.py", line 165, in test_platform_uses_all_observations_without_threshold_filter
+    self.assertEqual(result['kind'], 'degraded')
+AssertionError: 'sharp' != 'degraded'
+- sharp
++ degraded
+
+
+======================================================================
+FAIL: test_valid_va_reallocation_is_not_a_mixed_domain (runner.tests.test_engine_experiment_identity.TestEngineExperimentIdentity.test_valid_va_reallocation_is_not_a_mixed_domain)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/runner/tests/test_engine_experiment_identity.py", line 64, in test_valid_va_reallocation_is_not_a_mixed_domain
+    self.assertTrue(realized["domain_consistent"])
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 13 tests in 1.277s
+
+FAILED (failures=25, errors=1)

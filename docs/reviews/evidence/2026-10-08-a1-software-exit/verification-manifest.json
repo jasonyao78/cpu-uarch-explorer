@@ -1,0 +1,139 @@
+{
+  "verified_baseline": "0e205347b5ba789319b6ad87309da80c7fbfaee6",
+  "scope": "software only; no target execution; final audit commit adds documentation/evidence only",
+  "ancestry_exit_codes": {
+    "a98c598": 0,
+    "6062e20": 0
+  },
+  "checks": [
+    {
+      "name": "analysis",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "analysis/tests",
+        "-t",
+        "."
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "returncode": 0,
+      "log_sha256": "3cc9acb6f473a51e12788053541f7a6c696c550a255094216ff773a63f1938ee"
+    },
+    {
+      "name": "runner",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "runner/tests",
+        "-t",
+        "."
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "returncode": 0,
+      "log_sha256": "b7d7e782826b5682ff93544b898a3426877f4f7122e4dc9042be5ec994ccdeee"
+    },
+    {
+      "name": "ctest",
+      "command": [
+        "ctest",
+        "--preset",
+        "macos-arm64-release"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "returncode": 0,
+      "log_sha256": "b0c60294b071019bf9492068efb204e7e0745030a4625c440316d4ba79758031"
+    },
+    {
+      "name": "software-exit",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "scripts/verify_a1_software_exit_20261008.py",
+        "--tree",
+        ".",
+        "--out",
+        "/tmp/sm8650-a1-closeout/final/diagnostics.json"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "returncode": 0,
+      "log_sha256": "20586c081812b27cd1d10285442051a7742d5fbddba49bd6f4a57ae322b7006e"
+    },
+    {
+      "name": "r7-compat",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "scripts/verify_r7a_takeover_20261008.py",
+        "--tree",
+        ".",
+        "--out",
+        "/tmp/sm8650-a1-closeout/final/r7-compat.json"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "returncode": 0,
+      "log_sha256": "5aa89615fcceca917e3f007615f1b31ff2f76adf26eb4c128cd2da2954d62220"
+    }
+  ],
+  "source_sha256": {
+    "analysis/load.py": "63cbfa1d903b679a2c5423c043dd9d45b5b57fd64be6d5af985915bafd1ff2c2",
+    "analysis/sm8650_tlb_a1.py": "8e245b7a0cf619f7fa2bb7b0c9f11dedbb93a56897f5b5a0dac9119f2b873ccb",
+    "analysis/sm8650_tlb_a1_cli.py": "a5d7df5435987e9a6cc359aecf34f7302d87d96fc7520944c816f4f9d893eae1",
+    "analysis/sm8650_tlb_a1_contract.py": "0c073e11750f2dd2e8b6ec5d306c1882a5ed56de6543415350a3dc1f09b00a52",
+    "analysis/sm8650_tlb_a1_freeze.py": "ea3ff462eaf86c59e847fe8e4147d86ed8d2e2f1030ec010d5b46a197a5ac03a",
+    "probes/cache-mem/ptr_chase.cpp": "da65cd3aa702d3f5a300c6eb87414af4142dd4d4d287da27d9ab902e2812f47d",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_window.h": "95dc834898a0feb47474b4b7899533f0762a9a7298315a71dd33830d907363c7",
+    "probes/common/tlb_set_collect.h": "ead8eaf63c36cfcc082aa54cb5af718a82de9c1af6426b9c5c9c50b257ceb4b1",
+    "probes/platform/linux/perf_counter.cpp": "eb89ee646e823fe0ead4a56cd121a955804b8dd89361a908affac6590611dfc9",
+    "probes/platform/linux/perf_counter.h": "17c119b07b32849cfabc78d22299579a55c51e66aa56c023666a14d3ce7db5ea",
+    "runner/adapters/base.py": "4e2e28e1e7b01348470a8991a411f3527618f4229d7f59752410b1651e8f775a",
+    "runner/adapters/ptr_chase.py": "d1c5cb25c39d34795b02dcaae275f91cf0df10b0975cf5861ec02342885b3be6",
+    "runner/artifacts.py": "513c81b4b8e87d750f53b3c882b2ca4326894b6c864d30f37284000e0a46231c",
+    "runner/engine.py": "5977d89ce4803103229b45fb25e34b1384d13659c3674f304809055f8c733157",
+    "runner/environment/android_state.py": "455fe771ec91fd966767498eca86fe388da208d8ca8d1ed6023f80dcdb2b5d0f",
+    "runner/environment/policy.py": "51712deb95fff42e546bbfd057260b434c4b713cf3e3e3a98f3bc907c6c2115b",
+    "runner/plan.py": "f35a9511cd96a3cec541f62b7c9ac4e0bc11fe2e155c658d56abd773138f6648",
+    "runner/records.py": "76e23d2c4d78612b94c7a1f4f972e15871cea0efe2071f2bdb439c3969950bae",
+    "runner/resolve.py": "8eb18cafbe7fe0b489a3374d79e8fbf70c247087e3035bf118b026d259f2a6c5",
+    "runner/statistics.py": "14f98b7ad99f1df0e08c7fd28eeae8d5d4065dd6f34c3fc72e79b02eb61a2dcd",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-calibration-floor.json": "942358f02062f9dc21063d3b51666bceed7ee5c03979b628e28006a05e850259",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-calibration-scatter.json": "689622a31cef69f2042a5b81913ef0df19eff804bb2ecc87d7c29d0deb00b524",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json": "2d9aaf702dff4dd498c8600e2021405aaa74ae40e82d3be9f87c92fd903c382b",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json": "db0c20cd62d43e76d9a684cf18946b2bc3717af8dd2efe19ed6343a1a6231cfc",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json": "89092fc94a2a54e27db46f4311e8d49143ae6b3f353133275b8d7addc51ba85b",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658",
+    "analysis/sm8650_tlb.py": "4caab8209ba2f6efbf38688428160b1b916d553a51576035838da1ef13de0dff",
+    "analysis/tlb_figures.py": "034ba287f7bdbca2408cb7b9e32458d3ea2b72ceebcccab95167022745224baf",
+    "analysis/tests/test_sm8650_tlb_a1.py": "38f329dce465c9660155201b0815871448e550f0fd977efc85b419ff629e9118",
+    "analysis/tests/test_sm8650_tlb_a1_contract.py": "6f0c8b2f5b6fa9724ea91b6fa227911ec5ecd1640c63f6e03be84bb2c0ecb938",
+    "analysis/tests/test_sm8650_tlb_a1_freeze.py": "baac02795a270c01267534100346af2b73cf00b33ae861463b0bf19aeeb538bb",
+    "analysis/tests/test_tlb_figures_integration.py": "f5d376c0185a44e1dbdd9fab5aecba63f135315e7c58a830f4a269674fb6f03f",
+    "runner/tests/tlb_set_fixtures.py": "0c2c15cfb49f4522806806c9507006d08c22e8d1dfc13a8c27fee66c3cca0a34",
+    "scripts/verify_a1_software_exit_20261008.py": "e3d535c9cfe0fb000403c6a1b79b20dcf849e045335174d72620503a61949403",
+    "scripts/verify_r7a_takeover_20261008.py": "fc06f80bbc2ba640a37a5ae2e3a70546222733cebea8743745a23eb12c5f2c37",
+    "docs/tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md": "1362ad58ac68f46352bc33d9976c3cbacd2861ff1634e891214a85003e366de9",
+    "docs/runbooks/2026-10-08-sm8650-a1-integrated-handoff.md": "02c1cc9d573bdbacd95644297b87964b072e2905ea80ecda29fba5007e01546a",
+    "analysis/tests/a1_production_fixture.py": "126381955bf5643f0cd97bf443dcc01c812490eac94e121b4415a6cdac3fca3f",
+    "runner/tests/test_engine_experiment_identity.py": "6982f035bd3484b112c95972bab3e10790107b4d869e559097e439978dc9be2b",
+    "runner/schema/README.md": "2508275630cec6560b4df324dab424017b7d09ef870cee770deafdba4974b2a1",
+    "tests/CMakeLists.txt": "8334477e86697bbf446b05c3948662ed6b2dc91e1b7efadf314cfc625d7836cb",
+    "CMakePresets.json": "911d082a72f1ed4f5f71a4f2898bca14b1c2e5c8dc03d7480858d0bc7bb8deb4"
+  },
+  "evidence_sha256": {
+    "analysis.log": "3cc9acb6f473a51e12788053541f7a6c696c550a255094216ff773a63f1938ee",
+    "cmake-build.log": "87d783bbd7566cdbcd49ed54675a3d69e9303e4a832c8cf73959ea3be4640b46",
+    "cmake-configure.log": "8ee0c100aaedf0e90436a2594ce0da31a9e039a0cb2530e803f1c810d0f6c8d4",
+    "commands.json": "8e59a5e25b68cd8eb5781496a016e1b0ebc3ea83340e686b136dc8c1ee018e96",
+    "contract-red.log": "99b19423b7e1a3800f7986627f6045a08446b2eba9c86aa0d9361ea6a0112033",
+    "ctest.log": "b0c60294b071019bf9492068efb204e7e0745030a4625c440316d4ba79758031",
+    "diagnostics.json": "da1e62531e3b595bd83b3e8bb484206f8126ca9bfbe004db9c3468d0de8db817",
+    "freeze-red.log": "4b041c802fac99444b8e46e7711aecab7a77bfb2d411da9777673e2b5ac06559",
+    "r7-compat.log": "5aa89615fcceca917e3f007615f1b31ff2f76adf26eb4c128cd2da2954d62220",
+    "runner.log": "b7d7e782826b5682ff93544b898a3426877f4f7122e4dc9042be5ec994ccdeee",
+    "software-exit.log": "20586c081812b27cd1d10285442051a7742d5fbddba49bd6f4a57ae322b7006e"
+  }
+}

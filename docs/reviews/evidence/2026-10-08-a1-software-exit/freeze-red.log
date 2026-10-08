@@ -1,0 +1,22 @@
+FE
+======================================================================
+ERROR: test_real_calibration_freeze_and_consume (analysis.tests.test_sm8650_tlb_a1_freeze.TestA1FreezeArtifact.test_real_calibration_freeze_and_consume)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_freeze.py", line 28, in test_real_calibration_freeze_and_consume
+    from analysis.tests.a1_production_fixture import freeze_fixture
+ModuleNotFoundError: No module named 'analysis.tests.a1_production_fixture'
+
+======================================================================
+FAIL: test_bare_boolean_is_not_an_auditable_freeze (analysis.tests.test_sm8650_tlb_a1_freeze.TestA1FreezeArtifact.test_bare_boolean_is_not_an_auditable_freeze)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b/analysis/tests/test_sm8650_tlb_a1_freeze.py", line 24, in test_bare_boolean_is_not_an_auditable_freeze
+    with self.assertRaisesRegex(TlbError, 'unanchored'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: TlbError not raised
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.456s
+
+FAILED (failures=1, errors=1)

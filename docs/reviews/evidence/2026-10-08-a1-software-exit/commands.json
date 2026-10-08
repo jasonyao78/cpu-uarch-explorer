@@ -1,0 +1,76 @@
+{
+  "head": "0e205347b5ba789319b6ad87309da80c7fbfaee6",
+  "checks": [
+    {
+      "name": "analysis",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "analysis/tests",
+        "-t",
+        "."
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "returncode": 0,
+      "log_sha256": "3cc9acb6f473a51e12788053541f7a6c696c550a255094216ff773a63f1938ee"
+    },
+    {
+      "name": "runner",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "runner/tests",
+        "-t",
+        "."
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "returncode": 0,
+      "log_sha256": "b7d7e782826b5682ff93544b898a3426877f4f7122e4dc9042be5ec994ccdeee"
+    },
+    {
+      "name": "ctest",
+      "command": [
+        "ctest",
+        "--preset",
+        "macos-arm64-release"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "returncode": 0,
+      "log_sha256": "b0c60294b071019bf9492068efb204e7e0745030a4625c440316d4ba79758031"
+    },
+    {
+      "name": "software-exit",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "scripts/verify_a1_software_exit_20261008.py",
+        "--tree",
+        ".",
+        "--out",
+        "/tmp/sm8650-a1-closeout/final/diagnostics.json"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "returncode": 0,
+      "log_sha256": "20586c081812b27cd1d10285442051a7742d5fbddba49bd6f4a57ae322b7006e"
+    },
+    {
+      "name": "r7-compat",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "scripts/verify_r7a_takeover_20261008.py",
+        "--tree",
+        ".",
+        "--out",
+        "/tmp/sm8650-a1-closeout/final/r7-compat.json"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "returncode": 0,
+      "log_sha256": "5aa89615fcceca917e3f007615f1b31ff2f76adf26eb4c128cd2da2954d62220"
+    }
+  ]
+}

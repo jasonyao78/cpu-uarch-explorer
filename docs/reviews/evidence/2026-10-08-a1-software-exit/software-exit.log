@@ -1,0 +1,6 @@
+chart:  /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/a1-exit-figures-jabhi36b/refill-density.svg
+chart:  /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/a1-exit-figures-jabhi36b/walk-onset.svg
+chart:  /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/a1-exit-figures-jabhi36b/latency-cycles.svg
+chart:  /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/a1-exit-figures-jabhi36b/thp-cohort.svg
+report: /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/a1-exit-figures-jabhi36b/report.md
+PASS: software exit checks only; target qualification/calibration still required
