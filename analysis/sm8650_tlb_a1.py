@@ -337,11 +337,10 @@ def run_a1_adjudication(records: list[dict],
         l3_curves = {t: c for (hh, t), c in sorted(l3.items()) if hh == h}
         if len(l3_curves) < 4:
             raise TlbError(f"a1: L3 needs 4 targets, got {len(l3_curves)}")
-        l3_cls = {t: classify_onset(c, on_threshold=on)
-                  for t, c in l3_curves.items()}
-        l3_pass = (all(c["kind"] == "sharp" for c in l3_cls.values())
-                   and max(_w(c) for c in l3_cls.values())
-                       - min(_w(c) for c in l3_cls.values()) <= 1)
+        # L3 两点比较规则（预注册）：配置仅 W={8,12}，用低点 < on、
+        # 高点 ≥ on 的方向+越线检查替代完整 onset 分类（后者需 ≥4 点）。
+        l3_shapes = {classify_l3_two_point(c, on) for c in l3_curves.values()}
+        l3_pass = (len(l3_shapes) == 1 and "both-below" not in l3_shapes)
         per_h[h] = {"verdict": vm["verdict"], "reproducible": reproducible,
                     "l3_pass": l3_pass,
                     "classes": vm["classes"],
@@ -352,3 +351,15 @@ def run_a1_adjudication(records: list[dict],
     return {"per_hypothesis": per_h, "on_threshold": on, "n_records": n,
             "h_star": supported[0] if len(supported) == 1 else None,
             "h_star_status": "unique" if len(supported) == 1 else "multiple-or-none"}
+
+
+def classify_l3_two_point(curve: dict[int, float], on: float) -> str:
+    """L3 两点形态分类（任务书 v1.8.2 预注册，R8 修订）：两点网格不能做
+    onset 定位，L3 的证据形态 = 四 target **相互一致**且非全低于阈值。
+    返回 "both-below" / "crossing" / "both-above"。"""
+    if len(curve) != 2:
+        raise TlbError(f"a1: L3 two-point rule needs exactly 2 windows, "
+                       f"got {sorted(curve)}")
+    ws = sorted(curve)
+    lo, hi = curve[ws[0]] >= on, curve[ws[1]] >= on
+    return "both-above" if (lo and hi) else ("crossing" if hi else "both-below")

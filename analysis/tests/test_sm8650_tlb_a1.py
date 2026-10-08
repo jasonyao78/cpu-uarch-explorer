@@ -198,9 +198,10 @@ class TestFullChain(unittest.TestCase):
         return recs
 
     def _l3(self, h=1):
+        # 生产网格 W={8,12} 两点
         return [_chain_record(h, -1, 42, t, w, v, exp="x-a1-l3-target")
                 for t in (7, 42, 100, 200)
-                for w, v in ((6, 0.2), (8, 2.5), (10, 6.5), (12, 7.0))]
+                for w, v in ((8, 4.0), (12, 6.5))]
 
     def test_permutation_invariance(self):
         import random
@@ -234,7 +235,7 @@ class TestFullChain(unittest.TestCase):
         # 四 target 全退化 → l3_pass=False → 无 H*
         bad_l3 = [_chain_record(1, -1, 42, t, w, 0.3, exp="x-a1-l3-target")
                   for t in (7, 42, 100, 200)
-                  for w in (8, 10, 12)]
+                  for w in (8, 12)]
         r = run_a1_adjudication(self._l1_l2() + bad_l3, self.FROZEN)
         self.assertIsNone(r["h_star"])
 
@@ -246,3 +247,76 @@ class TestFullChain(unittest.TestCase):
                 r["metrics"][0]["value"] = 7.2
         out = run_a1_adjudication(recs, self.FROZEN)
         self.assertTrue(out["per_hypothesis"][1]["reproducible"])
+
+
+class TestProductionChain(unittest.TestCase):
+    """R8：真实三配置 plan 展开 → 写盘 → load_run 回读 → 全量判定。"""
+
+    def _build(self, tmp):
+        import json
+        from pathlib import Path
+        from runner import plan as plan_mod
+        from analysis.load import load_run
+        platform = json.loads(Path(
+            "configs/platforms/redmi-k70pro-01.json").read_text())
+        configs = ("ptr-chase-sm8650-x4-tlb-a1-l1-main",
+                   "ptr-chase-sm8650-x4-tlb-a1-l2-repro",
+                   "ptr-chase-sm8650-x4-tlb-a1-l3-target")
+        runs_root = Path(tmp) / "runs"
+        total = 0
+        for cid in configs:
+            spec = json.loads(Path(f"configs/experiments/{cid}.json").read_text())
+            built = plan_mod.build_plan(spec, platform)
+            run_dir = runs_root / f"20261008T000000Z-{cid}"
+            run_dir.mkdir(parents=True)
+            recs = []
+            for case in built.cases:
+                params = {k: rv.value for k, rv in case.params}
+                w = int(params["set_window"]); h = int(params["set_hypothesis"])
+                scope = int(params.get("set_region_scope", -1))
+                if h == 1:
+                    v = 0.2 if w < 8 else (4.0 if w == 8 else 6.5)
+                else:
+                    v = 0.4 if scope < 0 else (0.2 if w < 8 else 6.5)
+                nodes = ([3, 3, 3, 3] if scope < 0
+                         else [0]*scope + [12] + [0]*(3-scope))
+                recs.append({
+                    "schema_version": "2.0", "status": "ok",
+                    "experiment_id": cid, "params": params,
+                    "probe": {"name": "ptr_chase", "protocol_version": "1.2",
+                              "realized": {"set_target_region_nodes": nodes,
+                                           "set_region_vpn_hi_pure": 1,
+                                           "set_region_vpn_hi": ["5", "6", "7", "8"]}},
+                    "environment": {}, "metrics": [
+                        {"name": "pmu.l2d_tlb_refill.count", "value": v,
+                         "unit": "events"}]})
+                total += 1
+            (run_dir / "records.jsonl").write_text(
+                "".join(json.dumps(r) + "\n" for r in recs))
+            (run_dir / "run-manifest.json").write_text(json.dumps(
+                {"schema_version": "1.0", "experiment_id": cid}))
+        self.assertEqual(total, 128)
+        records = []
+        for d in sorted(runs_root.iterdir()):
+            run = load_run(d)
+            for r in run.ok_records:
+                r.setdefault("experiment_id", json.loads(
+                    (d / "run-manifest.json").read_text())["experiment_id"])
+                records.append(r)
+        return records
+
+    def test_full_128_positive(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            records = self._build(tmp)
+        out = run_a1_adjudication(records, {"frozen": True, "on_threshold": 3.0})
+        self.assertEqual(out["n_records"], 128)
+        self.assertEqual(out["h_star"], 1)
+
+    def test_permutation_invariant_full(self):
+        import random, tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            records = self._build(tmp)
+        random.seed(3); random.shuffle(records)
+        out = run_a1_adjudication(records, {"frozen": True, "on_threshold": 3.0})
+        self.assertEqual(out["h_star"], 1)
