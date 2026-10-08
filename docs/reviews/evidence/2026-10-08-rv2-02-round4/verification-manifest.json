@@ -1,0 +1,84 @@
+{
+  "reviewed_heads": {
+    "m0b": "fa663f51996752815d367c35a7c97271e34ed493",
+    "main": "2fa8d5d2fbc99a7a03c79634e47efcde23035e2c",
+    "r2": "24a919c0161927d85259202812430569ade161ea"
+  },
+  "changed_files": [
+    "analysis/sm8650_tlb_a1.py",
+    "analysis/tests/test_sm8650_tlb_a1.py"
+  ],
+  "source_sha256": {
+    "analysis/sm8650_tlb_a1.py": "d6121bc0a873ef322a54082001048433a007eb83a15bcd3eed30039f5f672579",
+    "analysis/tests/test_sm8650_tlb_a1.py": "f4b1ff7823042a349724ecf875d482ac72ebd4941f0a3d87585c40054dc4cecd",
+    "probes/common/tlb_set_collect.h": "ead8eaf63c36cfcc082aa54cb5af718a82de9c1af6426b9c5c9c50b257ceb4b1"
+  },
+  "test_commands": [
+    {
+      "name": "analysis",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "analysis/tests",
+        "-t",
+        "."
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "exit_code": 0
+    },
+    {
+      "name": "a1-tests",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "analysis.tests.test_sm8650_tlb_a1"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "exit_code": 0
+    },
+    {
+      "name": "a1-direct-module",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "analysis.tests.test_sm8650_tlb_a1"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "exit_code": 0,
+      "purpose": "verify test definitions below unittest.main are skipped in direct module execution"
+    }
+  ],
+  "diagnostics_command": [
+    "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+    "/private/tmp/tlb-rpa-round4-review-20261008/review_rv2_02_round4_20261008.py",
+    "--tree",
+    "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+    "--main-tree",
+    "/Users/michaelyao/workspace/cpu-uarch-explorer",
+    "--r2-tree",
+    "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+    "--out",
+    "/private/tmp/tlb-rpa-round4-review-20261008/diagnostics.json"
+  ],
+  "diagnostics_exit_code": 0,
+  "bounds": {
+    "phone_or_adb_executed": false,
+    "native_harness": "production header on integer virtual addresses only",
+    "ctest_ndk": "not rerun: current diff contains only A1 Python implementation/tests; previous 5ccb841 review evidence retained",
+    "synthetic_fixtures": "software review only, not hardware measurements"
+  },
+  "evidence_sha256": {
+    "2026-10-08-rv2-02-round4-review.md": "0c60ab5dbbce7d3fa14443a07085fd645db993b75b99ab94465d01ca3988e4c3",
+    "a1-direct-module.log": "50f0f5c476b9cc9d182e8b7bfb84adc74b09dbf2f0fd2f0932c931aa24fa578a",
+    "a1-tests.log": "3d1e28c0a63bf43fed29ba2994b4cce3e09f151d210fd7d603d50be7e40de7b1",
+    "analysis.log": "418e53d01edcbe96aa12691cafddf647adb42fd90fea27a86256e311932c07db",
+    "diagnostics.json": "35bc271c0025ab5e81e6e4dd8727e5091270bff1c4730efe8e080f38b6c6681e",
+    "review_rv2_02_round4_20261008.py": "4f0b1f9aca81d7eb7f65e531ff5d1022849c51005efcabdcedc22fe880bd9f96"
+  },
+  "reviewed_task_sha256": "36aa86b2734046541a06dd6a5085bae4bb4d14a0da020a507c63ecd910199f3a"
+}

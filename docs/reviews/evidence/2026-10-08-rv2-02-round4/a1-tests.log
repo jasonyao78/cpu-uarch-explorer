@@ -1,0 +1,21 @@
+test_h1_pattern_supported (analysis.tests.test_sm8650_tlb_a1.TestAdjudicateH.test_h1_pattern_supported) ... ok
+test_h3_pattern_folds (analysis.tests.test_sm8650_tlb_a1.TestAdjudicateH.test_h3_pattern_folds) ... ok
+test_happy_path_freezes (analysis.tests.test_sm8650_tlb_a1.TestFreezeThresholds.test_happy_path_freezes) ... ok
+test_stop_rules (analysis.tests.test_sm8650_tlb_a1.TestFreezeThresholds.test_stop_rules) ... ok
+test_all_scope_pure_passes (analysis.tests.test_sm8650_tlb_a1.TestGate.test_all_scope_pure_passes) ... ok
+test_impure_rejected_all_scopes (analysis.tests.test_sm8650_tlb_a1.TestGate.test_impure_rejected_all_scopes) ... ok
+test_isolated_expected_active_one (analysis.tests.test_sm8650_tlb_a1.TestGate.test_isolated_expected_active_one) ... ok
+test_mixed_domain_and_missing_rejected (analysis.tests.test_sm8650_tlb_a1.TestGate.test_mixed_domain_and_missing_rejected) ... ok
+test_consistency (analysis.tests.test_sm8650_tlb_a1.TestL3.test_consistency) ... ok
+test_empty_l3_rejected (analysis.tests.test_sm8650_tlb_a1.TestL3.test_empty_l3_rejected) ... ok
+test_degraded_never_on (analysis.tests.test_sm8650_tlb_a1.TestOnsetClassification.test_degraded_never_on) ... ok
+test_nonmonotonic_interval (analysis.tests.test_sm8650_tlb_a1.TestOnsetClassification.test_nonmonotonic_interval) ... ok
+test_right_censored_not_sharp (analysis.tests.test_sm8650_tlb_a1.TestOnsetClassification.test_right_censored_not_sharp) ... ok
+test_sharp (analysis.tests.test_sm8650_tlb_a1.TestOnsetClassification.test_sharp) ... ok
+test_weak_platform_degraded (analysis.tests.test_sm8650_tlb_a1.TestOnsetClassification.test_weak_platform_degraded) ... ok
+test_collection_model_distinct (analysis.tests.test_sm8650_tlb_a1.TestPrediction.test_collection_model_distinct) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.000s
+
+OK
