@@ -1,24 +1,13 @@
-/*
- * rob_window_probe.c — Cortex-X4 ROB 窗口协议探针（骨架 v0.1）
- *
- * 对应《ROB微架构深度分析报告》§5.4（E1/E2 协议）：
- *   模式 A：miss 锚点 —— [ldr x0,[x0]] + N×filler + [ldr x1,[x1]] + 循环控制
- *   模式 C：fsqrt 链锚点（pattern.c 路线）—— 8×fsqrt d0,d0 + N×filler + 循环控制
- *
- * 工程路线（报告 §5.1-2）：被测指令序列由本文件的手写发射器生成（mini-JIT），
- * 编译器不接触测量循环 —— 防优化纪律（矩阵 B5）由构造保证，配合 --write-asm
- * 生成黄金汇编回归（robsize check-gold.sh 同款，见 README）。
- *
- * 版本记录：
- *   v0.1 (2026-09-29) 初版：7 个填充类别 × 2 锚点模式；入口对齐抖动；
- *        Linux perf RAW 事件组（CPU_CYCLES/INST_SPEC/INST_RETIRED 默认集）；
- *        逐轮 rawlog；macOS 可编译冒烟（PMU 通道自动 n/a）。
- *        骨架性质：无统计检验、无 DVFS 记录、chase 回路完整性未校验 —— 见 README TODO。
- *
- * 许可证：Apache-2.0（cpu-uarch-explorer 仓库）。设计继承 stuffedcow/robsize/pattern.c
- * 三家的公开思路，全部代码重写，未复制上述仓库源码。
+/* SPDX-License-Identifier: Apache-2.0
+ * Standalone A64 effective-window probe v0.2, not a physical ROB counter.
+ * Contracts/design: docs/design/2026-10-09-minimal-tlb-rob-probes.md.
+ * Same-address independent/serial chase graphs; exact N filler per gap;
+ * explicit loop alignment; exported code; strict GROUP+ID PMU windows.
+ * Host supports export/tests only. Measurement requires Linux AArch64.
  */
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <assert.h>
 #include <errno.h>
 #include <getopt.h>
@@ -31,377 +20,291 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/mman.h>
-
-#ifdef __APPLE__
-#include <pthread.h>
-#include <libkern/OSCacheControl.h>
-#else
+#include "perf_group_read.h"
+#ifdef __linux__
 #include <linux/perf_event.h>
 #include <sched.h>
 #include <sys/ioctl.h>
 #include <sys/syscall.h>
 #endif
 
-/* ---------------- AArch64 发射器（全部编码经 objdump 核验，见 README） ---------------- */
-
-typedef uint32_t insn_t;
-
-/* 基址取自 ARM Architecture Reference Manual A64 编码；寄存器字段可轮转 */
-#define A64_NOP        0xD503201Fu
-#define A64_RET        0xD65F03C0u
-#define E_ADD(d, n, m)  (0x8B000000u | ((m) << 16) | ((n) << 5) | (d))
-#define E_ORR_MOV(d, m) (0xAA0003E0u | ((m) << 16) | (d))          /* mov xd, xm = orr xd, xzr, xm */
-#define E_MOVZ(d, imm)  (0xD2800000u | (((imm) & 0xFFFFu) << 5) | (d))
-#define E_MOVK(d, imm, s)(0xF2800000u | (((imm) & 0xFFFFu) << 5) | (((s) / 16) << 21) | (d))
-#define E_FADD(d, n, m) (0x1E202800u | ((m) << 16) | ((n) << 5) | (d))
-#define E_FSQRT(d, n)   (0x1E61C000u | ((n) << 5) | (d))
-#define E_LDR_UOFF(t, n, off_bytes) (0xF9400000u | ((((off_bytes) >> 3) & 0xFFFu) << 10) | ((n) << 5) | (t))
-#define E_LDR(t, n)     E_LDR_UOFF(t, n, 0)
-#define E_STR_UOFF(t, n, off_bytes) (0xF9000000u | ((((off_bytes) >> 3) & 0xFFFu) << 10) | ((n) << 5) | (t))
-#define E_SUBS_IMM(d, n, imm)  (0xF1000000u | (((imm) & 0xFFFu) << 10) | ((n) << 5) | (d))
-#define E_BNE(imm19)    (0x54000001u | (((imm19) & 0x7FFFFu) << 5))
-#define E_FMOV_DI(d)    (0x9E6703E0u | (d))
-
-typedef struct { insn_t *buf; size_t pos, cap; } emitter_t;
-
-static void emit(emitter_t *e, insn_t w) {
-    assert(e->pos < e->cap);
-    e->buf[e->pos++] = w;
-}
-
-/* movz/movk 链装载 64 位立即数（地址类常量） */
-static void emit_mov_imm64(emitter_t *e, unsigned rd, uint64_t v) {
-    emit(e, E_MOVZ(rd, (unsigned)(v & 0xFFFFu)));
-    for (unsigned s = 16; s < 64; s += 16)
-        emit(e, E_MOVK(rd, (unsigned)((v >> s) & 0xFFFFu), s));
-}
-
-/* 填充类别：与报告 §5.5 类别矩阵对应 */
-typedef enum { C_NOP = 0, C_ADD, C_MOVI, C_MOVR, C_FADD, C_LDR, C_STR, C_COUNT } fill_class_t;
-
-static const struct { const char *name; int needs_comp; } kClass[C_COUNT] = {
-    [C_NOP]  = { "nop",  1 },   /* 仅占窗口条目（E0-3 前提，主协议前必须验证） */
-    [C_ADD]  = { "add",  1 },   /* + INT PRF（目的寄存器） */
-    [C_MOVI] = { "movi", 1 },   /* + rename 消除配额（E0-2） */
-    [C_MOVR] = { "movr", 1 },   /* + rename 消除（E0-1） */
-    [C_FADD] = { "fadd", 0 },   /* NO_COMP：不与锚点 load 争用（FP PRF） */
-    [C_LDR]  = { "ldr",  1 },   /* + Load buffer */
-    [C_STR]  = { "str",  1 },   /* + Store buffer（1 MOP = SA+SD 2 µOP） */
+#define NOP 0xd503201fu
+#define RET 0xd65f03c0u
+#define ADD(d,n,m) (0x8b000000u|((m)<<16)|((n)<<5)|(d))
+#define MOV(d,m) (0xaa0003e0u|((m)<<16)|(d))
+#define MOVZ(d,v) (0xd2800000u|(((v)&65535u)<<5)|(d))
+#define MOVK(d,v,s) (0xf2800000u|(((v)&65535u)<<5)|(((s)/16)<<21)|(d))
+#define FADD(d,n,m) (0x1e602800u|((m)<<16)|((n)<<5)|(d))
+#define FSQRT(d,n) (0x1e61c000u|((n)<<5)|(d))
+#define FMOV(d,n) (0x9e670000u|((n)<<5)|(d))
+#define LDR(t,n,o) (0xf9400000u|(((o)/8)<<10)|((n)<<5)|(t))
+#define STR(t,n,o) (0xf9000000u|(((o)/8)<<10)|((n)<<5)|(t))
+#define SUBS(d,n) (0xf1000400u|((n)<<5)|(d))
+#define BNE(w) (0x54000001u|(((uint32_t)(w)&0x7ffffu)<<5))
+static const char *classes[]={"nop","add","movi","movr","fadd","ldr","str"};
+struct options {
+    unsigned cls,n,its,rounds,mb,align,chain,seed; int pin;
+    unsigned pmu_type; bool have_type,serial,asymmetric,paired;
+    enum { MISS, SQRT, NONE } anchor;
+    const char *dump,*rawlog;
+    uint64_t events[PG_MAX_EVENTS]; size_t ne;
 };
-
-static void emit_filler(emitter_t *e, fill_class_t c, unsigned i, uint64_t hot) {
-    unsigned rd = 4 + (i & 7u);   /* 目的寄存器轮转 x4..x11 / s0..s7 */
-    switch (c) {
-    case C_NOP:  emit(e, A64_NOP); break;
-    case C_ADD:  emit(e, E_ADD(rd, 16, 17)); break;
-    case C_MOVI: emit(e, E_MOVZ(rd, 1)); break;
-    case C_MOVR: emit(e, E_ORR_MOV(rd, 16)); break;
-    case C_FADD: emit(e, E_FADD(i & 7u, 16, 17)); break;
-    case C_LDR:  emit(e, E_LDR_UOFF(rd, 12, (i & 7u) * 8)); break;   /* 热缓冲命中 */
-    case C_STR:  emit(e, E_STR_UOFF(13, 12, (i & 7u) * 8)); break;
-    default: assert(!"bad class");
+struct code { uint32_t *words; size_t pos,cap,loop,branch; unsigned fillers,anchors; };
+static void emit(struct code *c,uint32_t w) { assert(c->pos<c->cap); c->words[c->pos++]=w; }
+static void imm(struct code *c,unsigned r,uint64_t v) {
+    emit(c,MOVZ(r,(unsigned)v));
+    for(unsigned s=16;s<64;s+=16) emit(c,MOVK(r,(unsigned)(v>>s),s));
+}
+static void filler(struct code *c,unsigned cls,unsigned j) {
+    unsigned rd=4+(j&7u);
+    switch(cls) {
+    case 0: emit(c,NOP); break;
+    case 1: emit(c,ADD(rd,16,17)); break;
+    case 2: emit(c,MOVZ(rd,1)); break;
+    case 3: emit(c,MOV(rd,16)); break;
+    case 4: emit(c,FADD(4+(j&3u),16,17)); break; // v0 anchor; v8..15 ABI preserved
+    case 5: emit(c,LDR(rd,14,8*(j&7u))); break;
+    case 6: emit(c,STR(16,14,8*(j&7u))); break;
+    default: abort();
     }
-    (void)hot;
+    ++c->fillers;
 }
-
-typedef enum { ANCHOR_MISS = 0, ANCHOR_FSQRT } anchor_mode_t;
-
-/*
- * 生成测量例程（无参调用；迭代计数烘焙进代码，每次调用自重装）。
- * 布局：[NOP 着陆区 64B] → [mov 常量] → 16B 对齐 → loop: 锚点 + N×filler
- *       (+第二锚点) + subs/b.ne → ret。
- * 入口抖动（i%4×16B）只落入开头的 NOP 区——无论哪个偏移进入，常量区总会执行
- * （robsize 的 prologue-first 结构；v0.1 冒烟实测：入口放常量区之后会跳过
- * x2 计数器装载，用调用方残留值死循环）。
- */
-#define LANDING_NOPS 16   /* 16 条 NOP = 64B = 4 个 16B 抖动入口 */
-
-static size_t build_routine(insn_t *buf, size_t cap, fill_class_t cls, anchor_mode_t amode,
-                            unsigned icount, uint64_t its, uint64_t chase_a, uint64_t chase_b,
-                            uint64_t hot) {
-    emitter_t e = { buf, 0, cap };
-    const int comp = kClass[cls].needs_comp;
-    const int adj = (int)icount - (comp ? 2 : 0);
-    if (adj < 0) { fprintf(stderr, "icount too small for class %s\n", kClass[cls].name); exit(2); }
-
-    /* 着陆区（抖动入口；任何 16B 偏移落入都只会少执行几条 NOP） */
-    for (int k = 0; k < LANDING_NOPS; k++) emit(&e, A64_NOP);
-
-    /* 常量装载（循环外，每次调用必经） */
-    emit_mov_imm64(&e, 2, its);                                  /* x2 = 迭代计数 */
-    if (amode == ANCHOR_MISS) {
-        emit_mov_imm64(&e, 0, chase_a);   /* x0 = chase A */
-        emit_mov_imm64(&e, 1, chase_b);   /* x1 = chase B */
+// Runtime arguments x0=A, x1=B, x2=hot, x3=iterations. No baked VA.
+static struct code build(uint32_t *buf,size_t cap,const struct options *o) {
+    struct code c={.words=buf,.cap=cap};
+    emit(&c,MOV(14,2));
+    imm(&c,16,0x1111); imm(&c,17,0x2222);
+    if(o->anchor==SQRT || o->cls==4) {
+        imm(&c,15,UINT64_C(0x3ff0000000000000)); // exact stable sqrt(1.0)
+        emit(&c,FMOV(0,15)); emit(&c,FMOV(16,15)); emit(&c,FMOV(17,15));
     }
-    if (cls == C_ADD || cls == C_MOVR) { emit_mov_imm64(&e, 16, 0x1111); emit_mov_imm64(&e, 17, 0x2222); }
-    if (cls == C_FADD) { emit(&e, E_FMOV_DI(16)); emit(&e, E_FMOV_DI(17)); }
-    if (cls == C_LDR || cls == C_STR) { emit_mov_imm64(&e, 12, hot); emit_mov_imm64(&e, 13, 0x1234); }
-
-    while ((e.pos & 3u) != 0) emit(&e, A64_NOP);         /* 16B 对齐 */
-    const size_t loop_start = e.pos;
-
-    if (amode == ANCHOR_MISS) {
-        emit(&e, E_LDR(0, 0));                            /* L₁: ldr x0,[x0] */
-        for (int j = 0; j < adj; j++) emit_filler(&e, cls, (unsigned)j, hot);
-        emit(&e, E_LDR(1, 1));                            /* L₂: ldr x1,[x1] */
-    } else {
-        for (int k = 0; k < 8; k++) emit(&e, E_FSQRT(0, 0));  /* 链式 fsqrt d0,d0 ×8 */
-        for (int j = 0; j < adj; j++) emit_filler(&e, cls, (unsigned)j, hot);
+    while ((c.pos*4)%64!=o->align) emit(&c,NOP);
+    c.loop=c.pos;
+    for(unsigned side=0;side<2;++side) {
+        if(o->anchor==MISS) { emit(&c,LDR(o->serial?0:side,o->serial?0:side,0)); ++c.anchors; }
+        if(o->anchor==SQRT) for(unsigned j=0;j<o->chain;++j) { emit(&c,FSQRT(0,0)); ++c.anchors; }
+        if(!side || !o->asymmetric) for(unsigned j=0;j<o->n;++j) filler(&c,o->cls,j);
     }
-    /* 循环控制（其窗口占用按未公开处理 → §5.8 判据 J7 的 ±2 口径带） */
-    emit(&e, E_SUBS_IMM(2, 2, 1));                        /* subs x2, x2, #1 */
-    const long off = (long)loop_start - (long)e.pos;      /* b.ne 以自身地址为基准 */
-    emit(&e, E_BNE((unsigned)(off >> 2)));
-    emit(&e, A64_RET);
-    return e.pos;
+    emit(&c,SUBS(3,3)); c.branch=c.pos;
+    const int64_t displacement=(int64_t)c.loop-(int64_t)c.branch; // instruction words, NOT bytes
+    assert(displacement>=-262144 && displacement<262144);
+    emit(&c,BNE(displacement)); emit(&c,RET); return c;
 }
-
-/* ---------------- 计时与 PMU（Linux；macOS 仅墙钟） ---------------- */
-
-static uint64_t ns_now(void) {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
-    return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
+static int failure(const char *why) {
+    fprintf(stderr,"error[%s]: %s\n",why,strerror(errno));
+    printf("{\"type\":\"failure\",\"metrics\":{},\"failure\":{\"reason\":\"%s\"}}\n",why);
+    return 1;
 }
-
-#define MAX_EV 8
-#ifndef __APPLE__
-typedef struct { int fd; const char *name; } ev_t;
-
-static int perf_open_raw(uint64_t evcode, int group_fd, int read_format) {
-    struct perf_event_attr pe;
-    memset(&pe, 0, sizeof(pe));
-    pe.size = sizeof(pe);
-    pe.type = PERF_TYPE_RAW;
-    pe.config = evcode;
-    pe.disabled = (group_fd < 0);
-    pe.read_format = (uint64_t)read_format;
-    return (int)syscall(SYS_perf_event_open, &pe, 0, -1, group_fd, 0);
+static uint64_t number(const char *s,uint64_t lo,uint64_t hi) {
+    char *end=NULL; errno=0;
+    if(!s || *s=='-' || !*s) { fprintf(stderr,"invalid number\n"); exit(2); }
+    unsigned long long n=strtoull(s,&end,0);
+    if(errno || !end || *end || n<lo || n>hi) { fprintf(stderr,"number out of range: %s\n",s); exit(2); }
+    return (uint64_t)n;
 }
-
-/* 组读布局：nr, values[nr], time_enabled, time_running */
-typedef struct { uint64_t nr, val[MAX_EV], ena, run; } group_t;
-
-static int g_ev_count = 0;
-static ev_t g_ev[MAX_EV];
-static int g_read_format;
-
-static void perf_setup(uint64_t *codes, int n, const char **names) {
-    g_read_format = PERF_FORMAT_GROUP | PERF_FORMAT_TOTAL_TIME_ENABLED | PERF_FORMAT_TOTAL_TIME_RUNNING;
-    int leader = -1;
-    for (int i = 0; i < n; i++) {
-        int fd = perf_open_raw(codes[i], leader, g_read_format);
-        if (fd < 0) {
-            fprintf(stderr, "warn: perf_event_open 0x%" PRIx64 " failed (%s) — 该事件记 n/a\n",
-                    codes[i], strerror(errno));
-            continue;                      /* TLB 评审2 教训：失败即 n/a，不伪报 0 */
-        }
-        if (leader < 0) leader = fd;
-        else ioctl(fd, PERF_EVENT_IOC_SET_OUTPUT, leader);
-        g_ev[g_ev_count].fd = fd; g_ev[g_ev_count].name = names[i]; g_ev_count++;
-    }
-    if (leader >= 0) ioctl(leader, PERF_EVENT_IOC_ENABLE, 0);
-}
-
-static void perf_read_group(group_t *g) {
-    memset(g, 0, sizeof(*g));
-    if (g_ev_count == 0) return;
-    ssize_t want = (ssize_t)(sizeof(uint64_t) * (1 + (size_t)g_ev_count + 2));
-    if (read(g_ev[0].fd, g, (size_t)want) != want) {
-        fprintf(stderr, "warn: perf group read failed (%s) — 本轮事件记 n/a\n", strerror(errno));
-        memset(g, 0, sizeof(*g));
-    }
-}
-#else
-typedef struct { uint64_t nr, val[MAX_EV], ena, run; } group_t;
-typedef struct { int fd; const char *name; } ev_t;
-static int g_ev_count = 0;
-static ev_t g_ev[MAX_EV];
-static void perf_setup(uint64_t *codes, int n, const char **names) {
-    (void)codes; (void)n; (void)names;
-    fprintf(stderr, "note: macOS 无 perf_event_open，PMU 通道 n/a（仅墙钟）\n");
-}
-static void perf_read_group(group_t *g) { memset(g, 0, sizeof(*g)); }
-#endif
-
-/* ---------------- chase 缓冲（miss 锚点）：长循环 + 远跳，保证每轮 miss ---------------- */
-
-static void chase_init(uint64_t *p, size_t n, size_t cycle_len) {
-    for (size_t i = 0; i < n; i++) p[i] = (uint64_t)&p[i + 1];
-    p[n - 1] = (uint64_t)&p[0];
-    srand(42);
-    for (size_t i = n - 1; i > 0; i--) {                 /* robsize init_dbuf 同款随机化 */
-        if (i & 0x1ffu) continue;
-        if (i < cycle_len) continue;
-        size_t k = (size_t)rand() % (i / cycle_len) * cycle_len + (i % cycle_len);
-        uint64_t t = p[i]; p[i] = p[k]; p[k] = t;
-    }
-}
-
-/* ---------------- main ---------------- */
-
-static void usage(const char *p) {
-    fprintf(stderr,
-        "usage: %s -t <class> -n <icount> [options]\n"
-        "  -t class    nop|add|movi|movr|fadd|ldr|str\n"
-        "  -n N        填充指令数（类别含补偿：实际发射 N-2 或 N，见 README）\n"
-        "  -a mode     miss（默认，A 档）| fsqrt（C 档链锚点）\n"
-        "  -i its      内层迭代次数（默认 262144；J1 门控：walk 足迹 = its×8B 必须超 L2）\n"
-        "  -r outer    外层重复轮数（默认 30）\n"
-        "  -e hex      追加 RAW PMU 事件（可重复；默认集 0x11,0x1B,0x8）\n"
-        "  -m mb       chase 缓冲区大小 MB（默认 128，仅 miss 模式）\n"
-        "  -l n        chase 远跳间隔（默认 1024 步）\n"
-        "  --rawlog f  逐轮原始数据 CSV\n"
-        "  --write-asm f  生成机器码到文件（黄金回归用），不运行\n"
-        "  --no-jitter 关闭入口对齐抖动\n"
-        "  --pin cpu   绑核（Linux；失败即退出——TLB 评审2 教训）\n", p);
+static void usage(void) {
+    fprintf(stderr,"rob_window_probe -t nop|add|movi|movr|fadd|ldr|str -n 0..4096 "
+        "[-a miss|fsqrt|none] [-i iterations] [-r rounds] [-m MiB] "
+        "[--serial|--paired] [--asymmetric] [--align 0|16|32|48] [--chain 1..256] "
+        "[--seed positive] [--pin cpu --pmu-type type] [-e raw_event] "
+        "[--write-asm file] [--rawlog file]\n");
     exit(2);
 }
-
-int main(int argc, char **argv) {
-    const char *cls_name = NULL, *rawlog = NULL, *write_asm = NULL;
-    unsigned icount = 0, its = 262144, outer = 30, mem_mb = 128, cycle_len = 1024;
-    int pin = -1; bool jitter = true; anchor_mode_t amode = ANCHOR_MISS;
-    uint64_t extra[MAX_EV]; int extra_n = 0;
-
-    static const struct option lo[] = {
-        {"rawlog", required_argument, NULL, 1}, {"write-asm", required_argument, NULL, 2},
-        {"no-jitter", no_argument, NULL, 3}, {"pin", required_argument, NULL, 4}, {NULL, 0, NULL, 0}};
+static uint64_t rng(uint64_t *state) {
+    uint64_t x=*state; x^=x>>12; x^=x<<25; x^=x>>27; *state=x; return x*UINT64_C(2685821657736338717);
+}
+// π[2j],π[2j+1] are A_j,B_j. Independent and serial modes read same addresses.
+// Every node is one 64-byte line; whole permutation is explicitly checked.
+static bool init_chase(char *mem,size_t bytes,bool serial,unsigned seed) {
+    size_t nodes=bytes/64; uint32_t *order=malloc(nodes*sizeof(*order));
+    if(!order) return false;
+    for(size_t i=0;i<nodes;++i) order[i]=(uint32_t)i;
+    uint64_t state=seed;
+    for(size_t i=nodes-1;i>0;--i) { size_t j=rng(&state)%(i+1); uint32_t t=order[i]; order[i]=order[j]; order[j]=t; }
+    for(size_t i=0;i<nodes;++i) {
+        size_t next=serial?(i+1)%nodes:(i+2)%nodes;
+        *(uintptr_t *)(void *)(mem+64*order[i])=(uintptr_t)(mem+64*order[next]);
+    }
+    // Inspect all links against the defining permutation, including wrap-around.
+    bool ok=true;
+    for(size_t i=0;i<nodes;++i) {
+        size_t next=serial?(i+1)%nodes:(i+2)%nodes;
+        if(*(uintptr_t *)(void *)(mem+64*order[i])!=(uintptr_t)(mem+64*order[next])) ok=false;
+    }
+    // Put heads in a separate global pair; do not overwrite node contents.
+    extern uintptr_t chase_heads[2];
+    chase_heads[0]=(uintptr_t)(mem+64*order[0]); chase_heads[1]=(uintptr_t)(mem+64*order[1]);
+    free(order); return ok;
+}
+uintptr_t chase_heads[2];
+static uint64_t now_ns(void) {
+    struct timespec t; if(clock_gettime(CLOCK_MONOTONIC_RAW,&t)) abort();
+    return (uint64_t)t.tv_sec*1000000000u+(uint64_t)t.tv_nsec;
+}
+#ifdef __linux__
+struct perf { int fd[PG_MAX_EVENTS]; uint64_t ids[PG_MAX_EVENTS]; size_t n; };
+static bool perf_setup(struct perf *p,const struct options *o) {
+    memset(p,0,sizeof(*p));
+    for(size_t i=0;i<o->ne;++i) {
+        struct perf_event_attr a; memset(&a,0,sizeof(a));
+        a.size=sizeof(a); a.type=o->pmu_type; a.config=o->events[i];
+        a.disabled=i==0; a.pinned=i==0; a.exclude_kernel=1; a.exclude_hv=1;
+        a.read_format=PERF_FORMAT_GROUP|PERF_FORMAT_TOTAL_TIME_ENABLED|PERF_FORMAT_TOTAL_TIME_RUNNING|PERF_FORMAT_ID;
+        int fd=(int)syscall(SYS_perf_event_open,&a,0,-1,i?p->fd[0]:-1,0);
+        if(fd<0) return false;
+        p->fd[p->n++]=fd;
+        if(ioctl(fd,PERF_EVENT_IOC_ID,&p->ids[i])) return false;
+    }
+    return true;
+}
+static const char *snapshot(struct perf *p,struct pg_sample *s) {
+    uint64_t wire[3+2*PG_MAX_EVENTS]; ssize_t bytes=read(p->fd[0],wire,sizeof(wire));
+    if(bytes<=0 || bytes%8) return "group-read-failed";
+    return pg_decode(wire,(size_t)bytes/8,p->ids,p->n,s);
+}
+// Verify actual anonymous backing for precisely this mapping. MADV is only a request.
+static bool backing(char *mem,size_t bytes) {
+    FILE *f=fopen("/proc/self/smaps","r"); if(!f) return false;
+    char line[512]; unsigned long start=0,end=0; bool within=false,found=false,nh=false;
+    size_t kernel=0,mmu=0,huge=1;
+    while(fgets(line,sizeof(line),f)) {
+        unsigned long a,b;
+        if(sscanf(line,"%lx-%lx",&a,&b)==2) {
+            if(within) break;
+            within=a==(uintptr_t)mem && b==a+bytes; start=a; end=b; (void)start; (void)end;
+            if(within) found=true;
+        }
+        if(!within) continue;
+        (void)sscanf(line,"KernelPageSize: %zu kB",&kernel);
+        (void)sscanf(line,"MMUPageSize: %zu kB",&mmu);
+        (void)sscanf(line,"AnonHugePages: %zu kB",&huge);
+        if(!strncmp(line,"VmFlags:",8) && strstr(line," nh")) nh=true;
+    }
+    fclose(f); return found && kernel==4 && mmu==4 && huge==0 && nh;
+}
+#endif
+int main(int argc,char **argv) {
+    struct options o={.its=131072,.rounds=3,.mb=16,.chain=8,.seed=42,.pin=-1,.anchor=MISS,.events={0x11,0x08},.ne=2};
+    bool have_class=false,have_n=false;
+    static const struct option opts[]={
+        {"write-asm",1,0,1},{"rawlog",1,0,2},{"pin",1,0,3},{"pmu-type",1,0,4},
+        {"serial",0,0,5},{"asymmetric",0,0,6},{"align",1,0,7},{"chain",1,0,8},
+        {"seed",1,0,9},{"paired",0,0,10},{0,0,0,0}};
     int ch;
-    while ((ch = getopt_long(argc, argv, "t:n:a:i:r:e:m:h", lo, NULL)) != -1) {
-        switch (ch) {
-        case 't': cls_name = optarg; break;
-        case 'n': icount = (unsigned)atoi(optarg); break;
-        case 'a': amode = (strcmp(optarg, "fsqrt") == 0) ? ANCHOR_FSQRT : ANCHOR_MISS; break;
-        case 'i': its = (unsigned)atoi(optarg); break;
-        case 'r': outer = (unsigned)atoi(optarg); break;
-        case 'e': extra[extra_n++] = strtoull(optarg, NULL, 0); break;
-        case 'm': mem_mb = (unsigned)atoi(optarg); break;
-        case 'l': cycle_len = (unsigned)atoi(optarg); break;
-        case 1: rawlog = optarg; break;
-        case 2: write_asm = optarg; break;
-        case 3: jitter = false; break;
-        case 4: pin = atoi(optarg); break;
-        default: usage(argv[0]);
+    while((ch=getopt_long(argc,argv,"t:n:a:i:r:m:e:h",opts,NULL))!=-1) {
+        switch(ch) {
+        case 't': {
+            bool found=false; for(unsigned k=0;k<7;++k) if(!strcmp(optarg,classes[k])) { o.cls=k; found=true; }
+            if(!found) usage(); have_class=true; break; }
+        case 'n': o.n=(unsigned)number(optarg,0,4096); have_n=true; break;
+        case 'a': if(!strcmp(optarg,"miss")) o.anchor=MISS; else if(!strcmp(optarg,"fsqrt")) o.anchor=SQRT;
+                  else if(!strcmp(optarg,"none")) o.anchor=NONE; else usage(); break;
+        case 'i': o.its=(unsigned)number(optarg,1,100000000); break;
+        case 'r': o.rounds=(unsigned)number(optarg,1,1000); break;
+        case 'm': o.mb=(unsigned)number(optarg,1,512); break;
+        case 'e': {
+            if(o.ne==PG_MAX_EVENTS) usage(); uint64_t e=number(optarg,0,UINT32_MAX);
+            for(size_t k=0;k<o.ne;++k) if(o.events[k]==e) usage(); o.events[o.ne++]=e; break; }
+        case 1: o.dump=optarg; break; case 2: o.rawlog=optarg; break;
+        case 3: o.pin=(int)number(optarg,0,1023); break;
+        case 4: o.pmu_type=(unsigned)number(optarg,1,UINT32_MAX); o.have_type=true; break;
+        case 5: o.serial=true; break; case 6: o.asymmetric=true; break;
+        case 7: o.align=(unsigned)number(optarg,0,48); if(o.align%16) usage(); break;
+        case 8: o.chain=(unsigned)number(optarg,1,256); break;
+        case 9: o.seed=(unsigned)number(optarg,1,UINT32_MAX); break;
+        case 10: o.paired=true; break;
+        default: usage();
         }
     }
-    if (!cls_name || icount == 0) usage(argv[0]);
-    fill_class_t cls = C_COUNT;
-    for (int c = 0; c < C_COUNT; c++) if (strcmp(cls_name, kClass[c].name) == 0) cls = (fill_class_t)c;
-    if (cls == C_COUNT) { fprintf(stderr, "unknown class %s\n", cls_name); usage(argv[0]); }
-    if (icount > 1024) { fprintf(stderr, "icount > 1024 超出骨架设计上限\n"); return 2; }
-
-#ifndef __APPLE__
-    if (pin >= 0) {
-        cpu_set_t s; CPU_ZERO(&s); CPU_SET(pin, &s);
-        if (sched_setaffinity(0, sizeof(s), &s) != 0) {
-            fprintf(stderr, "error: 绑核 cpu%d 失败 (%s)\n", pin, strerror(errno)); return 1;
-        }
+    if(!have_class || !have_n || optind!=argc || ((o.serial || o.paired) && o.anchor!=MISS) || (o.serial && o.paired)) usage();
+    const size_t capacity=65536;
+    uint32_t *buf=mmap(NULL,capacity,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
+    if(buf==MAP_FAILED) return failure("code-mmap");
+    struct code c=build(buf,capacity/4,&o);
+    uint32_t *serial_buf=NULL;
+    if(o.paired) {
+        serial_buf=mmap(NULL,capacity,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
+        if(serial_buf==MAP_FAILED) return failure("serial-code-mmap");
+        struct options so=o; so.serial=true;
+        struct code sc=build(serial_buf,capacity/4,&so);
+        assert(sc.loop==c.loop && sc.pos==c.pos);
     }
+    const char *anchor=o.anchor==MISS?"miss":o.anchor==SQRT?"fsqrt":"none";
+    printf("{\"type\":\"config\",\"version\":2,\"class\":\"%s\",\"anchor\":\"%s\",\"n\":%u,"
+           "\"iterations\":%u,\"rounds\":%u,\"serial\":%s,\"paired\":%s,\"asymmetric\":%s,\"chain\":%u,\"fsqrt_operand_bits\":\"0x3ff0000000000000\","
+           "\"loop_offset\":%zu,\"loop_mod64\":%u,\"branch_offset\":%zu,\"loop_instructions\":%zu,"
+           "\"fillers_per_iteration\":%u,\"anchors_per_iteration\":%u,\"code_bytes\":%zu,"
+           "\"memory_bytes\":%zu,\"chase_seed\":%u,\"pmu_type\":%u,\"exclude_kernel\":true,\"exclude_hv\":true,\"events\":[",
+           classes[o.cls],anchor,o.n,o.its,o.rounds,o.serial?"true":"false",o.paired?"true":"false",o.asymmetric?"true":"false",o.chain,
+           c.loop*4,o.align,c.branch*4,c.branch-c.loop+1,c.fillers,c.anchors,c.pos*4,
+           o.anchor==MISS?((size_t)o.mb<<20):0,o.seed,o.pmu_type);
+    for(size_t k=0;k<o.ne;++k) printf("%s%"PRIu64,k?",":"",o.events[k]); puts("]}");
+    if(o.dump) {
+        if(o.paired) usage();
+        FILE *f=fopen(o.dump,"wb"); if(!f) return failure("code-export-open");
+        bool ok=fwrite(buf,4,c.pos,f)==c.pos; if(fclose(f)) ok=false;
+        return ok?0:failure("code-export-write");
+    }
+#if !defined(__linux__) || !defined(__aarch64__)
+    (void)now_ns; (void)init_chase; (void)serial_buf;
+    return failure("measurement-requires-linux-aarch64");
 #else
-    if (pin >= 0) fprintf(stderr, "warn: --pin 仅 Linux 生效，忽略\n");
-    (void)pin;
-#endif
-
-    /* 常量区与缓冲 */
-    const uint64_t kCodeBytes = 1u << 20;
-    insn_t *code = mmap(NULL, kCodeBytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (code == MAP_FAILED) { perror("mmap code"); return 1; }
-    uint64_t chase_a = 0, chase_b = 0, hot = 0;
-    uint64_t *chase = NULL;
-    if (amode == ANCHOR_MISS) {
-        size_t bytes = (size_t)mem_mb << 20;
-        chase = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (chase == MAP_FAILED) { perror("mmap chase"); return 1; }
-#ifndef __APPLE__
-        madvise(chase, bytes, MADV_NOHUGEPAGE);   /* 页粒度控制（TLB 项目教训：显式固定） */
-#endif
-        size_t n = bytes / sizeof(uint64_t) / 2;
-        chase_init(chase, n, cycle_len); chase_init(chase + n, n, cycle_len);
-        chase_a = (uint64_t)chase; chase_b = (uint64_t)(chase + n);
+    if(o.pin<0 || !o.have_type || sysconf(_SC_PAGESIZE)!=4096) return failure("measurement-requires-pin-type-4k");
+    cpu_set_t affinity; CPU_ZERO(&affinity); CPU_SET(o.pin,&affinity);
+    if(sched_setaffinity(0,sizeof(affinity),&affinity) || sched_getcpu()!=o.pin) return failure("affinity");
+    uint64_t fpcr; __asm__ volatile("mrs %0, fpcr":"=r"(fpcr));
+    if(fpcr) return failure("fpcr-nonzero"); // no silent rounding/FZ/trap inheritance
+    char *mem=NULL; size_t bytes=(size_t)o.mb<<20;
+    if(o.anchor==MISS) {
+        mem=mmap(NULL,bytes,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
+        if(mem==MAP_FAILED || madvise(mem,bytes,MADV_NOHUGEPAGE)) return failure("chase-mapping");
+        if(!init_chase(mem,bytes,o.serial,o.seed)) return failure("chase-ring-validation");
+        if(!backing(mem,bytes)) return failure("chase-backing-not-4k");
     }
-    uint64_t *hotbuf = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (hotbuf == MAP_FAILED) { perror("mmap hotbuf"); return 1; }
-    memset(hotbuf, 1, 4096);
-    hot = (uint64_t)hotbuf;
-
-    const size_t ninsn = build_routine(code, kCodeBytes / sizeof(insn_t), cls, amode, icount, its,
-                                       chase_a, chase_b, hot);
-    const size_t code_bytes = ninsn * sizeof(insn_t);
-
-    if (write_asm) {
-        FILE *f = fopen(write_asm, "wb");
-        if (!f || fwrite(code, code_bytes, 1, f) != 1) { perror("write-asm"); return 1; }
-        fclose(f);
-        fprintf(stderr, "wrote %zu bytes of generated code to %s\n", code_bytes, write_asm);
-        fprintf(stderr, "inspect: objdump -D -b binary -m aarch64 %s\n", write_asm);
-        return 0;
+    uint64_t hot[8]={1,2,3,4,5,6,7,8};
+    __builtin___clear_cache((char *)buf,(char *)(buf+c.pos));
+    if(mprotect(buf,capacity,PROT_READ|PROT_EXEC)) return failure("code-w-to-x");
+    if(serial_buf) {
+        __builtin___clear_cache((char *)serial_buf,(char *)(serial_buf+c.pos));
+        if(mprotect(serial_buf,capacity,PROT_READ|PROT_EXEC)) return failure("serial-code-w-to-x");
     }
-
-#ifdef __APPLE__
-    pthread_jit_write_protect_np(false);
-    sys_icache_invalidate(code, code_bytes);
-    pthread_jit_write_protect_np(true);
-    if (mprotect(code, kCodeBytes, PROT_READ | PROT_EXEC) != 0) { perror("mprotect"); return 1; }
-#else
-    __clear_cache((char *)code, (char *)code + code_bytes);
-    if (mprotect(code, kCodeBytes, PROT_READ | PROT_EXEC) != 0) { perror("mprotect"); return 1; }
-#endif
-
-    /* PMU 默认集 + 用户追加 */
-    static uint64_t codes[MAX_EV]; static const char *names[MAX_EV]; int n_ev = 0;
-    if (g_ev_count == 0) { /* perf_setup 只调一次 */
-        codes[n_ev] = 0x11; names[n_ev++] = "CPU_CYCLES";
-        codes[n_ev] = 0x1B; names[n_ev++] = "INST_SPEC";
-        codes[n_ev] = 0x8;  names[n_ev++] = "INST_RETIRED";
-        for (int i = 0; i < extra_n && n_ev < MAX_EV; i++) { codes[n_ev] = extra[i]; names[n_ev++] = "raw"; }
-    }
-    perf_setup(codes, n_ev, names);
-
-    FILE *rf = NULL;
-    if (rawlog) {
-        rf = fopen(rawlog, "w");
-        if (!rf) { perror("rawlog"); return 1; }
-        fprintf(rf, "round,jit_off,ns_total");
-        for (int i = 0; i < g_ev_count; i++) fprintf(rf, ",%s", g_ev[i].name);
-        fprintf(rf, "\n");
-    }
-
-    printf("# class=%s anchor=%s n=%u its=%u outer=%u comp=%d\n",
-           kClass[cls].name, amode == ANCHOR_MISS ? "miss" : "fsqrt", icount, its, outer,
-           kClass[cls].needs_comp);
-    printf("# per_chunk_ns_min\tper_chunk_ns_avg\tper_chunk_cycles_avg\n");
-
-    double sum_ns = 0, min_ns = 1e30;
-    uint64_t sum_cyc = 0; unsigned used_rounds = 0;
-    for (unsigned i = 0; i < outer; i++) {
-        /* 入口抖动：只落入开头 64B NOP 着陆区内的 16B 偏移（常量区在其后必经） */
-        const size_t off_bytes = jitter ? ((i % 4u) * 16u) : 0;
-        void (*routine)(void) = (void (*)(void))(void *)((char *)code + off_bytes);
-        routine();                                             /* warmup */
-
-        group_t g0, g1; perf_read_group(&g0);
-        const uint64_t t0 = ns_now();
-        routine();
-        const uint64_t t1 = ns_now();
-        perf_read_group(&g1);
-
-        const double ns = (double)(t1 - t0);
-        const uint64_t cyc = (g1.nr >= 1 && g0.nr >= 1) ? g1.val[0] - g0.val[0] : 0;
-        const double per_chunk = ns / (double)its;
-        if (per_chunk < min_ns) min_ns = per_chunk;
-        sum_ns += per_chunk; sum_cyc += cyc; used_rounds++;
-        if (rf) {
-            fprintf(rf, "%u,%zu,%.0f", i, off_bytes, ns);
-            for (int k = 0; k < g_ev_count && (size_t)k < g1.nr; k++)
-                fprintf(rf, ",%" PRIu64, g1.val[k] - g0.val[k]);
-            fprintf(rf, "\n");
+    struct perf p; if(!perf_setup(&p,&o)) return failure("perf-open-or-id");
+    typedef void (*routine_t)(uintptr_t,uintptr_t,void *,uint64_t);
+    routine_t routine=(routine_t)(void *)buf;
+    const uint64_t accesses=2*(uint64_t)o.its, nodes=bytes/64;
+    printf("{\"type\":\"runtime\",\"fpcr\":%"PRIu64",\"cpu\":%d,\"loop_address_mod64\":%zu,"
+           "\"ring_nodes\":%"PRIu64",\"distinct_lines_per_call\":%"PRIu64",\"mapping_4k_verified\":%s,\"event_ids\":[",
+           fpcr,sched_getcpu(),((uintptr_t)buf+c.loop*4)%64,o.anchor==MISS?nodes:0,
+           o.anchor==MISS?(accesses<nodes?accesses:nodes):0,o.anchor==MISS?"true":"null");
+    for(size_t k=0;k<p.n;++k) printf("%s%"PRIu64,k?",":"",p.ids[k]); puts("]}");
+    FILE *raw=o.rawlog?fopen(o.rawlog,"w"):NULL;
+    if(o.rawlog && !raw) return failure("rawlog-open");
+    for(unsigned round=0;round<o.rounds;++round) {
+      for(unsigned step=0;step<(o.paired?2u:1u);++step) {
+        bool is_serial=o.paired?((round+step)%2!=0):o.serial;
+        if(o.paired) {
+            if(!init_chase(mem,bytes,is_serial,o.seed)) return failure("paired-ring-validation");
+            routine=(routine_t)(void *)(is_serial?serial_buf:buf);
         }
-        volatile uint64_t sink = (chase ? chase[0] : 0) ^ hotbuf[0];  /* 触碰结果，防 LTO 整段消除 */
-        (void)sink;
+        routine(chase_heads[0],chase_heads[1],hot,o.its); // same explicit warmup each round
+        struct pg_sample a,b,d; const char *err=snapshot(&p,&a); if(err) return failure(err);
+        if(ioctl(p.fd[0],PERF_EVENT_IOC_ENABLE,PERF_IOC_FLAG_GROUP)) return failure("group-enable");
+        uint64_t t0=now_ns(); routine(chase_heads[0],chase_heads[1],hot,o.its); uint64_t ns=now_ns()-t0;
+        if(ioctl(p.fd[0],PERF_EVENT_IOC_DISABLE,PERF_IOC_FLAG_GROUP)) return failure("group-disable");
+        if((err=snapshot(&p,&b)) || (err=pg_delta(&a,&b,p.n,&d))) return failure(err);
+        if(sched_getcpu()!=o.pin || !ns || !d.values[0]) return failure("round-cpu-or-timing");
+        for(unsigned dest=0;dest<(raw?2u:1u);++dest) {
+            FILE *f=dest?raw:stdout;
+            fprintf(f,"{\"type\":\"round\",\"round\":%u,\"serial\":%s,\"pair_step\":%u,\"ns\":%"PRIu64",\"enabled\":%"PRIu64",\"running\":%"PRIu64",\"metrics\":{",round,is_serial?"true":"false",step,ns,d.enabled,d.running);
+            for(size_t k=0;k<p.n;++k) fprintf(f,"%s\"0x%"PRIx64"\":%"PRIu64,k?",":"",o.events[k],d.values[k]);
+            fprintf(f,"}}\n"); if(fflush(f)) return failure("output-write");
+        }
     }
-    printf("%.2f\t%.2f\t%.2f\n", min_ns, sum_ns / (double)used_rounds,
-           g_ev_count ? (double)sum_cyc / (double)used_rounds / (double)its : 0.0);
-    if (rf) fclose(rf);
-    return 0;
+      }
+    if(raw && fclose(raw)) return failure("rawlog-close");
+    for(size_t k=0;k<p.n;++k) close(p.fd[k]);
+    if(mem) munmap(mem,bytes);
+    if(serial_buf) munmap(serial_buf,capacity);
+    munmap(buf,capacity); return 0;
+#endif
 }
