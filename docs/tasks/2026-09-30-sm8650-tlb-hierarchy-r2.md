@@ -1,6 +1,6 @@
-# SM8650 Cortex-X4 TLB 层级探测 · 第二次战役（r2）任务书 v1.9
+# SM8650 Cortex-X4 TLB 层级探测 · 第二次战役（r2）任务书 v1.9.1
 
-> 版本：v1.9（2026-10-08；A1 最终消费合同、锚定阈值工件、两阶段文件入口与软件集成收口。替代 v1.8.2 的 §5.5；历史评审处置保留于 §10.3 / docs/reviews/）。
+> 版本：v1.9.1（2026-10-08；在v1.9合同上补充预约内对齐与设备几何资格冒烟，保留H/矩阵/阈值规则。原v1.9的软件集成证据及历史处置保留于 §10.3 / docs/reviews/）。
 
 ## 1. 任务契约与有限终点
 
@@ -151,7 +151,7 @@
 
 **登记观察（不判读，Phase A 处理）**：① 0x2f 在 W=16 饱和 ~15/轮（<W）；② 0x2d 的轮数依赖（替换态积累）；③ 锚点小 footprint 漂移对大 footprint 不敏感（与共跑干扰假设一致）。
 
-### 5.5 Phase A A1 软件合同冻结（v1.9，2026-10-08）
+### 5.5 Phase A A1 软件合同冻结（v1.9.1，2026-10-08）
 
 **冻结边界**：本节冻结配置、选择程序和消费合同；目标板的数值工件须由独立标定生成。合成测试中的 H*=1 只验证软件，不是 SM8650 结论。旧 pilot 的 multi-region 标签不作 H 判别证据，不回填 realized。B1 继续作主估计量。A3 按 open-items 的既有条件后置，不混入本次 A1 软件出口。
 
@@ -174,6 +174,10 @@ record 的精确 `experiment_id` 绑定角色；完整 params/control/target/pro
 - `runner/engine.py`、`runner/adapters/ptr_chase.py`、`runner/schema/README.md`：requested→realized、逐记录角色与样本持久化。纯函数 helper 单独通过不代表正式裁定获准。
 
 **数据与几何硬门**：每 case 恰 10 个进程 observations，sample_index 为 0..9，全部有限、单位正确、各 metric 引用同一进程，median/value 与 observations 重算一致。每进程有效轮≥1，valid+invalid+mux=rounds−1（冷轮不计），各事件 valid_rounds 等于窗口有效轮。无效/mux 轮由探针排除均值并披露，不新增无依据的比例排除线。所有请求 descriptor 精确类型和值匹配 realized；节点向量长度、非负整数、总和 W、active 数量、隔离槽位、actual vpn_hi 与 purity 全核验。全域四区域必须实际有节点且高字段不同；隔离只激励指定区域；所有 scope 都要求 purity=1。任一失败命名拒绝整次正式裁定，保留失败/审计，不丢点继续宣布 H*。
+
+**v1.9.1 几何实现与资格前置**：`probes/common/tlb_set_layout.h` 在自有PROT_NONE预约内部取256MiB对齐起点，区域k仍为起点+k×256MiB+k×8页；64MiB池整区不跨高字段窗口。保留原预约起点/全长回收，不覆盖外部映射。所有进程的actual hi/purity输出仍独立核验，purity检查整个池，不将请求或布局成功当测量事实。新头纳入 `analysis/sm8650_tlb_a1_freeze.py` 的CODE_PATHS，旧binary/标定不可继承。
+
+设备先运行 `configs/experiments/ptr-chase-sm8650-x4-tlb-a1-geometry-smoke.json`（H×scope{-1,0,1}×W12，12cases×2reps），通过完整几何/统计/谱系资格后才运行专用标定。冒烟不输入freeze或正式裁定；正式矩阵与阈值选择规则保持本节原冻结值。旧pilot 14/50 purity=0只作为采集几何风险证据，不否定硬件模型；只读审计与范围见 `docs/reviews/2026-10-08-a1-geometry-and-pilot-audit.md`，执行见 `docs/runbooks/2026-10-08-sm8650-a1-integrated-handoff.md`。
 
 逐进程 VA 重分配允许变化，不能用最后一个 record 或第一个进程的 hi 代表全矩阵。`case_audit` 保留 128 个 case 各 10 个进程的实际 active hi、节点与四模型预测。按 C 收集、按 M 检验：C=M 必为 {target}；差一个高字段折叠时为 {target⊕hi}；低字段耦合差异为 multi。区域内编号置换不单独构成 H 判别证据。
 
@@ -275,17 +279,20 @@ Q-A/Q-B/Q-C/Q-D 判据同 §1.2 各问；另冻结（F8/F9）：
 
 | 对象 | 路径（相对各分支 worktree 根） |
 |---|---|
-| A1 判据消费链 | `analysis/sm8650_tlb_a1.py`（m0b；测试 `analysis/tests/test_sm8650_tlb_a1.py`） |
-| 主分析器/身份契约 | `analysis/sm8650_tlb.py`（m0b）；图表消费 `analysis/tlb_figures.py`（main） |
-| 探针 set 模式 | `probes/cache-mem/ptr_chase.cpp` + 共享收集器 `probes/common/tlb_set_collect.h`（m0b） |
-| runner 消费契约 | `runner/plan.py` / `runner/adapters/ptr_chase.py` / `runner/engine.py`（m0b） |
-| A1 三层配置 | `configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json` / `-a1-l2-repro.json` / `-a1-l3-target.json`（m0b） |
-| 标定/锚点配置 | `configs/experiments/ptr-chase-sm8650-x4-tlb-pilot-g03-empty.json` / `-g03-noconflict.json` / `-tlb-anchor.json`（m0b） |
-| 平台/充电态协议 | `configs/platforms/redmi-k70pro-01.json`（environment_profiles.charging-thermal，m0b） |
-| 上板执行包 | `docs/runbooks/2026-10-07-sm8650-tlb-pilot-kickoff.md`（r2，v2） |
-| 上板前清单 | `docs/runbooks/2026-10-01-sm8650-tlb-r2-preboard.md`（r2） |
-| 评审复核脚本 | `scripts/review_mb06_phasea_20261007.py` / `review_pa_response_20261007.py`（r2；适配见回执 §0：权威 = m0b `probes/common/tlb_set_collect.h`） |
-| 修复设计稿 | `docs/design/2026-10-07-rpa01-05-fix-design.md`（r2） |
+| A1判据消费链 | `analysis/sm8650_tlb_a1.py` / `analysis/sm8650_tlb_a1_contract.py` / `analysis/sm8650_tlb_a1_freeze.py` / `analysis/sm8650_tlb_a1_cli.py`（当前均r2） |
+| 主分析器/图表 | `analysis/sm8650_tlb.py` / `analysis/tlb_figures.py`（main已提交线已同步r2） |
+| 探针set模式/共享布局 | `probes/cache-mem/ptr_chase.cpp` / `probes/common/tlb_set_collect.h` / `probes/common/tlb_set_layout.h`（r2） |
+| 布局与收集器测试 | `probes/tests/tlb_set_layout_golden.cpp` / `probes/tests/tlb_set_collect_golden.cpp`；CTest登记 `tests/CMakeLists.txt` |
+| runner消费契约 | `runner/plan.py` / `runner/adapters/ptr_chase.py` / `runner/engine.py`（r2） |
+| A1三层配置 | `configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json` / `configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json` / `configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json` |
+| 专用标定/几何资格 | `configs/experiments/ptr-chase-sm8650-x4-tlb-a1-calibration-floor.json` / `configs/experiments/ptr-chase-sm8650-x4-tlb-a1-calibration-scatter.json` / `configs/experiments/ptr-chase-sm8650-x4-tlb-a1-geometry-smoke.json` |
+| 锚点/历史pilot | `configs/experiments/ptr-chase-sm8650-x4-tlb-anchor.json`；旧 `configs/experiments/ptr-chase-sm8650-x4-tlb-pilot-g03-empty.json` / `configs/experiments/ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict.json` 不晋升正式标定 |
+| 平台/充电态协议 | `configs/platforms/redmi-k70pro-01.json`（environment_profiles.charging-thermal） |
+| 当前上板执行包 | `docs/runbooks/2026-10-08-sm8650-a1-integrated-handoff.md`（v2）；历史入口 `docs/runbooks/2026-10-07-sm8650-tlb-pilot-kickoff.md` |
+| 上板前清单 | `docs/runbooks/2026-10-01-sm8650-tlb-r2-preboard.md` |
+| 几何反例/软件出口复现 | `scripts/reproduce_tlb_region_boundary_20261008.py` / `scripts/verify_a1_software_exit_20261008.py` |
+| 几何审计/计划 | `docs/reviews/2026-10-08-a1-geometry-and-pilot-audit.md` / `docs/superpowers/plans/2026-10-08-sm8650-a1-region-geometry.md` |
+| 历史评审/设计 | `scripts/review_mb06_phasea_20261007.py` / `scripts/review_pa_response_20261007.py`；`docs/design/2026-10-07-rpa01-05-fix-design.md` |
 
 ### 10.4 分支生命周期与合入策略（2026-10-08 用户拍板固化为 v1.8.2 增补）
 

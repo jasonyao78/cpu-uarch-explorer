@@ -1,0 +1,124 @@
+{
+  "created_at": "2026-10-08T10:06:52.203338+00:00",
+  "code_commit": "49da3e70dacb4c27b65cc99bcb0497b54dc7f403",
+  "scope": "Host software tests and read-only historical device pilot audit; no Android/NDK/adb/target PMU execution",
+  "tested_content": "Tests executed before code commit; runtime/config SHA matched committed contents after commit. Documentation-only changes follow.",
+  "commands": [
+    {
+      "command": "scripts/reproduce_tlb_region_boundary_20261008.py --tree . (old production block)",
+      "exit_code": 1,
+      "expected": "RED: vpn-hi-impure regions=4 offset_pages=65535 region=0"
+    },
+    {
+      "command": "unittest TestA1FreezeArtifact.test_region_layout_is_a_freeze_dependency (before registration)",
+      "exit_code": 1,
+      "expected": "RED: missing CODE_PATHS dependency"
+    },
+    {
+      "command": "scripts/reproduce_tlb_region_boundary_20261008.py --tree . (fixed production block)",
+      "exit_code": 0,
+      "combinations": 196608
+    },
+    {
+      "command": "c++ -std=c++17 -O2 -Wall -Wextra -Werror -I probes/common probes/tests/tlb_set_layout_golden.cpp -o /tmp/tlb-set-layout-golden && /tmp/tlb-set-layout-golden",
+      "exit_code": 0
+    },
+    {
+      "command": "cmake --preset macos-arm64-release && cmake --build --preset macos-arm64-release && ctest --preset macos-arm64-release",
+      "exit_code": 0,
+      "ctest_passed": 21
+    },
+    {
+      "command": "python -m unittest discover -s analysis/tests -t .",
+      "exit_code": 0,
+      "passed": 250
+    },
+    {
+      "command": "python -m unittest discover -s runner/tests -t .",
+      "exit_code": 0,
+      "passed": 198,
+      "initial_attempt": "sandbox private test-lock write denied; final full rerun with workspace write permission passed"
+    },
+    {
+      "command": "scripts/verify_a1_software_exit_20261008.py --tree . --out /tmp/tlb-region-software-exit.json",
+      "exit_code": 0
+    },
+    {
+      "command": "runner.cli plan --experiment configs/experiments/ptr-chase-sm8650-x4-tlb-a1-geometry-smoke.json --platform configs/platforms/redmi-k70pro-01.json --environment-profile charging-thermal",
+      "exit_code": 0,
+      "cases": 12,
+      "repetitions_per_case": 2
+    },
+    {
+      "command": "real smoke run_plan/adapter/writer/load_audited_run using synthetic external I/O",
+      "exit_code": 0,
+      "records": 12,
+      "synthetic_process_observations": 24
+    },
+    {
+      "command": "exact handoff Python audit block on real producer synthetic files, then altered purity negative",
+      "exit_code": 0,
+      "positive": "PASS: 12 cases / 24 processes",
+      "negative": "a1: record gate rejected (vpn-hi-impure)"
+    }
+  ],
+  "source_sha256": {
+    "analysis/load.py": "63cbfa1d903b679a2c5423c043dd9d45b5b57fd64be6d5af985915bafd1ff2c2",
+    "analysis/sm8650_tlb.py": "4caab8209ba2f6efbf38688428160b1b916d553a51576035838da1ef13de0dff",
+    "analysis/sm8650_tlb_a1.py": "8e245b7a0cf619f7fa2bb7b0c9f11dedbb93a56897f5b5a0dac9119f2b873ccb",
+    "analysis/sm8650_tlb_a1_cli.py": "a5d7df5435987e9a6cc359aecf34f7302d87d96fc7520944c816f4f9d893eae1",
+    "analysis/sm8650_tlb_a1_contract.py": "0c073e11750f2dd2e8b6ec5d306c1882a5ed56de6543415350a3dc1f09b00a52",
+    "analysis/sm8650_tlb_a1_freeze.py": "7096d59545f47de7899b14d50648a5d8a5d7c73b69899e1997d13749a2d3a2a0",
+    "analysis/tests/test_sm8650_tlb_a1_freeze.py": "1652c2dec0b653ce2d2a38906e4ff0458967d97eea0d4ecd18c5afc73d7c904d",
+    "analysis/tlb_figures.py": "034ba287f7bdbca2408cb7b9e32458d3ea2b72ceebcccab95167022745224baf",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-calibration-floor.json": "942358f02062f9dc21063d3b51666bceed7ee5c03979b628e28006a05e850259",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-calibration-scatter.json": "689622a31cef69f2042a5b81913ef0df19eff804bb2ecc87d7c29d0deb00b524",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-geometry-smoke.json": "31f0ff193717340efdcf99b9f0557a8392cf52acff86f2468226bda19fb2113c",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json": "2d9aaf702dff4dd498c8600e2021405aaa74ae40e82d3be9f87c92fd903c382b",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json": "db0c20cd62d43e76d9a684cf18946b2bc3717af8dd2efe19ed6343a1a6231cfc",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json": "89092fc94a2a54e27db46f4311e8d49143ae6b3f353133275b8d7addc51ba85b",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658",
+    "probes/cache-mem/ptr_chase.cpp": "d3d69d86f250553a960b96e3ab56e0d360d13d08919112d914919f61928e0668",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_window.h": "95dc834898a0feb47474b4b7899533f0762a9a7298315a71dd33830d907363c7",
+    "probes/common/tlb_set_collect.h": "ead8eaf63c36cfcc082aa54cb5af718a82de9c1af6426b9c5c9c50b257ceb4b1",
+    "probes/common/tlb_set_layout.h": "ce8fd9bfde87c94801ae1e311273b94609bc58118d219fc5abd1fd2ddf65074d",
+    "probes/platform/linux/perf_counter.cpp": "eb89ee646e823fe0ead4a56cd121a955804b8dd89361a908affac6590611dfc9",
+    "probes/platform/linux/perf_counter.h": "17c119b07b32849cfabc78d22299579a55c51e66aa56c023666a14d3ce7db5ea",
+    "probes/tests/tlb_set_collect_golden.cpp": "2bb13dc39f548174392547c2c240929b8c393117686ca6646fa78d901cf4cb4e",
+    "probes/tests/tlb_set_layout_golden.cpp": "fdcc6c65c23aeefcf8cdd762c650402a51a6d94c928900a59dd4e10f8c5bec6a",
+    "runner/adapters/base.py": "4e2e28e1e7b01348470a8991a411f3527618f4229d7f59752410b1651e8f775a",
+    "runner/adapters/ptr_chase.py": "d1c5cb25c39d34795b02dcaae275f91cf0df10b0975cf5861ec02342885b3be6",
+    "runner/artifacts.py": "513c81b4b8e87d750f53b3c882b2ca4326894b6c864d30f37284000e0a46231c",
+    "runner/engine.py": "5977d89ce4803103229b45fb25e34b1384d13659c3674f304809055f8c733157",
+    "runner/environment/android_state.py": "455fe771ec91fd966767498eca86fe388da208d8ca8d1ed6023f80dcdb2b5d0f",
+    "runner/environment/policy.py": "51712deb95fff42e546bbfd057260b434c4b713cf3e3e3a98f3bc907c6c2115b",
+    "runner/plan.py": "f35a9511cd96a3cec541f62b7c9ac4e0bc11fe2e155c658d56abd773138f6648",
+    "runner/records.py": "76e23d2c4d78612b94c7a1f4f972e15871cea0efe2071f2bdb439c3969950bae",
+    "runner/resolve.py": "8eb18cafbe7fe0b489a3374d79e8fbf70c247087e3035bf118b026d259f2a6c5",
+    "runner/statistics.py": "14f98b7ad99f1df0e08c7fd28eeae8d5d4065dd6f34c3fc72e79b02eb61a2dcd",
+    "scripts/reproduce_tlb_region_boundary_20261008.py": "68e503cb413a83bf0c3e6e37d0fca2cc8ef33bc955977ac7c8a140359463903f",
+    "tests/CMakeLists.txt": "93bb227a8dd509910b03e3ca97037915b0ba22243ae9761f1e935dcd23b47c9c"
+  },
+  "document_sha256": {
+    "docs/reviews/2026-10-08-a1-geometry-and-pilot-audit.md": "a41d1746ae9d93005821503b159ca6bb74e9b63992c12f181049b7b352ed7952",
+    "docs/runbooks/2026-10-08-sm8650-a1-integrated-handoff.md": "46f82d754ca40c9202140364043fde9511a3d1d0dfb87584486a16c0b53be1ee",
+    "docs/runbooks/2026-10-07-sm8650-tlb-pilot-kickoff.md": "daf61f8476944238b490c94659d13f60635bf87fa7a217c78c18da91b3a28061",
+    "docs/tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md": "9bc4c688e06a9126aa5b7effb2fb54d2d59396667e9300bb9e6be3707ca27bc8",
+    "docs/open-items.md": "5e7976db9e7a9951a71127e9529259e618df344cc2ede0eceeb678ee0bbc9a71",
+    "docs/superpowers/plans/2026-10-08-sm8650-a1-region-geometry.md": "94b7f036269f15c5d83d5f6df82e349036c091f023d9b2b044a8714f7861ba83"
+  },
+  "evidence_sha256": {
+    "analysis.log": "4fb5448ab4182ae16a015042c92b2d2042a3f0d27b1a6855889ecb95fb2ce70d",
+    "boundary-green.log": "ee1f7fd304cb031aeddb46f2dc206dbd870aa66e305f414fdb379c10d6fcee33",
+    "boundary-red.log": "563cf601cb2c101cc70d4bd829fbbbbe5d1ebe4c571348e516e5af9e90968e56",
+    "ctest.log": "34919bc07fec352db27d76aaa28cc9ae7016e3d24bf12e9d382f0533a068715c",
+    "freeze-dependency-red.log": "8a4509fa8fb0ad05142429c4d07a6f4756f3cfc1288067b872b784ba3c7cdba7",
+    "integration.json": "800cf1eefc44c3579a5af0c35ed6eea9a770b2346862f0df9b12aadc7b61c0df",
+    "integration.log": "be594998e0a68dba278b817d38adaab7e3edf090bc45cc0077fe02d4a1dabb8e",
+    "pilot-audit.json": "865dca630ef675c4dc9eca749fd048aa8688a6687ede7d757f000131882c195d",
+    "runner.log": "bafe82bef2cd4ee7e2c771f51be2c73412dcdf3f7be8dafb276dcce111baaa6e",
+    "smoke-plan.log": "91d647be21975a0eb7062a5ad00974439bc6e0c77043d811b1d6f0542291954a",
+    "smoke-producer.json": "c8cc2f063ab4d9748fe4cc7f25ea879b6698c1897521d572968488ebca8ec7e1"
+  }
+}

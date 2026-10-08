@@ -1,0 +1,7 @@
+{
+  "cases": 12,
+  "synthetic_observations": 24,
+  "real_producer_and_audited_reload": true,
+  "geometry_and_statistics_valid": true,
+  "target_execution": false
+}

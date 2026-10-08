@@ -1,0 +1,327 @@
+{
+  "scope": "Read-only audit of historical device pilot; no device execution and no promotion to formal calibration",
+  "target_alias": "redmi-k70pro-01",
+  "source_worktree": "cpu-uarch-explorer-tlb-r2-m0b",
+  "runs": [
+    {
+      "run_dir": "20261008T081235Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "file_sha256": {
+        "artifacts.jsonl": "aadb71ff4585102679f7a246ed24521754c548a4a6831b59fc8bdbca441839cd",
+        "records.jsonl": "f7b5ca8730022d266ab737922961d17c484de71e24563f1ab0137b694cf9e814",
+        "run-manifest.json": "0ab1fe0735c36f2c82d066a73ef237ecfd9d626210e13ea5a68c4c6efb83b246"
+      },
+      "records": [
+        {
+          "status": "ok",
+          "failure_reason": null,
+          "experiment_id": null,
+          "source": {
+            "commit": "b0f287f12829819f1e6f5acbf3c9fdd53ff36c71",
+            "dirty": false
+          },
+          "binary_sha256": "1e03a6583a7b7518eac378b4f5c97a4d8764cf6dc1398b20497c31f73377df64",
+          "conditions": {
+            "set_hypothesis": null,
+            "set_window": null,
+            "set_rounds": null,
+            "set_scatter": null
+          },
+          "medians": {
+            "latency_ns": 2.7580999999999998
+          },
+          "domain_consistent_legacy": null,
+          "process_domains": {},
+          "process_purity": {}
+        },
+        {
+          "status": "ok",
+          "failure_reason": null,
+          "experiment_id": null,
+          "source": {
+            "commit": "b0f287f12829819f1e6f5acbf3c9fdd53ff36c71",
+            "dirty": false
+          },
+          "binary_sha256": "1e03a6583a7b7518eac378b4f5c97a4d8764cf6dc1398b20497c31f73377df64",
+          "conditions": {
+            "set_hypothesis": null,
+            "set_window": null,
+            "set_rounds": null,
+            "set_scatter": null
+          },
+          "medians": {
+            "latency_ns": 8.137799999999999
+          },
+          "domain_consistent_legacy": null,
+          "process_domains": {},
+          "process_purity": {}
+        }
+      ],
+      "raw_digest_counts": {
+        "match": 20
+      }
+    },
+    {
+      "run_dir": "20261008T081255Z-ptr-chase-sm8650-x4-tlb-pilot-g03-empty",
+      "file_sha256": {
+        "artifacts.jsonl": "272fa31e17a684aba752ccaffe03d1fb8f98a02fed0a7b085db299a14d447563",
+        "records.jsonl": "dda1abe44fc252a953d5c0a0c6fba2f629911beb2caa76836506e2c3c783576b",
+        "run-manifest.json": "4dd618143e74bf443ad8aa12f424edda4a7642fb97d773ea251896a0322a6b6e"
+      },
+      "records": [
+        {
+          "status": "failed",
+          "failure_reason": "parse-error",
+          "experiment_id": null,
+          "source": {
+            "commit": "b0f287f12829819f1e6f5acbf3c9fdd53ff36c71",
+            "dirty": false
+          },
+          "binary_sha256": "1e03a6583a7b7518eac378b4f5c97a4d8764cf6dc1398b20497c31f73377df64",
+          "conditions": {
+            "set_hypothesis": 1,
+            "set_window": 0,
+            "set_rounds": 20,
+            "set_scatter": null
+          },
+          "medians": {},
+          "domain_consistent_legacy": null,
+          "process_domains": {},
+          "process_purity": {}
+        }
+      ],
+      "raw_digest_counts": {
+        "match": 10
+      }
+    },
+    {
+      "run_dir": "20261008T082002Z-ptr-chase-sm8650-x4-tlb-pilot-g03-empty",
+      "file_sha256": {
+        "artifacts.jsonl": "ec24558b75898ede19922b6db806a68b3592f3d3d2beedd512498b32c6369a37",
+        "records.jsonl": "1d5c12cdf0b7749e88f1b3ed04a276a8fde0a8c9257cd12d1fe682a5ad2c5689",
+        "run-manifest.json": "40c7db995d0b64d64edc7cdb9ab0390132d9452a66b4a69f52247eece947f070"
+      },
+      "records": [
+        {
+          "status": "ok",
+          "failure_reason": null,
+          "experiment_id": "ptr-chase-sm8650-x4-tlb-pilot-g03-empty",
+          "source": {
+            "commit": "b0f287f12829819f1e6f5acbf3c9fdd53ff36c71",
+            "dirty": true
+          },
+          "binary_sha256": "36aa9228192fba68762626daacbc268cc9623b3f40e45880d20cf0b1ead4e3c8",
+          "conditions": {
+            "set_hypothesis": 1,
+            "set_window": 0,
+            "set_rounds": 20,
+            "set_scatter": null
+          },
+          "medians": {
+            "window_mux_rounds": 0.0,
+            "pmu.l2d_tlb_refill.count": 0.0
+          },
+          "domain_consistent_legacy": false,
+          "process_domains": {
+            "multi-region": 10
+          },
+          "process_purity": {
+            "0": 6,
+            "1": 4
+          }
+        }
+      ],
+      "raw_digest_counts": {
+        "match": 10
+      }
+    },
+    {
+      "run_dir": "20261008T082019Z-ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict",
+      "file_sha256": {
+        "records.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "records": [],
+      "raw_digest_counts": {}
+    },
+    {
+      "run_dir": "20261008T082818Z-ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict",
+      "file_sha256": {
+        "artifacts.jsonl": "b4efc2964defd58ea9d43f832d56760d19b5bab85745a24242bd1617130792c5",
+        "records.jsonl": "58dd78eeb09db7424ca92e596654e624893ad835d5d6c72313ab5153c1e070e8",
+        "run-manifest.json": "41aadcd09ac8e3bac5c748c959bb858affbd974f1f40b96fd43e6937604d6034"
+      },
+      "records": [
+        {
+          "status": "ok",
+          "failure_reason": null,
+          "experiment_id": "ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict",
+          "source": {
+            "commit": "6f433e312783ae9bf0569ae292f463318c524313",
+            "dirty": false
+          },
+          "binary_sha256": "36aa9228192fba68762626daacbc268cc9623b3f40e45880d20cf0b1ead4e3c8",
+          "conditions": {
+            "set_hypothesis": 1,
+            "set_window": 8,
+            "set_rounds": 10,
+            "set_scatter": 0
+          },
+          "medians": {
+            "window_mux_rounds": 0.0,
+            "pmu.l2d_tlb_refill.count": 8.0
+          },
+          "domain_consistent_legacy": false,
+          "process_domains": {
+            "multi-region": 10
+          },
+          "process_purity": {
+            "1": 9,
+            "0": 1
+          }
+        },
+        {
+          "status": "ok",
+          "failure_reason": null,
+          "experiment_id": "ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict",
+          "source": {
+            "commit": "6f433e312783ae9bf0569ae292f463318c524313",
+            "dirty": false
+          },
+          "binary_sha256": "36aa9228192fba68762626daacbc268cc9623b3f40e45880d20cf0b1ead4e3c8",
+          "conditions": {
+            "set_hypothesis": 1,
+            "set_window": 8,
+            "set_rounds": 10,
+            "set_scatter": 1
+          },
+          "medians": {
+            "window_mux_rounds": 0.0,
+            "pmu.l2d_tlb_refill.count": 0.0
+          },
+          "domain_consistent_legacy": false,
+          "process_domains": {
+            "multi-region": 10
+          },
+          "process_purity": {
+            "1": 10
+          }
+        },
+        {
+          "status": "ok",
+          "failure_reason": null,
+          "experiment_id": "ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict",
+          "source": {
+            "commit": "6f433e312783ae9bf0569ae292f463318c524313",
+            "dirty": false
+          },
+          "binary_sha256": "36aa9228192fba68762626daacbc268cc9623b3f40e45880d20cf0b1ead4e3c8",
+          "conditions": {
+            "set_hypothesis": 1,
+            "set_window": 8,
+            "set_rounds": 40,
+            "set_scatter": 0
+          },
+          "medians": {
+            "window_mux_rounds": 0.0,
+            "pmu.l2d_tlb_refill.count": 6.0
+          },
+          "domain_consistent_legacy": false,
+          "process_domains": {
+            "multi-region": 10
+          },
+          "process_purity": {
+            "1": 6,
+            "0": 4
+          }
+        },
+        {
+          "status": "ok",
+          "failure_reason": null,
+          "experiment_id": "ptr-chase-sm8650-x4-tlb-pilot-g03-noconflict",
+          "source": {
+            "commit": "6f433e312783ae9bf0569ae292f463318c524313",
+            "dirty": false
+          },
+          "binary_sha256": "36aa9228192fba68762626daacbc268cc9623b3f40e45880d20cf0b1ead4e3c8",
+          "conditions": {
+            "set_hypothesis": 1,
+            "set_window": 8,
+            "set_rounds": 40,
+            "set_scatter": 1
+          },
+          "medians": {
+            "window_mux_rounds": 0.0,
+            "pmu.l2d_tlb_refill.count": 0.0
+          },
+          "domain_consistent_legacy": false,
+          "process_domains": {
+            "multi-region": 10
+          },
+          "process_purity": {
+            "1": 7,
+            "0": 3
+          }
+        }
+      ],
+      "raw_digest_counts": {
+        "match": 40
+      }
+    },
+    {
+      "run_dir": "20261008T082848Z-ptr-chase-sm8650-x4-tlb-anchor",
+      "file_sha256": {
+        "artifacts.jsonl": "bf2db528b628145997ce9035ea6ed70cf6a0abbec93cf223ef22ae8d428eea75",
+        "records.jsonl": "ae4eef5a9449175ca25440c445571d3cc71c26cb89efe5d07df21b3b43eabbe5",
+        "run-manifest.json": "018f8b891478f423b7f172ec77e06d4dd36b8aa055dcf5c81496aa0024a686db"
+      },
+      "records": [
+        {
+          "status": "ok",
+          "failure_reason": null,
+          "experiment_id": "ptr-chase-sm8650-x4-tlb-anchor",
+          "source": {
+            "commit": "6f433e312783ae9bf0569ae292f463318c524313",
+            "dirty": false
+          },
+          "binary_sha256": "36aa9228192fba68762626daacbc268cc9623b3f40e45880d20cf0b1ead4e3c8",
+          "conditions": {
+            "set_hypothesis": null,
+            "set_window": null,
+            "set_rounds": null,
+            "set_scatter": null
+          },
+          "medians": {
+            "latency_ns": 2.7409999999999997
+          },
+          "domain_consistent_legacy": null,
+          "process_domains": {},
+          "process_purity": {}
+        },
+        {
+          "status": "ok",
+          "failure_reason": null,
+          "experiment_id": "ptr-chase-sm8650-x4-tlb-anchor",
+          "source": {
+            "commit": "6f433e312783ae9bf0569ae292f463318c524313",
+            "dirty": false
+          },
+          "binary_sha256": "36aa9228192fba68762626daacbc268cc9623b3f40e45880d20cf0b1ead4e3c8",
+          "conditions": {
+            "set_hypothesis": null,
+            "set_window": null,
+            "set_rounds": null,
+            "set_scatter": null
+          },
+          "medians": {
+            "latency_ns": 8.06965
+          },
+          "domain_consistent_legacy": null,
+          "process_domains": {},
+          "process_purity": {}
+        }
+      ],
+      "raw_digest_counts": {
+        "match": 20
+      }
+    }
+  ]
+}

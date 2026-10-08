@@ -1,0 +1,426 @@
+{
+  "scope": "A1 软件出口复现：真实 producer + 合成外部 I/O、归档重放、真实图表。\n\n不运行手机/adb/目标探针/perf。合成 H* 只验证软件，不能充当硬件证据。\n历史统计比较仅排除新增 identity 元数据；cohort 比较不规范化。\n",
+  "head": "33084614b15f0998b4252439465c185e750026ad",
+  "production_chain": {
+    "ok_records": 128,
+    "synthetic_observations": 1280,
+    "calibration_records": 2,
+    "calibration_observations": 20,
+    "case_audit_processes": 1280,
+    "canonical_json_permutation_equal": true,
+    "negative_rejections": {
+      "missing": "a1: plan coverage incomplete: missing 1 cases; first=ptr-chase-sm8650-x4-tlb-a1-l1-main:x4-prime-base_pages1-pmu_eventshb09e7ed9febb-seed42-set_filler_pages512-set_hypothesis1-set_nsets0-set_pool_pages65536-set_region_scope-1-set_regions4-set_rounds20-set_target7-set_window6",
+      "duplicate": "a1: duplicate case record for ptr-chase-sm8650-x4-tlb-a1-l1-main:x4-prime-base_pages1-pmu_eventshb09e7ed9febb-seed42-set_filler_pages512-set_hypothesis1-set_nsets0-set_pool_pages65536-set_region_scope-1-set_regions4-set_rounds20-set_target7-set_window6",
+      "conflict": "a1: plan identity mismatch for 'ptr-chase-sm8650-x4-tlb-a1-l1-main'"
+    },
+    "synthetic_h_star": 1,
+    "frozen_on_threshold": 2.0
+  },
+  "legacy_replay": {
+    "baseline": "3e539c6",
+    "runs": 51,
+    "records": 295,
+    "rows": [
+      {
+        "run": "20260929T143631Z-ptr-chase-sm8650-x4-tlb-ctrl",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "44711e7daee8b6f0a06dbafce27318031407b7364a6570cace6d9c93b582c2d3"
+      },
+      {
+        "run": "20260929T144937Z-ptr-chase-sm8650-x4-tlb-ctrl-g1",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "6a1d5357f196fc13a9bb0667f82425a4727ec85fc898a21b49f166e45989348d"
+      },
+      {
+        "run": "20260929T145255Z-ptr-chase-sm8650-x4-tlb-ctrl-g2",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "cd275f435c6f07ddb7862f04a5e8f2e338e297c3afa9c36a6f968c77c6c7e497"
+      },
+      {
+        "run": "20260929T145432Z-ptr-chase-sm8650-x4-tlb-ctrl-g4",
+        "records": 4,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "8ce32ca1efaa074d178855a3944be6a0795d6e8c1caadb2bfb0b11bd96531481"
+      },
+      {
+        "run": "20260929T145551Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "19cc99b860350e0754057e30240e3e1097934eb34e2748f126dc6da4a6fbb4f6"
+      },
+      {
+        "run": "20260929T145659Z-ptr-chase-sm8650-x4-tlb-overhead",
+        "records": 24,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "acc45acff75837f7bb1823e9fbdf7acab4dab3047874356150bedfbb4fb1ec73"
+      },
+      {
+        "run": "20260929T150212Z-ptr-chase-sm8650-x4-tlb-ctrl-g4-thp-walk",
+        "records": 1,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "ea6a7258f46d3f42c26293b00311a288dceec6451590aba69b2a56594ed2256f"
+      },
+      {
+        "run": "20260929T181512Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "9e7643e008c066e94126b64ad68ab81ebd2bd87de9b5eec46ebca5c52a093c2d"
+      },
+      {
+        "run": "20260929T181521Z-ptr-chase-sm8650-x4-tlb-coarse",
+        "records": 26,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "f76cd6619df6c4994376a184618de5fbb93ac28573991fb2a79b9c3e3644f61c"
+      },
+      {
+        "run": "20260929T181716Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "1b9a2a7ec18d7040e66d79f231e04597e2a07763860fa2e7770cf4a3ecb9f28e"
+      },
+      {
+        "run": "20260929T182214Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "5ce72b4e46dfcfc403d2e1e6ba3acef0e59caa670fb580902538ec6e4cdb88bd"
+      },
+      {
+        "run": "20260929T182223Z-ptr-chase-sm8650-x4-tlb-coarse",
+        "records": 26,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "c528b32af9131dc0f831fd587ccd113345ed4e3163f3b312e18f381f2865db1b"
+      },
+      {
+        "run": "20260929T182418Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "67ae2e86ea70171ca561167a92071b2587764021be6238b1a514cb3f8de20fbd"
+      },
+      {
+        "run": "20260929T235909Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "697ad3f466da2a70a3bdd494be4f670a6a61dda78bc271a0a6e119bdae5787d0"
+      },
+      {
+        "run": "20260929T235918Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "b3fc7468a07e073dee731bb4c5a1316931cb85ea6531a80dd05478ed697d311a"
+      },
+      {
+        "run": "20260929T235927Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "0cfe2f1726155a48c1012bbadc80a654400342780ffa03ae4d16999aa30ffda3"
+      },
+      {
+        "run": "20260929T235938Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "39161e633379b08c7d72e8f9d459dc340c2d11bea11f8c78008445d39b7cf89b"
+      },
+      {
+        "run": "20260929T235948Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "47e91808d32379fef4404dbf50b502e14488b7415fb59e37b532c13fa54b4a5f"
+      },
+      {
+        "run": "20260929T235957Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "871725a0df810af53d0ceb8a0abf9d83f12e4aa1d854584c6928f85a39bbfd5a"
+      },
+      {
+        "run": "20260930T004833Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "27f4ab83b0177d11c1cccf03ce5cf4ae651b3f261e4ef3768aeb62a4d00fca78"
+      },
+      {
+        "run": "20260930T004843Z-ptr-chase-sm8650-x4-tlb-coarse",
+        "records": 26,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "7ca8f4fd21b8ab5656cca308b08e654610c08a9c236830e4a40dff776928696c"
+      },
+      {
+        "run": "20260930T005033Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "54d64bada5695dbc1c8e0c4262f8f6bbf5cd9833da6ab796cc2eb3cb85b99bb6"
+      },
+      {
+        "run": "20260930T010800Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "5e0c2805ed4b25eccfc594d0a71a5d7dd0c712aff52e155c3c5b57d6834eabf1"
+      },
+      {
+        "run": "20260930T010808Z-ptr-chase-sm8650-x4-tlb-dense",
+        "records": 32,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "633e4f5180cba125bb6ac09dd62d4242ccf9503704282953a5df8347f388899d"
+      },
+      {
+        "run": "20260930T011025Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "bb0237ab8d56ae6512c5e59d630798d51fcc36a9e4ded5900d3f3ed2fe7d8123"
+      },
+      {
+        "run": "20260930T011631Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "9de3d7a78d44604465ce8b2b068688caba78726fbdaefc9ca9a269dec71b960f"
+      },
+      {
+        "run": "20260930T011639Z-ptr-chase-sm8650-x4-tlb-dense-long",
+        "records": 12,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "254bbe7082138deda3f2f7a86fa187a07410f443767e0193c706de74b0ed16ca"
+      },
+      {
+        "run": "20260930T011814Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "75bc14b3ef2c7318979c65f9ff8a0b52680896c6b1526f0cfd3175e097892ee2"
+      },
+      {
+        "run": "20260930T012107Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "3fea76ed1daa6a0922c500ee74fa9e32f41349710df26569551cff864b16aa74"
+      },
+      {
+        "run": "20260930T012117Z-ptr-chase-sm8650-x4-tlb-dense-long",
+        "records": 12,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "c75d59284741b4b8414eccd3ce92c527793a25c59b743aac7aa798018e392dd9"
+      },
+      {
+        "run": "20260930T012253Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "0ad6b51aae5dcc516b17503a7f8c0b837e353c1fe5c1497df8bc185e4f0cfb22"
+      },
+      {
+        "run": "20260930T012815Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "e1efa875f6908deeb5972e1edbf539e23fa0651ac624f5ef66797054f3c3a326"
+      },
+      {
+        "run": "20260930T012824Z-ptr-chase-sm8650-x4-tlb-assoc-g2",
+        "records": 6,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "9aa7762ff954ac9ca62428be1ad2ddef9d438fb344a71d14b616b813b300cbff"
+      },
+      {
+        "run": "20260930T012852Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "5e9ce937cc7fb3c4d14ebe8d8f89e0cb3603ab7b11a52c31da86c392b46670d9"
+      },
+      {
+        "run": "20260930T012902Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "77e222b2e48fa85a936381e4ce06769ba01f8eb9fba669f745ad7543f41ab966"
+      },
+      {
+        "run": "20260930T012912Z-ptr-chase-sm8650-x4-tlb-assoc-g3",
+        "records": 6,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "a8a30d123d772c1bd64124ea84532dac528ace321079cd60457b06771f29a32b"
+      },
+      {
+        "run": "20260930T012939Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "ca1e6c00ee3d8d2b6d4ff85b758282029e262163fd647d395a6de414be2aa038"
+      },
+      {
+        "run": "20260930T013628Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "ac2b98e2546a53d3f94399de6966e52ecb3b04cdc88937c81a2ba67f0f170373"
+      },
+      {
+        "run": "20260930T013636Z-ptr-chase-sm8650-x4-tlb-thp-base",
+        "records": 12,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "245eacd3788125aef2482389ac959058d4955a83569667602895e1a65e5779a6"
+      },
+      {
+        "run": "20260930T013724Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "4d80c82b29d9237a8aceb9745b6b5745bcc932125935b51459476e607f0a5ce8"
+      },
+      {
+        "run": "20260930T013733Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "23fff0b82a607780c8d357b1b6e9d1ca934f4d360823184a1336e4ffb9ae7c12"
+      },
+      {
+        "run": "20260930T013743Z-ptr-chase-sm8650-x4-tlb-thp-madvise",
+        "records": 12,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "e82b5ac49f0be1f54d76efd66afc0503801f86bab469ba16d0dcdda39aab9d6a"
+      },
+      {
+        "run": "20260930T013829Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "d5b733cf831e3eaf0e94efbb8edf0585e2a388619af78e025d2367cf674af7d3"
+      },
+      {
+        "run": "20260930T014005Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "d7e7494165ab65adfedcb88af3866e47ae98e77ccd375fbc7aa07e635510db67"
+      },
+      {
+        "run": "20260930T014014Z-ptr-chase-sm8650-x4-tlb-thp-base",
+        "records": 12,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "bd425683844221874d15fe291f90e3cc489812bd0b2d3cc5d56700624ba3cc49"
+      },
+      {
+        "run": "20260930T014103Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "2b30abcd7e2cacd926b64b3ed5a75f7a9e4c16e26acc37a573b391e8e78497c7"
+      },
+      {
+        "run": "20260930T051530Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "110830c4044d21069d5590d86e97ad01758c0992efe73dbe53698ca5081876b1"
+      },
+      {
+        "run": "20260930T051540Z-ptr-chase-sm8650-x4-tlb-dense-long",
+        "records": 12,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "15ba0c6462b8348c96c51d7d3219fa3676b101029810504eb94d189a983d8c3a"
+      },
+      {
+        "run": "20260930T051715Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "e994b13b990ccba004838a0aee02743e5b598c2565310c9aab840820a194bbb7"
+      },
+      {
+        "run": "20261007T111626Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "36afde52aa2024f1e825ee42b54974cdc3d27a04c966a5610e7ceff60f1b8895"
+      },
+      {
+        "run": "20261007T111952Z-ptr-chase-sm8650-x4-tlb-anchor",
+        "records": 2,
+        "statistics_equal": true,
+        "cohort_equal": true,
+        "records_sha256": "517df25e660227717cceea6c0455b95be83df2b4597f0850d1805f53f788c708"
+      }
+    ]
+  },
+  "campaign_figures": {
+    "equal_to_main_committed_outputs": true,
+    "sha256": {
+      "latency-cycles.svg": "555e64eb2b2aee8e6fed395c25cb1a939d34c846cbdd2690a7c1ea082df0fd28",
+      "refill-density.svg": "701cb9ee1ec8d873759a8c5ec5b47cf82b05d220b78fbbea290593000919717c",
+      "report.md": "364618e1ad73e7f3c2d4213d7cf7a0fc24fe1a34975ca2ba3ed7149c05c72e70",
+      "thp-cohort.svg": "9ab1b4ab5e0e437defe4cd22e9363f26bcb1aa0bd7266d68412f3c98d6a34147",
+      "walk-onset.svg": "bb86c07fab4e578df8a6133621b296efcdac1c52c69283ad7f1578996fc72bb3"
+    }
+  },
+  "source_sha256": {
+    "analysis/load.py": "63cbfa1d903b679a2c5423c043dd9d45b5b57fd64be6d5af985915bafd1ff2c2",
+    "analysis/sm8650_tlb_a1.py": "8e245b7a0cf619f7fa2bb7b0c9f11dedbb93a56897f5b5a0dac9119f2b873ccb",
+    "analysis/sm8650_tlb_a1_cli.py": "a5d7df5435987e9a6cc359aecf34f7302d87d96fc7520944c816f4f9d893eae1",
+    "analysis/sm8650_tlb_a1_contract.py": "0c073e11750f2dd2e8b6ec5d306c1882a5ed56de6543415350a3dc1f09b00a52",
+    "analysis/sm8650_tlb_a1_freeze.py": "7096d59545f47de7899b14d50648a5d8a5d7c73b69899e1997d13749a2d3a2a0",
+    "probes/cache-mem/ptr_chase.cpp": "d3d69d86f250553a960b96e3ab56e0d360d13d08919112d914919f61928e0668",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_window.h": "95dc834898a0feb47474b4b7899533f0762a9a7298315a71dd33830d907363c7",
+    "probes/common/tlb_set_collect.h": "ead8eaf63c36cfcc082aa54cb5af718a82de9c1af6426b9c5c9c50b257ceb4b1",
+    "probes/common/tlb_set_layout.h": "ce8fd9bfde87c94801ae1e311273b94609bc58118d219fc5abd1fd2ddf65074d",
+    "probes/platform/linux/perf_counter.cpp": "eb89ee646e823fe0ead4a56cd121a955804b8dd89361a908affac6590611dfc9",
+    "probes/platform/linux/perf_counter.h": "17c119b07b32849cfabc78d22299579a55c51e66aa56c023666a14d3ce7db5ea",
+    "runner/adapters/base.py": "4e2e28e1e7b01348470a8991a411f3527618f4229d7f59752410b1651e8f775a",
+    "runner/adapters/ptr_chase.py": "d1c5cb25c39d34795b02dcaae275f91cf0df10b0975cf5861ec02342885b3be6",
+    "runner/artifacts.py": "513c81b4b8e87d750f53b3c882b2ca4326894b6c864d30f37284000e0a46231c",
+    "runner/engine.py": "5977d89ce4803103229b45fb25e34b1384d13659c3674f304809055f8c733157",
+    "runner/environment/android_state.py": "455fe771ec91fd966767498eca86fe388da208d8ca8d1ed6023f80dcdb2b5d0f",
+    "runner/environment/policy.py": "51712deb95fff42e546bbfd057260b434c4b713cf3e3e3a98f3bc907c6c2115b",
+    "runner/plan.py": "f35a9511cd96a3cec541f62b7c9ac4e0bc11fe2e155c658d56abd773138f6648",
+    "runner/records.py": "76e23d2c4d78612b94c7a1f4f972e15871cea0efe2071f2bdb439c3969950bae",
+    "runner/resolve.py": "8eb18cafbe7fe0b489a3374d79e8fbf70c247087e3035bf118b026d259f2a6c5",
+    "runner/statistics.py": "14f98b7ad99f1df0e08c7fd28eeae8d5d4065dd6f34c3fc72e79b02eb61a2dcd",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-calibration-floor.json": "942358f02062f9dc21063d3b51666bceed7ee5c03979b628e28006a05e850259",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-calibration-scatter.json": "689622a31cef69f2042a5b81913ef0df19eff804bb2ecc87d7c29d0deb00b524",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json": "2d9aaf702dff4dd498c8600e2021405aaa74ae40e82d3be9f87c92fd903c382b",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json": "db0c20cd62d43e76d9a684cf18946b2bc3717af8dd2efe19ed6343a1a6231cfc",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json": "89092fc94a2a54e27db46f4311e8d49143ae6b3f353133275b8d7addc51ba85b",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658",
+    "analysis/sm8650_tlb.py": "4caab8209ba2f6efbf38688428160b1b916d553a51576035838da1ef13de0dff",
+    "analysis/tlb_figures.py": "034ba287f7bdbca2408cb7b9e32458d3ea2b72ceebcccab95167022745224baf"
+  },
+  "outcome": "PASS: software exit checks only; target qualification/calibration still required"
+}

@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_region_layout_is_a_freeze_dependency (analysis.tests.test_sm8650_tlb_a1_freeze.TestA1FreezeArtifact.test_region_layout_is_a_freeze_dependency)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/analysis/tests/test_sm8650_tlb_a1_freeze.py", line 59, in test_region_layout_is_a_freeze_dependency
+    self.assertIn('probes/common/tlb_set_layout.h', CODE_PATHS)
+AssertionError: 'probes/common/tlb_set_layout.h' not found in ('analysis/load.py', 'analysis/sm8650_tlb_a1.py', 'analysis/sm8650_tlb_a1_cli.py', 'analysis/sm8650_tlb_a1_contract.py', 'analysis/sm8650_tlb_a1_freeze.py', 'probes/cache-mem/ptr_chase.cpp', 'probes/common/page_policy.h', 'probes/common/perf_window.h', 'probes/common/tlb_set_collect.h', 'probes/platform/linux/perf_counter.cpp', 'probes/platform/linux/perf_counter.h', 'runner/adapters/base.py', 'runner/adapters/ptr_chase.py', 'runner/artifacts.py', 'runner/engine.py', 'runner/environment/android_state.py', 'runner/environment/policy.py', 'runner/plan.py', 'runner/records.py', 'runner/resolve.py', 'runner/statistics.py')
+
+----------------------------------------------------------------------
+Ran 1 test in 0.420s
+
+FAILED (failures=1)

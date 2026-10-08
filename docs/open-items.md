@@ -339,3 +339,12 @@
 - **仍待办/归属 = 上板 Agent，触发 = 现在接 r2 基线**：NDK完整构建及标准构建路径（Android preset缺口仍沿SMOKE-20261001登记）；实际部署/二进制/设备身份/事件与charging-thermal资格；Linux VMA/PerfWindow和实际区域激励；floor/scatter独立标定、冻结数值与正式三层矩阵。步骤见[集成交接](runbooks/2026-10-08-sm8650-a1-integrated-handoff.md)，不再交回软件接缝余项。
 - **仍待办/归属 = 一般TLB分析器，触发 = 首个正式新事件组使用前**：OI-13/PA-06 extras派生字段/消费语义继续部分关闭口径，不因图表通过扩大关闭；首个非legacy整曲线的系列标签与旧一般分析器注释清理继续原P2触发。A3/ROB/其余后置保持原条件。main未提交runner移植草稿由其作者完成/提交后再核对，不消费中间编辑态；r2已集成6f433e3的已提交raw文件名修复。
 - **分支状态**：m0b开发使命结束，代码已是r2祖先；因并行会话/设备数据依赖保留worktree和分支。回收与删除按铁律7分步；用户暂不处理远程，不影响软件使命结束。r2继续承接设备与科学终态。
+
+
+## BOARD-A1-GEOMETRY-20261008 真机pilot几何阻塞与交接更新
+
+- **事实/归属**：旧m0b设备pilot成功选取9/9，完整流水另有1failed和1未完成run；100份raw摘要匹配。50个tlb-set样本全multi-region，但旧domain flag将VA变化误计混域；14/50 purity=0揭示任意mmap基址下64MiB区域可能跨256MiB窗口。跨binary锚点、dirty空窗与旧配置身份不构成当前正式标定资格。审计 `docs/reviews/2026-10-08-a1-geometry-and-pilot-audit.md` / `docs/reviews/evidence/2026-10-08-a1-geometry/pilot-audit.json`。
+- **软件处置/已验证**：当前软件负责人在r2通过 `probes/common/tlb_set_layout.h` 预约内对齐，保留区域相对偏移和消费者硬门；新头纳入冻结代码摘要。生产块跨窗RED→196608组合GREEN；共享布局边界/实际宿主预约/采集配额通过。analysis250/250、runner198/198、macOS CTest21/21、完整合成producer/51旧runs/5图表一致通过。任务书v1.9.1保留科学判据与正式矩阵。
+- **待办/归属 = 上板Agent，触发 = 本轮r2提交后，正式矩阵前必须关闭**：NDK完整重编/部署新binary、当前环境和Linux VMA/PerfWindow资格；`configs/experiments/ptr-chase-sm8650-x4-tlb-a1-geometry-smoke.json` 12cases×2reps全量通过；同一binary锚点与专用floor/scatter→有效freeze工件，再正式48/48/32。任何geometry/purity/fallback/实际混域/输入错误或STOP先停块。执行包 `docs/runbooks/2026-10-08-sm8650-a1-integrated-handoff.md` v2。
+- **待办/归属 = 原采数方，触发 = m0b回收/数据归档前**：按 `docs/methodology/measurement-discipline.md` 对失败、未完成及不合正式资格的pilot分类归档/隔离并保留审计；本轮不移动、不回填、不代提交原run。纯净且有用的pilot仍只作探索对照，不直接晋升baseline。
+- **边界**：软件几何修复自验通过，真机资格和数值冻结待执行；没有新增双独立评审或SM8650硬件模型结论。Android preset缺口沿SMOKE-20261001；A3/ROB和其他P2沿原触发，不重开m0b开发，不操作远程。

@@ -1,0 +1,14 @@
+....................................................................................................................................................................................a1: existing frozen file differs; choose a new artifact path
+......................................................................
+----------------------------------------------------------------------
+Ran 250 tests in 7.129s
+
+OK
+report: /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/tmp64klq8bw/run/report.md
+chart:  /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/tmp64klq8bw/run/latency.svg
+report: /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/tmp64klq8bw/run/report.md
+chart:  /var/folders/h_/sqt93qdj0lz29bbj_8k3phch0000gn/T/tmp64klq8bw/run/latency.svg
+{"frozen": true, "artifact_sha256": "c5e84db1ab3d3221e239360a07d0f5304add74b42e7badd02521196a6ab084a7"}
+{"frozen": true, "artifact_sha256": "c5e84db1ab3d3221e239360a07d0f5304add74b42e7badd02521196a6ab084a7"}
+{"frozen": true, "artifact_sha256": "c5e84db1ab3d3221e239360a07d0f5304add74b42e7badd02521196a6ab084a7"}
+{"h_star": 1, "h_star_status": "unique"}

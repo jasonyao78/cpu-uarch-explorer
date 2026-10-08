@@ -1,0 +1,522 @@
+Start testing: Oct 08 17:54 CST
+----------------------------------------------------------
+1/21 Testing: perf_window_golden
+1/21 Test: perf_window_golden
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests/perf_window_golden"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"perf_window_golden" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+perf_window_golden: all decode scenarios pass
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"perf_window_golden" end time: Oct 08 17:54 CST
+"perf_window_golden" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/21 Testing: tlb_set_collect_golden
+2/21 Test: tlb_set_collect_golden
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests/tlb_set_collect_golden"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"tlb_set_collect_golden" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+tlb_set_collect_golden: all scenarios pass
+<end of output>
+Test time =   0.47 sec
+----------------------------------------------------------
+Test Passed.
+"tlb_set_collect_golden" end time: Oct 08 17:54 CST
+"tlb_set_collect_golden" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/21 Testing: tlb_set_layout_golden
+3/21 Test: tlb_set_layout_golden
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests/tlb_set_layout_golden"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"tlb_set_layout_golden" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+tlb_set_layout_golden: 196608 offsets + bounds + real reservation + collectors PASS
+<end of output>
+Test time =   0.42 sec
+----------------------------------------------------------
+Test Passed.
+"tlb_set_layout_golden" end time: Oct 08 17:54 CST
+"tlb_set_layout_golden" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/21 Testing: ptr_chase_valid_small
+4/21 Test: ptr_chase_valid_small
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "64" "-s" "64" "-n" "8000"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_valid_small" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+buffer_kb=64 stride=64 loads=8000 elapsed_ns=12000 latency_ns=1.5000 warmup_loads=2048 warmup_passes_effective=2.000000 warmup_state=warm page_policy=platform-default page_kb=16 page_policy_requested=default page_policy_actual=platform-default anon_huge_kb=0 page_policy_actual_before=platform-default page_policy_actual_after=platform-default anon_huge_kb_before=0 anon_huge_kb_after=0 page_backing_endpoints_equal=1 vma_base=0x102204000 seed=42
+<end of output>
+Test time =   0.37 sec
+----------------------------------------------------------
+Test Pass Reason:
+Required regular expression found. Regex=[latency_ns=[0-9]+\.[0-9]+]
+"ptr_chase_valid_small" end time: Oct 08 17:54 CST
+"ptr_chase_valid_small" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/21 Testing: ptr_chase_default_warmup_two_passes
+5/21 Test: ptr_chase_default_warmup_two_passes
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "64" "-s" "64" "-n" "8000"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_default_warmup_two_passes" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+buffer_kb=64 stride=64 loads=8000 elapsed_ns=6000 latency_ns=0.7500 warmup_loads=2048 warmup_passes_effective=2.000000 warmup_state=warm page_policy=platform-default page_kb=16 page_policy_requested=default page_policy_actual=platform-default anon_huge_kb=0 page_policy_actual_before=platform-default page_policy_actual_after=platform-default anon_huge_kb_before=0 anon_huge_kb_after=0 page_backing_endpoints_equal=1 vma_base=0x100a20000 seed=42
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Pass Reason:
+Required regular expression found. Regex=[warmup_loads=2048 warmup_passes_effective=2\.000000 warmup_state=warm]
+"ptr_chase_default_warmup_two_passes" end time: Oct 08 17:54 CST
+"ptr_chase_default_warmup_two_passes" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/21 Testing: ptr_chase_explicit_warmup_loads
+6/21 Test: ptr_chase_explicit_warmup_loads
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "64" "-s" "64" "-n" "8000" "-w" "1000"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_explicit_warmup_loads" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+buffer_kb=64 stride=64 loads=8000 elapsed_ns=6000 latency_ns=0.7500 warmup_loads=1000 warmup_passes_effective=0.976562 warmup_state=warm page_policy=platform-default page_kb=16 page_policy_requested=default page_policy_actual=platform-default anon_huge_kb=0 page_policy_actual_before=platform-default page_policy_actual_after=platform-default anon_huge_kb_before=0 anon_huge_kb_after=0 page_backing_endpoints_equal=1 vma_base=0x102dec000 seed=42
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Pass Reason:
+Required regular expression found. Regex=[warmup_loads=1000 warmup_passes_effective=0\.976562 warmup_state=warm]
+"ptr_chase_explicit_warmup_loads" end time: Oct 08 17:54 CST
+"ptr_chase_explicit_warmup_loads" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/21 Testing: ptr_chase_warmup_zero_is_not_cold
+7/21 Test: ptr_chase_warmup_zero_is_not_cold
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "64" "-s" "64" "-n" "8000" "-w" "0"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_warmup_zero_is_not_cold" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+buffer_kb=64 stride=64 loads=8000 elapsed_ns=15000 latency_ns=1.8750 warmup_loads=0 warmup_passes_effective=0.000000 warmup_state=cold-warm0 page_policy=platform-default page_kb=16 page_policy_requested=default page_policy_actual=platform-default anon_huge_kb=0 page_policy_actual_before=platform-default page_policy_actual_after=platform-default anon_huge_kb_before=0 anon_huge_kb_after=0 page_backing_endpoints_equal=1 vma_base=0x10453c000 seed=42
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Pass Reason:
+Required regular expression found. Regex=[warmup_state=cold-warm0]
+"ptr_chase_warmup_zero_is_not_cold" end time: Oct 08 17:54 CST
+"ptr_chase_warmup_zero_is_not_cold" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/21 Testing: ptr_chase_rejects_tiny_loads
+8/21 Test: ptr_chase_rejects_tiny_loads
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-n" "1"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_rejects_tiny_loads" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+error: loads must be >= the unroll factor (8)
+usage: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-S seed] [-B|-h|-H|-T] [--pmu-event label:type:config]...
+       /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase --tlb-set-mode --set-hypothesis H --set-target T --set-window W [--set-target2 T2] [--set-rounds R]
+       [--set-pool-pages P] [--set-filler F] [--set-regions K] [--set-scatter] [-S seed] [--pmu-event label:type:config]...
+  -b  buffer size in KB            (default 8192)
+  -s  stride between chain slots, must be a multiple of 8 (default 64)
+  -n  total dependent loads, >= 8 (default 268435456)
+  -w  exact warmup loads          (default: 2 complete ring passes)
+  -S  ring shuffle seed           (default 42; recorded as seed=N)
+  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)
+  -H  2MB hugepage strict (exit 2 if pool unavailable)
+  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps
+  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps
+  --pmu-event label:type:config  Linux per-thread counting event (repeatable)
+  --tlb-set-mode                 M0-4b TLB set prime+probe 模式（与 -b/-s/-n/-w 互斥；Linux + 4K 页 + PMU 事件必填）
+  --set-hypothesis 1..4          候选 VPN→set 索引假设 H1..H4
+  --set-target N                 目标 set（<256）；--set-target2 = T2 对照组
+  --set-window W                 每轮 probe 访问数（0=空窗底噪 case）
+  --set-scatter                  无冲突负控：W 页各落不同 set（G0-3）
+  --set-rounds R                 轮数（默认 20，>=2；round 0 冷启动剔除）
+  --set-pool-pages P             目标地址池总页数（默认 65536）
+  --set-filler F                 prime 驱逐链页数（默认 512）
+  --set-regions K                F4 多稀疏 VA 区域数（默认 4；1=单区域）
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ptr_chase_rejects_tiny_loads" end time: Oct 08 17:54 CST
+"ptr_chase_rejects_tiny_loads" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/21 Testing: ptr_chase_rejects_misaligned_stride
+9/21 Test: ptr_chase_rejects_misaligned_stride
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "64" "-s" "9" "-n" "8000"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_rejects_misaligned_stride" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+error: stride must be a multiple of the pointer size
+usage: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-S seed] [-B|-h|-H|-T] [--pmu-event label:type:config]...
+       /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase --tlb-set-mode --set-hypothesis H --set-target T --set-window W [--set-target2 T2] [--set-rounds R]
+       [--set-pool-pages P] [--set-filler F] [--set-regions K] [--set-scatter] [-S seed] [--pmu-event label:type:config]...
+  -b  buffer size in KB            (default 8192)
+  -s  stride between chain slots, must be a multiple of 8 (default 64)
+  -n  total dependent loads, >= 8 (default 268435456)
+  -w  exact warmup loads          (default: 2 complete ring passes)
+  -S  ring shuffle seed           (default 42; recorded as seed=N)
+  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)
+  -H  2MB hugepage strict (exit 2 if pool unavailable)
+  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps
+  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps
+  --pmu-event label:type:config  Linux per-thread counting event (repeatable)
+  --tlb-set-mode                 M0-4b TLB set prime+probe 模式（与 -b/-s/-n/-w 互斥；Linux + 4K 页 + PMU 事件必填）
+  --set-hypothesis 1..4          候选 VPN→set 索引假设 H1..H4
+  --set-target N                 目标 set（<256）；--set-target2 = T2 对照组
+  --set-window W                 每轮 probe 访问数（0=空窗底噪 case）
+  --set-scatter                  无冲突负控：W 页各落不同 set（G0-3）
+  --set-rounds R                 轮数（默认 20，>=2；round 0 冷启动剔除）
+  --set-pool-pages P             目标地址池总页数（默认 65536）
+  --set-filler F                 prime 驱逐链页数（默认 512）
+  --set-regions K                F4 多稀疏 VA 区域数（默认 4；1=单区域）
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ptr_chase_rejects_misaligned_stride" end time: Oct 08 17:54 CST
+"ptr_chase_rejects_misaligned_stride" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/21 Testing: ptr_chase_rejects_stride_gt_buffer
+10/21 Test: ptr_chase_rejects_stride_gt_buffer
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "4" "-s" "999999" "-n" "8000"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_rejects_stride_gt_buffer" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+error: stride must be a multiple of the pointer size
+usage: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-S seed] [-B|-h|-H|-T] [--pmu-event label:type:config]...
+       /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase --tlb-set-mode --set-hypothesis H --set-target T --set-window W [--set-target2 T2] [--set-rounds R]
+       [--set-pool-pages P] [--set-filler F] [--set-regions K] [--set-scatter] [-S seed] [--pmu-event label:type:config]...
+  -b  buffer size in KB            (default 8192)
+  -s  stride between chain slots, must be a multiple of 8 (default 64)
+  -n  total dependent loads, >= 8 (default 268435456)
+  -w  exact warmup loads          (default: 2 complete ring passes)
+  -S  ring shuffle seed           (default 42; recorded as seed=N)
+  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)
+  -H  2MB hugepage strict (exit 2 if pool unavailable)
+  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps
+  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps
+  --pmu-event label:type:config  Linux per-thread counting event (repeatable)
+  --tlb-set-mode                 M0-4b TLB set prime+probe 模式（与 -b/-s/-n/-w 互斥；Linux + 4K 页 + PMU 事件必填）
+  --set-hypothesis 1..4          候选 VPN→set 索引假设 H1..H4
+  --set-target N                 目标 set（<256）；--set-target2 = T2 对照组
+  --set-window W                 每轮 probe 访问数（0=空窗底噪 case）
+  --set-scatter                  无冲突负控：W 页各落不同 set（G0-3）
+  --set-rounds R                 轮数（默认 20，>=2；round 0 冷启动剔除）
+  --set-pool-pages P             目标地址池总页数（默认 65536）
+  --set-filler F                 prime 驱逐链页数（默认 512）
+  --set-regions K                F4 多稀疏 VA 区域数（默认 4；1=单区域）
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ptr_chase_rejects_stride_gt_buffer" end time: Oct 08 17:54 CST
+"ptr_chase_rejects_stride_gt_buffer" time elapsed: 00:00:00
+----------------------------------------------------------
+
+11/21 Testing: ptr_chase_rejects_zero_buffer
+11/21 Test: ptr_chase_rejects_zero_buffer
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "0" "-s" "64" "-n" "8000"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_rejects_zero_buffer" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+error: buffer size must be positive
+usage: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-S seed] [-B|-h|-H|-T] [--pmu-event label:type:config]...
+       /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase --tlb-set-mode --set-hypothesis H --set-target T --set-window W [--set-target2 T2] [--set-rounds R]
+       [--set-pool-pages P] [--set-filler F] [--set-regions K] [--set-scatter] [-S seed] [--pmu-event label:type:config]...
+  -b  buffer size in KB            (default 8192)
+  -s  stride between chain slots, must be a multiple of 8 (default 64)
+  -n  total dependent loads, >= 8 (default 268435456)
+  -w  exact warmup loads          (default: 2 complete ring passes)
+  -S  ring shuffle seed           (default 42; recorded as seed=N)
+  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)
+  -H  2MB hugepage strict (exit 2 if pool unavailable)
+  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps
+  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps
+  --pmu-event label:type:config  Linux per-thread counting event (repeatable)
+  --tlb-set-mode                 M0-4b TLB set prime+probe 模式（与 -b/-s/-n/-w 互斥；Linux + 4K 页 + PMU 事件必填）
+  --set-hypothesis 1..4          候选 VPN→set 索引假设 H1..H4
+  --set-target N                 目标 set（<256）；--set-target2 = T2 对照组
+  --set-window W                 每轮 probe 访问数（0=空窗底噪 case）
+  --set-scatter                  无冲突负控：W 页各落不同 set（G0-3）
+  --set-rounds R                 轮数（默认 20，>=2；round 0 冷启动剔除）
+  --set-pool-pages P             目标地址池总页数（默认 65536）
+  --set-filler F                 prime 驱逐链页数（默认 512）
+  --set-regions K                F4 多稀疏 VA 区域数（默认 4；1=单区域）
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ptr_chase_rejects_zero_buffer" end time: Oct 08 17:54 CST
+"ptr_chase_rejects_zero_buffer" time elapsed: 00:00:00
+----------------------------------------------------------
+
+12/21 Testing: ptr_chase_hugepage_unsupported
+12/21 Test: ptr_chase_hugepage_unsupported
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "4096" "-s" "64" "-n" "8000" "-h"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_hugepage_unsupported" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+unsupported: MAP_HUGETLB not available on this platform
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ptr_chase_hugepage_unsupported" end time: Oct 08 17:54 CST
+"ptr_chase_hugepage_unsupported" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/21 Testing: ptr_chase_thp_unsupported
+13/21 Test: ptr_chase_thp_unsupported
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "4096" "-s" "64" "-n" "8000" "-T"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_thp_unsupported" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+unsupported: MADV_HUGEPAGE not available on this platform
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ptr_chase_thp_unsupported" end time: Oct 08 17:54 CST
+"ptr_chase_thp_unsupported" time elapsed: 00:00:00
+----------------------------------------------------------
+
+14/21 Testing: ptr_chase_base_pages_unsupported
+14/21 Test: ptr_chase_base_pages_unsupported
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "4096" "-s" "64" "-n" "8000" "-B"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_base_pages_unsupported" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+unsupported: MADV_NOHUGEPAGE not available on this platform
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ptr_chase_base_pages_unsupported" end time: Oct 08 17:54 CST
+"ptr_chase_base_pages_unsupported" time elapsed: 00:00:00
+----------------------------------------------------------
+
+15/21 Testing: ptr_chase_rejects_conflicting_page_requests
+15/21 Test: ptr_chase_rejects_conflicting_page_requests
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "4096" "-s" "64" "-n" "8000" "-T" "-h"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_rejects_conflicting_page_requests" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+error: cannot request both; page policies are mutually exclusive
+usage: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-S seed] [-B|-h|-H|-T] [--pmu-event label:type:config]...
+       /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase --tlb-set-mode --set-hypothesis H --set-target T --set-window W [--set-target2 T2] [--set-rounds R]
+       [--set-pool-pages P] [--set-filler F] [--set-regions K] [--set-scatter] [-S seed] [--pmu-event label:type:config]...
+  -b  buffer size in KB            (default 8192)
+  -s  stride between chain slots, must be a multiple of 8 (default 64)
+  -n  total dependent loads, >= 8 (default 268435456)
+  -w  exact warmup loads          (default: 2 complete ring passes)
+  -S  ring shuffle seed           (default 42; recorded as seed=N)
+  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)
+  -H  2MB hugepage strict (exit 2 if pool unavailable)
+  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps
+  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps
+  --pmu-event label:type:config  Linux per-thread counting event (repeatable)
+  --tlb-set-mode                 M0-4b TLB set prime+probe 模式（与 -b/-s/-n/-w 互斥；Linux + 4K 页 + PMU 事件必填）
+  --set-hypothesis 1..4          候选 VPN→set 索引假设 H1..H4
+  --set-target N                 目标 set（<256）；--set-target2 = T2 对照组
+  --set-window W                 每轮 probe 访问数（0=空窗底噪 case）
+  --set-scatter                  无冲突负控：W 页各落不同 set（G0-3）
+  --set-rounds R                 轮数（默认 20，>=2；round 0 冷启动剔除）
+  --set-pool-pages P             目标地址池总页数（默认 65536）
+  --set-filler F                 prime 驱逐链页数（默认 512）
+  --set-regions K                F4 多稀疏 VA 区域数（默认 4；1=单区域）
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ptr_chase_rejects_conflicting_page_requests" end time: Oct 08 17:54 CST
+"ptr_chase_rejects_conflicting_page_requests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+16/21 Testing: ptr_chase_rejects_base_and_thp
+16/21 Test: ptr_chase_rejects_base_and_thp
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "4096" "-s" "64" "-n" "8000" "-B" "-T"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_rejects_base_and_thp" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+error: cannot request both; page policies are mutually exclusive
+usage: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-S seed] [-B|-h|-H|-T] [--pmu-event label:type:config]...
+       /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase --tlb-set-mode --set-hypothesis H --set-target T --set-window W [--set-target2 T2] [--set-rounds R]
+       [--set-pool-pages P] [--set-filler F] [--set-regions K] [--set-scatter] [-S seed] [--pmu-event label:type:config]...
+  -b  buffer size in KB            (default 8192)
+  -s  stride between chain slots, must be a multiple of 8 (default 64)
+  -n  total dependent loads, >= 8 (default 268435456)
+  -w  exact warmup loads          (default: 2 complete ring passes)
+  -S  ring shuffle seed           (default 42; recorded as seed=N)
+  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)
+  -H  2MB hugepage strict (exit 2 if pool unavailable)
+  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps
+  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps
+  --pmu-event label:type:config  Linux per-thread counting event (repeatable)
+  --tlb-set-mode                 M0-4b TLB set prime+probe 模式（与 -b/-s/-n/-w 互斥；Linux + 4K 页 + PMU 事件必填）
+  --set-hypothesis 1..4          候选 VPN→set 索引假设 H1..H4
+  --set-target N                 目标 set（<256）；--set-target2 = T2 对照组
+  --set-window W                 每轮 probe 访问数（0=空窗底噪 case）
+  --set-scatter                  无冲突负控：W 页各落不同 set（G0-3）
+  --set-rounds R                 轮数（默认 20，>=2；round 0 冷启动剔除）
+  --set-pool-pages P             目标地址池总页数（默认 65536）
+  --set-filler F                 prime 驱逐链页数（默认 512）
+  --set-regions K                F4 多稀疏 VA 区域数（默认 4；1=单区域）
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ptr_chase_rejects_base_and_thp" end time: Oct 08 17:54 CST
+"ptr_chase_rejects_base_and_thp" time elapsed: 00:00:00
+----------------------------------------------------------
+
+17/21 Testing: ptr_chase_rejects_malformed_pmu_event
+17/21 Test: ptr_chase_rejects_malformed_pmu_event
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "64" "-s" "64" "-n" "8000" "--pmu-event" "not-a-descriptor"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_rejects_malformed_pmu_event" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+error: pmu-event must be label:uint32-type:uint64-config
+usage: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-S seed] [-B|-h|-H|-T] [--pmu-event label:type:config]...
+       /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase --tlb-set-mode --set-hypothesis H --set-target T --set-window W [--set-target2 T2] [--set-rounds R]
+       [--set-pool-pages P] [--set-filler F] [--set-regions K] [--set-scatter] [-S seed] [--pmu-event label:type:config]...
+  -b  buffer size in KB            (default 8192)
+  -s  stride between chain slots, must be a multiple of 8 (default 64)
+  -n  total dependent loads, >= 8 (default 268435456)
+  -w  exact warmup loads          (default: 2 complete ring passes)
+  -S  ring shuffle seed           (default 42; recorded as seed=N)
+  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)
+  -H  2MB hugepage strict (exit 2 if pool unavailable)
+  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps
+  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps
+  --pmu-event label:type:config  Linux per-thread counting event (repeatable)
+  --tlb-set-mode                 M0-4b TLB set prime+probe 模式（与 -b/-s/-n/-w 互斥；Linux + 4K 页 + PMU 事件必填）
+  --set-hypothesis 1..4          候选 VPN→set 索引假设 H1..H4
+  --set-target N                 目标 set（<256）；--set-target2 = T2 对照组
+  --set-window W                 每轮 probe 访问数（0=空窗底噪 case）
+  --set-scatter                  无冲突负控：W 页各落不同 set（G0-3）
+  --set-rounds R                 轮数（默认 20，>=2；round 0 冷启动剔除）
+  --set-pool-pages P             目标地址池总页数（默认 65536）
+  --set-filler F                 prime 驱逐链页数（默认 512）
+  --set-regions K                F4 多稀疏 VA 区域数（默认 4；1=单区域）
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ptr_chase_rejects_malformed_pmu_event" end time: Oct 08 17:54 CST
+"ptr_chase_rejects_malformed_pmu_event" time elapsed: 00:00:00
+----------------------------------------------------------
+
+18/21 Testing: ptr_chase_seed_is_recorded
+18/21 Test: ptr_chase_seed_is_recorded
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "64" "-s" "64" "-n" "8000" "-S" "7"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_seed_is_recorded" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+buffer_kb=64 stride=64 loads=8000 elapsed_ns=7000 latency_ns=0.8750 warmup_loads=2048 warmup_passes_effective=2.000000 warmup_state=warm page_policy=platform-default page_kb=16 page_policy_requested=default page_policy_actual=platform-default anon_huge_kb=0 page_policy_actual_before=platform-default page_policy_actual_after=platform-default anon_huge_kb_before=0 anon_huge_kb_after=0 page_backing_endpoints_equal=1 vma_base=0x104a70000 seed=7
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Pass Reason:
+Required regular expression found. Regex=[seed=7]
+"ptr_chase_seed_is_recorded" end time: Oct 08 17:54 CST
+"ptr_chase_seed_is_recorded" time elapsed: 00:00:00
+----------------------------------------------------------
+
+19/21 Testing: ptr_chase_seed_default_42
+19/21 Test: ptr_chase_seed_default_42
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "64" "-s" "64" "-n" "8000"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_seed_default_42" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+buffer_kb=64 stride=64 loads=8000 elapsed_ns=9000 latency_ns=1.1250 warmup_loads=2048 warmup_passes_effective=2.000000 warmup_state=warm page_policy=platform-default page_kb=16 page_policy_requested=default page_policy_actual=platform-default anon_huge_kb=0 page_policy_actual_before=platform-default page_policy_actual_after=platform-default anon_huge_kb_before=0 anon_huge_kb_after=0 page_backing_endpoints_equal=1 vma_base=0x102ef0000 seed=42
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Pass Reason:
+Required regular expression found. Regex=[seed=42]
+"ptr_chase_seed_default_42" end time: Oct 08 17:54 CST
+"ptr_chase_seed_default_42" time elapsed: 00:00:00
+----------------------------------------------------------
+
+20/21 Testing: ptr_chase_rejects_seed_garbage
+20/21 Test: ptr_chase_rejects_seed_garbage
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "64" "-s" "64" "-n" "8000" "-S" "abc"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_rejects_seed_garbage" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+error: seed must be a non-negative integer (base 0)
+usage: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase -b KB -s stride_bytes [-n loads] [-w warmup_loads] [-S seed] [-B|-h|-H|-T] [--pmu-event label:type:config]...
+       /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase --tlb-set-mode --set-hypothesis H --set-target T --set-window W [--set-target2 T2] [--set-rounds R]
+       [--set-pool-pages P] [--set-filler F] [--set-regions K] [--set-scatter] [-S seed] [--pmu-event label:type:config]...
+  -b  buffer size in KB            (default 8192)
+  -s  stride between chain slots, must be a multiple of 8 (default 64)
+  -n  total dependent loads, >= 8 (default 268435456)
+  -w  exact warmup loads          (default: 2 complete ring passes)
+  -S  ring shuffle seed           (default 42; recorded as seed=N)
+  -h  2MB hugepage (fallback to 4K with explicit tag if pool unavailable)
+  -H  2MB hugepage strict (exit 2 if pool unavailable)
+  -T  Linux THP via MADV_HUGEPAGE; actual backing read from smaps
+  -B  Linux base pages via MADV_NOHUGEPAGE; actual backing read from smaps
+  --pmu-event label:type:config  Linux per-thread counting event (repeatable)
+  --tlb-set-mode                 M0-4b TLB set prime+probe 模式（与 -b/-s/-n/-w 互斥；Linux + 4K 页 + PMU 事件必填）
+  --set-hypothesis 1..4          候选 VPN→set 索引假设 H1..H4
+  --set-target N                 目标 set（<256）；--set-target2 = T2 对照组
+  --set-window W                 每轮 probe 访问数（0=空窗底噪 case）
+  --set-scatter                  无冲突负控：W 页各落不同 set（G0-3）
+  --set-rounds R                 轮数（默认 20，>=2；round 0 冷启动剔除）
+  --set-pool-pages P             目标地址池总页数（默认 65536）
+  --set-filler F                 prime 驱逐链页数（默认 512）
+  --set-regions K                F4 多稀疏 VA 区域数（默认 4；1=单区域）
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ptr_chase_rejects_seed_garbage" end time: Oct 08 17:54 CST
+"ptr_chase_rejects_seed_garbage" time elapsed: 00:00:00
+----------------------------------------------------------
+
+21/21 Testing: ptr_chase_vma_base_is_recorded
+21/21 Test: ptr_chase_vma_base_is_recorded
+Command: "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/probes/cache-mem/ptr_chase" "-b" "64" "-s" "64" "-n" "8000"
+Directory: /Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2/build/macos-arm64/release/tests
+"ptr_chase_vma_base_is_recorded" start time: Oct 08 17:54 CST
+Output:
+----------------------------------------------------------
+buffer_kb=64 stride=64 loads=8000 elapsed_ns=5000 latency_ns=0.6250 warmup_loads=2048 warmup_passes_effective=2.000000 warmup_state=warm page_policy=platform-default page_kb=16 page_policy_requested=default page_policy_actual=platform-default anon_huge_kb=0 page_policy_actual_before=platform-default page_policy_actual_after=platform-default anon_huge_kb_before=0 anon_huge_kb_after=0 page_backing_endpoints_equal=1 vma_base=0x10227c000 seed=42
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Pass Reason:
+Required regular expression found. Regex=[vma_base=0x[0-9a-f]+]
+"ptr_chase_vma_base_is_recorded" end time: Oct 08 17:54 CST
+"ptr_chase_vma_base_is_recorded" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 08 17:54 CST
