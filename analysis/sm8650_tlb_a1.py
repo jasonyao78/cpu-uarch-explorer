@@ -290,8 +290,9 @@ def run_a1_adjudication(records: list[dict],
     归层 = record.experiment_id（生产配置三实验各带 a1-l1/l2/l3 标签；
     不再用 set_target 存在性推断——生产记录全部带 set_target 默认键）。
     L2 复现判据 = onset 相等（|ΔW*|≤1），不比较平台中位等噪声项。
-    L3 通过 = 4 target 齐备且全部判 sharp 且 onset 相互 ≤1——
-    "一致地 suspect"不放行（R7）。
+    L3 通过 = target 恰为 {7,42,100,200}、各 W 恰为 {8,12}，四 target
+    的两点形态一致且非 both-below（R8/R9）。两点不提供 onset 定位；
+    onset 正证据由 L1/L2 四点曲线承担，不能以一致的退化曲线替代。
     """
     if not frozen.get("frozen"):
         raise TlbError(f"a1: thresholds not frozen: {frozen.get('stop')}")

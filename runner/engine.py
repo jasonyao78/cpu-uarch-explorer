@@ -181,7 +181,12 @@ def _register_probe(store: ArtifactStore, executor, platform: dict,
 
 
 def run_plan(plan: Plan, platform: dict, run_dir: Path, repo_root: Path) -> dict:
-    """执行整个 plan，逐 case 落 record；返回 run 汇总。任何 case 失败不中断后续 case。"""
+    """执行整个 plan，逐 case 落 record；返回 run 汇总。任何 case 失败不中断后续 case。
+
+    每种 status 的 record 都持久化 plan.experiment_id，与 run-manifest 同源。
+    独立加载或合并 records 时也能恢复实验角色（A1 L1/L2/L3），无需读者
+    补写来源字段；R7-A/R9 生产归层合同。
+    """
     run_dir = Path(run_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
     store = ArtifactStore(run_dir)
@@ -207,6 +212,7 @@ def run_plan(plan: Plan, platform: dict, run_dir: Path, repo_root: Path) -> dict
         for case in plan.cases:
             record = _run_case(case, platform, probe_meta, probe_path, executor,
                                store, system_info, git)
+            record["experiment_id"] = plan.experiment_id
             writer.append(record)
             summary["total"] += 1
             summary[record["status"]] += 1

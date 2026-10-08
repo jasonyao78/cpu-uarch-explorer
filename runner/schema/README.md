@@ -33,6 +33,12 @@
 | `record.metric_contract` / `group.identity` 语义 | 契约 | MB-06：分析器分组键采用类型规范身份——bool True 与 int 1 不可合并，任何 params 差异（类型规范残差）阻止合并；报告面 identity 字典保持 legacy 原值（旧重放逐字一致） | 2026-10-07 |
 | `generator` | object | 致密配置生成器审计块（input_run_sha256/rules_sha256/output_sha256 三锚定 + dense_points 来源标注 + quota 核算）；仅由 `analysis/tlb_dense_gen.py` 产出，非手写 | 2026-09-29 |
 
+### 已登记的 run-record 扩展字段
+
+| 字段 | 类型 | 用途 | 登记日期 |
+|---|---|---|---|
+| `experiment_id` | string | `runner/engine.py:run_plan` 在每条 record 写盘前持久化 `Plan.experiment_id`，与 `run-manifest.json` 同源，覆盖 ok/failed/skipped/unsupported。供独立记录消费及 A1 L1/L2/L3 归层；旧记录允许缺省，不回填历史数据，不新增 schema required，不改变 schema_version，旧读者可忽略此扩展 | 2026-10-08 |
+
 ### 已登记的 target 扩展字段
 
 | 字段 | 类型 | 用途 | 登记日期 |

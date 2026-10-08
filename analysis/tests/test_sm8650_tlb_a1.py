@@ -126,10 +126,6 @@ class TestL3(unittest.TestCase):
             check_l3_consistency({})
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TestFreezeThresholds(unittest.TestCase):
     def test_happy_path_freezes(self):
         r = freeze_thresholds([0.0, 0.2, 0.0, 0.4, 0.2], scatter_mid=0.0)
@@ -250,76 +246,90 @@ class TestFullChain(unittest.TestCase):
 
 
 class TestProductionChain(unittest.TestCase):
-    """R8：真实三配置 plan 展开 → 写盘 → load_run 回读 → 全量判定。"""
+    """Real checked-in plans → run_plan/adapter → disk → load_run → A1.
 
-    def _build(self, tmp):
-        import json
+    Only external execution and binary registration are synthetic. No record is
+    handwritten and no ID is supplied after loading. Pure classifier fixtures
+    above remain unit tests and are not called production-chain evidence.
+    """
+
+    def _build(self, tmp, l3_change=None):
+        import dataclasses
         from pathlib import Path
-        from runner import plan as plan_mod
         from analysis.load import load_run
-        platform = json.loads(Path(
-            "configs/platforms/redmi-k70pro-01.json").read_text())
-        configs = ("ptr-chase-sm8650-x4-tlb-a1-l1-main",
-                   "ptr-chase-sm8650-x4-tlb-a1-l2-repro",
-                   "ptr-chase-sm8650-x4-tlb-a1-l3-target")
-        runs_root = Path(tmp) / "runs"
-        total = 0
-        for cid in configs:
-            spec = json.loads(Path(f"configs/experiments/{cid}.json").read_text())
-            built = plan_mod.build_plan(spec, platform)
-            run_dir = runs_root / f"20261008T000000Z-{cid}"
-            run_dir.mkdir(parents=True)
-            recs = []
-            for case in built.cases:
-                params = {k: rv.value for k, rv in case.params}
-                w = int(params["set_window"]); h = int(params["set_hypothesis"])
-                scope = int(params.get("set_region_scope", -1))
-                if h == 1:
-                    v = 0.2 if w < 8 else (4.0 if w == 8 else 6.5)
-                else:
-                    v = 0.4 if scope < 0 else (0.2 if w < 8 else 6.5)
-                nodes = ([3, 3, 3, 3] if scope < 0
-                         else [0]*scope + [12] + [0]*(3-scope))
-                recs.append({
-                    "schema_version": "2.0", "status": "ok",
-                    "experiment_id": cid, "params": params,
-                    "probe": {"name": "ptr_chase", "protocol_version": "1.2",
-                              "realized": {"set_target_region_nodes": nodes,
-                                           "set_region_vpn_hi_pure": 1,
-                                           "set_region_vpn_hi": ["5", "6", "7", "8"]}},
-                    "environment": {}, "metrics": [
-                        {"name": "pmu.l2d_tlb_refill.count", "value": v,
-                         "unit": "events"}]})
-                total += 1
-            (run_dir / "records.jsonl").write_text(
-                "".join(json.dumps(r) + "\n" for r in recs))
-            (run_dir / "run-manifest.json").write_text(json.dumps(
-                {"schema_version": "1.0", "experiment_id": cid}))
-        self.assertEqual(total, 128)
+        from runner.tests.tlb_set_fixtures import A1_LAYERS, a1_plan, run_synthetic_plan
         records = []
-        for d in sorted(runs_root.iterdir()):
-            run = load_run(d)
-            for r in run.ok_records:
-                r.setdefault("experiment_id", json.loads(
-                    (d / "run-manifest.json").read_text())["experiment_id"])
-                records.append(r)
+        calls = 0
+        for layer in A1_LAYERS:
+            plan, platform = a1_plan(layer)
+            if layer == "l3-target" and l3_change is not None:
+                key, mapping = l3_change
+                cases = tuple(dataclasses.replace(case, params=tuple(
+                    (k, dataclasses.replace(rv, value=mapping.get(rv.value, rv.value)))
+                    if k == key else (k, rv) for k, rv in case.params))
+                    for case in plan.cases)
+                plan = dataclasses.replace(plan, cases=cases)
+            run_dir = Path(tmp) / layer
+            summary, count = run_synthetic_plan(plan, platform, run_dir)
+            run = load_run(run_dir)
+            expected = 32 if layer == "l3-target" else 48
+            self.assertEqual(len(plan.cases), expected)
+            self.assertEqual(summary["ok"], expected, summary)
+            self.assertEqual(summary["failed"], 0, summary)
+            self.assertEqual(len(run.ok_records), expected)
+            self.assertEqual(run.failed_records, [])
+            self.assertEqual(count, expected * 10)
+            for record in run.ok_records:
+                self.assertEqual(record.get("experiment_id"), plan.experiment_id)
+                self.assertEqual(sum(record["probe"]["realized"]["set_target_region_nodes"]),
+                                 record["params"]["set_window"])
+                self.assertTrue(gate_record(record)[0])
+                for metric in record["metrics"]:
+                    self.assertEqual(metric["repetitions"], 10)
+                    self.assertEqual(len(metric["observations"]), 10)
+            records.extend(run.ok_records)
+            calls += count
+        self.assertEqual(len(records), 128)
+        self.assertEqual(calls, 1280)
         return records
 
     def test_full_128_positive(self):
         import tempfile
         with tempfile.TemporaryDirectory() as tmp:
             records = self._build(tmp)
-        out = run_a1_adjudication(records, {"frozen": True, "on_threshold": 3.0})
+        frozen = freeze_thresholds([0.0, 0.2, 0.0, 0.4, 0.2], scatter_mid=0.0)
+        out = run_a1_adjudication(records, frozen)
         self.assertEqual(out["n_records"], 128)
-        self.assertEqual(out["h_star"], 1)
+        self.assertEqual(out["h_star"], 1)  # synthetic response, not a hardware conclusion
 
     def test_permutation_invariant_full(self):
-        import random, tempfile
+        import json
+        import random
+        import tempfile
         with tempfile.TemporaryDirectory() as tmp:
             records = self._build(tmp)
-        random.seed(3); random.shuffle(records)
-        out = run_a1_adjudication(records, {"frozen": True, "on_threshold": 3.0})
-        self.assertEqual(out["h_star"], 1)
+        frozen = freeze_thresholds([0.0, 0.2, 0.0, 0.4, 0.2], scatter_mid=0.0)
+        baseline = run_a1_adjudication(records, frozen)
+        random.Random(3).shuffle(records)
+        shuffled = run_a1_adjudication(records, frozen)
+        self.assertEqual(baseline["h_star"], 1)
+        self.assertEqual(shuffled, baseline)
+        self.assertEqual(json.dumps(shuffled, sort_keys=True, separators=(",", ":")),
+                         json.dumps(baseline, sort_keys=True, separators=(",", ":")))
+
+    def test_neighboring_target_plan_is_rejected(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            records = self._build(tmp, ("set_target", {200: 201}))
+        with self.assertRaisesRegex(TlbError, "exact coverage"):
+            run_a1_adjudication(records, freeze_thresholds([0.0, 0.2, 0.0], 0.0))
+
+    def test_neighboring_window_plan_is_rejected(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            records = self._build(tmp, ("set_window", {8: 100, 12: 200}))
+        with self.assertRaisesRegex(TlbError, "window grid"):
+            run_a1_adjudication(records, freeze_thresholds([0.0, 0.2, 0.0], 0.0))
 
 
 class TestR9(unittest.TestCase):
@@ -342,55 +352,7 @@ class TestR9(unittest.TestCase):
         with self.assertRaisesRegex(TlbError, "window grid"):
             run_a1_adjudication(recs, {"frozen": True, "on_threshold": 3.0})
 
-    def test_run_plan_produces_record_experiment_id(self):
-        # R9 端到端：真实 run_plan + fake executor → 写盘 → load_run
-        import json, tempfile
-        from pathlib import Path
-        from unittest import mock
-        from runner import plan as plan_mod
-        from runner.engine import run_plan
-        from analysis.load import load_run
-        platform = json.loads(Path(
-            "configs/platforms/redmi-k70pro-01.json").read_text())
-        spec = json.loads(Path("configs/experiments/"
-            "ptr-chase-sm8650-x4-tlb-a1-l3-target.json").read_text())
-        built = plan_mod.build_plan(spec, platform)
 
-        class FakeExec:
-            probe_calls = 0
-            def execute(self, argv, command_prefix=()):
-                if "--set-window" not in argv:
-                    # 部署/校验类命令（sha256sum 等）：返回善意响应
-                    return type("R", (), {"returncode": 0,
-                        "stdout": "deadbeef\n", "stderr": "",
-                        "raw_command": "fake"})
-                self.probe_calls += 1
-                w = next(int(argv[i+1]) for i, a in enumerate(argv)
-                         if a == "--set-window")
-                v = 4.0 if w == 8 else 6.5
-                return type("R", (), {"returncode": 0, "stdout":
-                    f"mode=tlbset set_hypothesis=1 set_target=7 set_window={w} "
-                    f"set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
-                    f"set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
-                    f"set_active_regions=4 set_target_region_nodes=2,2,2,2 "
-                    f"set_region_vpn_hi=5,6,7,8 set_region_vpn_hi_pure=1 "
-                    f"set_domain=multi-region page_kb=4 seed=42 "
-                    f"window_valid_rounds=19 window_invalid_rounds=0 "
-                    f"window_mux_rounds=0 valid_rounds=19 probe_ns=1000 "
-                    f"pmu_l2d_tlb_refill_count={v} "
-                    f"pmu_l2d_tlb_refill_valid_rounds=19", "stderr": "",
-                    "raw_command": "fake"})
-            def freq_snapshot(self, cpu_hint): return None
-            def system_info(self):
-                return {"os": "android", "isa": "aarch64"}
-        fe = FakeExec()
-        with tempfile.TemporaryDirectory() as tmp:
-            with mock.patch("runner.engine.make_executor", return_value=fe), \
-                 mock.patch("runner.deploy.deploy_if_needed",
-                            return_value="/fake/probe"):
-                run_plan(built, {**platform, "environment_profiles": {}},
-                         Path(tmp) / "run", Path("."))
-            run = load_run(Path(tmp) / "run")
-        self.assertEqual(fe.probe_calls, 320)  # 32 cases × 10 reps
-        for r in run.ok_records:
-            self.assertEqual(r["experiment_id"], built.experiment_id)
+
+if __name__ == "__main__":
+    unittest.main()
