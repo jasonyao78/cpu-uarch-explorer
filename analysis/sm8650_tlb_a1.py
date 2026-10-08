@@ -282,7 +282,9 @@ def _layer_of(rec: dict) -> str:
 
 
 def run_a1_adjudication(records: list[dict],
-                        frozen: dict) -> dict[str, Any]:
+                        frozen: dict,
+                        expected_l3_targets: tuple = (7, 42, 100, 200),
+                        expected_l3_windows: tuple = (8, 12)) -> dict[str, Any]:
     """records → 硬门 → L1(主判定) / L2(复现) / L3(target) → H*。
 
     归层 = record.experiment_id（生产配置三实验各带 a1-l1/l2/l3 标签；
@@ -335,8 +337,15 @@ def run_a1_adjudication(records: list[dict],
                         and w_m is not None and w_r is not None
                         and abs(w_m - w_r) <= 1)
         l3_curves = {t: c for (hh, t), c in sorted(l3.items()) if hh == h}
-        if len(l3_curves) < 4:
-            raise TlbError(f"a1: L3 needs 4 targets, got {len(l3_curves)}")
+        if sorted(l3_curves) != sorted(expected_l3_targets):
+            raise TlbError(
+                f"a1: L3 exact coverage violation: got "
+                f"{sorted(l3_curves)} != expected {sorted(expected_l3_targets)}")
+        for c in l3_curves.values():
+            if tuple(sorted(c)) != tuple(sorted(expected_l3_windows)):
+                raise TlbError(
+                    f"a1: L3 window grid violation: got {sorted(c)} != "
+                    f"expected {sorted(expected_l3_windows)}")
         # L3 两点比较规则（预注册）：配置仅 W={8,12}，用低点 < on、
         # 高点 ≥ on 的方向+越线检查替代完整 onset 分类（后者需 ≥4 点）。
         l3_shapes = {classify_l3_two_point(c, on) for c in l3_curves.values()}

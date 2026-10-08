@@ -228,7 +228,7 @@ class TestFullChain(unittest.TestCase):
             run_a1_adjudication(recs, self.FROZEN)
 
     def test_missing_l3_rejected(self):
-        with self.assertRaisesRegex(TlbError, "4 targets"):
+        with self.assertRaisesRegex(TlbError, "exact coverage"):
             run_a1_adjudication(self._l1_l2(), self.FROZEN)
 
     def test_l3_uniform_suspect_not_passed(self):
@@ -320,3 +320,77 @@ class TestProductionChain(unittest.TestCase):
         random.seed(3); random.shuffle(records)
         out = run_a1_adjudication(records, {"frozen": True, "on_threshold": 3.0})
         self.assertEqual(out["h_star"], 1)
+
+
+class TestR9(unittest.TestCase):
+    def test_l3_exact_target_and_window_guards(self):
+        recs = TestFullChain()._l1_l2() + TestFullChain()._l3()
+        # target 201 冒充 200 → 拒
+        bad = [r for r in recs if not (r["params"].get("set_target") == 200
+                                       and "l3" in r["experiment_id"])]
+        bad.append(_chain_record(1, -1, 42, 201, 8, 4.0, exp="x-a1-l3-target"))
+        bad.append(_chain_record(1, -1, 42, 201, 12, 6.5, exp="x-a1-l3-target"))
+        with self.assertRaisesRegex(TlbError, "exact coverage"):
+            run_a1_adjudication(bad, {"frozen": True, "on_threshold": 3.0})
+
+    def test_l3_window_grid_guard(self):
+        recs = [r for r in (TestFullChain()._l1_l2() + TestFullChain()._l3())
+                if "l3" not in r["experiment_id"]]
+        for t in (7, 42, 100, 200):
+            recs.append(_chain_record(1, -1, 42, t, 100, 4.0, exp="x-a1-l3-target"))
+            recs.append(_chain_record(1, -1, 42, t, 200, 6.5, exp="x-a1-l3-target"))
+        with self.assertRaisesRegex(TlbError, "window grid"):
+            run_a1_adjudication(recs, {"frozen": True, "on_threshold": 3.0})
+
+    def test_run_plan_produces_record_experiment_id(self):
+        # R9 端到端：真实 run_plan + fake executor → 写盘 → load_run
+        import json, tempfile
+        from pathlib import Path
+        from unittest import mock
+        from runner import plan as plan_mod
+        from runner.engine import run_plan
+        from analysis.load import load_run
+        platform = json.loads(Path(
+            "configs/platforms/redmi-k70pro-01.json").read_text())
+        spec = json.loads(Path("configs/experiments/"
+            "ptr-chase-sm8650-x4-tlb-a1-l3-target.json").read_text())
+        built = plan_mod.build_plan(spec, platform)
+
+        class FakeExec:
+            probe_calls = 0
+            def execute(self, argv, command_prefix=()):
+                if "--set-window" not in argv:
+                    # 部署/校验类命令（sha256sum 等）：返回善意响应
+                    return type("R", (), {"returncode": 0,
+                        "stdout": "deadbeef\n", "stderr": "",
+                        "raw_command": "fake"})
+                self.probe_calls += 1
+                w = next(int(argv[i+1]) for i, a in enumerate(argv)
+                         if a == "--set-window")
+                v = 4.0 if w == 8 else 6.5
+                return type("R", (), {"returncode": 0, "stdout":
+                    f"mode=tlbset set_hypothesis=1 set_target=7 set_window={w} "
+                    f"set_rounds=20 set_pool_pages=65536 set_filler_pages=512 "
+                    f"set_regions=4 scatter=0 set_region_scope=-1 set_nsets=0 "
+                    f"set_active_regions=4 set_target_region_nodes=2,2,2,2 "
+                    f"set_region_vpn_hi=5,6,7,8 set_region_vpn_hi_pure=1 "
+                    f"set_domain=multi-region page_kb=4 seed=42 "
+                    f"window_valid_rounds=19 window_invalid_rounds=0 "
+                    f"window_mux_rounds=0 valid_rounds=19 probe_ns=1000 "
+                    f"pmu_l2d_tlb_refill_count={v} "
+                    f"pmu_l2d_tlb_refill_valid_rounds=19", "stderr": "",
+                    "raw_command": "fake"})
+            def freq_snapshot(self, cpu_hint): return None
+            def system_info(self):
+                return {"os": "android", "isa": "aarch64"}
+        fe = FakeExec()
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch("runner.engine.make_executor", return_value=fe), \
+                 mock.patch("runner.deploy.deploy_if_needed",
+                            return_value="/fake/probe"):
+                run_plan(built, {**platform, "environment_profiles": {}},
+                         Path(tmp) / "run", Path("."))
+            run = load_run(Path(tmp) / "run")
+        self.assertEqual(fe.probe_calls, 320)  # 32 cases × 10 reps
+        for r in run.ok_records:
+            self.assertEqual(r["experiment_id"], built.experiment_id)
