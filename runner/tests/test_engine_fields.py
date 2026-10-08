@@ -325,3 +325,32 @@ class TestEngineEnvironmentGate(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestRawSampleStem(unittest.TestCase):
+    def test_long_case_id_truncated_and_unique(self):
+        from runner.artifacts import raw_sample_stem
+        long_id = ("exp:x4-prime-" + "set_pool_pages65536-" * 12)  # >255B
+        stem = raw_sample_stem(long_id)
+        self.assertLessEqual(len(stem.encode()), 200)
+        other = long_id.replace("65536", "65537")
+        self.assertNotEqual(stem, raw_sample_stem(other))
+        short = "exp:uncontrolled-b64K-s64B"
+        self.assertEqual(raw_sample_stem(short),
+                         short.replace(":", "_"))  # 短名原样（仅净化）
+
+    def test_raw_write_failure_is_structured(self):
+        import tempfile
+        from runner.artifacts import ArtifactStore
+        with tempfile.TemporaryDirectory() as tmp:
+            store = ArtifactStore(Path(tmp) / "run")
+            records = []
+            with mock.patch.object(
+                    store, "write_raw_sample",
+                    side_effect=OSError(63, "File name too long")):
+                r = _run_case(_case(), PLATFORM, PROBE_META, "/probe",
+                              MultiMetricExec(), store, SYSINFO,
+                              PROBE_META["git"])
+            self.assertEqual(r["status"], "failed")
+            self.assertEqual(r["failure"]["reason"], "raw-write-failed")
+            self.assertEqual(r["metrics"], [])

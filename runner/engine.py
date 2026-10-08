@@ -23,7 +23,7 @@ import math
 from pathlib import Path
 
 from .adapters.ptr_chase import PtrChaseAdapter
-from .artifacts import ArtifactStore
+from .artifacts import ArtifactStore, raw_sample_stem
 from .errors import ParseError, RunnerError
 from .environment.policy import (collect_environment_state,
                                  evaluate_preconditions_full,
@@ -302,8 +302,16 @@ def _run_case(case: Case, platform: dict, probe_meta: dict, probe_path: str,
     for sample_index in range(case.repetitions):
         result = executor.execute(argv, case.control.command_prefix)
         raw_command = result.raw_command
-        store.write_raw_sample(case.id, sample_index, result.stdout, result.stderr)
-        raw_refs.append(f"raw-samples:{case.id.replace('/', '_').replace(':', '_')}.s{sample_index}")
+        try:
+            store.write_raw_sample(case.id, sample_index, result.stdout,
+                                   result.stderr)
+        except OSError as exc:
+            # R10 次级健壮性：raw 落盘失败 = 结构化 failure，不许异常逃逸
+            if first_failure is None:
+                first_failure = {"reason": "raw-write-failed",
+                                 "detail": str(exc)}
+            continue
+        raw_refs.append(f"raw-samples:{raw_sample_stem(case.id)}.s{sample_index}")
         status = _EXIT_STATUS.get(result.returncode, "failed")
         if status != "ok":
             if first_failure is None:
