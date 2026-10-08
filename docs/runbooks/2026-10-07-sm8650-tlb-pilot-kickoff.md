@@ -13,7 +13,7 @@
 
 ## 1. 代码基线与构建
 
-- 分支 `codex/sm8650-tlb-r2-m0b` @ **`0840b6e`**（worktree `~/workspace/cpu-uarch-explorer-tlb-r2-m0b`，`git pull --ff-only`）。
+- 分支 `codex/sm8650-tlb-r2-m0b` @ **`b0f287f`**（worktree `~/workspace/cpu-uarch-explorer-tlb-r2-m0b`，`git pull --ff-only`）。
 - **record 级 `experiment_id`**：从该提交起 runner 逐 record 写入——判据入口归层依赖它，**回传前必须抽查一条 record 含此字段**；探针 C++ 未变，二进制 sha256 前缀应仍为 `1e03a658`，不符则用 §3 recipe 重编（[recipe 验证记录](2026-10-01-sm8650-tlb-r2-preboard.md)）。
 - venv 用主树：`.venv/bin/python`。
 
