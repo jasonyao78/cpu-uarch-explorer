@@ -1,0 +1,78 @@
+{
+  "review": "R7",
+  "verdict": "not-approved",
+  "generated_at_utc": "2026-10-08T07:19:25.348656+00:00",
+  "reviewed_heads": {
+    "m0b": "6756d0021a89cf28efce37a50784c9dc77b0c5be",
+    "r2": "69e39f7993137b67ce208a2f5859661444d130c7",
+    "main": "2fa8d5d2fbc99a7a03c79634e47efcde23035e2c"
+  },
+  "reviewed_m0b_source_sha256": {
+    "analysis/sm8650_tlb_a1.py": "1bbedbafce764f2cd2e6234c6722ac54f5da5674912d900cb8af2152403e3f54",
+    "analysis/tests/test_sm8650_tlb_a1.py": "8fd8648bdf16ae0906b241a786ea826fa0f94981eefaee512f0e54b116309d08",
+    "analysis/load.py": "63cbfa1d903b679a2c5423c043dd9d45b5b57fd64be6d5af985915bafd1ff2c2",
+    "runner/engine.py": "1884e78382def7e813e8ae530311421b9f07e7cfd8453dc13aed9b1fb9d3da15",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json": "2d9aaf702dff4dd498c8600e2021405aaa74ae40e82d3be9f87c92fd903c382b",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json": "db0c20cd62d43e76d9a684cf18946b2bc3717af8dd2efe19ed6343a1a6231cfc",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json": "89092fc94a2a54e27db46f4311e8d49143ae6b3f353133275b8d7addc51ba85b"
+  },
+  "task_sha256": "62def96bc78f8d13cef80ef3c375534f678630696338d8c5f352997feb168629",
+  "test_commands": [
+    {
+      "name": "analysis",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "analysis/tests",
+        "-t",
+        "."
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "exit_code": 0
+    },
+    {
+      "name": "a1-tests",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "analysis.tests.test_sm8650_tlb_a1"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "exit_code": 0
+    }
+  ],
+  "diagnostic_command": {
+    "command": [
+      "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+      "/private/tmp/tlb-rpa-r7-review-20261008/review_rpa_r7_20261008.py",
+      "--tree",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "--r2-tree",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "--main-tree",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer",
+      "--out",
+      "/private/tmp/tlb-rpa-r7-review-20261008/diagnostics.json"
+    ],
+    "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer",
+    "environment": {
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "exit_code": 0
+  },
+  "boundary": "All probe outputs and metrics synthetic. No adb, binary or perf executed. Actual planner/engine/adapter/writer/loader with external transport, system info, binary registration and Git provenance mocked. Manifest enrichment is diagnostic-only and not delivered implementation. No runner/CTest/NDK/old-run replay repeated this round.",
+  "ledger_append_sha256": "cb0b0a1d4a8a0865308a09497be337be2e98a8d079eaa2703afb2685a4216757",
+  "artifact_sha256": {
+    "scripts/review_rpa_r7_20261008.py": "421c360a3df106ec61febfaa3b96b42a0618d90d3f7c06c682a262fb131ec0db",
+    "docs/reviews/2026-10-08-r7-review.md": "515527bdcbec29501231769f6cdd08861d4f3a8f3cdbb3f1c79167ae57cfab7b",
+    "docs/reviews/evidence/2026-10-08-r7/diagnostics.json": "26c6146fa8f37e741ed7940e4264a7aeab15af5e8dd07235dfb92bf3d7876b5f",
+    "docs/reviews/evidence/2026-10-08-r7/diagnostics.log": "87bf487d084393431564a54b78e90e9139c47866e4b5c697db2bbea68d290a5a",
+    "docs/reviews/evidence/2026-10-08-r7/analysis.log": "48e1cdb205ed5f24a050ec4918c11daaa50d86e465b6715d07d6ea18b379c0e6",
+    "docs/reviews/evidence/2026-10-08-r7/a1-tests.log": "cc647bdf56f045ccd1f05b21a1f2eb41d411039c8173c2e3f7e0035aaea217dc"
+  }
+}

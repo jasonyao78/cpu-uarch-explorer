@@ -1,0 +1,363 @@
+{
+  "heads": {
+    "m0b": "6756d0021a89cf28efce37a50784c9dc77b0c5be",
+    "r2": "69e39f7993137b67ce208a2f5859661444d130c7",
+    "main": "2fa8d5d2fbc99a7a03c79634e47efcde23035e2c"
+  },
+  "plan_cases": {
+    "l1-main": 48,
+    "l2-repro": 48,
+    "l3-target": 32
+  },
+  "plan_windows": {
+    "l1-main": [
+      6,
+      8,
+      10,
+      12
+    ],
+    "l2-repro": [
+      6,
+      8,
+      10,
+      12
+    ],
+    "l3-target": [
+      8,
+      12
+    ]
+  },
+  "real_pipeline_summary": {
+    "records": 128,
+    "process_observations": 1280,
+    "all_status_ok": true,
+    "manifest_experiment_id": {
+      "l1-main": "ptr-chase-sm8650-x4-tlb-a1-l1-main",
+      "l2-repro": "ptr-chase-sm8650-x4-tlb-a1-l2-repro",
+      "l3-target": "ptr-chase-sm8650-x4-tlb-a1-l3-target"
+    },
+    "record_experiment_id_present_by_layer": {
+      "l1-main": 0,
+      "l2-repro": 0,
+      "l3-target": 0
+    },
+    "set_target_present": 128,
+    "synthetic_response_model": "H1 alone has sharp L1/L2 curves; other H flat below floor",
+    "all_existing_gates_pass": true
+  },
+  "persisted_loaded_128": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "a1: unknown layer from experiment_id ''"
+  },
+  "diagnostic_only_manifest_enriched_128": {
+    "ok": true,
+    "value": {
+      "per_hypothesis": {
+        "1": {
+          "verdict": "supported",
+          "reproducible": true,
+          "l3_pass": false,
+          "classes": {
+            "-1": {
+              "kind": "sharp",
+              "onset": 8,
+              "transition_steps": 0,
+              "platform_median": 6.75
+            },
+            "0": {
+              "kind": "sharp",
+              "onset": 8,
+              "transition_steps": 0,
+              "platform_median": 6.75
+            },
+            "1": {
+              "kind": "sharp",
+              "onset": 8,
+              "transition_steps": 0,
+              "platform_median": 6.75
+            }
+          },
+          "predicted_hw_sets": [
+            7
+          ]
+        },
+        "2": {
+          "verdict": "suspect",
+          "reproducible": false,
+          "l3_pass": false,
+          "classes": {
+            "-1": {
+              "kind": "degraded",
+              "onset": null,
+              "reason": "never-reaches-on-threshold"
+            },
+            "0": {
+              "kind": "degraded",
+              "onset": null,
+              "reason": "never-reaches-on-threshold"
+            },
+            "1": {
+              "kind": "degraded",
+              "onset": null,
+              "reason": "never-reaches-on-threshold"
+            }
+          },
+          "predicted_hw_sets": [
+            7
+          ]
+        },
+        "3": {
+          "verdict": "suspect",
+          "reproducible": false,
+          "l3_pass": false,
+          "classes": {
+            "-1": {
+              "kind": "degraded",
+              "onset": null,
+              "reason": "never-reaches-on-threshold"
+            },
+            "0": {
+              "kind": "degraded",
+              "onset": null,
+              "reason": "never-reaches-on-threshold"
+            },
+            "1": {
+              "kind": "degraded",
+              "onset": null,
+              "reason": "never-reaches-on-threshold"
+            }
+          },
+          "predicted_hw_sets": [
+            7
+          ]
+        },
+        "4": {
+          "verdict": "suspect",
+          "reproducible": false,
+          "l3_pass": false,
+          "classes": {
+            "-1": {
+              "kind": "degraded",
+              "onset": null,
+              "reason": "never-reaches-on-threshold"
+            },
+            "0": {
+              "kind": "degraded",
+              "onset": null,
+              "reason": "never-reaches-on-threshold"
+            },
+            "1": {
+              "kind": "degraded",
+              "onset": null,
+              "reason": "never-reaches-on-threshold"
+            }
+          },
+          "predicted_hw_sets": [
+            7
+          ]
+        }
+      },
+      "on_threshold": 2.0,
+      "n_records": 128,
+      "h_star": null,
+      "h_star_status": "multiple-or-none"
+    }
+  },
+  "l3_two_point_labels": {
+    "low_high": {
+      "kind": "right-censored",
+      "onset": [
+        12,
+        null
+      ],
+      "reason": "onset at or near last window; platform unobserved"
+    },
+    "high_high": {
+      "kind": "left-censored",
+      "onset": [
+        null,
+        8
+      ],
+      "reason": "no below-floor observation on low side"
+    },
+    "low_low": {
+      "kind": "degraded",
+      "onset": null,
+      "reason": "never-reaches-on-threshold"
+    }
+  },
+  "two_point_grid_kinds": [
+    "degraded",
+    "left-censored",
+    "right-censored"
+  ],
+  "owner_fixture_shape": {
+    "records": 40,
+    "by_experiment": {
+      "x-a1-l1-main": 12,
+      "x-a1-l2-repro": 12,
+      "x-a1-l3-target": 16
+    },
+    "hypotheses": [
+      1
+    ],
+    "l3_windows": [
+      6,
+      8,
+      10,
+      12
+    ],
+    "note": "handmade records; experiment_id inserted by fixture, not runner"
+  },
+  "owner_40_positive": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3_pass": true,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 40,
+    "h_star": 1,
+    "h_star_status": "unique"
+  },
+  "owner_40_permutation_equal": true,
+  "owner_32_with_actual_l3_grid": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 32,
+    "h_star": null,
+    "h_star_status": "multiple-or-none"
+  },
+  "owner_missing_l3": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "a1: L3 needs 4 targets, got 0"
+  },
+  "owner_all_negative_l3": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3_pass": false,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 40,
+    "h_star": null,
+    "h_star_status": "multiple-or-none"
+  },
+  "owner_same_onset_different_platform": {
+    "per_hypothesis": {
+      "1": {
+        "verdict": "supported",
+        "reproducible": true,
+        "l3_pass": true,
+        "classes": {
+          "-1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "0": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          },
+          "1": {
+            "kind": "sharp",
+            "onset": 8,
+            "transition_steps": 0,
+            "platform_median": 6.75
+          }
+        },
+        "predicted_hw_sets": [
+          7
+        ]
+      }
+    },
+    "on_threshold": 2.0,
+    "n_records": 40,
+    "h_star": 1,
+    "h_star_status": "unique"
+  }
+}
