@@ -1,0 +1,981 @@
+{
+  "schema_version": "1.0",
+  "target_id": "redmi-k70pro-01",
+  "evidence_role": "exploratory-only; not formal H*, ways or full hash",
+  "binary_sha256": "54d105930b8743e7a3a69c31d7e640cdec1044a0276a5f040efff4b1dc82398c",
+  "epochs": [
+    {
+      "private_source": "data/private/20261008T161956Z-sm8650-tlb-bitaxes-exploration",
+      "manifest_sha256": "5e63186378ad3ee93363836e029eadf189fb71021bbc91a6ac25e98c2b48f565",
+      "platform_sha256": "aa06eb1e59cee29a01f7ad7d16f6babd19ffdbcf9b85140ea4dd16cddb24479d",
+      "conditions": [
+        {
+          "label": "floor",
+          "params": {
+            "base_pages": 1,
+            "pmu_events": [
+              {
+                "name": "cycles",
+                "type": 8,
+                "config": 17
+              },
+              {
+                "name": "l1d_tlb_refill",
+                "type": 8,
+                "config": 5
+              },
+              {
+                "name": "l2d_tlb_refill",
+                "type": 8,
+                "config": 45
+              },
+              {
+                "name": "l2d_tlb",
+                "type": 8,
+                "config": 47
+              }
+            ],
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 0
+          },
+          "git": {
+            "commit": "3d42834bbef044b44a770271fb7a76eb4e899d82",
+            "dirty": true
+          },
+          "wall_seconds": 4.651059124618769,
+          "observations": {
+            "pmu.cycles.count": [
+              314.4,
+              300.4,
+              277.7,
+              392.4,
+              372.4
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              2.0,
+              2.0,
+              2.0,
+              2.0,
+              2.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb.count": [
+              2.0,
+              2.0,
+              2.0,
+              2.0,
+              2.0
+            ]
+          },
+          "medians": {
+            "pmu.cycles.count": 314.4,
+            "pmu.l1d_tlb_refill.count": 2.0,
+            "pmu.l2d_tlb_refill.count": 0.0,
+            "pmu.l2d_tlb.count": 2.0
+          },
+          "records_sha256": "a1c040bc6654c146083517a6f825d8a370d4d6fb42c5cdd542c8e381986ab0f7",
+          "artifacts_sha256": "059a09dc000f6c51af90b08239e7da86fd863facb6b96480a65f53d218a52826",
+          "raw_verified": 5,
+          "policy_result": {
+            "valid": true,
+            "stage": "after",
+            "violations": [],
+            "accepted_nonbaseline": []
+          },
+          "valid_rounds_per_process": 19,
+          "invalid_rounds": 0,
+          "mux_rounds": 0
+        },
+        {
+          "label": "a",
+          "params": {
+            "base_pages": 1,
+            "pmu_events": [
+              {
+                "name": "cycles",
+                "type": 8,
+                "config": 17
+              },
+              {
+                "name": "l1d_tlb_refill",
+                "type": 8,
+                "config": 5
+              },
+              {
+                "name": "l2d_tlb_refill",
+                "type": 8,
+                "config": 45
+              },
+              {
+                "name": "l2d_tlb",
+                "type": 8,
+                "config": 47
+              }
+            ],
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "git": {
+            "commit": "3d42834bbef044b44a770271fb7a76eb4e899d82",
+            "dirty": true
+          },
+          "wall_seconds": 4.447022791951895,
+          "observations": {
+            "pmu.cycles.count": [
+              666.7,
+              558.9,
+              552.1,
+              516.5,
+              540.9
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              18.3,
+              16.5,
+              16.5,
+              15.0,
+              14.9
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              10.5,
+              7.2,
+              6.0,
+              5.1,
+              6.2
+            ],
+            "pmu.l2d_tlb.count": [
+              14.4,
+              15.0,
+              15.0,
+              15.0,
+              14.9
+            ]
+          },
+          "medians": {
+            "pmu.cycles.count": 552.1,
+            "pmu.l1d_tlb_refill.count": 16.5,
+            "pmu.l2d_tlb_refill.count": 6.2,
+            "pmu.l2d_tlb.count": 15.0
+          },
+          "records_sha256": "a70b2a127d161e461c0bc474d2e16e27e4780b238dcccac77ebfdd85c91d6956",
+          "artifacts_sha256": "bc724c9085bac24d426084026fa134c93a82d28893cfb66c69e79c6050056821",
+          "raw_verified": 5,
+          "policy_result": {
+            "valid": true,
+            "stage": "after",
+            "violations": [],
+            "accepted_nonbaseline": []
+          },
+          "valid_rounds_per_process": 19,
+          "invalid_rounds": 0,
+          "mux_rounds": 0
+        },
+        {
+          "label": "scatter",
+          "params": {
+            "base_pages": 1,
+            "pmu_events": [
+              {
+                "name": "cycles",
+                "type": 8,
+                "config": 17
+              },
+              {
+                "name": "l1d_tlb_refill",
+                "type": 8,
+                "config": 5
+              },
+              {
+                "name": "l2d_tlb_refill",
+                "type": 8,
+                "config": 45
+              },
+              {
+                "name": "l2d_tlb",
+                "type": 8,
+                "config": 47
+              }
+            ],
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 1,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "git": {
+            "commit": "3d42834bbef044b44a770271fb7a76eb4e899d82",
+            "dirty": true
+          },
+          "wall_seconds": 4.764807207975537,
+          "observations": {
+            "pmu.cycles.count": [
+              436.4,
+              484.2,
+              511.8,
+              434.7,
+              464.3
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              18.0,
+              16.4,
+              19.1,
+              19.8,
+              18.2
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.1,
+              0.1,
+              0.2,
+              0.1,
+              0.1
+            ],
+            "pmu.l2d_tlb.count": [
+              14.4,
+              14.9,
+              13.8,
+              14.5,
+              14.4
+            ]
+          },
+          "medians": {
+            "pmu.cycles.count": 464.3,
+            "pmu.l1d_tlb_refill.count": 18.2,
+            "pmu.l2d_tlb_refill.count": 0.1,
+            "pmu.l2d_tlb.count": 14.4
+          },
+          "records_sha256": "01a9e60daed4ebc73089328eaeb56c11c943bfb31eea3c70a2fe567d560ed83f",
+          "artifacts_sha256": "ff567b10e9ba9790fa2f0ba6423d4ea72dc8c28486e891b2dc41c22b7b1c6ae1",
+          "raw_verified": 5,
+          "policy_result": {
+            "valid": true,
+            "stage": "after",
+            "violations": [],
+            "accepted_nonbaseline": []
+          },
+          "valid_rounds_per_process": 19,
+          "invalid_rounds": 0,
+          "mux_rounds": 0
+        },
+        {
+          "label": "b",
+          "params": {
+            "base_pages": 1,
+            "pmu_events": [
+              {
+                "name": "cycles",
+                "type": 8,
+                "config": 17
+              },
+              {
+                "name": "l1d_tlb_refill",
+                "type": 8,
+                "config": 5
+              },
+              {
+                "name": "l2d_tlb_refill",
+                "type": 8,
+                "config": 45
+              },
+              {
+                "name": "l2d_tlb",
+                "type": 8,
+                "config": 47
+              }
+            ],
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": -1,
+            "set_regions": 12,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "git": {
+            "commit": "3d42834bbef044b44a770271fb7a76eb4e899d82",
+            "dirty": true
+          },
+          "wall_seconds": 4.914017499890178,
+          "observations": {
+            "pmu.cycles.count": [
+              658.9,
+              594.2,
+              631.3,
+              670.9,
+              623.5
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              17.4,
+              17.7,
+              16.2,
+              17.7,
+              16.5
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              6.8,
+              6.0,
+              7.8,
+              9.7,
+              6.1
+            ],
+            "pmu.l2d_tlb.count": [
+              14.5,
+              15.0,
+              14.7,
+              14.5,
+              15.0
+            ]
+          },
+          "medians": {
+            "pmu.cycles.count": 631.3,
+            "pmu.l1d_tlb_refill.count": 17.4,
+            "pmu.l2d_tlb_refill.count": 6.8,
+            "pmu.l2d_tlb.count": 14.7
+          },
+          "records_sha256": "898dc226316025b9d104ec15036ef22332d193504cd627042c0e294f478ce681",
+          "artifacts_sha256": "848d0e8615d9fb70b34b28d65392cfc00240b27e93601e52261658eea056e871",
+          "raw_verified": 5,
+          "policy_result": {
+            "valid": true,
+            "stage": "after",
+            "violations": [],
+            "accepted_nonbaseline": []
+          },
+          "valid_rounds_per_process": 19,
+          "invalid_rounds": 0,
+          "mux_rounds": 0
+        },
+        {
+          "label": "c",
+          "params": {
+            "base_pages": 1,
+            "pmu_events": [
+              {
+                "name": "cycles",
+                "type": 8,
+                "config": 17
+              },
+              {
+                "name": "l1d_tlb_refill",
+                "type": 8,
+                "config": 5
+              },
+              {
+                "name": "l2d_tlb_refill",
+                "type": 8,
+                "config": 45
+              },
+              {
+                "name": "l2d_tlb",
+                "type": 8,
+                "config": 47
+              }
+            ],
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 200,
+            "set_window": 12
+          },
+          "git": {
+            "commit": "3d42834bbef044b44a770271fb7a76eb4e899d82",
+            "dirty": true
+          },
+          "wall_seconds": 5.096598624717444,
+          "observations": {
+            "pmu.cycles.count": [
+              531.9,
+              490.3,
+              500.8,
+              491.9,
+              476.4
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              17.8,
+              15.0,
+              14.9,
+              15.0,
+              16.1
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.1,
+              0.1,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb.count": [
+              14.9,
+              15.0,
+              14.9,
+              15.0,
+              14.6
+            ]
+          },
+          "medians": {
+            "pmu.cycles.count": 491.9,
+            "pmu.l1d_tlb_refill.count": 15.0,
+            "pmu.l2d_tlb_refill.count": 0.1,
+            "pmu.l2d_tlb.count": 14.9
+          },
+          "records_sha256": "aa4529f557811508c207a0db66a27029722418e81ea8d5e8550dddbe41d3b446",
+          "artifacts_sha256": "9a93e1e59e96772454c2457147407a6194a65709cd3e29d93aa2febd2d2331a0",
+          "raw_verified": 5,
+          "policy_result": {
+            "valid": true,
+            "stage": "after",
+            "violations": [],
+            "accepted_nonbaseline": []
+          },
+          "valid_rounds_per_process": 19,
+          "invalid_rounds": 0,
+          "mux_rounds": 0
+        }
+      ]
+    },
+    {
+      "private_source": "data/private/20261008T162157Z-sm8650-tlb-bitaxes-exploration",
+      "manifest_sha256": "6f5f904559ee1ee8c6e15c3040fb53694c8834d515917b121dbe6ad9c19a2300",
+      "platform_sha256": "aa06eb1e59cee29a01f7ad7d16f6babd19ffdbcf9b85140ea4dd16cddb24479d",
+      "conditions": [
+        {
+          "label": "c",
+          "params": {
+            "base_pages": 1,
+            "pmu_events": [
+              {
+                "name": "cycles",
+                "type": 8,
+                "config": 17
+              },
+              {
+                "name": "l1d_tlb_refill",
+                "type": 8,
+                "config": 5
+              },
+              {
+                "name": "l2d_tlb_refill",
+                "type": 8,
+                "config": 45
+              },
+              {
+                "name": "l2d_tlb",
+                "type": 8,
+                "config": 47
+              }
+            ],
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 2,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 12
+          },
+          "git": {
+            "commit": "3d42834bbef044b44a770271fb7a76eb4e899d82",
+            "dirty": true
+          },
+          "wall_seconds": 4.079565417021513,
+          "observations": {
+            "pmu.cycles.count": [
+              481.0,
+              489.6,
+              489.1,
+              478.1,
+              477.2
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              15.0,
+              15.0,
+              15.0,
+              17.7,
+              15.0
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.3,
+              0.1,
+              0.1,
+              0.0,
+              0.1
+            ],
+            "pmu.l2d_tlb.count": [
+              15.0,
+              15.0,
+              15.0,
+              14.7,
+              15.0
+            ]
+          },
+          "medians": {
+            "pmu.cycles.count": 481.0,
+            "pmu.l1d_tlb_refill.count": 15.0,
+            "pmu.l2d_tlb_refill.count": 0.1,
+            "pmu.l2d_tlb.count": 15.0
+          },
+          "records_sha256": "d9d1f17a67a48c4ef27672bd7d9346ce6be79158c9b888a7e53a68546b3e9793",
+          "artifacts_sha256": "d243f19fdb42b620431404a8bc585c47487292b3d4c01a1409b6a1576c6236e5",
+          "raw_verified": 5,
+          "policy_result": {
+            "valid": true,
+            "stage": "after",
+            "violations": [],
+            "accepted_nonbaseline": []
+          },
+          "valid_rounds_per_process": 19,
+          "invalid_rounds": 0,
+          "mux_rounds": 0
+        },
+        {
+          "label": "b",
+          "params": {
+            "base_pages": 1,
+            "pmu_events": [
+              {
+                "name": "cycles",
+                "type": 8,
+                "config": 17
+              },
+              {
+                "name": "l1d_tlb_refill",
+                "type": 8,
+                "config": 5
+              },
+              {
+                "name": "l2d_tlb_refill",
+                "type": 8,
+                "config": 45
+              },
+              {
+                "name": "l2d_tlb",
+                "type": 8,
+                "config": 47
+              }
+            ],
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": -1,
+            "set_regions": 12,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 12
+          },
+          "git": {
+            "commit": "3d42834bbef044b44a770271fb7a76eb4e899d82",
+            "dirty": true
+          },
+          "wall_seconds": 4.811279458925128,
+          "observations": {
+            "pmu.cycles.count": [
+              872.2,
+              786.6,
+              697.1,
+              725.4,
+              719.9
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              15.0,
+              14.8,
+              17.4,
+              17.3,
+              14.5
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              12.0,
+              12.0,
+              7.8,
+              9.7,
+              7.8
+            ],
+            "pmu.l2d_tlb.count": [
+              15.1,
+              14.8,
+              14.5,
+              14.3,
+              14.5
+            ]
+          },
+          "medians": {
+            "pmu.cycles.count": 725.4,
+            "pmu.l1d_tlb_refill.count": 15.0,
+            "pmu.l2d_tlb_refill.count": 9.7,
+            "pmu.l2d_tlb.count": 14.5
+          },
+          "records_sha256": "2d8213cf21887d869abaf79ed63b8958c1d247f3408480a3c8b37ebb9bcb2c00",
+          "artifacts_sha256": "33d9f51286e6a16fca82599425c59858e179db6ec1ae8397aa4abe8b3262af87",
+          "raw_verified": 5,
+          "policy_result": {
+            "valid": true,
+            "stage": "after",
+            "violations": [],
+            "accepted_nonbaseline": []
+          },
+          "valid_rounds_per_process": 19,
+          "invalid_rounds": 0,
+          "mux_rounds": 0
+        },
+        {
+          "label": "scatter",
+          "params": {
+            "base_pages": 1,
+            "pmu_events": [
+              {
+                "name": "cycles",
+                "type": 8,
+                "config": 17
+              },
+              {
+                "name": "l1d_tlb_refill",
+                "type": 8,
+                "config": 5
+              },
+              {
+                "name": "l2d_tlb_refill",
+                "type": 8,
+                "config": 45
+              },
+              {
+                "name": "l2d_tlb",
+                "type": 8,
+                "config": 47
+              }
+            ],
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 1,
+            "set_target": 100,
+            "set_window": 12
+          },
+          "git": {
+            "commit": "3d42834bbef044b44a770271fb7a76eb4e899d82",
+            "dirty": true
+          },
+          "wall_seconds": 5.091403250116855,
+          "observations": {
+            "pmu.cycles.count": [
+              530.4,
+              454.8,
+              674.2,
+              457.6,
+              484.4
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              17.0,
+              17.5,
+              17.6,
+              16.7,
+              14.7
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.1,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb.count": [
+              14.6,
+              14.6,
+              14.6,
+              14.2,
+              12.8
+            ]
+          },
+          "medians": {
+            "pmu.cycles.count": 484.4,
+            "pmu.l1d_tlb_refill.count": 17.0,
+            "pmu.l2d_tlb_refill.count": 0.0,
+            "pmu.l2d_tlb.count": 14.6
+          },
+          "records_sha256": "58b1defc8a995b636493aca79b1f192c485ca8da8a3c69c14834dca00c930e8f",
+          "artifacts_sha256": "6884f7a65c179c52a8dd4da0bcf3186872b3b0c9af622444de8b6720e5dba337",
+          "raw_verified": 5,
+          "policy_result": {
+            "valid": true,
+            "stage": "after",
+            "violations": [],
+            "accepted_nonbaseline": []
+          },
+          "valid_rounds_per_process": 19,
+          "invalid_rounds": 0,
+          "mux_rounds": 0
+        },
+        {
+          "label": "a",
+          "params": {
+            "base_pages": 1,
+            "pmu_events": [
+              {
+                "name": "cycles",
+                "type": 8,
+                "config": 17
+              },
+              {
+                "name": "l1d_tlb_refill",
+                "type": 8,
+                "config": 5
+              },
+              {
+                "name": "l2d_tlb_refill",
+                "type": 8,
+                "config": 45
+              },
+              {
+                "name": "l2d_tlb",
+                "type": 8,
+                "config": 47
+              }
+            ],
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 12
+          },
+          "git": {
+            "commit": "3d42834bbef044b44a770271fb7a76eb4e899d82",
+            "dirty": true
+          },
+          "wall_seconds": 5.252426249906421,
+          "observations": {
+            "pmu.cycles.count": [
+              747.4,
+              712.7,
+              655.8,
+              638.2,
+              763.2
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              15.0,
+              14.9,
+              17.5,
+              14.9,
+              19.2
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              12.0,
+              8.3,
+              7.7,
+              7.3,
+              7.3
+            ],
+            "pmu.l2d_tlb.count": [
+              15.0,
+              14.9,
+              14.4,
+              14.9,
+              15.0
+            ]
+          },
+          "medians": {
+            "pmu.cycles.count": 712.7,
+            "pmu.l1d_tlb_refill.count": 15.0,
+            "pmu.l2d_tlb_refill.count": 7.7,
+            "pmu.l2d_tlb.count": 14.9
+          },
+          "records_sha256": "6ff5f33bcd62491284e79b6424e2aa49a1ff6ee2e1f77c5b8ff5d8a19460094a",
+          "artifacts_sha256": "2848ac5a1a96d4b047dc53ed83ae266fe2cc24f39d9a128957a8a1fd05fbce5c",
+          "raw_verified": 5,
+          "policy_result": {
+            "valid": true,
+            "stage": "after",
+            "violations": [],
+            "accepted_nonbaseline": []
+          },
+          "valid_rounds_per_process": 19,
+          "invalid_rounds": 0,
+          "mux_rounds": 0
+        },
+        {
+          "label": "floor",
+          "params": {
+            "base_pages": 1,
+            "pmu_events": [
+              {
+                "name": "cycles",
+                "type": 8,
+                "config": 17
+              },
+              {
+                "name": "l1d_tlb_refill",
+                "type": 8,
+                "config": 5
+              },
+              {
+                "name": "l2d_tlb_refill",
+                "type": 8,
+                "config": 45
+              },
+              {
+                "name": "l2d_tlb",
+                "type": 8,
+                "config": 47
+              }
+            ],
+            "seed": 42,
+            "set_filler_pages": 512,
+            "set_hypothesis": 1,
+            "set_nsets": 0,
+            "set_pool_pages": 65536,
+            "set_region_scope": 0,
+            "set_regions": 4,
+            "set_rounds": 20,
+            "set_scatter": 0,
+            "set_target": 100,
+            "set_window": 0
+          },
+          "git": {
+            "commit": "3d42834bbef044b44a770271fb7a76eb4e899d82",
+            "dirty": true
+          },
+          "wall_seconds": 5.413559208158404,
+          "observations": {
+            "pmu.cycles.count": [
+              357.5,
+              359.7,
+              366.0,
+              365.3,
+              375.1
+            ],
+            "pmu.l1d_tlb_refill.count": [
+              2.0,
+              2.0,
+              2.0,
+              2.1,
+              3.5
+            ],
+            "pmu.l2d_tlb_refill.count": [
+              0.0,
+              0.0,
+              0.1,
+              0.0,
+              0.0
+            ],
+            "pmu.l2d_tlb.count": [
+              2.0,
+              2.0,
+              2.0,
+              2.1,
+              2.1
+            ]
+          },
+          "medians": {
+            "pmu.cycles.count": 365.3,
+            "pmu.l1d_tlb_refill.count": 2.0,
+            "pmu.l2d_tlb_refill.count": 0.0,
+            "pmu.l2d_tlb.count": 2.0
+          },
+          "records_sha256": "eeca01725e48b3a09e554c7823db4905aeb94211c56b6434105f501e9a810231",
+          "artifacts_sha256": "4c5b761152362ba3f64e25b8067ea47a0d96c63cfac731af11950cfd92257a2d",
+          "raw_verified": 5,
+          "policy_result": {
+            "valid": true,
+            "stage": "after",
+            "violations": [],
+            "accepted_nonbaseline": []
+          },
+          "valid_rounds_per_process": 19,
+          "invalid_rounds": 0,
+          "mux_rounds": 0
+        }
+      ]
+    }
+  ],
+  "retained_preliminary_attempt": {
+    "private_source": "data/private/20261008T161923Z-sm8650-tlb-bitaxes-exploration",
+    "status": "stopped-after-floor",
+    "probe_processes": 5,
+    "reason": "experiment filename/ID mismatch in post-run audit; corrected before next sampling; original files unchanged"
+  },
+  "final_environment": {
+    "cpufreq": {
+      "policy0": {
+        "governor": "walt",
+        "min_khz": 556800,
+        "max_khz": 2265600,
+        "cur_khz": 556800
+      },
+      "policy2": {
+        "governor": "walt",
+        "min_khz": 614400,
+        "max_khz": 2707200,
+        "cur_khz": 1920000
+      },
+      "policy5": {
+        "governor": "walt",
+        "min_khz": 614400,
+        "max_khz": 2707200,
+        "cur_khz": 2707200
+      },
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    "max_cpu_c": 38.0,
+    "unfinished_journals": 0,
+    "residual_probe_processes": 0,
+    "violations": [],
+    "mutations_performed": false
+  }
+}
