@@ -87,7 +87,8 @@ def predicted_hw_sets(collection_h: int, target: int, model_h: int,
     return None
 
 
-def classify_onset(median_by_window: dict[int, float]) -> dict[str, Any]:
+def classify_onset(median_by_window: dict[int, float],
+                   on_threshold: float | None = None) -> dict[str, Any]:
     """量化 onset 分类（任务书 §5.5 操作定义）。
 
     输入：每 case 10 进程 per-round 均值的中位 m(W)。
@@ -96,17 +97,24 @@ def classify_onset(median_by_window: dict[int, float]) -> dict[str, Any]:
     """
     if not median_by_window:
         raise TlbError("a1: empty onset curve")
+    on = on_threshold if on_threshold is not None else ONSET_ON_PER_ROUND
     windows = sorted(median_by_window)
     values = {w: median_by_window[w] for w in windows}
-    if all(v < ONSET_ON_PER_ROUND for v in values.values()):
+    if all(v < on for v in values.values()):
         return {"kind": "degraded", "onset": None,
                 "reason": "never-reaches-on-threshold"}
-    on_windows = [w for w in windows if values[w] >= ONSET_ON_PER_ROUND]
+    on_windows = [w for w in windows if values[w] >= on]
     w_star = on_windows[0]
     peak = max(values.values())
     # 右删失（RV2-02-2）：末点越线或越线后不足两个平台点 → 不能判锐
+    # 左删失（R4）：w_star 左侧未观察到 <floor 的点 → onset 下界不可观测
+    has_low_side = any(values[w] < ONSET_FLOOR_PER_ROUND and w < w_star
+                       for w in windows)
+    if not has_low_side:
+        return {"kind": "left-censored", "onset": (None, w_star),
+                "reason": "no below-floor observation on low side"}
     post = [w for w in windows if w > w_star]
-    plateau_vals = [values[w] for w in post if values[w] >= ONSET_ON_PER_ROUND]
+    plateau_vals = [values[w] for w in post if values[w] >= on]
     if not post or len(plateau_vals) < 2:
         return {"kind": "right-censored", "onset": (w_star, None),
                 "reason": "onset at or near last window; platform unobserved"}
@@ -154,6 +162,10 @@ def adjudicate_h(curve_by_scope: dict[int, dict[int, float]],
     onset 一致（|ΔW*|≤1 且均锐）→ 支持；全域退化且隔离锐 → 该 H 折叠
     高位（与预测分区互证）；全域锐 → 不折叠；否则存疑。
     """
+    required_scopes = (-1, 0, 1)
+    missing = [sc for sc in required_scopes if sc not in curve_by_scope]
+    if missing:
+        raise TlbError(f"a1: L1 coverage incomplete, missing scopes {missing}")
     classes = {scope: classify_onset(curve)
                for scope, curve in curve_by_scope.items()}
     all_scope = classes.get(-1)
@@ -188,8 +200,9 @@ def adjudicate_h(curve_by_scope: dict[int, dict[int, float]],
 
 def check_l3_consistency(per_target: dict[int, dict[str, Any]]) -> dict[str, Any]:
     """L3 一致性：H* 需四 target 判定一致（任务书 §5.5）。"""
-    if not per_target:
-        raise TlbError("a1: L3 consistency check on empty input")
+    if len(per_target) < 4:
+        raise TlbError(
+            f"a1: L3 requires 4 targets, got {len(per_target)}")
     verdicts = {t: r["verdict"] for t, r in per_target.items()}
     distinct = set(verdicts.values())
     return {"consistent": len(distinct) <= 1, "verdicts": verdicts,
@@ -257,3 +270,44 @@ def _synthetic_suite_validates(on: float) -> bool:
         globals()["ONSET_ON_PER_ROUND"] = saved
     return (sharp["kind"] == "sharp" and never["kind"] == "degraded"
             and weak["kind"] == "degraded" and cens["kind"] == "right-censored")
+
+
+def run_a1_adjudication(records: list[dict],
+                        frozen: dict) -> dict[str, Any]:
+    """records → 硬门 → 统计 → L1/L2/L3 → H* 的必经消费链（R4 交付）。
+
+    frozen = freeze_thresholds 的产出；未冻结（STOP）→ TlbError，不静默
+    用默认阈值。阈值经 on_threshold 参数显式流入 classify_onset。
+    """
+    if not frozen.get("frozen"):
+        raise TlbError(f"a1: thresholds not frozen: {frozen.get('stop')}")
+    on = frozen["on_threshold"]
+    gated = []
+    for rec in records:
+        ok, why = gate_record(rec)
+        if not ok:
+            raise TlbError(f"a1: record gate rejected ({why}): "
+                           f"{rec.get('case_id', rec.get('params', {}))}")
+        gated.append(rec)
+    curves: dict[tuple[int, int], dict[int, float]] = {}
+    vpn_hi: list[int] = []
+    for rec in gated:
+        p = rec["params"]
+        key = (int(p["set_hypothesis"]), int(p.get("set_region_scope", -1)))
+        window = int(p["set_window"])
+        l2r = next((m for m in rec["metrics"]
+                    if m["name"] == "pmu.l2d_tlb_refill.count"), None)
+        if l2r is None:
+            raise TlbError(f"a1: record missing l2d_tlb_refill: {key} w={window}")
+        curves.setdefault(key, {})[window] = float(l2r["value"])
+        r = rec.get("probe", {}).get("realized", {})
+        if r.get("set_region_vpn_hi"):
+            vpn_hi = [int(v) for v in r["set_region_vpn_hi"]]
+    by_h: dict[int, dict[int, dict[int, float]]] = {}
+    for (h, scope), curve in curves.items():
+        by_h.setdefault(h, {})[scope] = curve
+    per_h = {h: adjudicate_h(scoped, vpn_hi, hypothesis=h,
+                             target=int(gated[0]["params"].get("set_target", 7)))
+             for h, scoped in by_h.items()}
+    return {"per_hypothesis": per_h, "on_threshold": on,
+            "n_records": len(gated)}

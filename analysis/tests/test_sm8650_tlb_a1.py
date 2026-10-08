@@ -5,7 +5,8 @@ import unittest
 from analysis.sm8650_tlb import TlbError
 from analysis.sm8650_tlb_a1 import (adjudicate_h, check_l3_consistency,
                                     classify_onset, freeze_thresholds,
-                                    gate_record, predicted_hw_sets)
+                                    gate_record, predicted_hw_sets,
+                                    run_a1_adjudication)
 
 
 def _record(scope=-1, regions=4, nodes=None, pure=1, consistent=None):
@@ -82,7 +83,7 @@ class TestOnsetClassification(unittest.TestCase):
         r = classify_onset({6: 0.2, 8: 0.3, 10: 0.2, 12: 4.0})
         self.assertEqual(r["kind"], "right-censored")
         r = classify_onset({8: 4.0})
-        self.assertEqual(r["kind"], "right-censored")
+        self.assertEqual(r["kind"], "left-censored")
 
     def test_degraded_never_on(self):
         self.assertEqual(classify_onset({6: 0.1, 8: 0.2, 10: 0.1})["kind"],
@@ -116,12 +117,13 @@ class TestL3(unittest.TestCase):
     def test_consistency(self):
         ok = check_l3_consistency({t: {"verdict": "supported"} for t in (7, 42, 100, 200)})
         self.assertTrue(ok["consistent"])
-        bad = check_l3_consistency({7: {"verdict": "supported"}, 42: {"verdict": "suspect"}})
-        self.assertFalse(bad["consistent"])
+        with self.assertRaisesRegex(TlbError, "4 targets"):
+            check_l3_consistency({7: {"verdict": "supported"},
+                                  42: {"verdict": "suspect"}})
 
     def test_empty_l3_rejected(self):
-        # RV2-02-3：空输入不得返回 consistent=true
-        with self.assertRaisesRegex(TlbError, "empty"):
+        # RV2-02-3/R4：覆盖不足（含空输入）一律拒绝
+        with self.assertRaisesRegex(TlbError, "4 targets"):
             check_l3_consistency({})
 
 
@@ -142,3 +144,30 @@ class TestFreezeThresholds(unittest.TestCase):
         self.assertEqual(r["stop"], "filler-exclusion-broken")
         r = freeze_thresholds([4.0, 4.2, 3.8], scatter_mid=0.0)
         self.assertEqual(r["stop"], "no-grid-value")
+
+
+class TestRound4(unittest.TestCase):
+    def test_left_censored_not_sharp(self):
+        r = classify_onset({6: 4.0, 8: 4.0, 10: 4.0, 12: 4.0})
+        self.assertEqual(r["kind"], "left-censored")
+
+    def test_adjudicate_requires_full_scope_coverage(self):
+        with self.assertRaisesRegex(TlbError, "coverage"):
+            adjudicate_h({-1: {6: 0.2, 8: 4.0, 10: 6.5, 12: 7.0},
+                          0: {6: 0.2, 8: 4.2, 10: 6.6, 12: 7.1}},
+                         [5, 6, 7, 8], hypothesis=1)
+
+    def test_l3_requires_four_targets(self):
+        with self.assertRaisesRegex(TlbError, "4 targets"):
+            check_l3_consistency({7: {"verdict": "supported"}})
+
+    def test_frozen_threshold_wired(self):
+        # 同一曲线：on=2.0 时 3.0 值点判 on，on=3.0 时不判 → 接线生效
+        curve = {6: 0.2, 8: 2.5, 10: 2.5, 12: 6.5, 14: 7.0}
+        self.assertEqual(classify_onset(curve, on_threshold=2.0)["kind"], "sharp")
+        self.assertEqual(classify_onset(curve, on_threshold=3.0)["kind"],
+                         "right-censored")
+
+    def test_run_a1_requires_frozen(self):
+        with self.assertRaisesRegex(TlbError, "not frozen"):
+            run_a1_adjudication([], {"frozen": False, "stop": "floor-noisy"})
