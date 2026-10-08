@@ -1,0 +1,119 @@
+{
+  "review": "R9",
+  "verdict": "not-approved",
+  "generated_at_utc": "2026-10-08T08:05:08.716338+00:00",
+  "reviewed_heads": {
+    "m0b": "b0f287f12829819f1e6f5acbf3c9fdd53ff36c71",
+    "r2": "9ec80cc9f51e21d08ecbe7c1d10e72b8a558b143",
+    "main": "6062e20c08dca6b54bc928d9db889a0f8d78f922"
+  },
+  "r2_response_commit": "51d34fc9eb01e46eda19fbd9ca9f5fc48de1920a",
+  "reviewed_m0b_source_sha256": {
+    "analysis/sm8650_tlb_a1.py": "a49c9ff044f23247dadab8ba106c3fe6bfa652a11eb17703bb003d7c334ac4c7",
+    "analysis/tests/test_sm8650_tlb_a1.py": "87c4affe527139921f043d7dc4a422682bf9e7f204fbb2de2ef617e27fe0941f",
+    "analysis/load.py": "63cbfa1d903b679a2c5423c043dd9d45b5b57fd64be6d5af985915bafd1ff2c2",
+    "runner/engine.py": "1884e78382def7e813e8ae530311421b9f07e7cfd8453dc13aed9b1fb9d3da15",
+    "runner/schema/README.md": "7cd1007b1420432c24cd9fcaa2920e629bb730ffc8f5df89bbd0efb77dc09b43",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l1-main.json": "2d9aaf702dff4dd498c8600e2021405aaa74ae40e82d3be9f87c92fd903c382b",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l2-repro.json": "db0c20cd62d43e76d9a684cf18946b2bc3717af8dd2efe19ed6343a1a6231cfc",
+    "configs/experiments/ptr-chase-sm8650-x4-tlb-a1-l3-target.json": "89092fc94a2a54e27db46f4311e8d49143ae6b3f353133275b8d7addc51ba85b"
+  },
+  "task_sha256": "f246ca6606a62c5f7288755daf22749775449fe80c24aede2886b0d3a1280965",
+  "test_commands": [
+    {
+      "name": "analysis",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "analysis/tests",
+        "-t",
+        "."
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "exit_code": 0
+    },
+    {
+      "name": "runner",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "runner/tests",
+        "-t",
+        "."
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "exit_code": 0
+    },
+    {
+      "name": "a1-tests",
+      "command": [
+        "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "analysis.tests.test_sm8650_tlb_a1"
+      ],
+      "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "exit_code": 0
+    }
+  ],
+  "diagnostic_command": {
+    "command": [
+      "/Users/michaelyao/workspace/cpu-uarch-explorer/.venv/bin/python",
+      "/private/tmp/tlb-rpa-r9-review-20261008/review_rpa_r9_20261008.py",
+      "--tree",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2-m0b",
+      "--r2-tree",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2",
+      "--main-tree",
+      "/Users/michaelyao/workspace/cpu-uarch-explorer",
+      "--out",
+      "/private/tmp/tlb-rpa-r9-review-20261008/diagnostics.json"
+    ],
+    "cwd": "/Users/michaelyao/workspace/cpu-uarch-explorer",
+    "environment": {
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "exit_code": 0
+  },
+  "boundary": "All probe outputs/metrics synthetic. No adb, phone binary or perf executed. Actual planner/engine/adapter/writer/loader with external execution/system info/binary registration/Git provenance mocked. Manual manifest enrichment diagnostic-only. Author test observed without modifying its original assertions/fakes; it passed with zero ok records. No CTest/NDK/old-run replay repeated.",
+  "ledger_append_sha256": "54374fad4b4b8c0dded4ab93271e4cc251fd3b099da8eeb45a8a639de6b0466f",
+  "artifact_sha256": {
+    "scripts/review_rpa_r9_20261008.py": "265d9e64462422652bc983ebc3e14a1b805b0a1fdc40ad3d65e547cf916d7134",
+    "docs/reviews/2026-10-08-r9-review.md": "e6e7b13f2399505e7f1d4e4ce2ce30badf93dc8e7b9fa732f5625c3511b2f310",
+    "docs/reviews/evidence/2026-10-08-r9/diagnostics.json": "a29e5ddd8a99abcfc11d8fbfba3b24e885ad8236e151c1dc78e48b1e5ac3a7c6",
+    "docs/reviews/evidence/2026-10-08-r9/diagnostics.log": "45d65d900e1fecf1ca9bb363fb4c0970cdf1db1423ba5c7e6f3d574b745feadf",
+    "docs/reviews/evidence/2026-10-08-r9/analysis.log": "70f21e3425846b3d63b514bf71c9df3a6e12c43abe0aebef6de2389e5bea3eaf",
+    "docs/reviews/evidence/2026-10-08-r9/runner.log": "a9a636bd022b2a48b88db060ccbd1f3e127725cc2fa82dc5ce443ae090794003",
+    "docs/reviews/evidence/2026-10-08-r9/a1-tests.log": "44a33affc3dc5e9d0557428eabab2fb3d65fb608a3baf1fd8e3d8e449d903e03"
+  },
+  "artifact_parent_r2_head": "3f3436b611ddcfbc9393876db5635decec80c8d1",
+  "concurrent_r2_advance": {
+    "changed_files": [
+      "docs/runbooks/2026-10-07-sm8650-tlb-pilot-kickoff.md"
+    ],
+    "included_in_review": false
+  },
+  "log_capture_normalization": {
+    "file": "analysis.log",
+    "change": "Trim trailing empty lines for git diff --check; test output content unchanged.",
+    "original_capture_sha256": "eededc115d3d848bbd8982a268c67bb65b96180f697340098e9b0594f7c2c22e"
+  },
+  "delivery_observed_main_head": "6062e20c08dca6b54bc928d9db889a0f8d78f922",
+  "main_advance_scope": "Only AGENTS.md changed after the recorded review baseline; no reviewed m0b source or test result affected."
+}

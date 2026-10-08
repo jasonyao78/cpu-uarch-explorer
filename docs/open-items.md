@@ -309,3 +309,14 @@
 - **继承与触发**：R5-D正文/冻结配置-代码-标定数据锚定，R3-C/R5-C有效样本/实际hi/最终审计/重复处理继续原合同；任务书未同步两点规则，入口docstring仍写sharp/onset规则。高→低误标签为both-below为P2（保守拒绝），随两点规则正文同步修订。既有A3/P2后置触发不变。
 - **证据边界**：独立analysis187/187、runner192/192、A1 loader29/29；正式128条生产/读盘诊断与两个邻接错误plan全部fake外部执行，无adb/手机二进制/perf。未复跑CTest/NDK/历史runs。本次仅提交自有评审文档、脚本、证据与本段台账。
 - **分支终点与行动链**：真实来源接线→真实producer正负例及精确覆盖→正文/冻结审计合同→新基线验收→m0b合入codex/sm8650-tlb-hierarchy-r2、main相关变更核对及整树回归→结束m0b开发、设备工作由r2/上板Agent承接。worktree按干净/无依赖/数据处置回收；分支删除须main集成+完整测试+推送，用户暂不处理远程期间保留引用，不因此延长开发使命。本轮没有执行集成/回收/删除。
+
+
+## REV-RPA-R9-20261008 第九轮复核
+
+- **输入/归属**：r2回执 `51d34fc`（复核读取HEAD `9ec80cc`，追加分支生命周期/索引文档）、m0b `b0f287f`、main `2fa8d5d`；[第九轮复核](reviews/2026-10-08-r9-review.md)。**不通过，RV2-02未关闭，正式冻结/软件出口不确认。**
+- **本轮关闭**：L3准确target/W覆盖——两个邻接错误plan经真实runner/adapter生成合法record，201替200、W100/200替8/12均命名TlbError；诊断性补层来源后的正式128条H*=1且完整结果/canonical JSON置换相等。§5.5对应集合/两点规则文字同步接受。既有RV2-01/03、R3-A、R4-B、R5-T、R6-C及其他已关闭L3子项维持关闭。
+- **P1延续 / 正式矩阵前关闭**：R7-A仍未交付——b0f287f实际仍只有两个analysis文件，无engine/schema README修改；真实三配置128条ok/1280合成观测，0条含record级ID，入口unknown layer。新增TestR9虽调用run_plan1次、_run_case32次、FakeExec320次，产物却ok0/failed32；ID断言循环0次仍通过，不能作为生产接线正证据。
+- **验收证据修复 / 同一关闭条件**：Fake输出需匹配每case请求H/target/W/节点及全部PMU事件；先断言summary.ok=32/failed=0、len(ok_records)=32、失败集合为空，再逐条核ID。缺接线时测试必须失败，实际engine修复后通过；之后用真实三配置128条成功记录完成正式入口与置换。回执“真实探针调用/部署走查”改为fake执行证据，deploy_if_needed当前被mock，不能当设备证据。
+- **继承合同**：R5-D冻结配置/代码/标定数据锚定、R3-C/R5-C其他有效样本/实际hi/最终审计/重复策略及旧docstring/重复段等沿原台账；不扩大关闭范围，也不重开本轮已修准确集合。A3和既有P2后置触发不变。
+- **证据边界**：独立analysis190/190、runner192/192、A1 loader32/32全绿，同时捕获新测试32条parse-error（缺cycles/l1d_tlb_refill/l2d_tlb、目标descriptor不符）。所有新诊断均fake外部执行，无adb/手机二进制/perf；未复跑CTest/NDK/旧战役runs。main他人文档差异保留，本次只提交自有评审产物与本段台账。
+- **行动链**：在明确m0b目录提交实际engine/schema接线→使run_plan测试产生非空成功记录并反证缺接线必失败→真实128条保存/加载/A1正负与置换→新基线验收→m0b合入r2、main相关变更核对与集成回归→结束m0b开发、设备工作由r2/上板Agent承接。回收/删分支按已确认铁律7分步；本轮不执行集成、删除或推送。

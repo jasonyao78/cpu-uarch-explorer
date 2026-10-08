@@ -1,0 +1,119 @@
+{
+  "heads": {
+    "m0b": "b0f287f12829819f1e6f5acbf3c9fdd53ff36c71",
+    "r2": "9ec80cc9f51e21d08ecbe7c1d10e72b8a558b143",
+    "main": "6062e20c08dca6b54bc928d9db889a0f8d78f922"
+  },
+  "commit_changed_files": [
+    "analysis/sm8650_tlb_a1.py",
+    "analysis/tests/test_sm8650_tlb_a1.py"
+  ],
+  "plan_cases": {
+    "l1-main": 48,
+    "l2-repro": 48,
+    "l3-target": 32
+  },
+  "real_pipeline_summary": {
+    "records": 128,
+    "process_observations": 1280,
+    "all_status_ok": true,
+    "record_experiment_id_present_by_layer": {
+      "l1-main": 0,
+      "l2-repro": 0,
+      "l3-target": 0
+    },
+    "manifest_experiment_id": {
+      "l1-main": "ptr-chase-sm8650-x4-tlb-a1-l1-main",
+      "l2-repro": "ptr-chase-sm8650-x4-tlb-a1-l2-repro",
+      "l3-target": "ptr-chase-sm8650-x4-tlb-a1-l3-target"
+    },
+    "all_existing_gates_pass": true,
+    "synthetic_response_model": "H1 sharp in L1/L2; other H flat below floor"
+  },
+  "persisted_loaded_128": {
+    "ok": false,
+    "exception": "TlbError",
+    "message": "a1: unknown layer from experiment_id ''"
+  },
+  "neighboring_plan_coverage": {
+    "wrong_fourth_target": {
+      "l3_records": 32,
+      "fake_calls": 320,
+      "all_status_ok": true,
+      "targets": [
+        7,
+        42,
+        100,
+        201
+      ],
+      "windows": [
+        8,
+        12
+      ],
+      "result": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "a1: L3 exact coverage violation: got [7, 42, 100, 201] != expected [7, 42, 100, 200]"
+      }
+    },
+    "wrong_two_windows": {
+      "l3_records": 32,
+      "fake_calls": 320,
+      "all_status_ok": true,
+      "targets": [
+        7,
+        42,
+        100,
+        200
+      ],
+      "windows": [
+        100,
+        200
+      ],
+      "result": {
+        "ok": false,
+        "exception": "TlbError",
+        "message": "a1: L3 window grid violation: got [100, 200] != expected [8, 12]"
+      }
+    }
+  },
+  "author_test_result": {
+    "ok": true,
+    "value": null
+  },
+  "author_real_run_test_observation": {
+    "run_plan_calls": 1,
+    "_run_case_calls": 32,
+    "fake_probe_calls": 320,
+    "summary": {
+      "total": 32,
+      "ok": 0,
+      "failed": 32,
+      "skipped": 0,
+      "unsupported": 0
+    },
+    "ok_records": 0,
+    "failed_records": 32,
+    "record_id_assertion_loop_iterations": 0,
+    "failed_records_with_experiment_id": 0,
+    "failure_reasons": {
+      "parse-error": 32
+    },
+    "first_failure": {
+      "reason": "parse-error",
+      "detail": "tlb-set descriptor: requested PMU events missing from probe output: ['cycles', 'l1d_tlb_refill', 'l2d_tlb'] | ok_samples=0/10"
+    },
+    "example_target42_failure": {
+      "reason": "parse-error",
+      "detail": "tlb-set descriptor mismatch: set_target='7' != requested set_target=42 | ok_samples=0/10"
+    },
+    "deployment_boundary": "author explicitly patches runner.deploy.deploy_if_needed",
+    "probe_execution_boundary": "author FakeExec returns synthetic stdout; no binary executed"
+  },
+  "diagnostic_only_128_permutation_equal": true,
+  "diagnostic_only_manifest_enriched_128": {
+    "n_records": 128,
+    "h_star": 1,
+    "h_star_status": "unique"
+  }
+}
