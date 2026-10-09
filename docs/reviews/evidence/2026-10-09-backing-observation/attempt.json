@@ -1,0 +1,288 @@
+{
+  "purpose": "Audit a single instrumented256MiB backing observation and its technical stop; no scientific qualification or N scan.",
+  "data_origin": "device-raw",
+  "mode": "rob-backing-observe",
+  "raw_directory": "20261009T091658Z-rob-backing-observe",
+  "status": "stopped",
+  "stop_reason": "STOP probe failure e0-miss-m256-n0",
+  "batch_technical_acceptance": false,
+  "failure_observation_audit_passed": true,
+  "stop_discipline_verified": true,
+  "scientific_qualification": "not-applicable-observation-only",
+  "n_scan_eligible": false,
+  "source_bindings": {
+    "source_head": "07bb9ba95e7427ab42ed6dcf1ee4e1e7c357c503",
+    "binary_source_head": "1474a7abca040fc01bf340b087bdb855811879e2",
+    "binary_sha256": "3781b56f0e75926b153b47671b5ced0350fa2acdbd0debbf97e2d67873c6c6d1",
+    "driver_sha256": "f359db5344d5fda3f74d7d9ad54774138ee316521158038dc4ca006f3b8ce42b",
+    "build_evidence_path": "docs/reviews/evidence/2026-10-09-backing-observation/build.json",
+    "build_evidence_sha256": "d174e6517301ca036403c2611c5586eaa947286643685cf3252a2ef957854ff7",
+    "protocol_path": "docs/design/2026-10-09-backing-observation.md",
+    "protocol_sha256": "75cd71de9b3437891e64c8dfb3cd87952f4b6b2c94e90b3a66d3af1ecff9a25e"
+  },
+  "source_bindings_verified": true,
+  "build_source_sha256": {
+    "docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c": "aeb1900876c791e1d6aa98d1dbf494ffcf32cd607d33e164552dd4425fcaf25e",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/rob_backing.h": "bf565c6158b43e4948dfded3428dec78b601ee407cdcd4770e0e973dedc31ca9"
+  },
+  "binary_binding_limit": "Registered binary digest and launch driver deployment SHA check are verified from committed driver/source; raw does not retain a binary copy for independent post-run hashing.",
+  "matrix": {
+    "registered_conditions": [
+      {
+        "name": "e0-miss-m256-n0",
+        "args": [
+          "-i",
+          "2097152",
+          "-r",
+          "3",
+          "--pin",
+          "7",
+          "--pmu-type",
+          "8",
+          "-e",
+          "0x03",
+          "-e",
+          "0x17",
+          "-e",
+          "0x34",
+          "-e",
+          "0x37",
+          "--backing",
+          "thp2m",
+          "-t",
+          "nop",
+          "-n",
+          "0",
+          "-a",
+          "miss",
+          "-m",
+          "256",
+          "--paired"
+        ]
+      }
+    ],
+    "registered_processes": 1,
+    "attempted_processes": 1,
+    "completed_processes": 0,
+    "failed_processes": 1,
+    "unattempted_conditions": [],
+    "maximum_registered_windows": 6,
+    "observed_windows": 0,
+    "qualification_matrix_registered": false
+  },
+  "process": {
+    "condition": "e0-miss-m256-n0",
+    "exit_code": 1,
+    "timed_out": false,
+    "wall_seconds": 0.18822012469172478,
+    "wall_seconds_semantics": "host-recorded whole probe invocation, not mapping or collapse phase timing",
+    "stdout_sha256": "810374cc8b0845842b6051de1ca466a14a60fcdd47339f06b21aebe50b20c337",
+    "stderr_sha256": "098f6acce13216dfda1672391fbb1e5523d1452e9cb4c045ecf4d3d5fa802f4e",
+    "config": {
+      "type": "config",
+      "version": 2,
+      "class": "nop",
+      "anchor": "miss",
+      "n": 0,
+      "iterations": 2097152,
+      "rounds": 3,
+      "serial": false,
+      "paired": true,
+      "asymmetric": false,
+      "chain": 8,
+      "fsqrt_operand_bits": "0x3ff0000000000000",
+      "loop_offset": 64,
+      "loop_mod64": 0,
+      "branch_offset": 76,
+      "loop_instructions": 4,
+      "fillers_per_iteration": 0,
+      "anchors_per_iteration": 2,
+      "code_bytes": 84,
+      "memory_bytes": 268435456,
+      "backing_requested": "thp2m",
+      "chase_seed": 42,
+      "pmu_type": 8,
+      "exclude_kernel": true,
+      "exclude_hv": true,
+      "events": [
+        17,
+        8,
+        3,
+        23,
+        52,
+        55
+      ]
+    },
+    "generated_code": {
+      "parallel": {
+        "sha256": "a4b0acfd3d5425d45570d0fe2a16116f276ed18df193c7303bd27eca820b22ce",
+        "code_bytes": 84,
+        "encoding_verified": true
+      },
+      "serial": {
+        "sha256": "bc4e1aff0023d06ac0b163f57a40493501a0d8f6068a9839c6ef51ea83031568",
+        "code_bytes": 84,
+        "encoding_verified": true
+      }
+    },
+    "runtime_observed": false,
+    "runtime": null,
+    "windows": [],
+    "failure": {
+      "type": "failure",
+      "metrics": {},
+      "failure": {
+        "reason": "chase-backing-not-thp2m",
+        "backing_requested": "thp2m",
+        "memory_bytes": 268435456,
+        "pmd_bytes": 2097152,
+        "backing_status": "coverage-mismatch",
+        "backing_info": {
+          "kernel_page_kb": 4,
+          "mmu_page_kb": 4,
+          "anon_huge_kb": 229376,
+          "rss_kb": 262144,
+          "swap_kb": 0,
+          "no_huge": false
+        }
+      }
+    },
+    "stderr": "error[chase-backing-not-thp2m]: backing observation status=3\n",
+    "smaps_original_retained": false
+  },
+  "backing_observation": {
+    "stage": "initial",
+    "parse_succeeded": true,
+    "exact_vma_parser_contract_satisfied": true,
+    "io_open_close_contract_satisfied": true,
+    "actual_fields": {
+      "kernel_page_kb": 4,
+      "mmu_page_kb": 4,
+      "anon_huge_kb": 229376,
+      "rss_kb": 262144,
+      "swap_kb": 0,
+      "no_huge": false
+    },
+    "original_acceptance_predicates": [
+      {
+        "predicate": "rss_kb equals memory_bytes/1024",
+        "actual": 262144,
+        "expected": 262144,
+        "passed": true
+      },
+      {
+        "predicate": "swap_kb equals zero",
+        "actual": 0,
+        "expected": 0,
+        "passed": true
+      },
+      {
+        "predicate": "pmd_bytes equals 2MiB",
+        "actual": 2097152,
+        "expected": 2097152,
+        "passed": true
+      },
+      {
+        "predicate": "memory_bytes is multiple of 2MiB",
+        "actual": 268435456,
+        "expected_modulus": 2097152,
+        "passed": true
+      },
+      {
+        "predicate": "anon_huge_kb equals memory_bytes/1024",
+        "actual": 229376,
+        "expected": 262144,
+        "passed": false
+      },
+      {
+        "predicate": "no_huge equals false",
+        "actual": false,
+        "expected": false,
+        "passed": true
+      },
+      {
+        "predicate": "kernel_page_kb is 4 or 2048",
+        "actual": 4,
+        "expected_one_of": [
+          4,
+          2048
+        ],
+        "passed": true
+      },
+      {
+        "predicate": "mmu_page_kb is 4 or 2048",
+        "actual": 4,
+        "expected_one_of": [
+          4,
+          2048
+        ],
+        "passed": true
+      }
+    ],
+    "failed_predicates": [
+      "anon_huge_kb equals memory_bytes/1024"
+    ],
+    "anon_huge_fraction_of_rss": 0.875,
+    "rss_minus_anon_huge_kb": 32768,
+    "rss_minus_anon_huge_mib": 32.0,
+    "interpretation": "The parsed initial mapping was not fully counted by smaps AnonHugePages; physical fragmentation or other cause of coverage shortfall is not established."
+  },
+  "environment": {
+    "endpoint_count": 3,
+    "expected_endpoint_names": [
+      "e0-miss-m256-n0-pre-environment.json",
+      "final-environment.json",
+      "initial-environment.json"
+    ],
+    "preconditions_and_stability_recomputed": true,
+    "profile_source": {
+      "commit": "07bb9ba95e7427ab42ed6dcf1ee4e1e7c357c503",
+      "path": "configs/platforms/redmi-k70pro-01.json",
+      "sha256": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658",
+      "overrides": {
+        "preconditions.cpufreq_governor": "walt"
+      }
+    },
+    "policy_sha256": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "max_cpu_c_range": [
+      38.0,
+      40.7
+    ],
+    "final_violations": [],
+    "final_warnings": [],
+    "final_max_cpu_c": 40.7
+  },
+  "consumer_boundaries": {
+    "complete_summary_cli": {
+      "exit_code": 1,
+      "output_written": false,
+      "exception": "AssertionError",
+      "failed_contract": "complete status and full result count"
+    },
+    "science_qualifier": {
+      "observation_mode_registered": false,
+      "exception": "ValueError",
+      "reason": "qualification mode/process mismatch",
+      "science_gates_evaluated": false
+    }
+  },
+  "raw_file_sha256": {
+    "driver.py": "f359db5344d5fda3f74d7d9ad54774138ee316521158038dc4ca006f3b8ce42b",
+    "e0-miss-m256-n0-parallel.bin": "a4b0acfd3d5425d45570d0fe2a16116f276ed18df193c7303bd27eca820b22ce",
+    "e0-miss-m256-n0-pre-environment.json": "97a2bcdd4446d356f979c0b9c05dba9275704cf36325d6ef706de32d54addf5f",
+    "e0-miss-m256-n0-serial.bin": "bc4e1aff0023d06ac0b163f57a40493501a0d8f6068a9839c6ef51ea83031568",
+    "e0-miss-m256-n0.stderr.log": "098f6acce13216dfda1672391fbb1e5523d1452e9cb4c045ecf4d3d5fa802f4e",
+    "e0-miss-m256-n0.stdout.jsonl": "810374cc8b0845842b6051de1ca466a14a60fcdd47339f06b21aebe50b20c337",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "final-environment.json": "86eeb4c884363a1dfd14e5fc89d143a95f1f2ca3fac8bd43c944510db114293b",
+    "initial-environment.json": "700addbf2b27c4c25ee9caee03b18b8049d8f61315278a683424c4a50f669ede",
+    "manifest.json": "a7a6e26829d43718c0856935050a7102281a452b0de52b0cb2669103074a73ed"
+  },
+  "interpretation_limits": [
+    "No runtime or PMU window; no miss rates, paired ratios, cycle headroom, or ROB/DRAM inference.",
+    "Observed coverage mismatch belongs only to this instrumented attempt; earlier uninstrumented256/512 failures have no backing data and cannot be assigned the same cause.",
+    "smaps aggregate fields do not establish why32MiB was not counted as AnonHugePages or its exact location/page subtype.",
+    "A subsequent MADV_COLLAPSE intervention requires separate source/protocol binding and complete repeated qualification; current failure is retained unchanged."
+  ]
+}
