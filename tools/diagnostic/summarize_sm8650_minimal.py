@@ -7,6 +7,9 @@ import hashlib
 import json
 import statistics as st
 import subprocess
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
+from tools.diagnostic.run_sm8650_minimal import conditions, validate_realized, OLD_PROTOCOL
 
 
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
@@ -15,10 +18,25 @@ def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
 def summarize(path):
     m=json.loads((path/'manifest.json').read_text())
     assert m['status']=='complete' and len(m['results'])==len(m['conditions'])
+    registered=[{'name':n,'args':a} for n,a in conditions(m['mode'])]
+    assert m['conditions']==registered, 'conditions differ from registered matrix'
+    assert sorted(r['name'] for r in m['results'])==sorted(c['name'] for c in registered), 'result coverage'
     assert sha(path/'driver.py')==m['driver_sha256']
     root=Path(__file__).resolve().parents[2]
-    protocol=subprocess.check_output(['git','show',m['source_head']+':docs/design/2026-10-09-minimal-tlb-rob-probes.md'],cwd=root)
+    driver=subprocess.check_output(['git','show',m['source_head']+':tools/diagnostic/run_sm8650_minimal.py'],cwd=root)
+    assert hashlib.sha256(driver).hexdigest()==m['driver_sha256'], 'driver not launch commit'
+    protocol=subprocess.check_output(['git','show',m['source_head']+':'+m.get('protocol_path',OLD_PROTOCOL)],cwd=root)
     assert hashlib.sha256(protocol).hexdigest()==m['protocol_sha256']
+    if 'build_evidence_path' in m:
+        build_blob=subprocess.check_output(['git','show',m['source_head']+':'+m['build_evidence_path']],cwd=root)
+        assert hashlib.sha256(build_blob).hexdigest()==m['build_evidence_sha256']
+        build=json.loads(build_blob)
+        binary_name='tlb_local_pair' if m['mode'].startswith('tlb') else 'rob_window_probe'
+        assert build['binaries'][binary_name]==m['binary_sha256'] and build['source_commit']==m['binary_source_head']
+        for rel,digest in build['source_sha256'].items():
+            assert hashlib.sha256(subprocess.check_output(['git','show',m['source_head']+':'+rel],cwd=root)).hexdigest()==digest
+    if m['mode'].startswith('tlb'):
+        assert m.get('tlb_target',int(registered[0]['args'][0]))==int(registered[0]['args'][0]), 'manifest target'
     expected_envs={'initial-environment.json','final-environment.json'}
     expected_envs|={entry['name']+'-'+suffix+'-environment.json' for entry in m['results'] for suffix in ('pre','post')}
     assert {env.name for env in path.glob('*-environment.json')}==expected_envs
@@ -30,11 +48,16 @@ def summarize(path):
             'raw_directory':path.name,'processes':len(m['results']),'rows':[],
             'max_cpu_c_range':[min(e['thermal']['max_cpu_c'] for e in envs),max(e['thermal']['max_cpu_c'] for e in envs)],
             'wall_seconds':sum(e['wall_seconds'] for e in m['results'])}
-    for entry in m['results']:
+    if m['mode'] in ('tlb-confirm100','rob-fine'):
+        result.update({k:m[k] for k in ('binary_source_head','build_evidence_sha256','driver_sha256','protocol_path','protocol_sha256')})
+        if m['mode'].startswith('tlb'): result['tlb_target']=m['tlb_target']
+    for entry in sorted(m['results'],key=lambda e:next(i for i,c in enumerate(registered) if c['name']==e['name'])):
         raw=path/(entry['name']+'.stdout.jsonl')
         assert entry['exit_code']==0 and not entry['timed_out'] and sha(raw)==entry['stdout_sha256']
         rows=[json.loads(line) for line in raw.read_text().splitlines()]
         assert not any(r['type']=='failure' for r in rows)
+        opts=next(c['args'] for c in registered if c['name']==entry['name'])
+        validate_realized(m['mode'],opts,rows)
         rounds=[r for r in rows if r['type']=='round']
         assert all(r['enabled']>0 and r['enabled']==r['running'] for r in rounds)
         if m['mode'].startswith('tlb'):
@@ -67,6 +90,7 @@ def summarize(path):
                 seed,f,rotate,h,w,block=key
                 assert sorted(r['round'] for r in rr)==list(range(20))
                 assert all(r['retained']==(r['round']>0) for r in rr)
+                rr.sort(key=lambda r:r['round'])
                 kept=[r for r in rr if r['retained']]
                 values=[st.mean(r['counts'][i] for r in kept) for i in range(6)]
                 result['rows'].append({'epoch':entry['name'],'seed':seed,'f':f,'offset_rotate':rotate,
@@ -81,7 +105,8 @@ def summarize(path):
             for generated in entry['generated_code'].values():
                 assert generated['sha256'] in [sha(p) for p in path.glob(entry['name']+'-*.bin')]
             for serial in sorted({r['serial'] for r in rounds}):
-                rr=[r for r in rounds if r['serial']==serial]
+                rr=sorted((r for r in rounds if r['serial']==serial),key=lambda r:r['round'])
+                assert [r['round'] for r in rr]==list(range(3))
                 expected=config['iterations']*config['loop_instructions']+config['loop_offset']//4+1
                 assert all(abs(r['metrics']['0x8']-expected)<=max(1000,0.01*expected) for r in rr)
                 result['rows'].append({'condition':entry['name'],'class':config['class'],'anchor':config['anchor'],
@@ -92,6 +117,9 @@ def summarize(path):
                                       'counts_per_iteration':{k:[r['metrics'][k]/config['iterations'] for r in rr] for k in rr[0]['metrics']},
                                       'retired_relative_error':[abs(r['metrics']['0x8']-expected)/expected for r in rr],
                                       'generated_code_sha256':{k:v['sha256'] for k,v in entry['generated_code'].items()}})
+                if m['mode']=='rob-fine':
+                    result['rows'][-1].update({'loop_mod64':config['loop_mod64'],'iterations':config['iterations'],
+                                               'chase_seed':config['chase_seed'],'epoch':int(entry['name'][1])})
     return result
 
 

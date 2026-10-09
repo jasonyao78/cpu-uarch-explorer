@@ -33,10 +33,19 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
 
 
+MODES = ('tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine')
+OLD_PROTOCOL = 'docs/design/2026-10-09-minimal-tlb-rob-probes.md'
+CONFIRM_PROTOCOL = 'docs/design/2026-10-09-local-confirmation.md'
+BUILD_EVIDENCE = 'docs/reviews/evidence/2026-10-09-minimal-probes/build.json'
+
+
 def conditions(mode):
+    if mode not in MODES:
+        raise ValueError('unknown registered mode: '+mode)
     if mode.startswith('tlb'):
         # One excluded smoke epoch, then five mapping epochs (target200 primary).
-        return [(f'epoch-{i}', (['200','--reverse'] if i%2 else ['200'])) for i in range(1 if mode == 'tlb-smoke' else 5)]
+        target = '100' if mode == 'tlb-confirm100' else '200'
+        return [(f'epoch-{i}', [target]+(['--reverse'] if i%2 else [])) for i in range(1 if mode == 'tlb-smoke' else 5)]
     base = ['-i', '131072', '-r', '3', '--pin', '7', '--pmu-type', '8',
             '-e', '0x03', '-e', '0x17', '-e', '0x34', '-e', '0x02']
     if mode == 'rob-qualify':
@@ -44,6 +53,17 @@ def conditions(mode):
         rows += [(f'fsqrt-chain{k}-n0', ['-t','nop','-n','0','-a','fsqrt','--chain',str(k)]) for k in (1,8,16)]
         rows += [(f'none-n{n}', ['-t','nop','-n',str(n),'-a','none']) for n in (0,512)]
         return [(name, base + args) for name,args in rows]
+    if mode == 'rob-fine':
+        cells = []
+        for align, grid in ((0, (0,*range(512,769,32))), (32, (0,608,640,672,768))):
+            for anchor,chain in (('none',8),('fsqrt',8),('fsqrt',16)):
+                cells += [('nop',anchor,chain,align,n) for n in grid]
+        for cls in ('add','fadd'):
+            for anchor,chain in (('none',8),('fsqrt',16)):
+                cells += [(cls,anchor,chain,0,n) for n in (0,128,640)]
+        return [(f'e{epoch}-{cls}-{anchor}-k{k}-a{align}-n{n}', base+
+                 ['-t',cls,'-a',anchor,'--chain',str(k),'--align',str(align),'-n',str(n)])
+                for epoch in range(2) for cls,anchor,k,align,n in (cells if epoch==0 else reversed(cells))]
     rows = []
     for epoch in range(2):
         for cls in ('nop','add'):
@@ -55,12 +75,44 @@ def conditions(mode):
     return rows
 
 
+def validate_realized(mode, opts, rows):
+    """Bind requested identity to exactly one self-description before accepting data."""
+    if mode.startswith('tlb'):
+        geometry=[r for r in rows if r['type']=='geometry']
+        if len(geometry)!=1 or geometry[0]['target']!=int(opts[0]):
+            raise ValueError('requested/realized TLB target mismatch')
+        return
+    configs=[r for r in rows if r['type']=='config']
+    if len(configs)!=1: raise ValueError('expected one ROB config')
+    c=configs[0]
+    def value(key, default): return opts[opts.index(key)+1] if key in opts else default
+    expected={'class':value('-t','nop'),'anchor':value('-a','miss'),
+              'n':int(value('-n','64')),'iterations':int(value('-i','131072')),
+              'rounds':int(value('-r','3')),'chain':int(value('--chain','8')),
+              'loop_mod64':int(value('--align','0')),'pmu_type':int(value('--pmu-type','0')),
+              'paired':'--paired' in opts,'serial':'--serial' in opts,'asymmetric':'--asymmetric' in opts,
+              'chase_seed':int(value('--seed','42')),'exclude_kernel':True,'exclude_hv':True,
+              'events':[17,8]+[int(opts[i+1],0) for i,v in enumerate(opts) if v=='-e']}
+    for key,want in expected.items():
+        if c.get(key)!=want: raise ValueError('requested/realized ROB '+key+' mismatch')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['tlb-smoke','tlb','rob-qualify','rob-window'])
+    parser.add_argument('mode', choices=MODES)
     parser.add_argument('--binary', type=Path, required=True)
     parser.add_argument('--host-exporter', type=Path)
     args = parser.parse_args()
+    protocol = CONFIRM_PROTOCOL if args.mode in ('tlb-confirm100','rob-fine') else OLD_PROTOCOL
+    launch_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+    for rel in (protocol, 'tools/diagnostic/run_sm8650_minimal.py'):
+        blob=subprocess.check_output(['git','show',launch_head+':'+rel],cwd=ROOT)
+        if hashlib.sha256(blob).hexdigest()!=sha(ROOT/rel): raise SystemExit('STOP uncommitted protocol/driver')
+    build=json.loads((ROOT/BUILD_EVIDENCE).read_text())
+    binary_name='tlb_local_pair' if args.mode.startswith('tlb') else 'rob_window_probe'
+    if sha(args.binary)!=build['binaries'][binary_name]: raise SystemExit('STOP unregistered binary')
+    for rel,digest in build['source_sha256'].items():
+        if sha(ROOT/rel)!=digest: raise SystemExit('STOP probe source drift '+rel)
     if default_store().unfinished():
         raise SystemExit('STOP unfinished environment journal')
     # Never print or persist serial identifiers.
@@ -82,10 +134,13 @@ def main():
     rows = conditions(args.mode)
     manifest = {'purpose':__doc__, 'mode':args.mode, 'target':'redmi-k70pro-01',
                 'source_branch':subprocess.check_output(['git','branch','--show-current'],cwd=ROOT,text=True).strip(),
-                'source_head':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+                'source_head':launch_head,
+                'binary_source_head':build['source_commit'], 'build_evidence_path':BUILD_EVIDENCE,
+                'build_evidence_sha256':sha(ROOT/BUILD_EVIDENCE), 'protocol_path':protocol,
                 'binary_sha256':sha(args.binary),'driver_sha256':sha(__file__),
-                'protocol_sha256':sha(ROOT/'docs/design/2026-10-09-minimal-tlb-rob-probes.md'),
+                'protocol_sha256':sha(ROOT/protocol),
                 'conditions':[{'name':name,'args':opts} for name,opts in rows], 'results':[], 'status':'started'}
+    if args.mode.startswith('tlb'): manifest['tlb_target']=int(rows[0][1][0])
     write(out/'manifest.json',manifest)
     write(out/'environment-policy.json',policy)
     print('OUT',out,flush=True)
@@ -130,6 +185,7 @@ def main():
             if result.returncode != 0: raise RuntimeError('STOP probe failure '+name)
             parsed=[json.loads(line) for line in result.stdout.splitlines()]
             if any(row['type']=='failure' for row in parsed): raise RuntimeError('STOP structured failure')
+            validate_realized(args.mode,opts,parsed)
             rounds=[row for row in parsed if row['type']=='round']
             expected=800 if args.mode.startswith('tlb') else 6 if '--paired' in opts else 3
             if len(rounds)!=expected: raise RuntimeError('STOP wrong round count')
@@ -152,7 +208,8 @@ def main():
         # Always keep final observed state; no restore needed because no settings changed.
         try: inspect('final')
         except Exception as error:
-            manifest['final_environment_error']=str(error); write(out/'manifest.json',manifest)
+            manifest['final_environment_error']=str(error); manifest['status']='stopped'; write(out/'manifest.json',manifest)
+    if 'final_environment_error' in manifest: raise RuntimeError(manifest['final_environment_error'])
     return 0
 
 if __name__=='__main__':
