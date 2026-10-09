@@ -1,0 +1,766 @@
+{
+  "purpose": "Audit stopped local-collapse qualification raw prefix and the single syscall failure; no complete scientific qualification is evaluated.",
+  "data_origin": "device-raw",
+  "mode": "rob-collapse-qualify",
+  "raw_directory": "20261009T093842Z-rob-collapse-qualify",
+  "status": "stopped",
+  "stop_reason": "STOP probe failure e0-miss-m256-n0",
+  "batch_technical_acceptance": false,
+  "completed_prefix_technical_audit_passed": true,
+  "stop_discipline_verified": true,
+  "scientific_qualification": "not-evaluable-incomplete-matrix",
+  "n_scan_eligible": false,
+  "gate_source_reference_only": {
+    "commit": "c93e788a31c077f5575ef6139157b8fe3185bc0f",
+    "path": "docs/design/2026-10-09-long-load-qualification.md",
+    "sha256": "7de293eff7033316c2f46a77025a688c7a26e3b6efe37ebe6f5b16b57a53d943"
+  },
+  "source_bindings": {
+    "source_head": "68f0991c7b9a54915bea6ee1a3cc95e88f9fe775",
+    "binary_source_head": "3b4e66db0b4804106a277b7ec41dcf9a71e454e9",
+    "binary_sha256": "29d8c8b844183bdfa05288d60fb07f6966bb24174e2310af68866c86cb6dd74a",
+    "driver_sha256": "f7bf163ddaf43d1a62ffb3d6741ea6f5cac4292856e4673106963c7efdc7e8af",
+    "build_evidence_path": "docs/reviews/evidence/2026-10-09-local-collapse/build.json",
+    "build_evidence_sha256": "ee50de89534286a67e1b07b2a6d3c16748b4eb908e319b731442cb2c4a14365b",
+    "protocol_path": "docs/design/2026-10-09-local-collapse-qualification.md",
+    "protocol_sha256": "5790d606f64a095bc03f5faa23ed9656779a9bf5267ff4cf9f702a6fcf4cbd85"
+  },
+  "source_bindings_verified": true,
+  "build_source_sha256": {
+    "docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c": "5f4e59eb453fe02fe175d8cd4786c6fa9a672cfcb2187fb948165cceeaecb21b",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/rob_backing.h": "ef1dd0f7f38dad99713322f06b3d5c70caac3e9a56ca214f687120f3fafedd29"
+  },
+  "binary_binding_limit": "Registered binary digest and launch driver deployment SHA check are verified from committed driver/source; the stopped raw directory does not retain a binary copy for independent post-run hashing.",
+  "matrix": {
+    "registered_conditions": [
+      {
+        "name": "e0-miss-m1-n0",
+        "args": [
+          "-i",
+          "131072",
+          "-r",
+          "3",
+          "--pin",
+          "7",
+          "--pmu-type",
+          "8",
+          "-e",
+          "0x03",
+          "-e",
+          "0x17",
+          "-e",
+          "0x34",
+          "-e",
+          "0x37",
+          "--backing",
+          "4k",
+          "-t",
+          "nop",
+          "-n",
+          "0",
+          "-a",
+          "miss",
+          "-m",
+          "1",
+          "--paired"
+        ]
+      },
+      {
+        "name": "e0-miss-m256-n0",
+        "args": [
+          "-i",
+          "2097152",
+          "-r",
+          "3",
+          "--pin",
+          "7",
+          "--pmu-type",
+          "8",
+          "-e",
+          "0x03",
+          "-e",
+          "0x17",
+          "-e",
+          "0x34",
+          "-e",
+          "0x37",
+          "--backing",
+          "thp2m",
+          "--collapse",
+          "-t",
+          "nop",
+          "-n",
+          "0",
+          "-a",
+          "miss",
+          "-m",
+          "256",
+          "--paired"
+        ]
+      },
+      {
+        "name": "e1-miss-m256-n0",
+        "args": [
+          "-i",
+          "2097152",
+          "-r",
+          "3",
+          "--pin",
+          "7",
+          "--pmu-type",
+          "8",
+          "-e",
+          "0x03",
+          "-e",
+          "0x17",
+          "-e",
+          "0x34",
+          "-e",
+          "0x37",
+          "--backing",
+          "thp2m",
+          "--collapse",
+          "-t",
+          "nop",
+          "-n",
+          "0",
+          "-a",
+          "miss",
+          "-m",
+          "256",
+          "--paired"
+        ]
+      },
+      {
+        "name": "e1-miss-m1-n0",
+        "args": [
+          "-i",
+          "131072",
+          "-r",
+          "3",
+          "--pin",
+          "7",
+          "--pmu-type",
+          "8",
+          "-e",
+          "0x03",
+          "-e",
+          "0x17",
+          "-e",
+          "0x34",
+          "-e",
+          "0x37",
+          "--backing",
+          "4k",
+          "-t",
+          "nop",
+          "-n",
+          "0",
+          "-a",
+          "miss",
+          "-m",
+          "1",
+          "--paired"
+        ]
+      }
+    ],
+    "attempted_conditions": [
+      "e0-miss-m1-n0",
+      "e0-miss-m256-n0"
+    ],
+    "completed_conditions": [
+      "e0-miss-m1-n0"
+    ],
+    "failed_conditions": [
+      "e0-miss-m256-n0"
+    ],
+    "unattempted_conditions": [
+      "e1-miss-m256-n0",
+      "e1-miss-m1-n0"
+    ],
+    "registered_processes": 4,
+    "attempted_processes": 2,
+    "completed_processes": 1,
+    "registered_windows": 24,
+    "completed_windows": 6,
+    "long_load_windows": 0,
+    "epoch1_windows": 0
+  },
+  "processes": [
+    {
+      "condition": "e0-miss-m1-n0",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_seconds": 0.07334220921620727,
+      "stdout_sha256": "14e5a1dffe305611f53a508a2e7870dc29ada185a8dc7b12e09aa92db8321e4d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "config": {
+        "type": "config",
+        "version": 2,
+        "class": "nop",
+        "anchor": "miss",
+        "n": 0,
+        "iterations": 131072,
+        "rounds": 3,
+        "serial": false,
+        "paired": true,
+        "asymmetric": false,
+        "chain": 8,
+        "fsqrt_operand_bits": "0x3ff0000000000000",
+        "loop_offset": 64,
+        "loop_mod64": 0,
+        "branch_offset": 76,
+        "loop_instructions": 4,
+        "fillers_per_iteration": 0,
+        "anchors_per_iteration": 2,
+        "code_bytes": 84,
+        "memory_bytes": 1048576,
+        "backing_requested": "4k",
+        "chase_seed": 42,
+        "pmu_type": 8,
+        "exclude_kernel": true,
+        "exclude_hv": true,
+        "events": [
+          17,
+          8,
+          3,
+          23,
+          52,
+          55
+        ]
+      },
+      "generated_code": {
+        "parallel": {
+          "sha256": "a4b0acfd3d5425d45570d0fe2a16116f276ed18df193c7303bd27eca820b22ce",
+          "code_bytes": 84,
+          "encoding_verified": true
+        },
+        "serial": {
+          "sha256": "bc4e1aff0023d06ac0b163f57a40493501a0d8f6068a9839c6ef51ea83031568",
+          "code_bytes": 84,
+          "encoding_verified": true
+        }
+      },
+      "status": "completed-prefix-only",
+      "runtime_observed": true,
+      "runtime": {
+        "type": "runtime",
+        "fpcr": 0,
+        "cpu": 7,
+        "loop_address_mod64": 0,
+        "ring_nodes": 16384,
+        "distinct_lines_per_call": 16384,
+        "mapping_4k_verified": true,
+        "backing_verified": true,
+        "backing_page_bytes": 4096,
+        "backing_info": {
+          "kernel_page_kb": 4,
+          "mmu_page_kb": 4,
+          "anon_huge_kb": 0,
+          "rss_kb": 1024,
+          "swap_kb": 0,
+          "no_huge": true
+        },
+        "event_ids": [
+          16758,
+          16759,
+          16760,
+          16761,
+          16762,
+          16763
+        ]
+      },
+      "rounds_observed": 6,
+      "windows": [
+        {
+          "type": "round",
+          "round": 0,
+          "serial": false,
+          "pair_step": 0,
+          "ns": 727813,
+          "enabled": 735886,
+          "running": 735886,
+          "metrics": {
+            "0x11": 1916329,
+            "0x8": 524545,
+            "0x3": 261811,
+            "0x17": 2195,
+            "0x34": 1,
+            "0x37": 7
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        },
+        {
+          "type": "round",
+          "round": 0,
+          "serial": true,
+          "pair_step": 1,
+          "ns": 1404844,
+          "enabled": 1411199,
+          "running": 1411199,
+          "metrics": {
+            "0x11": 3781837,
+            "0x8": 524545,
+            "0x3": 261816,
+            "0x17": 2759,
+            "0x34": 0,
+            "0x37": 0
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        },
+        {
+          "type": "round",
+          "round": 1,
+          "serial": true,
+          "pair_step": 0,
+          "ns": 1371614,
+          "enabled": 1378490,
+          "running": 1378490,
+          "metrics": {
+            "0x11": 3766367,
+            "0x8": 524545,
+            "0x3": 262155,
+            "0x17": 2396,
+            "0x34": 0,
+            "0x37": 0
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        },
+        {
+          "type": "round",
+          "round": 1,
+          "serial": false,
+          "pair_step": 1,
+          "ns": 692552,
+          "enabled": 698124,
+          "running": 698124,
+          "metrics": {
+            "0x11": 1901939,
+            "0x8": 524545,
+            "0x3": 262143,
+            "0x17": 2071,
+            "0x34": 0,
+            "0x37": 1
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        },
+        {
+          "type": "round",
+          "round": 2,
+          "serial": false,
+          "pair_step": 0,
+          "ns": 693334,
+          "enabled": 698593,
+          "running": 698593,
+          "metrics": {
+            "0x11": 1903940,
+            "0x8": 524545,
+            "0x3": 262155,
+            "0x17": 2144,
+            "0x34": 0,
+            "0x37": 1
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        },
+        {
+          "type": "round",
+          "round": 2,
+          "serial": true,
+          "pair_step": 1,
+          "ns": 1362761,
+          "enabled": 1368232,
+          "running": 1368232,
+          "metrics": {
+            "0x11": 3741999,
+            "0x8": 524545,
+            "0x3": 262151,
+            "0x17": 2195,
+            "0x34": 0,
+            "0x37": 0
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        }
+      ],
+      "descriptive_only": {
+        "members": {
+          "P": {
+            "cycles_per_iteration": [
+              14.620429992675781,
+              14.510643005371094,
+              14.525909423828125
+            ],
+            "counts_per_iteration": {
+              "0x11": [
+                14.620429992675781,
+                14.510643005371094,
+                14.525909423828125
+              ],
+              "0x8": [
+                4.001960754394531,
+                4.001960754394531,
+                4.001960754394531
+              ],
+              "0x3": [
+                1.9974594116210938,
+                1.9999923706054688,
+                2.0000839233398438
+              ],
+              "0x17": [
+                0.01674652099609375,
+                0.01580047607421875,
+                0.016357421875
+              ],
+              "0x34": [
+                7.62939453125e-06,
+                0.0,
+                0.0
+              ],
+              "0x37": [
+                5.340576171875e-05,
+                7.62939453125e-06,
+                7.62939453125e-06
+              ]
+            },
+            "cycle_median": 14.525909423828125,
+            "cycle_range_over_median": 0.007558011281868126
+          },
+          "S": {
+            "cycles_per_iteration": [
+              28.853126525878906,
+              28.73509979248047,
+              28.54918670654297
+            ],
+            "counts_per_iteration": {
+              "0x11": [
+                28.853126525878906,
+                28.73509979248047,
+                28.54918670654297
+              ],
+              "0x8": [
+                4.001960754394531,
+                4.001960754394531,
+                4.001960754394531
+              ],
+              "0x3": [
+                1.99749755859375,
+                2.0000839233398438,
+                2.0000534057617188
+              ],
+              "0x17": [
+                0.02104949951171875,
+                0.018280029296875,
+                0.01674652099609375
+              ],
+              "0x34": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "0x37": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "cycle_median": 28.73509979248047,
+            "cycle_range_over_median": 0.01057730168090364
+          }
+        },
+        "serial_over_parallel": [
+          1.9734800235241443,
+          1.9802774957556473,
+          1.9653975440402534
+        ],
+        "hot_LL_miss_rate_max": 5.340576171875e-05,
+        "qualification": null
+      }
+    },
+    {
+      "condition": "e0-miss-m256-n0",
+      "exit_code": 1,
+      "timed_out": false,
+      "wall_seconds": 0.21143216593191028,
+      "stdout_sha256": "7576236a5c4a188b13893fadb36edcb23bc1f5d947eef2d524b3de28ba5fee00",
+      "stderr_sha256": "14880b4f2035a7d939a02c9a16d67081162654b9e8014a28b10aec67fd9f4681",
+      "config": {
+        "type": "config",
+        "version": 2,
+        "class": "nop",
+        "anchor": "miss",
+        "n": 0,
+        "iterations": 2097152,
+        "rounds": 3,
+        "serial": false,
+        "paired": true,
+        "asymmetric": false,
+        "chain": 8,
+        "fsqrt_operand_bits": "0x3ff0000000000000",
+        "loop_offset": 64,
+        "loop_mod64": 0,
+        "branch_offset": 76,
+        "loop_instructions": 4,
+        "fillers_per_iteration": 0,
+        "anchors_per_iteration": 2,
+        "code_bytes": 84,
+        "memory_bytes": 268435456,
+        "backing_requested": "thp2m",
+        "chase_seed": 42,
+        "pmu_type": 8,
+        "exclude_kernel": true,
+        "exclude_hv": true,
+        "events": [
+          17,
+          8,
+          3,
+          23,
+          52,
+          55
+        ],
+        "collapse_requested": true
+      },
+      "generated_code": {
+        "parallel": {
+          "sha256": "a4b0acfd3d5425d45570d0fe2a16116f276ed18df193c7303bd27eca820b22ce",
+          "code_bytes": 84,
+          "encoding_verified": true
+        },
+        "serial": {
+          "sha256": "bc4e1aff0023d06ac0b163f57a40493501a0d8f6068a9839c6ef51ea83031568",
+          "code_bytes": 84,
+          "encoding_verified": true
+        }
+      },
+      "status": "initial-collapse-syscall-failure",
+      "runtime_observed": false,
+      "runtime": null,
+      "rounds_observed": 0,
+      "windows": [],
+      "failure": {
+        "type": "failure",
+        "metrics": {},
+        "failure": {
+          "reason": "collapse-syscall"
+        }
+      },
+      "stderr": "error[collapse-syscall]: Out of memory\n",
+      "collapse_requested": true,
+      "collapse_observation": {
+        "type": "backing-collapse",
+        "memory_bytes": 268435456,
+        "pmd_bytes": 2097152,
+        "return_code": -1,
+        "errno": 12,
+        "before_status": "coverage-mismatch",
+        "after_status": "coverage-mismatch",
+        "before": {
+          "kernel_page_kb": 4,
+          "mmu_page_kb": 4,
+          "anon_huge_kb": 227328,
+          "rss_kb": 262144,
+          "swap_kb": 0,
+          "no_huge": false
+        },
+        "after": {
+          "kernel_page_kb": 4,
+          "mmu_page_kb": 4,
+          "anon_huge_kb": 243712,
+          "rss_kb": 262144,
+          "swap_kb": 0,
+          "no_huge": false
+        }
+      },
+      "failed_smaps_observation": null,
+      "interpretation": "One local collapse syscall returned ENOMEM; parsed initial coverage remains incomplete. This does not establish global memory exhaustion or physical fragmentation."
+    }
+  ],
+  "environment": {
+    "endpoint_count": 5,
+    "expected_endpoint_names": [
+      "e0-miss-m1-n0-post-environment.json",
+      "e0-miss-m1-n0-pre-environment.json",
+      "e0-miss-m256-n0-pre-environment.json",
+      "final-environment.json",
+      "initial-environment.json"
+    ],
+    "preconditions_and_stability_recomputed": true,
+    "profile_source": {
+      "commit": "68f0991c7b9a54915bea6ee1a3cc95e88f9fe775",
+      "path": "configs/platforms/redmi-k70pro-01.json",
+      "sha256": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658",
+      "overrides": {
+        "preconditions.cpufreq_governor": "walt"
+      }
+    },
+    "policy_sha256": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "max_cpu_c_range": [
+      38.4,
+      41.5
+    ],
+    "final_violations": [],
+    "final_warnings": [],
+    "final_max_cpu_c": 41.5
+  },
+  "backing_observations_verified_completed_prefix": 13,
+  "retired_minus_generated_kernel_range_completed_prefix": [
+    240,
+    240
+  ],
+  "complete_consumers_rejection": {
+    "complete_summary_cli": {
+      "exit_code": 1,
+      "output_written": false,
+      "exception": "AssertionError",
+      "failed_contract": "complete status and full result count",
+      "science_gates_evaluated": false
+    },
+    "complete_analysis_cli": {
+      "exit_code": 1,
+      "output_written": false,
+      "exception": "AssertionError",
+      "failed_contract": "complete status and full result count",
+      "science_gates_evaluated": false
+    },
+    "pure_qualifier_incomplete_prefix": {
+      "exception": "ValueError",
+      "reason": "qualification mode/process mismatch",
+      "science_gates_evaluated": false
+    }
+  },
+  "raw_file_sha256": {
+    "driver.py": "f7bf163ddaf43d1a62ffb3d6741ea6f5cac4292856e4673106963c7efdc7e8af",
+    "e0-miss-m1-n0-parallel.bin": "a4b0acfd3d5425d45570d0fe2a16116f276ed18df193c7303bd27eca820b22ce",
+    "e0-miss-m1-n0-post-environment.json": "182519ae11e093ae270b12760e447f3cce92146f9bdb045acb4362ae8029a951",
+    "e0-miss-m1-n0-pre-environment.json": "c24797b236de7cc8b485dc3f098c50ba4c1dd53bd0e8a0bf3c214749bcbecce8",
+    "e0-miss-m1-n0-serial.bin": "bc4e1aff0023d06ac0b163f57a40493501a0d8f6068a9839c6ef51ea83031568",
+    "e0-miss-m1-n0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e0-miss-m1-n0.stdout.jsonl": "14e5a1dffe305611f53a508a2e7870dc29ada185a8dc7b12e09aa92db8321e4d",
+    "e0-miss-m256-n0-parallel.bin": "a4b0acfd3d5425d45570d0fe2a16116f276ed18df193c7303bd27eca820b22ce",
+    "e0-miss-m256-n0-pre-environment.json": "5c41c063236f905e68151042c5b5d8c5644e7020542c692f00039c3b92dea1d4",
+    "e0-miss-m256-n0-serial.bin": "bc4e1aff0023d06ac0b163f57a40493501a0d8f6068a9839c6ef51ea83031568",
+    "e0-miss-m256-n0.stderr.log": "14880b4f2035a7d939a02c9a16d67081162654b9e8014a28b10aec67fd9f4681",
+    "e0-miss-m256-n0.stdout.jsonl": "7576236a5c4a188b13893fadb36edcb23bc1f5d947eef2d524b3de28ba5fee00",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "final-environment.json": "b5b51c298cf9df18fbf771e85382558277d75f3185a50ec2a6a0905ed020e62c",
+    "initial-environment.json": "715db3dc4aa4d53a303a55497ce8b1371e0e206e94e6d99c2882c93495eccc9b",
+    "manifest.json": "b767853cec1bdcc80f70614c026967b4f964ce0096396a1a22a6402045cdc1d9"
+  },
+  "local_collapse": {
+    "requests_observed": 1,
+    "successful_requests": 0,
+    "return_code": -1,
+    "errno": 12,
+    "errno_name": "ENOMEM",
+    "before_anon_huge_mib": 222,
+    "after_anon_huge_mib": 238,
+    "before_rss_minus_anon_huge_mib": 34,
+    "after_rss_minus_anon_huge_mib": 18,
+    "before_anon_huge_fraction_of_rss": 0.8671875,
+    "after_anon_huge_fraction_of_rss": 0.9296875,
+    "coverage_gate_passed_before": false,
+    "coverage_gate_passed_after": false
+  },
+  "interpretation_limits": [
+    "No long-load PMU window or epoch1; no complete qualification or N scan eligibility.",
+    "The single local MADV_COLLAPSE request returned ENOMEM; the observed post mapping still lacks full AnonHugePages coverage.",
+    "Before/after aggregate fields do not establish global memory exhaustion, physical fragmentation, or exact page-level causes.",
+    "Neither earlier uninstrumented failures nor the earlier observer can be assigned this current syscall cause.",
+    "The failed request is not retried or ignored; old prefixes cannot replace this registered two-epoch matrix."
+  ]
+}
