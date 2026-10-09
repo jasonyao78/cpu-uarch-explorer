@@ -1,0 +1,732 @@
+{
+  "purpose": "Audit stopped fixed-256 THP raw prefix and initial failure; no complete scientific qualification is evaluated.",
+  "data_origin": "device-raw",
+  "mode": "rob-miss-fixed-thp",
+  "raw_directory": "20261009T090043Z-rob-miss-fixed-thp",
+  "status": "stopped",
+  "stop_reason": "STOP probe failure e0-miss-m256-n0",
+  "batch_technical_acceptance": false,
+  "completed_prefix_technical_audit_passed": true,
+  "stop_discipline_verified": true,
+  "scientific_qualification": "not-evaluable-incomplete-matrix",
+  "n_scan_eligible": false,
+  "gate_source_reference_only": {
+    "commit": "c93e788a31c077f5575ef6139157b8fe3185bc0f",
+    "path": "docs/design/2026-10-09-long-load-qualification.md",
+    "sha256": "7de293eff7033316c2f46a77025a688c7a26e3b6efe37ebe6f5b16b57a53d943"
+  },
+  "source_bindings": {
+    "source_head": "c2a44d2115103c39f66df2415fb22a31b04af7e0",
+    "binary_source_head": "2a37795107163a9c3effd8fc3e25410c0dd75695",
+    "binary_sha256": "afeafad4b9538768efacddf07ee50b5ba6b8795c70fdf5e070b246c5d1f7b161",
+    "driver_sha256": "662e49775be5909919fd809200668a56397967723f11a8bc7dd8f872d3437272",
+    "build_evidence_path": "docs/reviews/evidence/2026-10-09-long-load-fixed/build.json",
+    "build_evidence_sha256": "08928b5d741df316d28897dda82103d6fafbbef924536febeeef7a9fa9bddf7a",
+    "protocol_path": "docs/design/2026-10-09-fixed-load-qualification.md",
+    "protocol_sha256": "221e49b0165fa57efd9a86c4132c61ca87ed199d65c3cad8853f10fdab07cd89"
+  },
+  "source_bindings_verified": true,
+  "build_source_sha256": {
+    "docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c": "1e5509ed0ab4a8c0444fd68a1f90dabb4ea508390c5c28fd220c352558f9146c",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/rob_backing.h": "0f35ea4250d4050e5923058a4ea6268e041107e1897511ef9e794e356ac5a8ef"
+  },
+  "binary_binding_limit": "Registered binary digest and launch driver deployment SHA check are verified from committed driver/source; the stopped raw directory does not retain a binary copy for independent post-run hashing.",
+  "matrix": {
+    "registered_conditions": [
+      {
+        "name": "e0-miss-m1-n0",
+        "args": [
+          "-i",
+          "131072",
+          "-r",
+          "3",
+          "--pin",
+          "7",
+          "--pmu-type",
+          "8",
+          "-e",
+          "0x03",
+          "-e",
+          "0x17",
+          "-e",
+          "0x34",
+          "-e",
+          "0x37",
+          "--backing",
+          "4k",
+          "-t",
+          "nop",
+          "-n",
+          "0",
+          "-a",
+          "miss",
+          "-m",
+          "1",
+          "--paired"
+        ]
+      },
+      {
+        "name": "e0-miss-m256-n0",
+        "args": [
+          "-i",
+          "2097152",
+          "-r",
+          "3",
+          "--pin",
+          "7",
+          "--pmu-type",
+          "8",
+          "-e",
+          "0x03",
+          "-e",
+          "0x17",
+          "-e",
+          "0x34",
+          "-e",
+          "0x37",
+          "--backing",
+          "thp2m",
+          "-t",
+          "nop",
+          "-n",
+          "0",
+          "-a",
+          "miss",
+          "-m",
+          "256",
+          "--paired"
+        ]
+      },
+      {
+        "name": "e1-miss-m256-n0",
+        "args": [
+          "-i",
+          "2097152",
+          "-r",
+          "3",
+          "--pin",
+          "7",
+          "--pmu-type",
+          "8",
+          "-e",
+          "0x03",
+          "-e",
+          "0x17",
+          "-e",
+          "0x34",
+          "-e",
+          "0x37",
+          "--backing",
+          "thp2m",
+          "-t",
+          "nop",
+          "-n",
+          "0",
+          "-a",
+          "miss",
+          "-m",
+          "256",
+          "--paired"
+        ]
+      },
+      {
+        "name": "e1-miss-m1-n0",
+        "args": [
+          "-i",
+          "131072",
+          "-r",
+          "3",
+          "--pin",
+          "7",
+          "--pmu-type",
+          "8",
+          "-e",
+          "0x03",
+          "-e",
+          "0x17",
+          "-e",
+          "0x34",
+          "-e",
+          "0x37",
+          "--backing",
+          "4k",
+          "-t",
+          "nop",
+          "-n",
+          "0",
+          "-a",
+          "miss",
+          "-m",
+          "1",
+          "--paired"
+        ]
+      }
+    ],
+    "attempted_conditions": [
+      "e0-miss-m1-n0",
+      "e0-miss-m256-n0"
+    ],
+    "completed_conditions": [
+      "e0-miss-m1-n0"
+    ],
+    "failed_conditions": [
+      "e0-miss-m256-n0"
+    ],
+    "unattempted_conditions": [
+      "e1-miss-m256-n0",
+      "e1-miss-m1-n0"
+    ],
+    "registered_processes": 4,
+    "attempted_processes": 2,
+    "completed_processes": 1,
+    "registered_windows": 24,
+    "completed_windows": 6,
+    "long_load_windows": 0,
+    "epoch1_windows": 0
+  },
+  "processes": [
+    {
+      "condition": "e0-miss-m1-n0",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_seconds": 0.08965545892715454,
+      "stdout_sha256": "7df0383bb747ce02f7e4df6a39852a6764db663b580f8067f97e74ff48032167",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "config": {
+        "type": "config",
+        "version": 2,
+        "class": "nop",
+        "anchor": "miss",
+        "n": 0,
+        "iterations": 131072,
+        "rounds": 3,
+        "serial": false,
+        "paired": true,
+        "asymmetric": false,
+        "chain": 8,
+        "fsqrt_operand_bits": "0x3ff0000000000000",
+        "loop_offset": 64,
+        "loop_mod64": 0,
+        "branch_offset": 76,
+        "loop_instructions": 4,
+        "fillers_per_iteration": 0,
+        "anchors_per_iteration": 2,
+        "code_bytes": 84,
+        "memory_bytes": 1048576,
+        "backing_requested": "4k",
+        "chase_seed": 42,
+        "pmu_type": 8,
+        "exclude_kernel": true,
+        "exclude_hv": true,
+        "events": [
+          17,
+          8,
+          3,
+          23,
+          52,
+          55
+        ]
+      },
+      "generated_code": {
+        "parallel": {
+          "sha256": "a4b0acfd3d5425d45570d0fe2a16116f276ed18df193c7303bd27eca820b22ce",
+          "code_bytes": 84,
+          "encoding_verified": true
+        },
+        "serial": {
+          "sha256": "bc4e1aff0023d06ac0b163f57a40493501a0d8f6068a9839c6ef51ea83031568",
+          "code_bytes": 84,
+          "encoding_verified": true
+        }
+      },
+      "status": "completed-prefix-only",
+      "runtime_observed": true,
+      "runtime": {
+        "type": "runtime",
+        "fpcr": 0,
+        "cpu": 7,
+        "loop_address_mod64": 0,
+        "ring_nodes": 16384,
+        "distinct_lines_per_call": 16384,
+        "mapping_4k_verified": true,
+        "backing_verified": true,
+        "backing_page_bytes": 4096,
+        "backing_info": {
+          "kernel_page_kb": 4,
+          "mmu_page_kb": 4,
+          "anon_huge_kb": 0,
+          "rss_kb": 1024,
+          "swap_kb": 0,
+          "no_huge": true
+        },
+        "event_ids": [
+          16722,
+          16723,
+          16724,
+          16725,
+          16726,
+          16727
+        ]
+      },
+      "rounds_observed": 6,
+      "windows": [
+        {
+          "type": "round",
+          "round": 0,
+          "serial": false,
+          "pair_step": 0,
+          "ns": 737813,
+          "enabled": 745833,
+          "running": 745833,
+          "metrics": {
+            "0x11": 2028968,
+            "0x8": 524544,
+            "0x3": 262145,
+            "0x17": 5293,
+            "0x34": 8,
+            "0x37": 1
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        },
+        {
+          "type": "round",
+          "round": 0,
+          "serial": true,
+          "pair_step": 1,
+          "ns": 1389115,
+          "enabled": 1395365,
+          "running": 1395365,
+          "metrics": {
+            "0x11": 3783584,
+            "0x8": 524544,
+            "0x3": 262151,
+            "0x17": 2622,
+            "0x34": 2,
+            "0x37": 2
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        },
+        {
+          "type": "round",
+          "round": 1,
+          "serial": true,
+          "pair_step": 0,
+          "ns": 1476562,
+          "enabled": 1481875,
+          "running": 1481875,
+          "metrics": {
+            "0x11": 3915724,
+            "0x8": 524544,
+            "0x3": 262153,
+            "0x17": 5106,
+            "0x34": 4,
+            "0x37": 0
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        },
+        {
+          "type": "round",
+          "round": 1,
+          "serial": false,
+          "pair_step": 1,
+          "ns": 688958,
+          "enabled": 694220,
+          "running": 694220,
+          "metrics": {
+            "0x11": 1891799,
+            "0x8": 524544,
+            "0x3": 262149,
+            "0x17": 1480,
+            "0x34": 5,
+            "0x37": 0
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        },
+        {
+          "type": "round",
+          "round": 2,
+          "serial": false,
+          "pair_step": 0,
+          "ns": 686355,
+          "enabled": 692188,
+          "running": 692188,
+          "metrics": {
+            "0x11": 1884795,
+            "0x8": 524544,
+            "0x3": 262146,
+            "0x17": 1168,
+            "0x34": 4,
+            "0x37": 0
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        },
+        {
+          "type": "round",
+          "round": 2,
+          "serial": true,
+          "pair_step": 1,
+          "ns": 1396198,
+          "enabled": 1401614,
+          "running": 1401614,
+          "metrics": {
+            "0x11": 3833618,
+            "0x8": 524544,
+            "0x3": 262156,
+            "0x17": 3650,
+            "0x34": 1,
+            "0x37": 0
+          },
+          "backing_verified": true,
+          "backing_before": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          },
+          "backing_after": {
+            "kernel_page_kb": 4,
+            "mmu_page_kb": 4,
+            "anon_huge_kb": 0,
+            "rss_kb": 1024,
+            "swap_kb": 0,
+            "no_huge": true
+          }
+        }
+      ],
+      "descriptive_only": {
+        "members": {
+          "P": {
+            "cycles_per_iteration": [
+              15.47979736328125,
+              14.433280944824219,
+              14.379844665527344
+            ],
+            "counts_per_iteration": {
+              "0x11": [
+                15.47979736328125,
+                14.433280944824219,
+                14.379844665527344
+              ],
+              "0x8": [
+                4.001953125,
+                4.001953125,
+                4.001953125
+              ],
+              "0x3": [
+                2.0000076293945312,
+                2.0000381469726562,
+                2.0000152587890625
+              ],
+              "0x17": [
+                0.04038238525390625,
+                0.01129150390625,
+                0.0089111328125
+              ],
+              "0x34": [
+                6.103515625e-05,
+                3.814697265625e-05,
+                3.0517578125e-05
+              ],
+              "0x37": [
+                7.62939453125e-06,
+                0.0,
+                0.0
+              ]
+            },
+            "cycle_median": 14.433280944824219,
+            "cycle_range_over_median": 0.07620947045642798
+          },
+          "S": {
+            "cycles_per_iteration": [
+              28.866455078125,
+              29.874603271484375,
+              29.248184204101562
+            ],
+            "counts_per_iteration": {
+              "0x11": [
+                28.866455078125,
+                29.874603271484375,
+                29.248184204101562
+              ],
+              "0x8": [
+                4.001953125,
+                4.001953125,
+                4.001953125
+              ],
+              "0x3": [
+                2.0000534057617188,
+                2.0000686645507812,
+                2.000091552734375
+              ],
+              "0x17": [
+                0.0200042724609375,
+                0.0389556884765625,
+                0.0278472900390625
+              ],
+              "0x34": [
+                1.52587890625e-05,
+                3.0517578125e-05,
+                7.62939453125e-06
+              ],
+              "0x37": [
+                1.52587890625e-05,
+                0.0,
+                0.0
+              ]
+            },
+            "cycle_median": 29.248184204101562,
+            "cycle_range_over_median": 0.03446874466887415
+          }
+        },
+        "serial_over_parallel": [
+          1.8647824904089172,
+          2.069841457787006,
+          2.033970803190798
+        ],
+        "hot_LL_miss_rate_max": 1.52587890625e-05,
+        "qualification": null
+      }
+    },
+    {
+      "condition": "e0-miss-m256-n0",
+      "exit_code": 1,
+      "timed_out": false,
+      "wall_seconds": 0.17265233304351568,
+      "stdout_sha256": "833bba3a7605b4e108c63022389e82fe4d1ff375c5986e6ef46dc791448c150e",
+      "stderr_sha256": "8d09cda104a7a0dc94a67e98ab4eb26ca5e347b7a7933e1a8d1c638488c486b4",
+      "config": {
+        "type": "config",
+        "version": 2,
+        "class": "nop",
+        "anchor": "miss",
+        "n": 0,
+        "iterations": 2097152,
+        "rounds": 3,
+        "serial": false,
+        "paired": true,
+        "asymmetric": false,
+        "chain": 8,
+        "fsqrt_operand_bits": "0x3ff0000000000000",
+        "loop_offset": 64,
+        "loop_mod64": 0,
+        "branch_offset": 76,
+        "loop_instructions": 4,
+        "fillers_per_iteration": 0,
+        "anchors_per_iteration": 2,
+        "code_bytes": 84,
+        "memory_bytes": 268435456,
+        "backing_requested": "thp2m",
+        "chase_seed": 42,
+        "pmu_type": 8,
+        "exclude_kernel": true,
+        "exclude_hv": true,
+        "events": [
+          17,
+          8,
+          3,
+          23,
+          52,
+          55
+        ]
+      },
+      "generated_code": {
+        "parallel": {
+          "sha256": "a4b0acfd3d5425d45570d0fe2a16116f276ed18df193c7303bd27eca820b22ce",
+          "code_bytes": 84,
+          "encoding_verified": true
+        },
+        "serial": {
+          "sha256": "bc4e1aff0023d06ac0b163f57a40493501a0d8f6068a9839c6ef51ea83031568",
+          "code_bytes": 84,
+          "encoding_verified": true
+        }
+      },
+      "status": "initial-backing-failure",
+      "runtime_observed": false,
+      "runtime": null,
+      "rounds_observed": 0,
+      "windows": [],
+      "failure": {
+        "type": "failure",
+        "metrics": {},
+        "failure": {
+          "reason": "chase-backing-not-thp2m"
+        }
+      },
+      "stderr": "error[chase-backing-not-thp2m]: Invalid argument\n",
+      "failed_backing_observation": null,
+      "failed_smaps_observation": null,
+      "interpretation": "Failure subcause is unrecorded; full/partial THP, exact VMA, parser or another acceptance condition cannot be distinguished."
+    }
+  ],
+  "environment": {
+    "endpoint_count": 5,
+    "expected_endpoint_names": [
+      "e0-miss-m1-n0-post-environment.json",
+      "e0-miss-m1-n0-pre-environment.json",
+      "e0-miss-m256-n0-pre-environment.json",
+      "final-environment.json",
+      "initial-environment.json"
+    ],
+    "preconditions_and_stability_recomputed": true,
+    "profile_source": {
+      "commit": "c2a44d2115103c39f66df2415fb22a31b04af7e0",
+      "path": "configs/platforms/redmi-k70pro-01.json",
+      "sha256": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658",
+      "overrides": {
+        "preconditions.cpufreq_governor": "walt"
+      }
+    },
+    "policy_sha256": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "max_cpu_c_range": [
+      38.0,
+      41.1
+    ],
+    "final_violations": [],
+    "final_warnings": [],
+    "final_max_cpu_c": 41.1
+  },
+  "backing_observations_verified_completed_prefix": 13,
+  "retired_minus_generated_kernel_range_completed_prefix": [
+    239,
+    239
+  ],
+  "complete_consumers_rejection": {
+    "complete_summary_cli": {
+      "exit_code": 1,
+      "output_written": false,
+      "exception": "AssertionError",
+      "failed_contract": "complete status and full result count",
+      "science_gates_evaluated": false
+    },
+    "complete_analysis_cli": {
+      "exit_code": 1,
+      "output_written": false,
+      "exception": "AssertionError",
+      "failed_contract": "complete status and full result count",
+      "science_gates_evaluated": false
+    },
+    "pure_qualifier_incomplete_prefix": {
+      "exception": "ValueError",
+      "reason": "qualification mode/process mismatch",
+      "science_gates_evaluated": false
+    }
+  },
+  "comparison_to_previous_512_failure": {
+    "raw_directory": "20261009T035527Z-rob-miss-wide-thp",
+    "manifest_sha256": "2b7a8222e911c486556b28f90055d86910801e6277b36945c568201a9fcfaa16",
+    "stdout_sha256": "8e5b56a5318a374ad781226ba08c4e0f947cc7cade8f8bd51da92a8caa07811b",
+    "stderr_sha256": "8d09cda104a7a0dc94a67e98ab4eb26ca5e347b7a7933e1a8d1c638488c486b4",
+    "same_binary": true,
+    "same_failure_record": true,
+    "same_stderr": true,
+    "same_root_cause_established": false
+  },
+  "raw_file_sha256": {
+    "driver.py": "662e49775be5909919fd809200668a56397967723f11a8bc7dd8f872d3437272",
+    "e0-miss-m1-n0-parallel.bin": "a4b0acfd3d5425d45570d0fe2a16116f276ed18df193c7303bd27eca820b22ce",
+    "e0-miss-m1-n0-post-environment.json": "7825395f67de6edf70c576fc2e1057532360aaadd24ad7a0e2124ba512b67627",
+    "e0-miss-m1-n0-pre-environment.json": "33eafda42e8179abe5b2d98985e4b80825b7c3d642f1dce6c0b291ee4cf5f064",
+    "e0-miss-m1-n0-serial.bin": "bc4e1aff0023d06ac0b163f57a40493501a0d8f6068a9839c6ef51ea83031568",
+    "e0-miss-m1-n0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e0-miss-m1-n0.stdout.jsonl": "7df0383bb747ce02f7e4df6a39852a6764db663b580f8067f97e74ff48032167",
+    "e0-miss-m256-n0-parallel.bin": "a4b0acfd3d5425d45570d0fe2a16116f276ed18df193c7303bd27eca820b22ce",
+    "e0-miss-m256-n0-pre-environment.json": "0a5497a601aad2364650aa89dc11de5ddcc9757b3ba2fe3b33b320ba26f3fec6",
+    "e0-miss-m256-n0-serial.bin": "bc4e1aff0023d06ac0b163f57a40493501a0d8f6068a9839c6ef51ea83031568",
+    "e0-miss-m256-n0.stderr.log": "8d09cda104a7a0dc94a67e98ab4eb26ca5e347b7a7933e1a8d1c638488c486b4",
+    "e0-miss-m256-n0.stdout.jsonl": "833bba3a7605b4e108c63022389e82fe4d1ff375c5986e6ef46dc791448c150e",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "final-environment.json": "94fb5c6bc3b9a51cef3dd1a62bbd04d174f350b1f0fe3aef8d40d5a1622684c3",
+    "initial-environment.json": "190641e91e41c64b40279ea0bf11b3728ca865e11992917fa936750ca89c16f3",
+    "manifest.json": "73783b49552f6020a3430850173cf9c2740b9d98bb96da3a3a6e670192b816c0"
+  },
+  "interpretation_limits": [
+    "No long-load PMU window or epoch1; no complete qualification or N scan eligibility.",
+    "256MiB has no runtime/backing-info or failed smaps; the specific failure subcause is unrecorded.",
+    "Same reason as previous512MiB does not establish same root cause or partialTHP.",
+    "Neither previous256MiB prefix nor current hot control can replace the registered fixed matrix."
+  ]
+}
