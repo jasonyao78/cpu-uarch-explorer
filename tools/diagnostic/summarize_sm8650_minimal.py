@@ -9,10 +9,19 @@ import statistics as st
 import subprocess
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
-from tools.diagnostic.run_sm8650_minimal import conditions, validate_realized, OLD_PROTOCOL, binary_name
+from tools.diagnostic.run_sm8650_minimal import conditions, validate_realized, OLD_PROTOCOL, binary_name, NEW_EVIDENCE, NEW_PROTOCOL
 
 
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def require_registered_evidence(manifest):
+    """New protocols require their committed build path; legacy optionality stays legacy."""
+    mode=manifest['mode']
+    if mode in NEW_EVIDENCE:
+        expected='docs/reviews/evidence/'+NEW_EVIDENCE[mode]+'/build.json'
+        assert manifest.get('build_evidence_path')==expected, 'required registered build path'
+        assert manifest.get('protocol_path')==NEW_PROTOCOL[mode], 'required registered protocol path'
 
 
 def validate_backing(config, runtime, rounds):
@@ -37,6 +46,7 @@ def validate_backing(config, runtime, rounds):
 
 def summarize(path):
     m=json.loads((path/'manifest.json').read_text())
+    require_registered_evidence(m)
     assert m['status']=='complete' and len(m['results'])==len(m['conditions'])
     registered=[{'name':n,'args':a} for n,a in conditions(m['mode'])]
     assert m['conditions']==registered, 'conditions differ from registered matrix'
@@ -53,11 +63,14 @@ def summarize(path):
         build=json.loads(build_blob)
         assert build['binaries'][binary_name(m['mode'])]==m['binary_sha256'] and build['source_commit']==m['binary_source_head']
         for rel,digest in build['source_sha256'].items():
+            if m['mode'] in NEW_EVIDENCE:
+                assert hashlib.sha256(subprocess.check_output(['git','show',m['binary_source_head']+':'+rel],cwd=root)).hexdigest()==digest
             assert hashlib.sha256(subprocess.check_output(['git','show',m['source_head']+':'+rel],cwd=root)).hexdigest()==digest
     if m['mode'].startswith('tlb'):
         assert m.get('tlb_target',int(registered[0]['args'][0]))==int(registered[0]['args'][0]), 'manifest target'
     history_plan=None
     if m['mode']=='tlb-history':
+        assert m['plan_path']==build['plan_path']
         plan_blob=subprocess.check_output(['git','show',m['source_head']+':'+m['plan_path']],cwd=root)
         assert hashlib.sha256(plan_blob).hexdigest()==m['plan_sha256']==build['plan_sha256']
         history_plan=json.loads(plan_blob)

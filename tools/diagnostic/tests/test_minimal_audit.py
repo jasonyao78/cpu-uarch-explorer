@@ -120,6 +120,21 @@ class ThpQualification(unittest.TestCase):
             with self.assertRaises(ValueError): driver.validate_realized('rob-miss-qualify-thp',opts,[config])
 
 
+class RegisteredEvidence(unittest.TestCase):
+    def test_new_mode_cannot_omit_or_substitute_build(self):
+        for mode in ('tlb-history','rob-miss-qualify-thp'):
+            m={'mode':mode,'protocol_path':driver.NEW_PROTOCOL[mode]}
+            for path in (None,driver.BUILD_EVIDENCE):
+                if path is not None: m['build_evidence_path']=path
+                with self.assertRaises(AssertionError): audit.require_registered_evidence(m)
+            m['build_evidence_path']='docs/reviews/evidence/'+driver.NEW_EVIDENCE[mode]+'/build.json'
+            audit.require_registered_evidence(m)
+            m['protocol_path']=driver.OLD_PROTOCOL
+            with self.assertRaises(AssertionError): audit.require_registered_evidence(m)
+    def test_legacy_manifest_shape_stays_readable(self):
+        audit.require_registered_evidence({'mode':'rob-qualify'})
+
+
 class BackingConsumption(unittest.TestCase):
     def fixture(self):
         info={'rss_kb':65536,'swap_kb':0,'anon_huge_kb':65536,'kernel_page_kb':4,'mmu_page_kb':4,'no_huge':False}
