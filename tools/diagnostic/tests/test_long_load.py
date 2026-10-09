@@ -43,6 +43,19 @@ def synthetic_run():
     return {'mode': 'rob-miss-qualify', 'processes': 6, 'rows': rows}
 
 
+def synthetic_wide_run():
+    """大足迹新 mode 的虚构完整输入；不改变旧64/128夹具。"""
+    run = synthetic_run()
+    run['mode'] = 'rob-miss-wide-thp'
+    for row in run['rows']:
+        mb = row['memory_bytes'] // 1048576
+        mb = {1: 1, 64: 256, 128: 512}[mb]
+        row.update(memory_bytes=mb * 1048576,
+                   condition=f'e{row["epoch"]}-miss-m{mb}-n0',
+                   iterations=max(131072, mb * 8192))
+    return run
+
+
 class LongLoadTests(unittest.TestCase):
     """所有数字均 synthetic，只证明计算器契约，不证明硬件资格。"""
 
@@ -189,6 +202,66 @@ class LongLoadTests(unittest.TestCase):
         result = qualify(run, mode='rob-miss-qualify-thp')
         self.assertTrue(result['qualified'])
         self.assertEqual(result['gate_source']['commit'], 'c93e788a31c077f5575ef6139157b8fe3185bc0f')
+
+    def test_wide_thp_requires_explicit_mode_and_full_new_shape(self):
+        run = synthetic_wide_run()
+        with self.assertRaises(ValueError):
+            qualify(run)
+        try:
+            result = qualify(run, mode='rob-miss-wide-thp')
+        except ValueError as exc:
+            self.fail(f'explicit wide shape is not supported: {exc}')
+        self.assertTrue(result['qualified'])
+        self.assertEqual(result['qualified_footprints_mib'], [256, 512])
+        self.assertEqual([(c['epoch'], c['memory_bytes'] // 1048576) for c in result['candidates']],
+                         [(0, 256), (0, 512), (1, 256), (1, 512)])
+        self.assertEqual(result['thresholds'], qualify(synthetic_run())['thresholds'])
+        self.assertEqual(result['gate_source'], qualify(synthetic_run())['gate_source'])
+        self.assertEqual((result['processes'], result['windows']), (6, 36))
+
+    def test_old_footprints_cannot_be_relabelled_wide_or_reverse(self):
+        run = synthetic_run()
+        run['mode'] = 'rob-miss-wide-thp'
+        with self.assertRaises(ValueError):
+            qualify(run, mode='rob-miss-wide-thp')
+        run = synthetic_wide_run()
+        run['mode'] = 'rob-miss-qualify-thp'
+        with self.assertRaises(ValueError):
+            qualify(run, mode='rob-miss-qualify-thp')
+
+    def test_wide_incomplete_or_old_iteration_count_cannot_pass(self):
+        for mutation in ('missing', 'duplicate', 'iterations', 'mixed-footprint'):
+            run = synthetic_wide_run()
+            if mutation == 'missing':
+                run['rows'].pop()
+            elif mutation == 'duplicate':
+                run['rows'][-1] = copy.deepcopy(run['rows'][0])
+            elif mutation == 'iterations':
+                run['rows'][2]['iterations'] = 524288
+            else:
+                run['rows'][2].update(memory_bytes=64 * 1048576, condition='e0-miss-m64-n0', iterations=524288)
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                qualify(run, mode='rob-miss-wide-thp')
+
+    def test_wide_scientific_gate_is_not_relaxed_for_larger_footprint(self):
+        run = synthetic_wide_run()
+        run['rows'][2]['counts_per_iteration']['0x37'][0] = 1.79999
+        try:
+            result = qualify(run, mode='rob-miss-wide-thp')
+        except ValueError as exc:
+            self.fail(f'explicit wide scientific gates are not implemented: {exc}')
+        self.assertEqual(result['qualified_footprints_mib'], [512])
+        self.assertIn('P.round0.LL_miss_rate', result['candidates'][0]['failed_gates'])
+
+    def test_archived_4k_and_thp_pure_outputs_stay_identical(self):
+        root = Path(__file__).resolve().parents[3]
+        for directory in ('2026-10-09-long-load-4k', '2026-10-09-long-load-thp'):
+            path = root / 'docs/reviews/evidence' / directory
+            run = json.loads((path / 'summary.json').read_text())['runs'][0]
+            archived = json.loads((path / 'qualification.json').read_text())
+            actual = qualify(run, mode=run['mode'])
+            with self.subTest(directory=directory):
+                self.assertEqual(actual, {key: archived[key] for key in actual})
 
     def test_zero_miss_means_are_rejected_without_nonfinite_json(self):
         run = synthetic_run()
