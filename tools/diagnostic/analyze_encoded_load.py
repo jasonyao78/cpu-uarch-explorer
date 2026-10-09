@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """审核编码双load的完整raw，再按mask独立复算原冻结资格门。
 
-契约：docs/design/2026-10-09-encoded-load-qualification.md。显式mask0
+契约：docs/design/2026-10-09-encoded-load-qualification.md，以及
+docs/design/2026-10-09-canonical-load-qualification.md。仅两个固定profile。
+显式mask0
 与非零mask均保留两条EOR；不混入旧无EOR数据，不跨编码池化科学门。
 纯qualify测试是软件证据；CLI的设备结果必须先通过完整来源/actual审核。
 """
@@ -26,6 +28,8 @@ BUILD = 'docs/reviews/evidence/2026-10-09-encoded-load/build.json'
 PLAN = 'docs/reviews/evidence/2026-10-09-encoded-load/plan.json'
 DRIVER = 'tools/diagnostic/run_sm8650_minimal.py'
 PROFILE = 'configs/platforms/redmi-k70pro-01.json'
+CANONICAL_MODE = 'rob-xor-canonical-qualify'
+SUPPORTED_MODES = (MODE, CANONICAL_MODE)
 PROBE_SOURCES = ('docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c',
                  'probes/common/perf_group_read.h', 'probes/common/rob_backing.h')
 PAIR_ORDER = ((0, False, 0), (0, True, 1), (1, True, 0),
@@ -56,9 +60,22 @@ def _fields(actual, expected, message):
     _require(all(_matches(actual.get(k), v) for k, v in expected.items()), message)
 
 
-def registered_plan():
+def _profile(mode):
+    """只选预注册的固定mask/路径；没有runtime mask或路径参数。"""
+    if mode == MODE:
+        return MASKS, PROTOCOL, BUILD, PLAN
+    if mode == CANONICAL_MODE:
+        return ((MASKS[0], '0x0000000000100000'),
+                'docs/design/2026-10-09-canonical-load-qualification.md',
+                'docs/reviews/evidence/2026-10-09-canonical-load/build.json',
+                'docs/reviews/evidence/2026-10-09-canonical-load/plan.json')
+    raise ValueError('unknown registered encoded mode')
+
+
+def registered_plan(mode=MODE):
     """独立冻结12条件及完整逆序；不从可变producer推导审计期待值。"""
-    forward = [(mb, mask) for mb in (1, 64, 128) for mask in MASKS]
+    masks, _, _, _ = _profile(mode)
+    forward = [(mb, mask) for mb in (1, 64, 128) for mask in masks]
     conditions = []
     for epoch in (0, 1):
         for mb, mask in (forward if epoch == 0 else reversed(forward)):
@@ -67,13 +84,15 @@ def registered_plan():
                     '--backing', '4k' if mb == 1 else 'thp2m', '-t', 'nop', '-n', '0', '-a', 'miss',
                     '-m', str(mb), '--paired']
             conditions.append({'name': f'e{epoch}-xor{mask[2:]}-miss-m{mb}-n0', 'args': args})
-    return {'mode': MODE, 'conditions': conditions, 'processes': 12, 'windows': 72,
-            'member_windows': 3, 'masks': list(MASKS)}
+    return {'mode': mode, 'conditions': conditions, 'processes': 12, 'windows': 72,
+            'member_windows': 3, 'masks': list(masks)}
 
 
 def _cells(run):
     """验证全部24member身份与72有限窗口；科学评分之前禁止任何缺格。"""
-    _fields(run, {'mode': MODE, 'processes': 12}, 'encoded mode/process mismatch')
+    mode = run.get('mode')
+    masks, _, _, _ = _profile(mode)
+    _fields(run, {'mode': mode, 'processes': 12}, 'encoded mode/process mismatch')
     _require(type(run.get('rows')) is list, 'encoded rows must be a list')
     cells = {}
     for row in run['rows']:
@@ -81,7 +100,7 @@ def _cells(run):
         epoch, memory, serial, mask = (row.get(k) for k in ('epoch', 'memory_bytes', 'serial', 'pointer_xor'))
         _require(type(epoch) is int and epoch in (0, 1) and type(memory) is int and
                  memory in (1048576, 64 * 1048576, 128 * 1048576) and
-                 type(serial) is bool and type(mask) is str and mask in MASKS, 'invalid encoded cell identity')
+                 type(serial) is bool and type(mask) is str and mask in masks, 'invalid encoded cell identity')
         mb = memory // 1048576
         _fields(row, {'condition': f'e{epoch}-xor{mask[2:]}-miss-m{mb}-n0', 'class': 'nop', 'anchor': 'miss',
                       'n': 0, 'chain': 8, 'loop_mod64': 0, 'chase_seed': 42,
@@ -99,7 +118,7 @@ def _cells(run):
         _require(min(row['cycles_per_iteration']) > 0 and row['cycles_per_iteration'] == rates['0x11'],
                  'invalid or inconsistent encoded cycles')
         cells[key] = row
-    expected = {(mask, e, mb * 1048576, s) for mask in MASKS for e in (0, 1)
+    expected = {(mask, e, mb * 1048576, s) for mask in masks for e in (0, 1)
                 for mb in (1, 64, 128) for s in (False, True)}
     _require(set(cells) == expected, 'encoded cell coverage mismatch')
     return cells
@@ -108,8 +127,10 @@ def _cells(run):
 def qualify(run):
     """新身份完整验收后仅作数学规范化；每mask仍独立沿c93e788原门。"""
     cells = _cells(run)
+    mode = run['mode']
+    masks, _, _, _ = _profile(mode)
     encodings, qualified = {}, []
-    for mask in MASKS:
+    for mask in masks:
         rows = []
         for epoch in (0, 1):
             for mb in (1, 64, 128):
@@ -119,21 +140,21 @@ def qualify(run):
                     rows.append(row)
         result = base_qualify({'mode': 'rob-miss-qualify', 'processes': 6, 'rows': rows})
         # 旧mode只是数学适配输入；公开结果始终保留新mode及显式编码。
-        result.update(mode=MODE, pointer_xor=mask, base_gate_mode='rob-miss-qualify')
+        result.update(mode=mode, pointer_xor=mask, base_gate_mode='rob-miss-qualify')
         encodings[mask] = result
         qualified.extend({'pointer_xor': mask, 'footprint_mib': mb} for mb in result['qualified_footprints_mib'])
     contrasts = []
     for epoch in (0, 1):
         for mb in (1, 64, 128):
             for serial in (False, True):
-                zero, nonzero = [cells[m, epoch, mb * 1048576, serial] for m in MASKS]
+                zero, nonzero = [cells[m, epoch, mb * 1048576, serial] for m in masks]
                 contrasts.append({'epoch': epoch, 'memory_bytes': mb * 1048576, 'serial': serial,
                                   'encoding_counts_per_iteration': {m: cells[m, epoch, mb * 1048576, serial]['counts_per_iteration']
-                                                                   for m in MASKS},
+                                                                   for m in masks},
                                   'counts_per_iteration_nonzero_minus_zero':
                                   {k: [b - a for a, b in zip(zero['counts_per_iteration'][k], nonzero['counts_per_iteration'][k])]
                                    for k in EVENTS}})
-    return {'mode': MODE, 'processes': 12, 'windows': 72, 'gate_source': dict(GATE_SOURCE),
+    return {'mode': mode, 'processes': 12, 'windows': 72, 'gate_source': dict(GATE_SOURCE),
             'encodings': encodings, 'mask_contrasts': contrasts, 'qualified_conditions': qualified,
             'qualified': bool(qualified), 'all_encodings_qualified': all(q['all_candidates_qualified'] for q in encodings.values()),
             'naming_limit': '仅各编码独立资格；不能认证DRAM、物理ROB或跨编码因果',
@@ -176,10 +197,12 @@ def audit_raw(path, summary):
     _require(__debug__, 'raw auditor requires Python assertions enabled')
     path = Path(path)
     manifest = json.loads((path / 'manifest.json').read_text())
-    _fields(manifest, {'mode': MODE, 'status': 'complete', 'midr': '0x410fd821', 'base_page_bytes': 4096,
-                       'protocol_path': PROTOCOL, 'build_evidence_path': BUILD, 'plan_path': PLAN},
+    mode = manifest.get('mode')
+    _, protocol_path, build_path, plan_path = _profile(mode)
+    _fields(manifest, {'mode': mode, 'status': 'complete', 'midr': '0x410fd821', 'base_page_bytes': 4096,
+                       'protocol_path': protocol_path, 'build_evidence_path': build_path, 'plan_path': plan_path},
             'encoded complete launch identity mismatch')
-    plan = registered_plan()
+    plan = registered_plan(mode)
     _require(manifest.get('conditions') == plan['conditions'], 'encoded manifest conditions mismatch')
     results = manifest.get('results')
     _require(type(results) is list and [r.get('name') for r in results] == [c['name'] for c in plan['conditions']],
@@ -187,9 +210,9 @@ def audit_raw(path, summary):
     launch, source = manifest['source_head'], manifest['binary_source_head']
     driver = (path / 'driver.py').read_bytes()
     _require(_sha(driver) == manifest['driver_sha256'] == _sha(_git_blob(launch, DRIVER)), 'driver source binding mismatch')
-    protocol_blob = _git_blob(launch, PROTOCOL)
+    protocol_blob = _git_blob(launch, protocol_path)
     _require(_sha(protocol_blob) == manifest['protocol_sha256'], 'protocol source binding mismatch')
-    build_blob = _git_blob(launch, BUILD)
+    build_blob = _git_blob(launch, build_path)
     _require(_sha(build_blob) == manifest['build_evidence_sha256'], 'build source binding mismatch')
     build = json.loads(build_blob)
     _require(build['source_commit'] == source and build['binaries']['rob_window_probe'] == manifest['binary_sha256'],
@@ -197,8 +220,8 @@ def audit_raw(path, summary):
     _require(set(build['source_sha256']) == set(PROBE_SOURCES), 'probe source coverage mismatch')
     for name, digest in build['source_sha256'].items():
         _require(_sha(_git_blob(source, name)) == digest == _sha(_git_blob(launch, name)), 'probe source binding mismatch')
-    plan_blob = _git_blob(launch, PLAN)
-    _require(build['plan_path'] == PLAN and _sha(plan_blob) == manifest['plan_sha256'] == build['plan_sha256'],
+    plan_blob = _git_blob(launch, plan_path)
+    _require(build['plan_path'] == plan_path and _sha(plan_blob) == manifest['plan_sha256'] == build['plan_sha256'],
              'plan source binding mismatch')
     actual_plan = json.loads(plan_blob)
     _require(type(actual_plan) is dict and set(actual_plan) == set(plan), 'registered plan shape mismatch')
@@ -282,9 +305,9 @@ def audit_raw(path, summary):
     return {'passed': True, 'raw_directory': path.name, 'manifest_sha256': _sha((path / 'manifest.json').read_bytes()),
             'source_head': launch, 'binary_source_head': source, 'binary_sha256': manifest['binary_sha256'],
             'source_sha256': build['source_sha256'], 'driver_sha256': _sha(driver),
-            'build_evidence_path': BUILD, 'build_evidence_sha256': _sha(build_blob),
-            'protocol_path': PROTOCOL, 'protocol_sha256': _sha(protocol_blob),
-            'plan_path': PLAN, 'plan_sha256': _sha(plan_blob), 'registered_plan': actual_plan,
+            'build_evidence_path': build_path, 'build_evidence_sha256': _sha(build_blob),
+            'protocol_path': protocol_path, 'protocol_sha256': _sha(protocol_blob),
+            'plan_path': plan_path, 'plan_sha256': _sha(plan_blob), 'registered_plan': actual_plan,
             'environment_policy_sha256': _sha((path / 'environment-policy.json').read_bytes()),
             'environment_profile_source': {'commit': launch, 'path': PROFILE, 'sha256': _sha(profile_blob),
                                            'overrides': {'preconditions.cpufreq_governor': 'walt'}},
@@ -300,11 +323,12 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('summary', type=Path)
     parser.add_argument('--raw', required=True, type=Path)
-    parser.add_argument('--mode', choices=(MODE,), default=MODE)
+    parser.add_argument('--mode', choices=SUPPORTED_MODES)
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args(argv)
     summary = json.loads(args.summary.read_text())
     technical = audit_raw(args.raw, summary)
+    _require(args.mode is None or args.mode == summary['runs'][0]['mode'], 'explicit mode differs from audited run')
     result = qualify(summary['runs'][0])
     result.update(summary_input={'path': args.summary.name if args.summary.is_absolute() else args.summary.as_posix(),
                                  'sha256': _sha(args.summary.read_bytes())}, data_origin='device-raw',
