@@ -425,3 +425,5 @@
 - **高位编码策略无资格 / ROB锚点负责人 / 触发=低位地址值域对照**：source1ef4baa/launchba9068d的 `docs/reviews/2026-10-09-encoded-load-results.md` 完整12进程72窗技术通过，两mask原c93科学资格均不通过。128MiB的P LL均值1.64–1.71/iter，不能认证预取关闭/DMP存在、DRAM或ROB。独立新协议 `docs/design/2026-10-09-canonical-load-qualification.md` 注册bit20、同binary、原门与12进程72窗；hot raw值均在自身1MiB映射外但软件先decode的残差披露，long实际2MiB块内。只允许新profile各两epoch独立合格后有限N扫描；若仍不合格，结束循环长load策略，转小型冷load机制设计并独立预注册，不跨profile救门、不追门重试。
 
 - **循环长load路线收束 / ROB锚点负责人 / 触发=single-shot冷line设计**：`docs/reviews/2026-10-09-canonical-load-results.md`（source1ef4baa/launchdca68b6）bit20独立12进程72窗技术通过、两mask原门都不合格，不再升足迹/改mask/放宽门追N扫描。下一小型single-shot方案需另立冷/热、串/并及timing/PMU窗口资格，cache维护能力与完成屏障实测后才决定N扫；DC到PoC不认证DRAM，计时wrapper与DMP/zero elision残差明示。物理ROB/PRF/RS/前端/融合沿既有OPEN，归当前端到端探针负责人。
+
+- **single-shot冷line资格 / 当前ROB探针负责人 / 触发=冻结稿通过后实施**：`docs/design/2026-10-09-cold-pair-qualification.md` 新机制2mapping/3072窗，只N0。原loop c93门与数据保持不改；精确双line、bit12 raw自指、内部CNTVCT/完成屏障、E仪器哨兵和PMU冷热差共同资格。通过后才另行有限N网格，未过则诊断cache维护/时间/层级，禁止无限加密或硬命名条目；专门事件/资源分配认证与正式runner/schema接入沿既有后置。

@@ -1,0 +1,59 @@
+{
+  "mode": "rob-cold-pair-qualify",
+  "processes": 2,
+  "windows": 3072,
+  "trials": 64,
+  "cells_per_trial": 24,
+  "masks": [
+    0,
+    4096
+  ],
+  "swaps": [
+    0,
+    1
+  ],
+  "members": [
+    "P",
+    "S",
+    "E"
+  ],
+  "states": [
+    "hot",
+    "cold"
+  ],
+  "warmup_calls": 128,
+  "n": 0,
+  "mapping_bytes": 8192,
+  "conditions": [
+    {
+      "name": "epoch-0",
+      "args": [
+        "--epoch",
+        "0",
+        "-n",
+        "0",
+        "--trials",
+        "64",
+        "--pin",
+        "7",
+        "--pmu-type",
+        "8"
+      ]
+    },
+    {
+      "name": "epoch-1",
+      "args": [
+        "--epoch",
+        "1",
+        "-n",
+        "0",
+        "--trials",
+        "64",
+        "--pin",
+        "7",
+        "--pmu-type",
+        "8"
+      ]
+    }
+  ]
+}

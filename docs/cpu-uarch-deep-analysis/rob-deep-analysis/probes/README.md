@@ -42,3 +42,20 @@ Host仅支持导出/契约检查，拒绝测量；不伪造macOS PMU。独立原
 ```
 
 N=0包含锚点真实耗时；无锚点和hot控制保留独立曲线，不统一扣底噪。NOP融合、PRF/LSQ、前端供给及锚点长度敏感性未闭合前，仅报告有效窗口响应。384为第三方候选，不作验收条件。
+
+## Single-shot小型冷line机制（2026-10-09）
+
+循环64/128MiB的无编码/高位编码/bit20编码均未满足长load资格，完整报告 `docs/reviews/2026-10-09-canonical-load-results.md`。新机制单列 `probes/diagnostic/rob_cold_pair.c`，不重写本文件旧循环producer。协议与实施计划 `docs/design/2026-10-09-cold-pair-qualification.md`，driver `tools/diagnostic/run_sm8650_cold_pair.py`，consumer `tools/diagnostic/analyze_cold_pair.py`。
+
+8KiB对齐自有两页、guard/实际4K；同映射mask0/4096的raw互链/自指，解码后同两line，冷/热和P/S/E三个角色。内部CNTVCT计时有完成屏障，whole-PMU wrapper不硬扣；不认证timer/cache维护原生执行、DRAM或物理ROB。先2mapping/3072窗只N0资格，成功后才另注册有限N扫描。host topology支持本机16KiB页，不能充当Android4KiB证据；target严格拒绝非4KiB。source与launchcommit分开记录在 `docs/reviews/evidence/2026-10-09-cold-pair/build.json` 和私有manifest，分支 `codex/sm8650-tlb-hierarchy-r2`。
+
+```sh
+clang -O2 -Wall -Wextra -Werror -Iprobes/common \
+  probes/diagnostic/rob_cold_pair.c -o /private/tmp/rob-cold-pair-exporter
+# 同NDK27.2/API34/静态/-Werror flags编译相对source路径，可重复构建核SHA。
+.venv/bin/python -m unittest tools.diagnostic.tests.test_cold_pair_producer \
+  tools.diagnostic.tests.test_cold_pair_driver tools.diagnostic.tests.test_cold_pair_analysis
+# protocol/source/build/plan/consumer全部提交与独立审查后，根单操作者才执行：
+.venv/bin/python tools/diagnostic/run_sm8650_cold_pair.py \
+  --binary /private/tmp/rob-cold-pair-android --host-exporter /private/tmp/rob-cold-pair-exporter
+```
