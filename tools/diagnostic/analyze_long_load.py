@@ -23,7 +23,7 @@ GATE_SOURCE = {
     'path': 'docs/design/2026-10-09-long-load-qualification.md',
     'sha256': '7de293eff7033316c2f46a77025a688c7a26e3b6efe37ebe6f5b16b57a53d943',
 }
-MODES = ('rob-miss-qualify', 'rob-miss-qualify-thp', 'rob-miss-wide-thp')
+MODES = ('rob-miss-qualify', 'rob-miss-qualify-thp', 'rob-miss-wide-thp', 'rob-miss-fixed-thp')
 EVENTS = ('0x11', '0x8', '0x3', '0x17', '0x34', '0x37')
 REFILLS = {'0x3': 'L1_refill', '0x17': 'L2_refill', '0x37': 'LL_miss'}
 THRESHOLDS = {
@@ -37,16 +37,21 @@ THRESHOLDS = {
 def qualify(run, *, mode='rob-miss-qualify'):
     """按 epoch/footprint/member/round 独立评门，返回全部值与失败门。
 
-    输入须为完整 6 进程/12 member 摘要；缺身份、非有限值或激励元数据
-    改变抛 ValueError。此纯函数不证明 raw 来源或 backing，CLI 另行核验。
-    THP mode 必须显式选择；wide 仅将64/128换成256/512 MiB完整足迹，
-    仍使用旧 c93e788 冻结科学门，不改写旧模式或既有输出。
+    输入须覆盖所选 mode 的完整双 epoch/双 member 矩阵；缺身份、非有限值
+    或激励元数据改变抛 ValueError。此纯函数不证明 raw 来源或 backing，
+    CLI 另行核验。THP mode 必须显式选择；wide 为 1/256/512 MiB 的
+    6 进程/36 窗，fixed 为 1/256 MiB 的 4 进程/24 窗，均仍使用旧
+    c93e788 冻结科学门，不改写旧模式或既有输出。
     """
-    if mode not in MODES or run.get('mode') != mode or run.get('processes') != 6:
+    if mode not in MODES or run.get('mode') != mode:
         raise ValueError('qualification mode/process mismatch')
-    # wide 的新矩阵由独立 mode 注册，不能通过重标记旧64/128数据扩容。
-    long_mib = (256, 512) if mode == 'rob-miss-wide-thp' else (64, 128)
+    # fixed 的独立完整矩阵见 docs/design/2026-10-09-fixed-load-qualification.md；
+    # 不接受 stopped wide 前缀，也不能通过重标记旧64/128数据改变足迹。
+    long_mib = {'rob-miss-wide-thp': (256, 512), 'rob-miss-fixed-thp': (256,)}.get(mode, (64, 128))
     footprints = (1, *long_mib)
+    process_count = 2 * len(footprints)
+    if run.get('processes') != process_count:
+        raise ValueError('qualification mode/process mismatch')
     cells = {}
     for row in run['rows']:
         epoch, memory, serial = row['epoch'], row['memory_bytes'], row['serial']
@@ -140,7 +145,7 @@ def qualify(run, *, mode='rob-miss-qualify'):
                                'failed_gates': failed, 'qualified': not failed})
     eligible = [mb for mb in long_mib if all(c['qualified'] for c in candidates if c['memory_bytes'] == mb * 1048576)]
     return {'gate_source': dict(GATE_SOURCE), 'thresholds': dict(THRESHOLDS),
-            'mode': mode, 'processes': 6, 'windows': 36, 'hot_controls': hot_controls,
+            'mode': mode, 'processes': process_count, 'windows': process_count * 6, 'hot_controls': hot_controls,
             'candidates': candidates, 'qualified': bool(eligible),
             'all_candidates_qualified': all(c['qualified'] for c in candidates),
             'qualified_footprints_mib': eligible,

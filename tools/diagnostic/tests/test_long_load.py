@@ -56,6 +56,14 @@ def synthetic_wide_run():
     return run
 
 
+def synthetic_fixed_run():
+    """固定256的新独立完整夹具；不接续 stopped wide 前缀。"""
+    run = synthetic_wide_run()
+    run.update(mode='rob-miss-fixed-thp', processes=4)
+    run['rows'] = [r for r in run['rows'] if r['memory_bytes'] != 512 * 1048576]
+    return run
+
+
 class LongLoadTests(unittest.TestCase):
     """所有数字均 synthetic，只证明计算器契约，不证明硬件资格。"""
 
@@ -262,6 +270,63 @@ class LongLoadTests(unittest.TestCase):
             actual = qualify(run, mode=run['mode'])
             with self.subTest(directory=directory):
                 self.assertEqual(actual, {key: archived[key] for key in actual})
+
+    def test_fixed_thp_is_explicit_four_process_twenty_four_window_shape(self):
+        run = synthetic_fixed_run()
+        with self.assertRaises(ValueError):
+            qualify(run)
+        try:
+            result = qualify(run, mode='rob-miss-fixed-thp')
+        except ValueError as exc:
+            self.fail(f'explicit fixed four-process shape is not supported: {exc}')
+        self.assertTrue(result['qualified'])
+        self.assertEqual((result['processes'], result['windows']), (4, 24))
+        self.assertEqual(result['qualified_footprints_mib'], [256])
+        self.assertEqual([(c['epoch'], c['memory_bytes'] // 1048576) for c in result['candidates']],
+                         [(0, 256), (1, 256)])
+        self.assertEqual(result['thresholds'], qualify(synthetic_run())['thresholds'])
+        self.assertEqual(result['gate_source'], qualify(synthetic_run())['gate_source'])
+
+    def test_fixed_rejects_wide_shape_missing_epoch_and_wrong_process_count(self):
+        for mutation in ('wide', 'missing-epoch', 'processes', 'old-footprint'):
+            run = synthetic_fixed_run()
+            if mutation == 'wide':
+                run = synthetic_wide_run()
+                run['mode'] = 'rob-miss-fixed-thp'
+            elif mutation == 'missing-epoch':
+                run['rows'] = [r for r in run['rows'] if r['epoch'] == 0]
+            elif mutation == 'processes':
+                run['processes'] = 6
+            else:
+                run['rows'][2].update(memory_bytes=128 * 1048576, condition='e0-miss-m128-n0', iterations=1048576)
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                qualify(run, mode='rob-miss-fixed-thp')
+
+    def test_fixed_needs_both_epochs_and_same_epoch_hot_headroom(self):
+        run = synthetic_fixed_run()
+        for row in run['rows'][:2]:
+            cycles = 60 * (2 if row['serial'] else 1)
+            row['cycles_per_iteration'] = row['counts_per_iteration']['0x11'] = [cycles] * 3
+        try:
+            result = qualify(run, mode='rob-miss-fixed-thp')
+        except ValueError as exc:
+            self.fail(f'explicit fixed scientific gates are not supported: {exc}')
+        self.assertFalse(result['qualified'])
+        self.assertEqual(result['qualified_footprints_mib'], [])
+        self.assertIn('P.cycle_headroom', result['candidates'][0]['failed_gates'])
+        self.assertEqual([c['parallel_cycle_floor'] for c in result['candidates']], [240, 171])
+        self.assertTrue(result['candidates'][1]['qualified'])
+
+    def test_fixed_bad_round_is_not_rescued_by_other_epoch(self):
+        run = synthetic_fixed_run()
+        run['rows'][6]['counts_per_iteration']['0x37'][0] = 1.79999
+        try:
+            result = qualify(run, mode='rob-miss-fixed-thp')
+        except ValueError as exc:
+            self.fail(f'explicit fixed round gates are not supported: {exc}')
+        self.assertTrue(result['candidates'][0]['qualified'])
+        self.assertFalse(result['qualified'])
+        self.assertIn('P.round0.LL_miss_rate', result['candidates'][1]['failed_gates'])
 
     def test_zero_miss_means_are_rejected_without_nonfinite_json(self):
         run = synthetic_run()
