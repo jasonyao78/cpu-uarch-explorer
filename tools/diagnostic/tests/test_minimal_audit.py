@@ -76,4 +76,26 @@ class RealReplay(unittest.TestCase):
         self.m['driver_sha256']=hashlib.sha256(p.read_bytes()).hexdigest(); self.save()
         with self.assertRaises((ValueError,AssertionError)): audit.summarize(self.path)
 
+
+class MissQualification(unittest.TestCase):
+    def test_allocation_is_fully_visited_and_order_balanced(self):
+        rows=driver.conditions('rob-miss-qualify')
+        self.assertEqual(len(rows),6)
+        sizes=[]
+        for name,opts in rows:
+            value=lambda k:int(opts[opts.index(k)+1])
+            mb=value('-m'); sizes.append(mb)
+            self.assertGreaterEqual(value('-i')*2,mb*1024*1024//64)
+            self.assertIn('0x37',opts)
+        self.assertEqual(sizes,[1,64,128,128,64,1])
+    def test_real_memory_shape_cannot_be_relabeled(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            exe=Path(tmp)/'exporter';code=Path(tmp)/'code.bin'
+            subprocess.run(['clang','-O2','-I',str(ROOT/'probes/common'),str(ROOT/'docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c'),'-o',str(exe)],check=True)
+            opts=['-t','nop','-n','0','-a','miss','-m','64','--pmu-type','8']
+            config=json.loads(subprocess.check_output([str(exe),*opts,'--write-asm',str(code)],text=True))
+            driver.validate_realized('rob-miss-qualify',opts,[config])
+            config['memory_bytes']=16*1024*1024
+            with self.assertRaises(ValueError): driver.validate_realized('rob-miss-qualify',opts,[config])
+
 if __name__=='__main__': unittest.main()

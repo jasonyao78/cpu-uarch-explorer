@@ -33,7 +33,7 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
 
 
-MODES = ('tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine')
+MODES = ('tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify')
 OLD_PROTOCOL = 'docs/design/2026-10-09-minimal-tlb-rob-probes.md'
 CONFIRM_PROTOCOL = 'docs/design/2026-10-09-local-confirmation.md'
 BUILD_EVIDENCE = 'docs/reviews/evidence/2026-10-09-minimal-probes/build.json'
@@ -48,6 +48,13 @@ def conditions(mode):
         return [(f'epoch-{i}', [target]+(['--reverse'] if i%2 else [])) for i in range(1 if mode == 'tlb-smoke' else 5)]
     base = ['-i', '131072', '-r', '3', '--pin', '7', '--pmu-type', '8',
             '-e', '0x03', '-e', '0x17', '-e', '0x34', '-e', '0x02']
+    if mode == 'rob-miss-qualify':
+        rows=[]
+        for epoch in range(2):
+            for mb in ((1,64,128) if epoch==0 else (128,64,1)):
+                opts=base.copy(); opts[1]=str(max(131072,mb*8192)); opts[opts.index('0x02')]='0x37'
+                rows.append((f'e{epoch}-miss-m{mb}-n0',opts+['-t','nop','-n','0','-a','miss','-m',str(mb),'--paired']))
+        return rows
     if mode == 'rob-qualify':
         rows = [(f'miss-m{mb}-n0', ['-t','nop','-n','0','-a','miss','-m',str(mb),'--paired']) for mb in (1,16)]
         rows += [(f'fsqrt-chain{k}-n0', ['-t','nop','-n','0','-a','fsqrt','--chain',str(k)]) for k in (1,8,16)]
@@ -89,6 +96,7 @@ def validate_realized(mode, opts, rows):
     expected={'class':value('-t','nop'),'anchor':value('-a','miss'),
               'n':int(value('-n','64')),'iterations':int(value('-i','131072')),
               'rounds':int(value('-r','3')),'chain':int(value('--chain','8')),
+              'memory_bytes':(int(value('-m','16'))<<20) if value('-a','miss')=='miss' else 0,
               'loop_mod64':int(value('--align','0')),'pmu_type':int(value('--pmu-type','0')),
               'paired':'--paired' in opts,'serial':'--serial' in opts,'asymmetric':'--asymmetric' in opts,
               'chase_seed':int(value('--seed','42')),'exclude_kernel':True,'exclude_hv':True,
@@ -104,6 +112,7 @@ def main():
     parser.add_argument('--host-exporter', type=Path)
     args = parser.parse_args()
     protocol = CONFIRM_PROTOCOL if args.mode in ('tlb-confirm100','rob-fine') else OLD_PROTOCOL
+    if args.mode=='rob-miss-qualify': protocol='docs/design/2026-10-09-long-load-qualification.md'
     launch_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     for rel in (protocol, 'tools/diagnostic/run_sm8650_minimal.py'):
         blob=subprocess.check_output(['git','show',launch_head+':'+rel],cwd=ROOT)
@@ -163,6 +172,7 @@ def main():
         if identity.returncode or [int(v,0) for v in identity.stdout.split()]!=[0x410fd821,4096]: raise RuntimeError('target-identity')
         manifest['midr']='0x410fd821'; manifest['base_page_bytes']=4096
         for name,opts in rows:
+            if args.mode=='rob-miss-qualify': time.sleep(15)
             inspect(name+'-pre')
             result_code={}
             if args.host_exporter:

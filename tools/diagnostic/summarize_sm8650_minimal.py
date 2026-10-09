@@ -48,7 +48,7 @@ def summarize(path):
             'raw_directory':path.name,'processes':len(m['results']),'rows':[],
             'max_cpu_c_range':[min(e['thermal']['max_cpu_c'] for e in envs),max(e['thermal']['max_cpu_c'] for e in envs)],
             'wall_seconds':sum(e['wall_seconds'] for e in m['results'])}
-    if m['mode'] in ('tlb-confirm100','rob-fine'):
+    if m['mode'] in ('tlb-confirm100','rob-fine','rob-miss-qualify'):
         result.update({k:m[k] for k in ('binary_source_head','build_evidence_sha256','driver_sha256','protocol_path','protocol_sha256')})
         if m['mode'].startswith('tlb'): result['tlb_target']=m['tlb_target']
     for entry in sorted(m['results'],key=lambda e:next(i for i,c in enumerate(registered) if c['name']==e['name'])):
@@ -101,6 +101,8 @@ def summarize(path):
             runtime=next(r for r in rows if r['type']=='runtime')
             assert runtime['cpu']==7 and runtime['fpcr']==0 and runtime['loop_address_mod64']==config['loop_mod64']
             if config['anchor']=='miss': assert runtime['mapping_4k_verified']
+            if m['mode']=='rob-miss-qualify':
+                assert runtime['distinct_lines_per_call']==runtime['ring_nodes']==config['memory_bytes']//64
             assert len(rounds)==(6 if config['paired'] else 3)
             for generated in entry['generated_code'].values():
                 assert generated['sha256'] in [sha(p) for p in path.glob(entry['name']+'-*.bin')]
@@ -117,7 +119,7 @@ def summarize(path):
                                       'counts_per_iteration':{k:[r['metrics'][k]/config['iterations'] for r in rr] for k in rr[0]['metrics']},
                                       'retired_relative_error':[abs(r['metrics']['0x8']-expected)/expected for r in rr],
                                       'generated_code_sha256':{k:v['sha256'] for k,v in entry['generated_code'].items()}})
-                if m['mode']=='rob-fine':
+                if m['mode'] in ('rob-fine','rob-miss-qualify'):
                     result['rows'][-1].update({'loop_mod64':config['loop_mod64'],'iterations':config['iterations'],
                                                'chase_seed':config['chase_seed'],'epoch':int(entry['name'][1])})
     return result
