@@ -1,0 +1,2150 @@
+{
+  "protocol": "docs/design/2026-10-09-local-confirmation.md",
+  "inputs": {
+    "docs/reviews/evidence/2026-10-09-local-confirmation/summary.json": "6a4986d812cb68d48a48324afd8dde9eb05ac5f265ef3b39af20b9cec17cc045",
+    "docs/reviews/evidence/2026-10-09-minimal-probes/summary.json": "c19ff66ccf0e7eed3848a54e09178c325044e2bbe4426a5b156f5210927200d1"
+  },
+  "tlb": [
+    {
+      "tlb_target": 200,
+      "paired": [
+        {
+          "epoch": "epoch-0",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 0.631578947368421
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2.8421052631578947
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 2.526315789473684
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 3.8947368421052633
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 3.0526315789473686
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2.7894736842105265
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 3.8421052631578947
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 2.7894736842105265
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 3.947368421052632
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 3.8947368421052633
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 3.8947368421052633
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 6.894736842105263
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 2.8947368421052633
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 3.6842105263157894
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 2.7894736842105265
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 0.7894736842105262
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 1.631578947368421
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 1.9473684210526316
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 1.6315789473684212
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 1.8421052631578947
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 3
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 1.894736842105263
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 1.368421052631579
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 0.42105263157894735
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2.8421052631578947
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 1.8421052631578947
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 2.0526315789473686
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 1.8421052631578947
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 2.7894736842105265
+        }
+      ],
+      "summary": [
+        {
+          "f": 128,
+          "offset_rotate": false,
+          "epoch_values": [
+            1.8421052631578947,
+            3.421052631578948,
+            1.6315789473684212,
+            1.8684210526315788,
+            1.236842105263158
+          ],
+          "mean": 2.0,
+          "median": 1.8421052631578947,
+          "range": [
+            1.236842105263158,
+            3.421052631578948
+          ]
+        },
+        {
+          "f": 128,
+          "offset_rotate": true,
+          "epoch_values": [
+            2.8157894736842106,
+            3.7894736842105265,
+            2,
+            2,
+            2.4210526315789473
+          ],
+          "mean": 2.6052631578947367,
+          "median": 2.4210526315789473,
+          "range": [
+            2,
+            3.7894736842105265
+          ]
+        },
+        {
+          "f": 512,
+          "offset_rotate": false,
+          "epoch_values": [
+            3.1842105263157894,
+            3.3421052631578947,
+            1.973684210526316,
+            2,
+            1.8421052631578947
+          ],
+          "mean": 2.468421052631579,
+          "median": 2,
+          "range": [
+            1.8421052631578947,
+            3.3421052631578947
+          ]
+        },
+        {
+          "f": 512,
+          "offset_rotate": true,
+          "epoch_values": [
+            3.3421052631578947,
+            3.8421052631578947,
+            2,
+            2.1842105263157894,
+            2.3947368421052633
+          ],
+          "mean": 2.7526315789473683,
+          "median": 2.3947368421052633,
+          "range": [
+            2,
+            3.8421052631578947
+          ]
+        }
+      ],
+      "overall_epoch_values": [
+        2.7960526315789473,
+        3.598684210526316,
+        1.9013157894736843,
+        2.013157894736842,
+        1.973684210526316
+      ],
+      "did_positive": 40,
+      "did_count": 40,
+      "did_range": [
+        0.42105263157894735,
+        6.894736842105263
+      ],
+      "retained_floor_datawalk_max": 0,
+      "retained_iwalk_max": 0,
+      "all_windows_l2_equals_data_plus_instruction": true,
+      "c9_mean_max": 0,
+      "a8_mean_range": [
+        0,
+        2.3157894736842106
+      ]
+    },
+    {
+      "tlb_target": 100,
+      "paired": [
+        {
+          "epoch": "epoch-0",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 3.421052631578948
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 7.315789473684211
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 6.421052631578947
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 6.473684210526316
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 2.68421052631579
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 7.421052631578947
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 6.421052631578947
+        },
+        {
+          "epoch": "epoch-0",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 7.2631578947368425
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": false,
+          "did": -0.052631578947368585
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 0.9473684210526319
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 6.894736842105263
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 3.263157894736842
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": true,
+          "did": -1.1578947368421053
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 1
+        },
+        {
+          "epoch": "epoch-1",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 1
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 1.1052631578947367
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2.8947368421052633
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 3
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 3.8947368421052633
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 3.6315789473684212
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 4
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 4
+        },
+        {
+          "epoch": "epoch-2",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 2.8947368421052633
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 1.8947368421052633
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2.9473684210526314
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 5.0
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 4.947368421052632
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 6.684210526315789
+        },
+        {
+          "epoch": "epoch-3",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 4.052631578947368
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 2.0
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 42,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2.8421052631578947
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 2.8947368421052633
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 42,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 1.8947368421052633
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": false,
+          "did": 2.789473684210526
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 137,
+          "f": 128,
+          "offset_rotate": true,
+          "did": 2.9473684210526314
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": false,
+          "did": 4.631578947368421
+        },
+        {
+          "epoch": "epoch-4",
+          "seed": 137,
+          "f": 512,
+          "offset_rotate": true,
+          "did": 4
+        }
+      ],
+      "summary": [
+        {
+          "f": 128,
+          "offset_rotate": false,
+          "epoch_values": [
+            3.052631578947369,
+            1.6052631578947367,
+            2.3684210526315788,
+            1.9473684210526316,
+            2.394736842105263
+          ],
+          "mean": 2.2736842105263158,
+          "median": 2.3684210526315788,
+          "range": [
+            1.6052631578947367,
+            3.052631578947369
+          ]
+        },
+        {
+          "f": 128,
+          "offset_rotate": true,
+          "epoch_values": [
+            7.368421052631579,
+            -0.10526315789473673,
+            3.447368421052632,
+            2.473684210526316,
+            2.894736842105263
+          ],
+          "mean": 3.2157894736842105,
+          "median": 2.894736842105263,
+          "range": [
+            -0.10526315789473673,
+            7.368421052631579
+          ]
+        },
+        {
+          "f": 512,
+          "offset_rotate": false,
+          "epoch_values": [
+            6.421052631578947,
+            3.9473684210526314,
+            3.5,
+            5.842105263157895,
+            3.7631578947368425
+          ],
+          "mean": 4.694736842105263,
+          "median": 3.9473684210526314,
+          "range": [
+            3.5,
+            6.421052631578947
+          ]
+        },
+        {
+          "f": 512,
+          "offset_rotate": true,
+          "epoch_values": [
+            6.868421052631579,
+            1.5,
+            3.3947368421052633,
+            4.5,
+            2.947368421052632
+          ],
+          "mean": 3.8421052631578947,
+          "median": 3.3947368421052633,
+          "range": [
+            1.5,
+            6.868421052631579
+          ]
+        }
+      ],
+      "overall_epoch_values": [
+        5.927631578947368,
+        1.736842105263158,
+        3.1776315789473686,
+        3.6907894736842106,
+        3.0
+      ],
+      "did_positive": 38,
+      "did_count": 40,
+      "did_range": [
+        -1.1578947368421053,
+        7.421052631578947
+      ],
+      "retained_floor_datawalk_max": 0,
+      "retained_iwalk_max": 0,
+      "all_windows_l2_equals_data_plus_instruction": true,
+      "c9_mean_max": 0.05263157894736842,
+      "a8_mean_range": [
+        0,
+        8
+      ]
+    }
+  ],
+  "rob": {
+    "curves": [
+      {
+        "class": "add",
+        "anchor": "fsqrt",
+        "chain": 16,
+        "loop_mod64": 0,
+        "iterations": 131072,
+        "chase_seed": 42,
+        "points": [
+          {
+            "n": 0,
+            "epoch_medians": [
+              416.0144805908203,
+              416.01441955566406
+            ],
+            "range_all_rounds": [
+              416.0124053955078,
+              416.02379608154297
+            ],
+            "delta_from_n0": [
+              0.0,
+              0.0
+            ],
+            "full_overlap_reference": [
+              416.0144805908203,
+              416.01441955566406
+            ],
+            "excess_over_reference": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "n": 128,
+            "epoch_medians": [
+              416.01940155029297,
+              416.0177993774414
+            ],
+            "range_all_rounds": [
+              416.0148239135742,
+              416.02439880371094
+            ],
+            "delta_from_n0": [
+              0.00492095947265625,
+              0.00337982177734375
+            ],
+            "full_overlap_reference": [
+              416.0144805908203,
+              416.01441955566406
+            ],
+            "excess_over_reference": [
+              0.00492095947265625,
+              0.00337982177734375
+            ]
+          },
+          {
+            "n": 640,
+            "epoch_medians": [
+              599.0349502563477,
+              616.4078750610352
+            ],
+            "range_all_rounds": [
+              585.0830688476562,
+              630.8564071655273
+            ],
+            "delta_from_n0": [
+              183.02046966552734,
+              200.3934555053711
+            ],
+            "full_overlap_reference": [
+              416.0144805908203,
+              416.01441955566406
+            ],
+            "excess_over_reference": [
+              183.02046966552734,
+              200.3934555053711
+            ]
+          }
+        ]
+      },
+      {
+        "class": "add",
+        "anchor": "none",
+        "chain": 8,
+        "loop_mod64": 0,
+        "iterations": 131072,
+        "chase_seed": 42,
+        "points": [
+          {
+            "n": 0,
+            "epoch_medians": [
+              1.0110397338867188,
+              1.0407943725585938
+            ],
+            "range_all_rounds": [
+              1.0058135986328125,
+              1.0624237060546875
+            ],
+            "delta_from_n0": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "n": 128,
+            "epoch_medians": [
+              42.00962829589844,
+              42.0042724609375
+            ],
+            "range_all_rounds": [
+              42.00422668457031,
+              42.01286315917969
+            ],
+            "delta_from_n0": [
+              40.99858856201172,
+              40.963478088378906
+            ]
+          },
+          {
+            "n": 640,
+            "epoch_medians": [
+              281.37047576904297,
+              299.58077239990234
+            ],
+            "range_all_rounds": [
+              231.23876953125,
+              324.5509338378906
+            ],
+            "delta_from_n0": [
+              280.35943603515625,
+              298.53997802734375
+            ]
+          }
+        ]
+      },
+      {
+        "class": "fadd",
+        "anchor": "fsqrt",
+        "chain": 16,
+        "loop_mod64": 0,
+        "iterations": 131072,
+        "chase_seed": 42,
+        "points": [
+          {
+            "n": 0,
+            "epoch_medians": [
+              416.0120391845703,
+              416.01329040527344
+            ],
+            "range_all_rounds": [
+              416.01145935058594,
+              416.0179672241211
+            ],
+            "delta_from_n0": [
+              0.0,
+              0.0
+            ],
+            "full_overlap_reference": [
+              416.0120391845703,
+              416.01329040527344
+            ],
+            "excess_over_reference": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "n": 128,
+            "epoch_medians": [
+              416.0209503173828,
+              416.01922607421875
+            ],
+            "range_all_rounds": [
+              416.0172805786133,
+              416.02449798583984
+            ],
+            "delta_from_n0": [
+              0.0089111328125,
+              0.0059356689453125
+            ],
+            "full_overlap_reference": [
+              416.0120391845703,
+              416.01329040527344
+            ],
+            "excess_over_reference": [
+              0.0089111328125,
+              0.0059356689453125
+            ]
+          },
+          {
+            "n": 640,
+            "epoch_medians": [
+              555.7510986328125,
+              698.2554321289062
+            ],
+            "range_all_rounds": [
+              555.0608291625977,
+              699.5544586181641
+            ],
+            "delta_from_n0": [
+              139.7390594482422,
+              282.2421417236328
+            ],
+            "full_overlap_reference": [
+              416.0120391845703,
+              416.01329040527344
+            ],
+            "excess_over_reference": [
+              139.7390594482422,
+              282.2421417236328
+            ]
+          }
+        ]
+      },
+      {
+        "class": "fadd",
+        "anchor": "none",
+        "chain": 8,
+        "loop_mod64": 0,
+        "iterations": 131072,
+        "chase_seed": 42,
+        "points": [
+          {
+            "n": 0,
+            "epoch_medians": [
+              1.0291290283203125,
+              1.00433349609375
+            ],
+            "range_all_rounds": [
+              1.0022506713867188,
+              1.0570297241210938
+            ],
+            "delta_from_n0": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "n": 128,
+            "epoch_medians": [
+              64.00532531738281,
+              64.00917053222656
+            ],
+            "range_all_rounds": [
+              64.00389099121094,
+              128.01607513427734
+            ],
+            "delta_from_n0": [
+              62.9761962890625,
+              63.00483703613281
+            ]
+          },
+          {
+            "n": 640,
+            "epoch_medians": [
+              320.0156707763672,
+              320.0172805786133
+            ],
+            "range_all_rounds": [
+              320.01332092285156,
+              320.0226364135742
+            ],
+            "delta_from_n0": [
+              318.9865417480469,
+              319.01294708251953
+            ]
+          }
+        ]
+      },
+      {
+        "class": "nop",
+        "anchor": "fsqrt",
+        "chain": 8,
+        "loop_mod64": 0,
+        "iterations": 131072,
+        "chase_seed": 42,
+        "points": [
+          {
+            "n": 0,
+            "epoch_medians": [
+              208.0025177001953,
+              208.00643920898438
+            ],
+            "range_all_rounds": [
+              208.00234985351562,
+              208.0109100341797
+            ],
+            "delta_from_n0": [
+              0.0,
+              0.0
+            ],
+            "full_overlap_reference": [
+              208.0025177001953,
+              208.00643920898438
+            ],
+            "excess_over_reference": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "n": 512,
+            "epoch_medians": [
+              208.0076675415039,
+              208.01480102539062
+            ],
+            "range_all_rounds": [
+              208.00603485107422,
+              208.0177993774414
+            ],
+            "delta_from_n0": [
+              0.00514984130859375,
+              0.00836181640625
+            ],
+            "full_overlap_reference": [
+              208.0025177001953,
+              208.00643920898438
+            ],
+            "excess_over_reference": [
+              0.00514984130859375,
+              0.00836181640625
+            ]
+          },
+          {
+            "n": 544,
+            "epoch_medians": [
+              208.0079574584961,
+              208.01551055908203
+            ],
+            "range_all_rounds": [
+              208.00650787353516,
+              208.01815795898438
+            ],
+            "delta_from_n0": [
+              0.00543975830078125,
+              0.00907135009765625
+            ],
+            "full_overlap_reference": [
+              208.0025177001953,
+              208.00643920898438
+            ],
+            "excess_over_reference": [
+              0.00543975830078125,
+              0.00907135009765625
+            ]
+          },
+          {
+            "n": 576,
+            "epoch_medians": [
+              208.0087661743164,
+              208.01564025878906
+            ],
+            "range_all_rounds": [
+              208.0069351196289,
+              208.02182006835938
+            ],
+            "delta_from_n0": [
+              0.00624847412109375,
+              0.0092010498046875
+            ],
+            "full_overlap_reference": [
+              208.0025177001953,
+              208.00643920898438
+            ],
+            "excess_over_reference": [
+              0.00624847412109375,
+              0.0092010498046875
+            ]
+          },
+          {
+            "n": 608,
+            "epoch_medians": [
+              208.01183319091797,
+              208.01283264160156
+            ],
+            "range_all_rounds": [
+              208.0109100341797,
+              208.0204620361328
+            ],
+            "delta_from_n0": [
+              0.00931549072265625,
+              0.0063934326171875
+            ],
+            "full_overlap_reference": [
+              208.0025177001953,
+              208.00643920898438
+            ],
+            "excess_over_reference": [
+              0.00931549072265625,
+              0.0063934326171875
+            ]
+          },
+          {
+            "n": 640,
+            "epoch_medians": [
+              208.0089874267578,
+              208.0183868408203
+            ],
+            "range_all_rounds": [
+              208.00721740722656,
+              208.0232925415039
+            ],
+            "delta_from_n0": [
+              0.0064697265625,
+              0.0119476318359375
+            ],
+            "full_overlap_reference": [
+              208.0025177001953,
+              208.00643920898438
+            ],
+            "excess_over_reference": [
+              0.0064697265625,
+              0.0119476318359375
+            ]
+          },
+          {
+            "n": 672,
+            "epoch_medians": [
+              208.8109130859375,
+              208.81280517578125
+            ],
+            "range_all_rounds": [
+              208.80873107910156,
+              208.82762908935547
+            ],
+            "delta_from_n0": [
+              0.8083953857421875,
+              0.806365966796875
+            ],
+            "full_overlap_reference": [
+              208.0025177001953,
+              208.00643920898438
+            ],
+            "excess_over_reference": [
+              0.8083953857421875,
+              0.806365966796875
+            ]
+          },
+          {
+            "n": 704,
+            "epoch_medians": [
+              220.01261138916016,
+              220.01773834228516
+            ],
+            "range_all_rounds": [
+              220.01140594482422,
+              220.0201187133789
+            ],
+            "delta_from_n0": [
+              12.010093688964844,
+              12.011299133300781
+            ],
+            "full_overlap_reference": [
+              208.0025177001953,
+              208.00643920898438
+            ],
+            "excess_over_reference": [
+              12.010093688964844,
+              12.011299133300781
+            ]
+          },
+          {
+            "n": 736,
+            "epoch_medians": [
+              227.51244354248047,
+              227.5160140991211
+            ],
+            "range_all_rounds": [
+              227.51068115234375,
+              227.52931213378906
+            ],
+            "delta_from_n0": [
+              19.509925842285156,
+              19.50957489013672
+            ],
+            "full_overlap_reference": [
+              208.0025177001953,
+              208.00643920898438
+            ],
+            "excess_over_reference": [
+              19.509925842285156,
+              19.50957489013672
+            ]
+          },
+          {
+            "n": 768,
+            "epoch_medians": [
+              235.01677703857422,
+              235.01944732666016
+            ],
+            "range_all_rounds": [
+              235.0136947631836,
+              235.03060913085938
+            ],
+            "delta_from_n0": [
+              27.014259338378906,
+              27.01300811767578
+            ],
+            "full_overlap_reference": [
+              208.0025177001953,
+              208.00643920898438
+            ],
+            "excess_over_reference": [
+              27.014259338378906,
+              27.01300811767578
+            ]
+          }
+        ],
+        "response": {
+          "threshold_cycles": 1.0,
+          "status": "confirmed-response",
+          "interval": [
+            672,
+            704
+          ],
+          "grid": [
+            512,
+            544,
+            576,
+            608,
+            640,
+            672,
+            704,
+            736,
+            768
+          ],
+          "deltas": [
+            [
+              0.00514984130859375,
+              0.00543975830078125,
+              0.00624847412109375,
+              0.00931549072265625,
+              0.0064697265625,
+              0.8083953857421875,
+              12.010093688964844,
+              19.509925842285156,
+              27.014259338378906
+            ],
+            [
+              0.00836181640625,
+              0.00907135009765625,
+              0.0092010498046875,
+              0.0063934326171875,
+              0.0119476318359375,
+              0.806365966796875,
+              12.011299133300781,
+              19.50957489013672,
+              27.01300811767578
+            ]
+          ]
+        }
+      },
+      {
+        "class": "nop",
+        "anchor": "fsqrt",
+        "chain": 8,
+        "loop_mod64": 32,
+        "iterations": 131072,
+        "chase_seed": 42,
+        "points": [
+          {
+            "n": 0,
+            "epoch_medians": [
+              208.00665283203125,
+              208.00919342041016
+            ],
+            "range_all_rounds": [
+              208.0044708251953,
+              208.01329803466797
+            ],
+            "delta_from_n0": [
+              0.0,
+              0.0
+            ],
+            "full_overlap_reference": [
+              208.00665283203125,
+              208.00919342041016
+            ],
+            "excess_over_reference": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "n": 608,
+            "epoch_medians": [
+              208.01962280273438,
+              208.0138702392578
+            ],
+            "range_all_rounds": [
+              208.0136947631836,
+              208.02259826660156
+            ],
+            "delta_from_n0": [
+              0.012969970703125,
+              0.00467681884765625
+            ],
+            "full_overlap_reference": [
+              208.00665283203125,
+              208.00919342041016
+            ],
+            "excess_over_reference": [
+              0.012969970703125,
+              0.00467681884765625
+            ]
+          },
+          {
+            "n": 640,
+            "epoch_medians": [
+              208.0136260986328,
+              208.0210723876953
+            ],
+            "range_all_rounds": [
+              208.01156616210938,
+              208.0211181640625
+            ],
+            "delta_from_n0": [
+              0.0069732666015625,
+              0.01187896728515625
+            ],
+            "full_overlap_reference": [
+              208.00665283203125,
+              208.00919342041016
+            ],
+            "excess_over_reference": [
+              0.0069732666015625,
+              0.01187896728515625
+            ]
+          },
+          {
+            "n": 672,
+            "epoch_medians": [
+              208.8139877319336,
+              208.81349182128906
+            ],
+            "range_all_rounds": [
+              208.81255340576172,
+              208.82101440429688
+            ],
+            "delta_from_n0": [
+              0.8073348999023438,
+              0.8042984008789062
+            ],
+            "full_overlap_reference": [
+              208.00665283203125,
+              208.00919342041016
+            ],
+            "excess_over_reference": [
+              0.8073348999023438,
+              0.8042984008789062
+            ]
+          },
+          {
+            "n": 768,
+            "epoch_medians": [
+              235.0181121826172,
+              235.0145721435547
+            ],
+            "range_all_rounds": [
+              235.01375579833984,
+              235.024169921875
+            ],
+            "delta_from_n0": [
+              27.011459350585938,
+              27.00537872314453
+            ],
+            "full_overlap_reference": [
+              208.00665283203125,
+              208.00919342041016
+            ],
+            "excess_over_reference": [
+              27.011459350585938,
+              27.00537872314453
+            ]
+          }
+        ],
+        "response": {
+          "threshold_cycles": 1.0,
+          "status": "right-edge-unconfirmed",
+          "interval": null,
+          "grid": [
+            608,
+            640,
+            672,
+            768
+          ],
+          "deltas": [
+            [
+              0.012969970703125,
+              0.0069732666015625,
+              0.8073348999023438,
+              27.011459350585938
+            ],
+            [
+              0.00467681884765625,
+              0.01187896728515625,
+              0.8042984008789062,
+              27.00537872314453
+            ]
+          ]
+        }
+      },
+      {
+        "class": "nop",
+        "anchor": "fsqrt",
+        "chain": 16,
+        "loop_mod64": 0,
+        "iterations": 131072,
+        "chase_seed": 42,
+        "points": [
+          {
+            "n": 0,
+            "epoch_medians": [
+              416.0144348144531,
+              416.0127639770508
+            ],
+            "range_all_rounds": [
+              416.01084899902344,
+              416.02142333984375
+            ],
+            "delta_from_n0": [
+              0.0,
+              0.0
+            ],
+            "full_overlap_reference": [
+              416.0144348144531,
+              416.0127639770508
+            ],
+            "excess_over_reference": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "n": 512,
+            "epoch_medians": [
+              416.0238800048828,
+              416.0235824584961
+            ],
+            "range_all_rounds": [
+              416.02101135253906,
+              416.0274963378906
+            ],
+            "delta_from_n0": [
+              0.0094451904296875,
+              0.0108184814453125
+            ],
+            "full_overlap_reference": [
+              416.0144348144531,
+              416.0127639770508
+            ],
+            "excess_over_reference": [
+              0.0094451904296875,
+              0.0108184814453125
+            ]
+          },
+          {
+            "n": 544,
+            "epoch_medians": [
+              416.0240478515625,
+              416.02532958984375
+            ],
+            "range_all_rounds": [
+              416.0230407714844,
+              416.02906799316406
+            ],
+            "delta_from_n0": [
+              0.009613037109375,
+              0.01256561279296875
+            ],
+            "full_overlap_reference": [
+              416.0144348144531,
+              416.0127639770508
+            ],
+            "excess_over_reference": [
+              0.009613037109375,
+              0.01256561279296875
+            ]
+          },
+          {
+            "n": 576,
+            "epoch_medians": [
+              416.02313232421875,
+              416.02393341064453
+            ],
+            "range_all_rounds": [
+              416.0212707519531,
+              416.0262145996094
+            ],
+            "delta_from_n0": [
+              0.008697509765625,
+              0.01116943359375
+            ],
+            "full_overlap_reference": [
+              416.0144348144531,
+              416.0127639770508
+            ],
+            "excess_over_reference": [
+              0.008697509765625,
+              0.01116943359375
+            ]
+          },
+          {
+            "n": 608,
+            "epoch_medians": [
+              416.0275192260742,
+              416.0247039794922
+            ],
+            "range_all_rounds": [
+              416.0233459472656,
+              416.04312896728516
+            ],
+            "delta_from_n0": [
+              0.01308441162109375,
+              0.01194000244140625
+            ],
+            "full_overlap_reference": [
+              416.0144348144531,
+              416.0127639770508
+            ],
+            "excess_over_reference": [
+              0.01308441162109375,
+              0.01194000244140625
+            ]
+          },
+          {
+            "n": 640,
+            "epoch_medians": [
+              416.02574920654297,
+              416.02392578125
+            ],
+            "range_all_rounds": [
+              416.02303314208984,
+              416.0272521972656
+            ],
+            "delta_from_n0": [
+              0.01131439208984375,
+              0.01116180419921875
+            ],
+            "full_overlap_reference": [
+              416.0144348144531,
+              416.0127639770508
+            ],
+            "excess_over_reference": [
+              0.01131439208984375,
+              0.01116180419921875
+            ]
+          },
+          {
+            "n": 672,
+            "epoch_medians": [
+              417.22088623046875,
+              417.2174072265625
+            ],
+            "range_all_rounds": [
+              416.4805450439453,
+              417.61214447021484
+            ],
+            "delta_from_n0": [
+              1.206451416015625,
+              1.2046432495117188
+            ],
+            "full_overlap_reference": [
+              416.0144348144531,
+              416.0127639770508
+            ],
+            "excess_over_reference": [
+              1.206451416015625,
+              1.2046432495117188
+            ]
+          },
+          {
+            "n": 704,
+            "epoch_medians": [
+              429.9774932861328,
+              429.8370895385742
+            ],
+            "range_all_rounds": [
+              429.6385269165039,
+              430.01903533935547
+            ],
+            "delta_from_n0": [
+              13.963058471679688,
+              13.824325561523438
+            ],
+            "full_overlap_reference": [
+              416.0144348144531,
+              416.0127639770508
+            ],
+            "excess_over_reference": [
+              13.963058471679688,
+              13.824325561523438
+            ]
+          },
+          {
+            "n": 736,
+            "epoch_medians": [
+              438.020751953125,
+              438.02635955810547
+            ],
+            "range_all_rounds": [
+              438.02014923095703,
+              438.03087615966797
+            ],
+            "delta_from_n0": [
+              22.006317138671875,
+              22.013595581054688
+            ],
+            "full_overlap_reference": [
+              416.0144348144531,
+              416.0127639770508
+            ],
+            "excess_over_reference": [
+              22.006317138671875,
+              22.013595581054688
+            ]
+          },
+          {
+            "n": 768,
+            "epoch_medians": [
+              444.02418518066406,
+              444.0235824584961
+            ],
+            "range_all_rounds": [
+              444.0175247192383,
+              444.03162384033203
+            ],
+            "delta_from_n0": [
+              28.009750366210938,
+              28.010818481445312
+            ],
+            "full_overlap_reference": [
+              416.0144348144531,
+              416.0127639770508
+            ],
+            "excess_over_reference": [
+              28.009750366210938,
+              28.010818481445312
+            ]
+          }
+        ],
+        "response": {
+          "threshold_cycles": 1.0,
+          "status": "confirmed-response",
+          "interval": [
+            640,
+            672
+          ],
+          "grid": [
+            512,
+            544,
+            576,
+            608,
+            640,
+            672,
+            704,
+            736,
+            768
+          ],
+          "deltas": [
+            [
+              0.0094451904296875,
+              0.009613037109375,
+              0.008697509765625,
+              0.01308441162109375,
+              0.01131439208984375,
+              1.206451416015625,
+              13.963058471679688,
+              22.006317138671875,
+              28.009750366210938
+            ],
+            [
+              0.0108184814453125,
+              0.01256561279296875,
+              0.01116943359375,
+              0.01194000244140625,
+              0.01116180419921875,
+              1.2046432495117188,
+              13.824325561523438,
+              22.013595581054688,
+              28.010818481445312
+            ]
+          ]
+        }
+      },
+      {
+        "class": "nop",
+        "anchor": "fsqrt",
+        "chain": 16,
+        "loop_mod64": 32,
+        "iterations": 131072,
+        "chase_seed": 42,
+        "points": [
+          {
+            "n": 0,
+            "epoch_medians": [
+              416.0147247314453,
+              416.01114654541016
+            ],
+            "range_all_rounds": [
+              416.0098190307617,
+              416.02020263671875
+            ],
+            "delta_from_n0": [
+              0.0,
+              0.0
+            ],
+            "full_overlap_reference": [
+              416.0147247314453,
+              416.01114654541016
+            ],
+            "excess_over_reference": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "n": 608,
+            "epoch_medians": [
+              416.02159881591797,
+              416.022216796875
+            ],
+            "range_all_rounds": [
+              416.01969146728516,
+              416.0307922363281
+            ],
+            "delta_from_n0": [
+              0.00687408447265625,
+              0.01107025146484375
+            ],
+            "full_overlap_reference": [
+              416.0147247314453,
+              416.01114654541016
+            ],
+            "excess_over_reference": [
+              0.00687408447265625,
+              0.01107025146484375
+            ]
+          },
+          {
+            "n": 640,
+            "epoch_medians": [
+              416.0226516723633,
+              416.0280303955078
+            ],
+            "range_all_rounds": [
+              416.0212631225586,
+              416.0304260253906
+            ],
+            "delta_from_n0": [
+              0.00792694091796875,
+              0.01688385009765625
+            ],
+            "full_overlap_reference": [
+              416.0147247314453,
+              416.01114654541016
+            ],
+            "excess_over_reference": [
+              0.00792694091796875,
+              0.01688385009765625
+            ]
+          },
+          {
+            "n": 672,
+            "epoch_medians": [
+              417.6116943359375,
+              417.22640228271484
+            ],
+            "range_all_rounds": [
+              416.7488555908203,
+              417.63153076171875
+            ],
+            "delta_from_n0": [
+              1.5969696044921875,
+              1.2152557373046875
+            ],
+            "full_overlap_reference": [
+              416.0147247314453,
+              416.01114654541016
+            ],
+            "excess_over_reference": [
+              1.5969696044921875,
+              1.2152557373046875
+            ]
+          },
+          {
+            "n": 768,
+            "epoch_medians": [
+              444.0215530395508,
+              444.02587890625
+            ],
+            "range_all_rounds": [
+              444.0191192626953,
+              444.02962493896484
+            ],
+            "delta_from_n0": [
+              28.00682830810547,
+              28.014732360839844
+            ],
+            "full_overlap_reference": [
+              416.0147247314453,
+              416.01114654541016
+            ],
+            "excess_over_reference": [
+              28.00682830810547,
+              28.014732360839844
+            ]
+          }
+        ],
+        "response": {
+          "threshold_cycles": 1.0,
+          "status": "confirmed-response",
+          "interval": [
+            640,
+            672
+          ],
+          "grid": [
+            608,
+            640,
+            672,
+            768
+          ],
+          "deltas": [
+            [
+              0.00687408447265625,
+              0.00792694091796875,
+              1.5969696044921875,
+              28.00682830810547
+            ],
+            [
+              0.01107025146484375,
+              0.01688385009765625,
+              1.2152557373046875,
+              28.014732360839844
+            ]
+          ]
+        }
+      },
+      {
+        "class": "nop",
+        "anchor": "none",
+        "chain": 8,
+        "loop_mod64": 0,
+        "iterations": 131072,
+        "chase_seed": 42,
+        "points": [
+          {
+            "n": 0,
+            "epoch_medians": [
+              1.0215911865234375,
+              1.01129150390625
+            ],
+            "range_all_rounds": [
+              1.0023651123046875,
+              1.0570907592773438
+            ],
+            "delta_from_n0": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "n": 512,
+            "epoch_medians": [
+              114.01200103759766,
+              114.0143814086914
+            ],
+            "range_all_rounds": [
+              114.01143646240234,
+              114.02556610107422
+            ],
+            "delta_from_n0": [
+              112.99040985107422,
+              113.00308990478516
+            ]
+          },
+          {
+            "n": 544,
+            "epoch_medians": [
+              121.12130737304688,
+              121.12041473388672
+            ],
+            "range_all_rounds": [
+              121.11859130859375,
+              121.1405258178711
+            ],
+            "delta_from_n0": [
+              120.09971618652344,
+              120.10912322998047
+            ]
+          },
+          {
+            "n": 576,
+            "epoch_medians": [
+              128.23075103759766,
+              128.2364044189453
+            ],
+            "range_all_rounds": [
+              128.22948455810547,
+              128.24264526367188
+            ],
+            "delta_from_n0": [
+              127.20915985107422,
+              127.22511291503906
+            ]
+          },
+          {
+            "n": 608,
+            "epoch_medians": [
+              135.33988189697266,
+              135.3469467163086
+            ],
+            "range_all_rounds": [
+              135.33753204345703,
+              135.3520050048828
+            ],
+            "delta_from_n0": [
+              134.31829071044922,
+              134.33565521240234
+            ]
+          },
+          {
+            "n": 640,
+            "epoch_medians": [
+              142.45508575439453,
+              142.45684051513672
+            ],
+            "range_all_rounds": [
+              142.4549560546875,
+              142.47196197509766
+            ],
+            "delta_from_n0": [
+              141.4334945678711,
+              141.44554901123047
+            ]
+          },
+          {
+            "n": 672,
+            "epoch_medians": [
+              149.563232421875,
+              149.5649185180664
+            ],
+            "range_all_rounds": [
+              149.5613784790039,
+              149.58208465576172
+            ],
+            "delta_from_n0": [
+              148.54164123535156,
+              148.55362701416016
+            ]
+          },
+          {
+            "n": 704,
+            "epoch_medians": [
+              156.68011474609375,
+              156.67996978759766
+            ],
+            "range_all_rounds": [
+              156.67662048339844,
+              156.6942138671875
+            ],
+            "delta_from_n0": [
+              155.6585235595703,
+              155.6686782836914
+            ]
+          },
+          {
+            "n": 736,
+            "epoch_medians": [
+              163.7870864868164,
+              163.79158782958984
+            ],
+            "range_all_rounds": [
+              163.78681182861328,
+              163.80492401123047
+            ],
+            "delta_from_n0": [
+              162.76549530029297,
+              162.7802963256836
+            ]
+          },
+          {
+            "n": 768,
+            "epoch_medians": [
+              170.8973617553711,
+              170.90198516845703
+            ],
+            "range_all_rounds": [
+              170.8968963623047,
+              170.90807342529297
+            ],
+            "delta_from_n0": [
+              169.87577056884766,
+              169.89069366455078
+            ]
+          }
+        ]
+      },
+      {
+        "class": "nop",
+        "anchor": "none",
+        "chain": 8,
+        "loop_mod64": 32,
+        "iterations": 131072,
+        "chase_seed": 42,
+        "points": [
+          {
+            "n": 0,
+            "epoch_medians": [
+              1.01904296875,
+              1.0037994384765625
+            ],
+            "range_all_rounds": [
+              1.002227783203125,
+              1.0206832885742188
+            ],
+            "delta_from_n0": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "n": 608,
+            "epoch_medians": [
+              135.34402465820312,
+              135.34781646728516
+            ],
+            "range_all_rounds": [
+              135.34156799316406,
+              135.36215209960938
+            ],
+            "delta_from_n0": [
+              134.32498168945312,
+              134.3440170288086
+            ]
+          },
+          {
+            "n": 640,
+            "epoch_medians": [
+              142.45729064941406,
+              142.45679473876953
+            ],
+            "range_all_rounds": [
+              142.4543228149414,
+              142.4677963256836
+            ],
+            "delta_from_n0": [
+              141.43824768066406,
+              141.45299530029297
+            ]
+          },
+          {
+            "n": 672,
+            "epoch_medians": [
+              149.5689926147461,
+              149.56652069091797
+            ],
+            "range_all_rounds": [
+              149.56350708007812,
+              149.57485961914062
+            ],
+            "delta_from_n0": [
+              148.5499496459961,
+              148.5627212524414
+            ]
+          },
+          {
+            "n": 768,
+            "epoch_medians": [
+              170.9011993408203,
+              170.90496826171875
+            ],
+            "range_all_rounds": [
+              170.90032958984375,
+              170.91355895996094
+            ],
+            "delta_from_n0": [
+              169.8821563720703,
+              169.9011688232422
+            ]
+          }
+        ]
+      }
+    ],
+    "processes": 114,
+    "rounds": 342,
+    "max_retired_relative_error": 0.0009078390759876564
+  }
+}

@@ -395,3 +395,11 @@
 - **后续 / TLB局部容量负责人 / 触发 = 正式确认设计或ways命名前**：用同一最小协议确认target100；再判断是否必要扩到W7–10的同max集合/不同target顺序。识别描述符、PFN/cache残差，独立mapping作为重复单位；不以40相关配对冒充40物理独立实验。承接OI-TLB-LOCAL-20261009，不拼接旧A1。
 - **后续 / ROB与执行部件负责人 / 触发 = 下一局部实验**：512–768内预注册细网格；无锚点同网格、真实对齐0/32、ADD/FADD资源对照；ALU/FPU依赖/独立链latency/throughput与operand标定。缺失路线另做hot/long/翻译/cache资格，不凭allocation断言DRAM，不把NOP数除2救384。承接OI-ROB-PROBE-20261009与OI-7/OI-12。
 - **后置 / 软件集成负责人 / 触发 = 独立原型行为稳定且需正式矩阵时**：决定runner/schema/CMake正式接入；当前JSONL明确是独立探针格式，不冒充schema v2 record。当前实现/测试说明在 `docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/README.md`，板测驱动 `tools/diagnostic/run_sm8650_minimal.py`。远端与worktree回收沿既有分支门禁，当前不操作。
+
+
+## LOCAL-CONFIRM-20261009 第二局部确认与持续研究
+
+- **已完成 / 当前端到端探针负责人**：协议与驱动`7a249e3`、分析`afe6d26`；报告 `docs/reviews/2026-10-09-local-confirmation-results.md`，全脱敏观测/判据/实际生成码审计在 `docs/reviews/evidence/2026-10-09-local-confirmation/`。119进程/4342窗全技术通过，22新增回归/8ROB/203runner/250analysis/21CTest通过，旧四批重审summary字节一致。源码217e5e3的NDK产物不变；root独占手机，用户授权无需常规人工确认持续推进。
+- **TLB下一轮 / TLB局部容量负责人 / 触发 = 现在**：target100有38/40正、两负DID、一个seed平均后负epoch及A/W8最高8walk/圈；硬8页命中边界已反证。固定更大max集合，区分预热与目标访问顺序/替换历史，再W6–12嵌套局部扫描；不要只加W点就宣布ways。两target异时差异不作纯target因果，PFN/cache/描述符与未建模索引仍OPEN，承接OI-TLB-LOCAL-20261009。
+- **ROB下一轮 / ROB及执行部件负责人 / 触发 = 现在**：align0 k8/k16冻结FD为(672,704]/(640,672]；align32 k8右端未确认源于稀疏网格，不当机制差异。N704 none仅156.68而k8=220.01，简单max供给参考不足；ADD/FADD N640提前退化且FADD约555/699两簇，不能由NOP数换算条目。优先融合/重命名/资源对照和long-load锚点资格，不继续无限加密同一NOP曲线；PRF/RS/前端/退休及物理ROB开放，承接OI-ROB-PROBE-20261009。
+- **仍后置 / 正式软件集成负责人 / 触发 = 原型科学合同稳定且需正式矩阵**：runner/schema/CMake正式接入及其跨平台测试；当前独立JSONL保持明确格式边界。ALU/FPU完整operand/latency/throughput标定沿MINIMAL-PROBES/OI-7；专门ITLB正控沿OI-TLB-LOCAL。原A1、冻结产物与旧14条L1不拼接。

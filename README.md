@@ -1,6 +1,6 @@
 # cpu-uarch-explorer
 
-**r2 当前进展（2026-10-09）**：当前Agent端到端独占设备。TLB固定maxW9嵌套对照完成5新进程mapping/200格，40组W9−W8双差均正，但幅值受offset/filler影响，未证明精确ways。ROB v0.2修复生成码/PMU/FP及双链协议，71进程/327窗实际执行核验；fsqrt+NOP在每gap N∈(512,768]出现响应，物理ROB仍OPEN。代码`217e5e3`，审计/证据`468dad9`，均在r2；m0b不恢复开发，旧正式A1/frozen不拼接。交付与复现见[最小探针实测报告](docs/reviews/2026-10-09-minimal-probes-results.md)。
+**r2 当前进展（2026-10-09）**：当前Agent独占设备，已获授权常规端到端持续推进TLB/ROB。新增target100五mapping/4000窗：38/40双差正，但存在负epoch及W8全walk反例；精确ways仍OPEN。ROB细扫114进程/342窗，NOP+fsqrt k8/k16在预注册1-cycle规则下分别响应于每gap N∈(672,704]/(640,672]；无锚点/对齐/ADD/FADD对照已交付，物理ROB仍未识别。当前协议/驱动`7a249e3`、分析`afe6d26`，复用探针`217e5e3`；均在r2，m0b不恢复开发，旧正式A1/frozen不拼接。见[局部确认报告](docs/reviews/2026-10-09-local-confirmation-results.md)；后续继续替换历史与资源归因对照。
 
 跨 ISA、跨 OS 的 CPU 微架构探索平台：真实设备微架构探测 → 统一实验协议与数据模型 → gem5 O3 建模与实机校准 → 综合 Benchmark 验证 → ARM / x86 / RISC-V 对比。
 
