@@ -118,6 +118,47 @@ class RobCode(unittest.TestCase):
             self.assertEqual(words[first+10],0xf9400000 if flag=='--serial' else 0xf9400021)
             self.assertEqual(m['fillers_per_iteration'],18 if flag=='--serial' else 9)
 
+    def test_failed_backing_keeps_observation_without_metrics(self):
+        """部分THP保留实际值；解析失败输出null，不能把零结构当实测。"""
+        header = ROOT / 'probes/common/rob_backing.h'
+        self.assertIn('rob_backing_inspect', header.read_text(),
+                      '失败验收缺少可区分parse与coverage的生产观测')
+        harness = pathlib.Path(self.tmp.name) / 'backing_failure.c'
+        harness.write_text(r'''#include "rob_backing.h"
+#include <assert.h>
+static void sample(const char *text) {
+    FILE *f=tmpfile(); assert(f); fputs(text,f); rewind(f);
+    struct rob_backing_info info={0};
+    enum rob_backing_status status=rob_backing_inspect(f,0x200000,0x400000,true,ROB_PMD_BYTES,&info);
+    fclose(f);
+    assert(status!=ROB_BACKING_VERIFIED);
+    rob_backing_failure_json(stdout,"chase-backing-not-thp2m",0x400000,true,ROB_PMD_BYTES,status,&info);
+}
+int main(void) {
+    sample("200000-600000 rw-p 0 00:00 0\nKernelPageSize: 4 kB\nMMUPageSize: 4 kB\nAnonHugePages: 2048 kB\nRss: 4096 kB\nSwap: 0 kB\nVmFlags: rd wr hg\n");
+    sample("200000-600000 rw-p 0 00:00 0\nAnonHugePages: 2048 kB\n");
+    return 0;
+}
+''')
+        exe = pathlib.Path(self.tmp.name) / 'backing_failure'
+        result = subprocess.run(['clang','-O2','-Wall','-Wextra','-Werror','-I',
+                    str(ROOT / 'probes/common'),str(harness),'-o',str(exe)],capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        result = subprocess.run([str(exe)],capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        mismatch, unparsed = map(json.loads,result.stdout.splitlines())
+        for row in (mismatch,unparsed):
+            self.assertEqual(row['type'],'failure')
+            self.assertEqual(row['metrics'],{})
+            self.assertEqual(row['failure']['reason'],'chase-backing-not-thp2m')
+            self.assertEqual(row['failure']['backing_requested'],'thp2m')
+            self.assertEqual(row['failure']['memory_bytes'],4194304)
+        self.assertEqual(mismatch['failure']['backing_status'],'coverage-mismatch')
+        self.assertEqual(mismatch['failure']['backing_info']['anon_huge_kb'],2048)
+        self.assertEqual(mismatch['failure']['backing_info']['rss_kb'],4096)
+        self.assertEqual(unparsed['failure']['backing_status'],'smaps-parse-failed')
+        self.assertIsNone(unparsed['failure']['backing_info'])
+
     def test_production_smaps_and_aligned_mapping(self):
         """执行生产解析器/真实mmap，拒绝只看THP hint、混合覆盖及伪造完整VMA。"""
         header = ROOT / 'probes/common/rob_backing.h'

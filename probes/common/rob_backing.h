@@ -81,6 +81,19 @@ static inline bool rob_backing_matches(const struct rob_backing_info *info,size_
         && (info->kernel_kb==4 || info->kernel_kb==2048) && (info->mmu_kb==4 || info->mmu_kb==2048);
 }
 
+/* 保留失败时的观察而不放宽验收；parse失败不能输出零填充info。 */
+enum rob_backing_status {
+    ROB_BACKING_VERIFIED, ROB_BACKING_OPEN_FAILED, ROB_BACKING_PARSE_FAILED,
+    ROB_BACKING_COVERAGE_MISMATCH, ROB_BACKING_CLOSE_FAILED
+};
+static inline enum rob_backing_status rob_backing_inspect(FILE *f,uintptr_t start,size_t bytes,
+        bool thp2m,size_t pmd_bytes,struct rob_backing_info *out) {
+    if(!f) return ROB_BACKING_OPEN_FAILED;
+    if(!rob_backing_parse(f,start,bytes,out)) return ROB_BACKING_PARSE_FAILED;
+    return rob_backing_matches(out,bytes,thp2m,pmd_bytes)
+        ? ROB_BACKING_VERIFIED : ROB_BACKING_COVERAGE_MISMATCH;
+}
+
 /* sysfs PMD大小必须明确为2MiB；hint、mTHP或其它PMD大小不能充当本模式。 */
 static inline bool rob_backing_read_pmd(FILE *f,size_t *out) {
     uintmax_t n; char extra;
@@ -94,6 +107,21 @@ static inline void rob_backing_json(FILE *f,const struct rob_backing_info *info)
     fprintf(f,"{\"kernel_page_kb\":%zu,\"mmu_page_kb\":%zu,\"anon_huge_kb\":%zu,"
               "\"rss_kb\":%zu,\"swap_kb\":%zu,\"no_huge\":%s}",
             info->kernel_kb,info->mmu_kb,info->huge_kb,info->rss_kb,info->swap_kb,info->nohuge?"true":"false");
+}
+
+/* 只供固定内部reason/status调用。失败metrics仍为空；实际parse值与未解析null分开。
+ * 独立探针格式（非runner schema v2），无VA/PFN/设备标识。
+ */
+static inline void rob_backing_failure_json(FILE *f,const char *why,size_t bytes,bool thp2m,
+        size_t pmd_bytes,enum rob_backing_status status,const struct rob_backing_info *info) {
+    const char *names[]={"verified","smaps-open-failed","smaps-parse-failed",
+                         "coverage-mismatch","smaps-close-failed"};
+    fprintf(f,"{\"type\":\"failure\",\"metrics\":{},\"failure\":{\"reason\":\"%s\","
+              "\"backing_requested\":\"%s\",\"memory_bytes\":%zu,\"pmd_bytes\":%zu,"
+              "\"backing_status\":\"%s\",\"backing_info\":",
+              why,thp2m?"thp2m":"4k",bytes,pmd_bytes,names[status]);
+    rob_backing_json(f,(status==ROB_BACKING_VERIFIED || status==ROB_BACKING_COVERAGE_MISMATCH)?info:NULL);
+    fputs("}}\n",f);
 }
 
 /* 返回仅含bytes、2MiB对齐的可读写匿名映射；失败返回MAP_FAILED并设置errno。

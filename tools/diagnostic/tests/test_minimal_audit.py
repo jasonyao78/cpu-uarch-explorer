@@ -77,6 +77,23 @@ class RealReplay(unittest.TestCase):
         with self.assertRaises((ValueError,AssertionError)): audit.summarize(self.path)
 
 
+class BackingObservation(unittest.TestCase):
+    def test_bounded_instrumented_reproduction_not_qualification(self):
+        rows=driver.conditions('rob-backing-observe')
+        self.assertEqual(len(rows),1)
+        name,opts=rows[0]
+        self.assertEqual(name,'e0-miss-m256-n0')
+        self.assertIn('rob-backing-observe',driver.THP_QUALIFICATION_MODES)
+        self.assertNotIn('rob-backing-observe',driver.QUALIFICATION_MODES)
+        self.assertEqual(opts[opts.index('-m')+1],'256')
+        self.assertEqual(opts[opts.index('-i')+1],'2097152')
+        self.assertEqual(opts[opts.index('--backing')+1],'thp2m')
+        self.assertIn('--paired',opts)
+        self.assertEqual(opts[opts.index('-n')+1],'0')
+        self.assertEqual(driver.NEW_PROTOCOL['rob-backing-observe'],
+                         'docs/design/2026-10-09-backing-observation.md')
+
+
 class MissQualification(unittest.TestCase):
     def test_allocation_is_fully_visited_and_order_balanced(self):
         rows=driver.conditions('rob-miss-qualify')

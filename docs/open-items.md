@@ -414,3 +414,5 @@
 - **继续 / ROB足迹残差 / 触发=现在**：`docs/design/2026-10-09-wide-load-qualification.md`将同binary足迹有限上推256/512MiB，仍原门、各两epoch、1MiB热对照。不合格不进入N扫描；通过才有限N0/128/256/384/512、同VA P/S验证模型。若仍失败，下步访问次序/编码指针或经认证事件分母对照；未知预取、命中层级不得猜成已知机制。物理ROB、PRF/RS/前端/融合、ALU/FPU独立latency/throughput继续承接OI-12及OI-ROB-PROBE-20261009。
 
 - **足迹上推技术停块 / ROB软件与锚点负责人 / 触发=下一资格轮**：`data/private/20261009T035527Z-rob-miss-wide-thp/` 的512MiB初始 `chase-backing-not-thp2m` 后停块；只有单epoch热点/256已完成，完整科学资格不可计算。512失败尚无具体smaps字段，覆盖/精确VMA/解析原因未区分，后续修改错误诊断时保留实际backing观察但不输出成功metrics。当前不retry512、不改全局defrag；按 `docs/design/2026-10-09-fixed-load-qualification.md` 固定256独立4进程24窗重建，不拼旧前缀。若仍不合格，访问编码/LL请求分母另案预注册，不增足迹追门。
+
+- **固定256技术停块 / ROB软件与锚点负责人 / 触发=下一失败诊断**：`docs/reviews/2026-10-09-long-load-fixed-results.md`（启动`c2a44d2`）仅热点6窗完成，256 initial backing失败，没有长点PMU窗，科学资格不可计算。两次相同reason不证同一根因。最小观测补丁/有限一次复现协议见 `docs/design/2026-10-09-backing-observation.md`：保留parse后实际字段，parse/I/O失败为null，原验收与空metrics不改。若仍parse失败，精确VMA相对边界、字段mask与私有smaps片段属于后续观测项；该补丁不宣称已区分所有parser子原因。物理ROB仍OPEN，不拼前缀或重试直到过门。

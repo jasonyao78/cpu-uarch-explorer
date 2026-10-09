@@ -165,13 +165,20 @@ static const char *snapshot(struct perf *p,struct pg_sample *s) {
     return pg_decode(wire,(size_t)bytes/8,p->ids,p->n,s);
 }
 /* 验收恰好本次mapping；madvise仅是请求，smaps检查始终在PMU窗外。 */
-static bool backing(char *mem,size_t bytes,bool thp2m,size_t pmd_bytes,struct rob_backing_info *out) {
-    FILE *f=fopen("/proc/self/smaps","r"); if(!f) return false;
-    bool ok=rob_backing_parse(f,(uintptr_t)mem,bytes,out)
-        && rob_backing_matches(out,bytes,thp2m,pmd_bytes);
-    if(fclose(f)) return false;
-    if(!ok) errno=EINVAL;
-    return ok;
+static bool backing(char *mem,size_t bytes,bool thp2m,size_t pmd_bytes,struct rob_backing_info *out,
+        enum rob_backing_status *status) {
+    FILE *f=fopen("/proc/self/smaps","r");
+    *status=rob_backing_inspect(f,(uintptr_t)mem,bytes,thp2m,pmd_bytes,out);
+    if(f && fclose(f)) *status=ROB_BACKING_CLOSE_FAILED;
+    if(*status!=ROB_BACKING_VERIFIED) { errno=EINVAL; return false; }
+    return true;
+}
+/* 观测失败分层，不把THP缺口、VMA/parser问题或I/O失败混成未知零值。 */
+static int backing_failure(const char *why,size_t bytes,bool thp2m,size_t pmd_bytes,
+        enum rob_backing_status status,const struct rob_backing_info *info) {
+    fprintf(stderr,"error[%s]: backing observation status=%d\n",why,(int)status);
+    rob_backing_failure_json(stdout,why,bytes,thp2m,pmd_bytes,status,info);
+    return 1;
 }
 #endif
 int main(int argc,char **argv) {
@@ -253,7 +260,7 @@ int main(int argc,char **argv) {
     uint64_t fpcr; __asm__ volatile("mrs %0, fpcr":"=r"(fpcr));
     if(fpcr) return failure("fpcr-nonzero"); // no silent rounding/FZ/trap inheritance
     char *mem=NULL; size_t bytes=(size_t)o.mb<<20,pmd_bytes=0;
-    struct rob_backing_info initial={0};
+    struct rob_backing_info initial={0}; enum rob_backing_status backing_status;
     if(o.anchor==MISS) {
         if(o.thp2m) {
             FILE *f=fopen("/sys/kernel/mm/transparent_hugepage/hpage_pmd_size","r");
@@ -268,8 +275,9 @@ int main(int argc,char **argv) {
         /* 必须在init_chase写节点触页之前请求；失败绝不退回4k。 */
         if(madvise(mem,bytes,o.thp2m?MADV_HUGEPAGE:MADV_NOHUGEPAGE)) return failure("chase-backing-madvise");
         if(!init_chase(mem,bytes,o.serial,o.seed)) return failure("chase-ring-validation");
-        if(!backing(mem,bytes,o.thp2m,pmd_bytes,&initial))
-            return failure(o.thp2m?"chase-backing-not-thp2m":"chase-backing-not-4k");
+        if(!backing(mem,bytes,o.thp2m,pmd_bytes,&initial,&backing_status))
+            return backing_failure(o.thp2m?"chase-backing-not-thp2m":"chase-backing-not-4k",
+                                   bytes,o.thp2m,pmd_bytes,backing_status,&initial);
     }
     uint64_t hot[8]={1,2,3,4,5,6,7,8};
     __builtin___clear_cache((char *)buf,(char *)(buf+c.pos));
@@ -301,14 +309,16 @@ int main(int argc,char **argv) {
         }
         routine(chase_heads[0],chase_heads[1],hot,o.its); // same explicit warmup each round
         struct rob_backing_info before={0},after={0};
-        if(mem && !backing(mem,bytes,o.thp2m,pmd_bytes,&before)) return failure("round-backing-before");
+        if(mem && !backing(mem,bytes,o.thp2m,pmd_bytes,&before,&backing_status))
+            return backing_failure("round-backing-before",bytes,o.thp2m,pmd_bytes,backing_status,&before);
         struct pg_sample a,b,d; const char *err=snapshot(&p,&a); if(err) return failure(err);
         if(ioctl(p.fd[0],PERF_EVENT_IOC_ENABLE,PERF_IOC_FLAG_GROUP)) return failure("group-enable");
         uint64_t t0=now_ns(); routine(chase_heads[0],chase_heads[1],hot,o.its); uint64_t ns=now_ns()-t0;
         if(ioctl(p.fd[0],PERF_EVENT_IOC_DISABLE,PERF_IOC_FLAG_GROUP)) return failure("group-disable");
         if((err=snapshot(&p,&b)) || (err=pg_delta(&a,&b,p.n,&d))) return failure(err);
         /* post不通过时不输出该窗的metrics；pre/post也不能证明窗内从未短暂拆页。 */
-        if(mem && !backing(mem,bytes,o.thp2m,pmd_bytes,&after)) return failure("round-backing-after");
+        if(mem && !backing(mem,bytes,o.thp2m,pmd_bytes,&after,&backing_status))
+            return backing_failure("round-backing-after",bytes,o.thp2m,pmd_bytes,backing_status,&after);
         if(sched_getcpu()!=o.pin || !ns || !d.values[0]) return failure("round-cpu-or-timing");
         for(unsigned dest=0;dest<(raw?2u:1u);++dest) {
             FILE *f=dest?raw:stdout;
