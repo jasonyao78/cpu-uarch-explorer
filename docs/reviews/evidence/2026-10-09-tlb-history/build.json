@@ -1,0 +1,32 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "flags": [
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic"
+  ],
+  "independent_rebuild_byte_identical": true,
+  "source_commit": "2a37795107163a9c3effd8fc3e25410c0dd75695",
+  "binaries": {
+    "tlb_history": "8d046bfb68370ccfd21b144864aa77d48f061398a694cae5e4d45732a884c22e"
+  },
+  "source_sha256": {
+    "probes/diagnostic/tlb_history.cpp": "bac1510936a3ac2985c65266395b2dbde38642039cd7a81d140730e06e9d4f6f",
+    "probes/diagnostic/tlb_history_layout.h": "bd20d2f277e8742590297dec3d2131664ebde8d0459ac75437a32192ba371e6f",
+    "probes/diagnostic/tlb_local_layout.h": "083f6f81d4b6ec04e522cab16c01a9ee796135b30b1476485048859e9283f9d5",
+    "probes/common/tlb_set_collect.h": "ead8eaf63c36cfcc082aa54cb5af718a82de9c1af6426b9c5c9c50b257ceb4b1",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_window.h": "95dc834898a0feb47474b4b7899533f0762a9a7298315a71dd33830d907363c7"
+  },
+  "cpp_flags": [
+    "-std=c++17"
+  ],
+  "plan_path": "docs/reviews/evidence/2026-10-09-tlb-history/plan.json",
+  "plan_sha256": "bb5e5ccd72874bfa2027c59d5f87c31bba0783fce32abf3fe91e898f554b0b23"
+}
