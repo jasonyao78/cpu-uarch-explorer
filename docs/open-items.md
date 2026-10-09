@@ -4,7 +4,7 @@
 
 ## OI-12 ROB 微架构深度分析项目（2026-09-30 登记，第二个部件探测项目）
 
-- **2026-10-09 当前裁定**：ROB软件研究可与TLB并行，设备采样串行；骨架仍不通过采数资格。既有R1–R3未修，新增协议/输入/锚点与判据项见本文件 `OI-ROB-PROBE-20261009`，审查路径 `docs/reviews/2026-10-09-rob-probe-critical-reuse.md`。
+- **2026-10-09 当前裁定**：ROB软件研究与TLB并行，设备采样串行；旧v0.1骨架已由217e5e3及ec1d284修复版本替代，R1–R3的软件缺陷已修并完成目标机测量。物理ROB与长load科学资格仍开放，新增协议/输入/锚点与判据项见本文件 `OI-ROB-PROBE-20261009`，审查路径 `docs/reviews/2026-10-09-rob-probe-critical-reuse.md`。
 
 - **交付物（v0.1 已入库）**：`docs/cpu-uarch-deep-analysis/rob-deep-analysis/`——报告 v0.1（采数前版本：估计量定义/混淆清单/判据预注册 J1–J8/协议三要素）、探针骨架 `probes/rob_window_probe.c`（mini-JIT，7 类别 × 2 锚点，本机编译冒烟 + 生成码 capstone 核验通过）、probes README；方法迁移矩阵相应升级 v0.3。
 - **与 TLB 项目最大差异**：ROB 无 TRM 真值（已全文核验 TRM+优化指南零披露），走"估计量优先 + 第三方候选区间 + 交叉约束"（矩阵 C1 ✏️ 档）。
@@ -403,3 +403,14 @@
 - **TLB下一轮 / TLB局部容量负责人 / 触发 = 现在**：target100有38/40正、两负DID、一个seed平均后负epoch及A/W8最高8walk/圈；硬8页命中边界已反证。固定更大max集合，区分预热与目标访问顺序/替换历史，再W6–12嵌套局部扫描；不要只加W点就宣布ways。两target异时差异不作纯target因果，PFN/cache/描述符与未建模索引仍OPEN，承接OI-TLB-LOCAL-20261009。
 - **ROB下一轮 / ROB及执行部件负责人 / 触发 = 现在**：align0 k8/k16冻结FD为(672,704]/(640,672]；align32 k8右端未确认源于稀疏网格，不当机制差异。N704 none仅156.68而k8=220.01，简单max供给参考不足；ADD/FADD N640提前退化且FADD约555/699两簇，不能由NOP数换算条目。优先融合/重命名/资源对照和long-load锚点资格，不继续无限加密同一NOP曲线；PRF/RS/前端/退休及物理ROB开放，承接OI-ROB-PROBE-20261009。
 - **仍后置 / 正式软件集成负责人 / 触发 = 原型科学合同稳定且需正式矩阵**：runner/schema/CMake正式接入及其跨平台测试；当前独立JSONL保持明确格式边界。ALU/FPU完整operand/latency/throughput标定沿MINIMAL-PROBES/OI-7；专门ITLB正控沿OI-TLB-LOCAL。原A1、冻结产物与旧14条L1不拼接。
+
+
+## OI-UARCH-CONTINUATION-20261009 历史反证与长load资格
+
+- **归属/执行**：当前端到端探针负责人；r2 `codex/sm8650-tlb-hierarchy-r2`，软件可并行、手机单操作者串行。持续授权不是物理容量结论的替代，源/启动/构建身份逐批核验。
+- **已完成 / TLB历史反证**：`docs/reviews/2026-10-09-tlb-history-results.md`，5进程/4000窗，生产plan/geometry/76 backing每epoch/完整PMU与环境审计；代码 `probes/diagnostic/tlb_history.cpp`、分析 `tools/diagnostic/tlb_history_analysis.py`。W8逆向history DID有限瞬态4/5通过，正向3/5；persistent未过，部分方向abs fading符号不一致。整圈首步8walk与逐victim重新准备率合计1.75并存，禁止直接换算初始缺失项数。floor与Iwalk偶发非零已完整披露。
+- **继续 / TLB局部转折 / 触发=现在**：冻结稿 `docs/design/2026-10-09-tlb-local-capacity.md`：W6–12稳定段+单victim/K竞争；先实际producer→auditor闭合，再采数。精确ways、真实索引/替换、I/D与descriptor共享仍OPEN；同样响应只可命名访问协议下的工作集/eviction区间。
+- **已完成 / ROB锚点两轮反证**：`docs/reviews/2026-10-09-long-load-4k-qualification.md`及`docs/reviews/2026-10-09-long-load-thp-results.md`，各6进程/36窗；4K长点73失败门，实际THP完整覆盖且walk约1e-6/iter后仍53失败门。`probes/common/rob_backing.h`提供实际backing核验，`tools/diagnostic/analyze_long_load.py`按c93e788固定科学门，不调门救结论。THP batch窗前smaps流程变化，旧4K绝对周期非同条件因果配对。
+- **继续 / ROB足迹残差 / 触发=现在**：`docs/design/2026-10-09-wide-load-qualification.md`将同binary足迹有限上推256/512MiB，仍原门、各两epoch、1MiB热对照。不合格不进入N扫描；通过才有限N0/128/256/384/512、同VA P/S验证模型。若仍失败，下步访问次序/编码指针或经认证事件分母对照；未知预取、命中层级不得猜成已知机制。物理ROB、PRF/RS/前端/融合、ALU/FPU独立latency/throughput继续承接OI-12及OI-ROB-PROBE-20261009。
+
+- **足迹上推技术停块 / ROB软件与锚点负责人 / 触发=下一资格轮**：`data/private/20261009T035527Z-rob-miss-wide-thp/` 的512MiB初始 `chase-backing-not-thp2m` 后停块；只有单epoch热点/256已完成，完整科学资格不可计算。512失败尚无具体smaps字段，覆盖/精确VMA/解析原因未区分，后续修改错误诊断时保留实际backing观察但不输出成功metrics。当前不retry512、不改全局defrag；按 `docs/design/2026-10-09-fixed-load-qualification.md` 固定256独立4进程24窗重建，不拼旧前缀。若仍不合格，访问编码/LL请求分母另案预注册，不增足迹追门。

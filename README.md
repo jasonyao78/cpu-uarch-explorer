@@ -1,6 +1,6 @@
 # cpu-uarch-explorer
 
-**r2 当前进展（2026-10-09）**：当前Agent独占设备，已获授权常规端到端持续推进TLB/ROB。新增target100五mapping/4000窗：38/40双差正，但存在负epoch及W8全walk反例；精确ways仍OPEN。ROB细扫114进程/342窗，NOP+fsqrt k8/k16在预注册1-cycle规则下分别响应于每gap N∈(672,704]/(640,672]；无锚点/对齐/ADD/FADD对照已交付，物理ROB仍未识别。当前协议/驱动`7a249e3`、分析`afe6d26`，复用探针`217e5e3`；均在r2，m0b不恢复开发，旧正式A1/frozen不拼接。见[局部确认报告](docs/reviews/2026-10-09-local-confirmation-results.md)；后续继续替换历史与资源归因对照。
+**r2 当前进展（2026-10-09）**：当前Agent独占设备，按用户授权持续端到端推进TLB/ROB；m0b已完成集成使命，不恢复开发。TLB新增历史反证5mapping/4000窗，W8初始高walk可消退，整圈8walk不能当作窗前8项全不驻留；局部W6–12/victim竞争对照继续。ROB软件/实际4K与THP2MiB测量链已通过，长点大页使walk约降至1e-6/iter，但64/128MiB仍未通过原miss代理资格门；256/512MiB反证在512初始backing核验处停块，正重建固定256MiB的双epoch资格，不以NOP数换算物理ROB。既有细扫仍仅为有效窗口响应：k8/k16每gap N∈(672,704]/(640,672]，物理ROB/PRF/RS/融合开放。代码/协议/构建/启动与raw SHA分开锚定，旧正式A1/frozen不拼接。见[TLB历史反证](docs/reviews/2026-10-09-tlb-history-results.md)、[大页资格结果](docs/reviews/2026-10-09-long-load-thp-results.md)、[局部确认](docs/reviews/2026-10-09-local-confirmation-results.md)。
 
 跨 ISA、跨 OS 的 CPU 微架构探索平台：真实设备微架构探测 → 统一实验协议与数据模型 → gem5 O3 建模与实机校准 → 综合 Benchmark 验证 → ARM / x86 / RISC-V 对比。
 

@@ -120,6 +120,22 @@ class ThpQualification(unittest.TestCase):
             with self.assertRaises(ValueError): driver.validate_realized('rob-miss-qualify-thp',opts,[config])
 
 
+class FixedFootprint(unittest.TestCase):
+    def test_rebuilds_complete_two_epoch_qualification(self):
+        rows=driver.conditions('rob-miss-fixed-thp')
+        self.assertEqual([n for n,_ in rows],['e0-miss-m1-n0','e0-miss-m256-n0','e1-miss-m256-n0','e1-miss-m1-n0'])
+        for _,opts in rows:
+            mb=int(opts[opts.index('-m')+1])
+            self.assertEqual(int(opts[opts.index('-i')+1]),max(131072,mb*8192))
+            self.assertEqual(opts[opts.index('--backing')+1], '4k' if mb==1 else 'thp2m')
+
+
+class CapacityMatrix(unittest.TestCase):
+    def test_capacity_uses_registered_target_and_own_binary(self):
+        self.assertEqual(driver.conditions('tlb-capacity'),[(f'epoch-{i}',['100']+(['--reverse'] if i%2 else [])) for i in range(5)])
+        self.assertEqual(driver.binary_name('tlb-capacity'),'tlb_capacity')
+
+
 class WideFootprints(unittest.TestCase):
     def test_full_wide_matrix_keeps_hot_control(self):
         rows=driver.conditions('rob-miss-wide-thp')
