@@ -3,9 +3,11 @@
 契约来源：docs/design/2026-10-09-long-load-qualification.md（c93e788）。
 """
 import copy
+import hashlib
 import json
 import math
 from pathlib import Path
+import struct
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -61,6 +63,15 @@ def synthetic_fixed_run():
     run = synthetic_wide_run()
     run.update(mode='rob-miss-fixed-thp', processes=4)
     run['rows'] = [r for r in run['rows'] if r['memory_bytes'] != 512 * 1048576]
+    return run
+
+
+def synthetic_collapse_run():
+    """仅构造新flag已透传的虚构资格输入，不模拟设备collapse成功。"""
+    run = synthetic_fixed_run()
+    run['mode'] = 'rob-collapse-qualify'
+    for row in run['rows']:
+        row['collapse_requested'] = row['memory_bytes'] > 1048576
     return run
 
 
@@ -327,6 +338,110 @@ class LongLoadTests(unittest.TestCase):
         self.assertTrue(result['candidates'][0]['qualified'])
         self.assertFalse(result['qualified'])
         self.assertIn('P.round0.LL_miss_rate', result['candidates'][1]['failed_gates'])
+
+    def test_collapse_is_explicit_fixed_shape_with_original_gates(self):
+        run = synthetic_collapse_run()
+        with self.assertRaises(ValueError):
+            qualify(run)
+        try:
+            result = qualify(run, mode='rob-collapse-qualify')
+        except ValueError as exc:
+            self.fail(f'explicit collapse four-process shape is not supported: {exc}')
+        self.assertEqual((result['mode'], result['processes'], result['windows']),
+                         ('rob-collapse-qualify', 4, 24))
+        self.assertEqual(result['qualified_footprints_mib'], [256])
+        reference = qualify(synthetic_fixed_run(), mode='rob-miss-fixed-thp')
+        self.assertEqual(result['thresholds'], reference['thresholds'])
+        self.assertEqual(result['gate_source'], reference['gate_source'])
+        self.assertEqual(result['candidates'], reference['candidates'])
+
+    def test_collapse_requires_explicit_bool_flag_per_member(self):
+        for index in (0, 1, 2, 3, 4, 5, 6, 7):
+            for value in ('missing', None, 0, 1, 'true', 'false', not (index in (2, 3, 6, 7))):
+                run = synthetic_collapse_run()
+                if value == 'missing':
+                    del run['rows'][index]['collapse_requested']
+                else:
+                    run['rows'][index]['collapse_requested'] = value
+                with self.subTest(member=index, value=value), self.assertRaisesRegex(ValueError, 'collapse request metadata mismatch'):
+                    qualify(run, mode='rob-collapse-qualify')
+        relabeled = synthetic_fixed_run()
+        relabeled['mode'] = 'rob-collapse-qualify'
+        with self.assertRaisesRegex(ValueError, 'collapse request metadata mismatch'):
+            qualify(relabeled, mode='rob-collapse-qualify')
+
+    def test_collapse_needs_both_epochs_without_scientific_gate_relaxation(self):
+        run = synthetic_collapse_run()
+        run['rows'][6]['counts_per_iteration']['0x37'][0] = 1.79999
+        try:
+            result = qualify(run, mode='rob-collapse-qualify')
+        except ValueError as exc:
+            self.fail(f'explicit collapse round gates are not supported: {exc}')
+        self.assertTrue(result['candidates'][0]['qualified'])
+        self.assertFalse(result['qualified'])
+        self.assertIn('P.round0.LL_miss_rate', result['candidates'][1]['failed_gates'])
+        del run['rows'][4:]
+        with self.assertRaises(ValueError):
+            qualify(run, mode='rob-collapse-qualify')
+
+    def test_raw_collapse_layout_retains_receipt_before_runtime(self):
+        """隔离本审计层的布局接缝；生产矩阵/来源auditor另测，全部内容synthetic。"""
+        run = synthetic_collapse_run()
+        run['max_cpu_c_range'] = [40, 40]
+        config = {'type': 'config', 'paired': True, 'serial': False,
+                  'memory_bytes': 256 * 1048576, 'iterations': 2097152,
+                  'collapse_requested': True}
+        info = {'kernel_page_kb': 4, 'mmu_page_kb': 4, 'anon_huge_kb': 262144,
+                'rss_kb': 262144, 'swap_kb': 0, 'no_huge': False}
+        collapse = {'type': 'backing-collapse', 'memory_bytes': config['memory_bytes'],
+                    'pmd_bytes': 2097152, 'return_code': 0, 'errno': 0,
+                    'before_status': 'coverage-mismatch', 'after_status': 'verified',
+                    'before': dict(info, anon_huge_kb=229376), 'after': info}
+        runtime = {'type': 'runtime', 'event_ids': list(range(1, 7)),
+                   'ring_nodes': 4194304, 'distinct_lines_per_call': 4194304,
+                   'loop_address_mod64': 0, 'mapping_4k_verified': False,
+                   'backing_info': info}
+        order = [(0, False, 0), (0, True, 1), (1, True, 0), (1, False, 1), (2, False, 0), (2, True, 1)]
+        rounds = [{'type': 'round', 'round': r, 'serial': s, 'pair_step': step,
+                   'metrics': {'0x11': 100, '0x8': config['iterations'] * 4 + 17}}
+                  for r, s, step in order]
+        code = struct.pack('<21I', *([0xd503201f] * 16), 0xf9400000,
+                           0xf9400021, 0xf1000463, 0x54ffffa1, 0xd65f03c0)
+        with tempfile.TemporaryDirectory() as directory:
+            raw = Path(directory)
+            name = 'e0-miss-m256-n0'
+            generated = {}
+            for member in ('parallel', 'serial'):
+                member_code = code if member == 'parallel' else code[:68] + struct.pack('<I', 0xf9400000) + code[72:]
+                (raw / (name + '-' + member + '.bin')).write_bytes(member_code)
+                generated[member] = {'sha256': hashlib.sha256(member_code).hexdigest(),
+                                     'config': dict(config, paired=False, serial=member == 'serial')}
+            manifest = {'mode': 'rob-collapse-qualify', 'source_head': 'c93e788a31c077f5575ef6139157b8fe3185bc0f',
+                        'binary_source_head': 'synthetic', 'binary_sha256': 'synthetic', 'driver_sha256': 'synthetic',
+                        'build_evidence_sha256': 'synthetic', 'protocol_path': 'synthetic', 'protocol_sha256': 'synthetic',
+                        'results': [{'name': name, 'stdout_sha256': 'synthetic', 'generated_code': generated}]}
+            (raw / 'manifest.json').write_text(json.dumps(manifest))
+            (raw / 'environment-policy.json').write_text('{}')
+            _, envs = self.synthetic_environment()
+            for filename, env in envs.items():
+                (raw / filename).write_text(json.dumps(env))
+            stdout = raw / (name + '.stdout.jsonl')
+            (raw / (name + '.stderr.log')).write_text('')
+            records = [config, collapse, runtime, *rounds]
+            stdout.write_text('\n'.join(json.dumps(r) for r in records) + '\n')
+            with patch('tools.diagnostic.summarize_sm8650_minimal.summarize', return_value=run), \
+                 patch('tools.diagnostic.analyze_long_load.audit_environment'):
+                try:
+                    result = audit_raw(raw, {'runs': [run]})
+                except ValueError as exc:
+                    self.fail(f'collapse record breaks raw layout consumer: {exc}')
+                process = result['processes'][0]
+                self.assertIs(process['collapse_requested'], True)
+                self.assertEqual(process['collapse_observation'], collapse)
+                self.assertEqual(process['windows'], rounds)
+                stdout.write_text('\n'.join(json.dumps(r) for r in [config, runtime, collapse, *rounds]) + '\n')
+                with self.assertRaisesRegex(ValueError, 'raw record layout mismatch'):
+                    audit_raw(raw, {'runs': [run]})
 
     def test_zero_miss_means_are_rejected_without_nonfinite_json(self):
         run = synthetic_run()

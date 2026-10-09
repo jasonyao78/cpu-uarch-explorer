@@ -23,7 +23,7 @@ GATE_SOURCE = {
     'path': 'docs/design/2026-10-09-long-load-qualification.md',
     'sha256': '7de293eff7033316c2f46a77025a688c7a26e3b6efe37ebe6f5b16b57a53d943',
 }
-MODES = ('rob-miss-qualify', 'rob-miss-qualify-thp', 'rob-miss-wide-thp', 'rob-miss-fixed-thp')
+MODES = ('rob-miss-qualify', 'rob-miss-qualify-thp', 'rob-miss-wide-thp', 'rob-miss-fixed-thp', 'rob-collapse-qualify')
 EVENTS = ('0x11', '0x8', '0x3', '0x17', '0x34', '0x37')
 REFILLS = {'0x3': 'L1_refill', '0x17': 'L2_refill', '0x37': 'LL_miss'}
 THRESHOLDS = {
@@ -40,14 +40,16 @@ def qualify(run, *, mode='rob-miss-qualify'):
     输入须覆盖所选 mode 的完整双 epoch/双 member 矩阵；缺身份、非有限值
     或激励元数据改变抛 ValueError。此纯函数不证明 raw 来源或 backing，
     CLI 另行核验。THP mode 必须显式选择；wide 为 1/256/512 MiB 的
-    6 进程/36 窗，fixed 为 1/256 MiB 的 4 进程/24 窗，均仍使用旧
-    c93e788 冻结科学门，不改写旧模式或既有输出。
+    6 进程/36 窗，fixed/collapse 为 1/256 MiB 的 4 进程/24 窗。collapse
+    每行须显式绑定bool请求标志；均仍使用旧 c93e788 冻结科学门，
+    不改写旧模式或既有输出。
     """
     if mode not in MODES or run.get('mode') != mode:
         raise ValueError('qualification mode/process mismatch')
     # fixed 的独立完整矩阵见 docs/design/2026-10-09-fixed-load-qualification.md；
     # 不接受 stopped wide 前缀，也不能通过重标记旧64/128数据改变足迹。
-    long_mib = {'rob-miss-wide-thp': (256, 512), 'rob-miss-fixed-thp': (256,)}.get(mode, (64, 128))
+    long_mib = {'rob-miss-wide-thp': (256, 512), 'rob-miss-fixed-thp': (256,),
+                'rob-collapse-qualify': (256,)}.get(mode, (64, 128))
     footprints = (1, *long_mib)
     process_count = 2 * len(footprints)
     if run.get('processes') != process_count:
@@ -63,6 +65,12 @@ def qualify(run, *, mode='rob-miss-qualify'):
         mb = memory // 1048576
         if mb not in footprints:
             raise ValueError('qualification mode/footprint mismatch')
+        # 新局部干预必须贯穿请求→摘要；缺flag的旧fixed数据不能改名晋升。
+        # 契约：docs/design/2026-10-09-local-collapse-qualification.md。
+        if mode == 'rob-collapse-qualify' and (
+                type(row.get('collapse_requested')) is not bool or
+                row['collapse_requested'] != (memory > 1048576)):
+            raise ValueError('collapse request metadata mismatch')
         expected = {'condition': f'e{epoch}-miss-m{mb}-n0', 'class': 'nop',
                     'anchor': 'miss', 'n': 0, 'chain': 8, 'loop_mod64': 0,
                     'chase_seed': 42, 'iterations': max(131072, mb * 8192)}
@@ -202,7 +210,17 @@ def audit_raw(path, summary):
         name = result['name']
         if (path / (name + '.stderr.log')).read_text():
             raise ValueError('unexpected stderr: ' + name)
-        config, runtime, *rounds = [json.loads(line) for line in (path / (name + '.stdout.jsonl')).read_text().splitlines()]
+        records = [json.loads(line) for line in (path / (name + '.stdout.jsonl')).read_text().splitlines()]
+        config = records[0]
+        collapse = None
+        collapse_requested = config.get('collapse_requested', False)
+        if manifest['mode'] == 'rob-collapse-qualify' and collapse_requested:
+            # 生产summarizer已核唯一性/位置/返回值/actual post；本层保留原记录。
+            config, collapse, runtime, *rounds = records
+            if collapse.get('type') != 'backing-collapse':
+                raise ValueError('raw record layout mismatch')
+        else:
+            config, runtime, *rounds = records
         if (config['type'], runtime['type']) != ('config', 'runtime') or len(rounds) != 6:
             raise ValueError('raw record layout mismatch')
         if [(r['round'], r['serial'], r['pair_step']) for r in rounds] != expected_order:
@@ -228,13 +246,16 @@ def audit_raw(path, summary):
             if row['type'] != 'round' or not all(type(v) is int and v >= 0 for v in row['metrics'].values()):
                 raise ValueError('invalid raw PMU counts')
             residuals.append(row['metrics']['0x8'] - (config['iterations'] * 4 + 17))
-        processes.append({'condition': name, 'stdout_sha256': result['stdout_sha256'],
+        process = {'condition': name, 'stdout_sha256': result['stdout_sha256'],
                           'iterations': config['iterations'], 'memory_bytes': config['memory_bytes'],
                           'ring_nodes': runtime['ring_nodes'], 'distinct_lines_per_call': runtime['distinct_lines_per_call'],
                           'loop_address_mod64': runtime['loop_address_mod64'],
                           'mapping_4k_verified': runtime.get('mapping_4k_verified'),
                           'event_ids': runtime['event_ids'], 'generated_code_sha256': codes,
-                          'windows': rounds})
+                          'windows': rounds}
+        if manifest['mode'] == 'rob-collapse-qualify':
+            process.update(collapse_requested=collapse_requested, collapse_observation=collapse)
+        processes.append(process)
     return {'passed': True, 'raw_directory': path.name,
             'manifest_sha256': hashlib.sha256((path / 'manifest.json').read_bytes()).hexdigest(),
             'source_head': manifest['source_head'], 'binary_source_head': manifest['binary_source_head'],
