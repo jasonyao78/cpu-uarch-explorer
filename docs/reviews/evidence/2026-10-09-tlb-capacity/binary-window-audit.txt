@@ -1,0 +1,52 @@
+
+/private/tmp/tlb-capacity-android:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+000000000024354c <main>:
+  244dc0:      	bl	0x2bb87c <_Unwind_Resume>
+
+0000000000244dc4 <_ZL15measured_windowRN12probe_common10PerfWindowEmjjmjPNS_11GroupSampleES3_>:
+  244dc4:      	stp	x29, x30, [sp, #-0x40]!
+  244dc8:      	str	x23, [sp, #0x10]
+  244dcc:      	stp	x22, x21, [sp, #0x20]
+  244dd0:      	stp	x20, x19, [sp, #0x30]
+  244dd4:      	mov	x29, sp
+  244dd8:      	mov	x19, x7
+  244ddc:      	mov	w23, w3
+  244de0:      	mov	w22, w2
+  244de4:      	mov	x21, x1
+  244de8:      	mov	x20, x0
+  244dec:      	cbz	w5, 0x244e08 <_ZL15measured_windowRN12probe_common10PerfWindowEmjjmjPNS_11GroupSampleES3_+0x44>
+  244df0:      	cmp	w5, #0x80
+  244df4:      	cset	w8, eq
+  244df8:      	ubfiz	x8, x8, #3, #32
+  244dfc:      	ldr	x4, [x4, x8]
+  244e00:      	subs	w5, w5, #0x1
+  244e04:      	b.ne	0x244dfc <_ZL15measured_windowRN12probe_common10PerfWindowEmjjmjPNS_11GroupSampleES3_+0x38>
+  244e08:      	mov	x0, x20
+  244e0c:      	mov	x1, x6
+  244e10:      	bl	0x248d24 <_ZN12probe_common10PerfWindow13read_snapshotEPNS_11GroupSampleE>
+  244e14:      	tbz	w0, #0x0, 0x244e50 <_ZL15measured_windowRN12probe_common10PerfWindowEmjjmjPNS_11GroupSampleES3_+0x8c>
+  244e18:      	cbz	w22, 0x244e2c <_ZL15measured_windowRN12probe_common10PerfWindowEmjjmjPNS_11GroupSampleES3_+0x68>
+  244e1c:      	lsl	w8, w23, #3
+  244e20:      	ldr	x21, [x21, w8, uxtw]
+  244e24:      	subs	w22, w22, #0x1
+  244e28:      	b.ne	0x244e20 <_ZL15measured_windowRN12probe_common10PerfWindowEmjjmjPNS_11GroupSampleES3_+0x5c>
+  244e2c:      	mov	x0, x20
+  244e30:      	mov	x1, x19
+  244e34:      	bl	0x248d24 <_ZN12probe_common10PerfWindow13read_snapshotEPNS_11GroupSampleE>
+  244e38:      	tbz	w0, #0x0, 0x244e6c <_ZL15measured_windowRN12probe_common10PerfWindowEmjjmjPNS_11GroupSampleES3_+0xa8>
+  244e3c:      	ldp	x20, x19, [sp, #0x30]
+  244e40:      	ldr	x23, [sp, #0x10]
+  244e44:      	ldp	x22, x21, [sp, #0x20]
+  244e48:      	ldp	x29, x30, [sp], #0x40
+  244e4c:      	ret
+  244e50:      	mov	w0, #0x10               // =16
+  244e54:      	bl	0x2b9208 <__cxa_allocate_exception>
+  244e58:      	mov	x19, x0
+  244e5c:      	adrp	x1, 0x202000 <year_lengths+0x19c8>
+  244e60:      	add	x1, x1, #0xe46
+  244e64:      	bl	0x24927c <_ZNSt13runtime_errorC2EPKc>
+  244e68:      	b	0x244e84 <_ZL15measured_windowRN12probe_common10PerfWindowEmjjmjPNS_11GroupSampleES3_+0xc0>
+  244e6c:      	mov	w0, #0x10               // =16

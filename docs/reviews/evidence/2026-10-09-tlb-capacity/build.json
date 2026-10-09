@@ -1,0 +1,33 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "ea32ba4344e308bfa97a31f9973163d9f8209220",
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "flags": [
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic"
+  ],
+  "cpp_flags": [
+    "-std=c++17"
+  ],
+  "binaries": {
+    "tlb_capacity": "84393935b2d8ddbd3f059e1768d9a25087a1c11f74864f571b4f7b7de95143ce"
+  },
+  "independent_rebuild_byte_identical": true,
+  "source_sha256": {
+    "probes/diagnostic/tlb_capacity.cpp": "43a688a0d1f4faa85ad70f740cd3d65427defe6888469e01a89cafe8af0527cb",
+    "probes/diagnostic/tlb_capacity_layout.h": "4b1c6d67b3a2469eaf757c4bc51ddd4e33f286826fb9ff85ca9fb73b58aba54f",
+    "probes/diagnostic/tlb_history_layout.h": "bd20d2f277e8742590297dec3d2131664ebde8d0459ac75437a32192ba371e6f",
+    "probes/diagnostic/tlb_local_layout.h": "083f6f81d4b6ec04e522cab16c01a9ee796135b30b1476485048859e9283f9d5",
+    "probes/common/tlb_set_collect.h": "ead8eaf63c36cfcc082aa54cb5af718a82de9c1af6426b9c5c9c50b257ceb4b1",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_window.h": "95dc834898a0feb47474b4b7899533f0762a9a7298315a71dd33830d907363c7"
+  },
+  "plan_path": "docs/reviews/evidence/2026-10-09-tlb-capacity/plan.json",
+  "plan_sha256": "5c7cc37ae67acdfb17aec7c93218d68fa1f157d439a22f408e3cb1b1b0b23bc2"
+}
