@@ -1,0 +1,25 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "a3ef370f35a06af51f25896b1a18c6b149860198",
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "flags": [
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common"
+  ],
+  "independent_rebuild_byte_identical": true,
+  "binaries": {
+    "rob_cold_pair": "79dde1a1351a90e8bc779d034901f105ee6313fca5562bb0ac47310adca77e73"
+  },
+  "source_sha256": {
+    "probes/diagnostic/rob_cold_pair.c": "e6f1f76504169cb4f45aa10662b8ff8e60a486ccb39d593db60c869f3640ea6d",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/rob_backing.h": "ef1dd0f7f38dad99713322f06b3d5c70caac3e9a56ca214f687120f3fafedd29"
+  },
+  "plan_path": "docs/reviews/evidence/2026-10-10-cold-load-model/plan.json",
+  "plan_sha256": "d4bfc2560f710cd973c9b38ff8184c3d896c2859426ce407fa4b7bf0577f8c9c"
+}
