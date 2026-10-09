@@ -60,4 +60,24 @@ class ColdProducer(unittest.TestCase):
             self.assertEqual(r[-1]['metrics'],{});self.assertEqual(r[-1]['failure']['reason'],'measurement-requires-linux-aarch64')
             self.assertFalse(any(x['type']=='round' for x in r))
 
+class SingletonProducer(unittest.TestCase):
+    compile=ColdProducer.compile
+    def test_explicit_singletons_actual_slots_and_profile(self):
+        with tempfile.TemporaryDirectory() as folder:
+            exe=self.compile(folder)
+            for mask in (0,4096):
+                for member in ('A','B'):
+                    out=Path(folder)/'code.bin'
+                    p=subprocess.run([str(exe),'--singletons','--mask',str(mask),'--member',member,'--write-asm',str(out)],capture_output=True,text=True)
+                    self.assertEqual(p.returncode,0,p.stderr)
+                    c=json.loads(p.stdout);words=struct.unpack('<29I',out.read_bytes())
+                    self.assertEqual(c['version'],2);self.assertIs(c['singletons_requested'],True)
+                    self.assertEqual(c['members'],['P','S','E','A','B'])
+                    self.assertEqual((c['matrix_cells_per_trial'],c['windows']),(40,2560))
+                    self.assertEqual(words[20:24],(0xf9400000,0xca0c0000,0xd503201f,0xd503201f) if member=='A'
+                                     else (0xd503201f,0xd503201f,0xf9400021,0xca0c0021))
+            for member in ('A','B'):
+                p=subprocess.run([str(exe),'--member',member,'--write-asm',str(out)],capture_output=True,text=True)
+                self.assertNotEqual(p.returncode,0)
+
 if __name__=='__main__':unittest.main()

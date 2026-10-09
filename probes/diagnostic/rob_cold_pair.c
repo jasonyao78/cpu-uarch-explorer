@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0
  * Single-shot dual-line mechanism, never a physical ROB-entry counter.
  * Contract: docs/design/2026-10-09-cold-pair-qualification.md.
+ * Singleton profile: docs/design/2026-10-10-cold-load-model.md.
  * Internal CNTVCT time is distinct from whole user PMU wrapper counts.
  * All cache maintenance is on this process's own two nodes, outside the window.
  * Host builds export real generated code/map tests; Linux AArch64 measures.
@@ -32,8 +33,8 @@
 #define NOP UINT32_C(0xd503201f)
 #define DSB UINT32_C(0xd5033f9f)
 #define ISB UINT32_C(0xd5033fdf)
-enum member { P, S, E };
-static const char *const names[]={"P","S","E"};
+enum member { P, S, E, A_ONLY, B_ONLY };
+static const char *const names[]={"P","S","E","A","B"};
 struct pair_mapping { char *reservation,*data; size_t reserved; };
 struct cell { unsigned mask,swap; enum member member; bool cold; };
 
@@ -59,11 +60,16 @@ static bool fill_pair(const struct pair_mapping *p,unsigned mask) {
     return !mask || (*(uintptr_t *)a==a && *(uintptr_t *)b==b);
 }
 /* Left rotation then optional reversal: same function drives every actual call. */
-static struct cell cell_at(unsigned epoch,unsigned trial,unsigned position) {
-    unsigned j=((trial+epoch)%2 ? 23-position : position);
-    j=(j+trial%24)%24;
-    struct cell c={.mask=(j/12)*4096,.swap=(j/6)%2,.member=(enum member)((j/2)%3),.cold=j%2!=0};
+static struct cell cell_at_profile(unsigned epoch,unsigned trial,unsigned position,bool singletons) {
+    unsigned members=singletons?5:3,cells=members*8;
+    unsigned j=((trial+epoch)%2 ? cells-1-position : position);
+    j=(j+trial%cells)%cells;
+    struct cell c={.mask=(j/(members*4))*4096,.swap=(j/(members*2))%2,
+        .member=(enum member)((j/2)%members),.cold=j%2!=0};
     return c;
+}
+static struct cell cell_at(unsigned epoch,unsigned trial,unsigned position) {
+    return cell_at_profile(epoch,trial,position,false);
 }
 /* x0/x1=actual node heads; x12 mask; x13/14 clocks. Only caller-saved regs. */
 static size_t build(uint32_t *buf,size_t capacity,unsigned n,unsigned mask,enum member member) {
@@ -74,8 +80,9 @@ static size_t build(uint32_t *buf,size_t capacity,unsigned n,unsigned mask,enum 
     buf[p++]=DSB;buf[p++]=ISB;buf[p++]=UINT32_C(0xd53be04d);buf[p++]=ISB;
     for(unsigned side=0;side<2;++side){
         unsigned r=member==S?0:side;
-        buf[p++]=member==E?NOP:(UINT32_C(0xf9400000)|(r<<5)|r);
-        buf[p++]=member==E?NOP:(UINT32_C(0xca0c0000)|(r<<5)|r);
+        bool active=member==P || member==S || (member==A_ONLY && !side) || (member==B_ONLY && side);
+        buf[p++]=active?(UINT32_C(0xf9400000)|(r<<5)|r):NOP;
+        buf[p++]=active?(UINT32_C(0xca0c0000)|(r<<5)|r):NOP;
         for(unsigned j=0;j<n;++j)buf[p++]=NOP;
     }
     buf[p++]=DSB;buf[p++]=ISB;buf[p++]=UINT32_C(0xd53be04e);
@@ -91,13 +98,16 @@ static unsigned number(const char *s,unsigned lo,unsigned hi){
     char *end;errno=0;if(!s || !*s || *s=='-')exit(2);
     unsigned long v=strtoul(s,&end,0);if(errno || *end || v<lo || v>hi)exit(2);return (unsigned)v;
 }
-static void config(unsigned n,unsigned epoch,int pin,unsigned type,const char *dump,unsigned mask,enum member member){
-    printf("{\"type\":\"config\",\"version\":1,\"probe\":\"rob-cold-pair\",\"n\":%u,\"trials\":64,\"epoch\":%u,"
-      "\"matrix_cells_per_trial\":24,\"windows\":1536,\"memory_bytes\":8192,\"mapping_alignment\":8192,"
-      "\"node_offsets\":[0,4096],\"masks\":[0,4096],\"members\":[\"P\",\"S\",\"E\"],\"states\":[\"hot\",\"cold\"],"
+static void config(unsigned n,unsigned epoch,int pin,unsigned type,const char *dump,unsigned mask,enum member member,bool singletons){
+    printf("{\"type\":\"config\",\"version\":%u,\"probe\":\"%s\",\"n\":%u,\"trials\":64,\"epoch\":%u,"
+      "\"matrix_cells_per_trial\":%u,\"windows\":%u,\"memory_bytes\":8192,\"mapping_alignment\":8192,"
+      "\"node_offsets\":[0,4096],\"masks\":[0,4096],\"members\":%s,\"states\":[\"hot\",\"cold\"],"
       "\"warmup_calls\":128,\"internal_clock\":\"cntvct_el0\",\"code_bytes\":%u,\"kernel_instructions\":%u,"
       "\"pin\":%d,\"pmu_type\":%u,\"events\":[17,8,3,23,52,55],\"exclude_kernel\":true,\"exclude_hv\":true,"
-      "\"backing_requested\":\"4k\"",n,epoch,4*(29+2*n),29+2*n,pin,type);
+      "\"backing_requested\":\"4k\"",singletons?2:1,singletons?"rob-load-model":"rob-cold-pair",n,epoch,
+        singletons?40:24,singletons?2560:1536,singletons?"[\"P\",\"S\",\"E\",\"A\",\"B\"]":"[\"P\",\"S\",\"E\"]",
+        4*(29+2*n),29+2*n,pin,type);
+    if(singletons)fputs(",\"singletons_requested\":true",stdout);
     if(dump)printf(",\"export\":{\"mask\":%u,\"member\":\"%s\"}",mask,names[member]);puts("}");
 }
 #if defined(__linux__) && defined(__aarch64__)
@@ -144,35 +154,36 @@ static bool capabilities(uintptr_t a,uintptr_t b,routine_t fn,uint64_t *freq,siz
 }
 #endif
 int main(int argc,char **argv){
-    unsigned n=0,epoch=0,mask=0,type=0;enum member member=P;int pin=-1;const char *dump=NULL;bool member_set=false,mask_set=false;
+    unsigned n=0,epoch=0,mask=0,type=0;enum member member=P;int pin=-1;const char *dump=NULL;bool member_set=false,mask_set=false,singletons=false;
     static const struct option opts[]={{"epoch",1,0,1},{"trials",1,0,2},{"pin",1,0,3},{"pmu-type",1,0,4},
-      {"mask",1,0,5},{"member",1,0,6},{"write-asm",1,0,7},{0,0,0,0}};int ch;
+      {"mask",1,0,5},{"member",1,0,6},{"write-asm",1,0,7},{"singletons",0,0,8},{0,0,0,0}};int ch;
     while((ch=getopt_long(argc,argv,"n:",opts,NULL))!=-1){
         switch(ch){
         case 'n':n=number(optarg,0,4096);break;case 1:epoch=number(optarg,0,1);break;
         case 2:if(number(optarg,64,64)!=64)return 2;break;case 3:pin=(int)number(optarg,0,1023);break;
         case 4:type=number(optarg,1,UINT32_MAX);break;
         case 5:mask=number(optarg,0,4096);if(mask!=0 && mask!=4096)return 2;mask_set=true;break;
-        case 6:member_set=true;{bool ok=false;for(unsigned i=0;i<3;++i)if(!strcmp(optarg,names[i])){member=(enum member)i;ok=true;}if(!ok)return 2;}break;
-        case 7:dump=optarg;break;default:return 2;
+        case 6:member_set=true;{bool ok=false;for(unsigned i=0;i<5;++i)if(!strcmp(optarg,names[i])){member=(enum member)i;ok=true;}if(!ok)return 2;}break;
+        case 7:dump=optarg;break;case 8:singletons=true;break;default:return 2;
         }
     }
-    if(optind!=argc || (!dump && (member_set || mask_set)))return 2;
-    config(n,epoch,pin,type,dump,mask,member);
+    if(optind!=argc || (!dump && (member_set || mask_set)) || (!singletons && member>E))return 2;
+    config(n,epoch,pin,type,dump,mask,member,singletons);
     if(dump){
         uint32_t buf[8221];size_t words=build(buf,8221,n,mask,member);if(!words)return failure("code-capacity");
         FILE *f=fopen(dump,"wb");if(!f)return failure("code-export-open");bool ok=fwrite(buf,4,words,f)==words;if(fclose(f))ok=false;return ok?0:failure("code-export-write");
     }
 #if !defined(__linux__) || !defined(__aarch64__)
-    (void)map_pair;(void)fill_pair;(void)cell_at;return failure("measurement-requires-linux-aarch64");
+    (void)map_pair;(void)fill_pair;(void)cell_at;(void)cell_at_profile;return failure("measurement-requires-linux-aarch64");
 #else
     if(n || pin<0 || !type || sysconf(_SC_PAGESIZE)!=4096)return failure("qualification-requires-n0-pin-type-4k");
     cpu_set_t affinity;CPU_ZERO(&affinity);CPU_SET(pin,&affinity);
     if(sched_setaffinity(0,sizeof(affinity),&affinity) || sched_getcpu()!=pin)return failure("affinity");
     struct pair_mapping data={0};if(!map_pair(&data) || !fill_pair(&data,0))return failure("node-mapping-or-graph");
     struct rob_backing_info before={0},after={0};if(!backing(&data,&before))return failure("initial-backing");
-    uint32_t *codes[2][3];routine_t routines[2][3];
-    for(unsigned m=0;m<2;++m)for(unsigned j=0;j<3;++j){
+    unsigned member_count=singletons?5:3;
+    uint32_t *codes[2][5];routine_t routines[2][5];
+    for(unsigned m=0;m<2;++m)for(unsigned j=0;j<member_count;++j){
         codes[m][j]=mmap(NULL,4096,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
         if(codes[m][j]==MAP_FAILED || build(codes[m][j],1024,0,m*4096,(enum member)j)!=29)return failure("code-mapping");
         __builtin___clear_cache((char *)codes[m][j],(char *)(codes[m][j]+29));
@@ -187,8 +198,8 @@ int main(int argc,char **argv){
       "\"mapping_alignment_verified\":true,\"raw_self_pointer_verified\":true,\"code_address_mod64\":0,"
       "\"cache_maintenance_completed\":true,\"initial_backing\":",sched_getcpu(),freq,line);
     rob_backing_json(stdout,&before);fputs(",\"event_ids\":[",stdout);for(unsigned j=0;j<6;++j)printf("%s%"PRIu64,j?",":"",perf.ids[j]);puts("]}");
-    for(unsigned trial=0;trial<64;++trial)for(unsigned pos=0;pos<24;++pos){
-        struct cell c=cell_at(epoch,trial,pos);if(!fill_pair(&data,c.mask))return failure("round-graph");
+    for(unsigned trial=0;trial<64;++trial)for(unsigned pos=0;pos<member_count*8;++pos){
+        struct cell c=singletons?cell_at_profile(epoch,trial,pos,true):cell_at(epoch,trial,pos);if(!fill_pair(&data,c.mask))return failure("round-graph");
         uintptr_t head0=c.swap?b:a,head1=c.swap?a:b;routine_t fn=routines[c.mask/4096][c.member];
         for(unsigned j=0;j<128;++j)sink=fn(head0,head1);barrier();
         if(c.cold)flush_pair(a,b);else{sink=*(volatile uintptr_t *)a;sink=*(volatile uintptr_t *)b;barrier();}
@@ -207,7 +218,7 @@ int main(int argc,char **argv){
     if(!backing(&data,&after))return failure("final-backing");
     fputs("{\"type\":\"backing-final\",\"backing\":",stdout);rob_backing_json(stdout,&after);puts("}");
     for(unsigned j=0;j<6;++j)close(perf.fd[j]);
-    for(unsigned m=0;m<2;++m)for(unsigned j=0;j<3;++j)munmap(codes[m][j],4096);
+    for(unsigned m=0;m<2;++m)for(unsigned j=0;j<member_count;++j)munmap(codes[m][j],4096);
     munmap(data.reservation,data.reserved);return 0;
 #endif
 }

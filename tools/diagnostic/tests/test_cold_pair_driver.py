@@ -78,4 +78,52 @@ class ColdDriver(unittest.TestCase):
         records[2]['enabled']=records[2]['running']=2**64
         with self.assertRaises(ValueError):driver.validate(records,0)
 
+class SingletonDriver(unittest.TestCase):
+    def test_actual_singleton_matrix_and_config_are_request_bound(self):
+        import inspect
+        driver=importlib.import_module('tools.diagnostic.run_sm8650_cold_pair')
+        self.assertIn('profile',inspect.signature(driver.plan).parameters)
+        plan=driver.plan('singletons')
+        self.assertEqual((plan['mode'],plan['windows'],plan['cells_per_trial']),('rob-cold-load-model',5120,40))
+        with tempfile.TemporaryDirectory() as tmp:
+            src=Path(tmp)/'cells.c';exe=Path(tmp)/'cells'
+            src.write_text('#define main producer_main\n#include "'+str(ROOT/'probes/diagnostic/rob_cold_pair.c')+'"\n#undef main\nint main(void){for(unsigned e=0;e<2;++e)for(unsigned t=0;t<64;++t)for(unsigned p=0;p<40;++p){struct cell c=cell_at_profile(e,t,p,true);printf("%u %u %u %u %s %s\\n",e,t,c.mask,c.swap,names[c.member],c.cold?"cold":"hot");}return 0;}\n')
+            subprocess.run(['clang','-O2','-Wall','-Wextra','-Werror','-I',str(ROOT/'probes/common'),str(src),'-o',str(exe)],check=True)
+            rows=[]
+            for line in subprocess.check_output([str(exe)],text=True).splitlines():
+                e,t,m,s,member,state=line.split();rows.append(dict(epoch=int(e),trial=int(t),mask=int(m),swap=int(s),member=member,state=state))
+            self.assertEqual(rows,driver.matrix(0,'singletons')+driver.matrix(1,'singletons'))
+            self.assertEqual(len(rows),5120)
+            out=Path(tmp)/'code.bin';export=Path(tmp)/'export'
+            subprocess.run(['clang','-O2','-Wall','-Wextra','-Werror','-I',str(ROOT/'probes/common'),str(ROOT/'probes/diagnostic/rob_cold_pair.c'),'-o',str(export)],check=True)
+            c=json.loads(subprocess.check_output([str(export),*plan['conditions'][0]['args'],'--mask','4096','--member','A','--write-asm',str(out)],text=True))
+            driver.validate_config(c,0,{'mask':4096,'member':'A'},'singletons')
+            with self.assertRaises(ValueError):driver.validate_config(c,0,{'mask':4096,'member':'A'})
+            c['singletons_requested']=1
+            with self.assertRaises(ValueError):driver.validate_config(c,0,{'mask':4096,'member':'A'},'singletons')
+
+    def test_complete_profile_stream_rejects_missing_duplicate_and_wrong_type(self):
+        import copy
+        driver=importlib.import_module('tools.diagnostic.run_sm8650_cold_pair')
+        with tempfile.TemporaryDirectory() as tmp:
+            exe=Path(tmp)/'exporter';out=Path(tmp)/'code.bin'
+            subprocess.run(['clang','-O2','-Wall','-Wextra','-Werror','-I',str(ROOT/'probes/common'),str(ROOT/'probes/diagnostic/rob_cold_pair.c'),'-o',str(exe)],check=True)
+            c=json.loads(subprocess.check_output([str(exe),*driver.plan('singletons')['conditions'][0]['args'],'--write-asm',str(out)],text=True));c.pop('export')
+        info={'kernel_page_kb':4,'mmu_page_kb':4,'anon_huge_kb':0,'rss_kb':8,'swap_kb':0,'no_huge':True}
+        runtime={'type':'runtime','cpu':7,'cntfrq_hz':19200000,'cache_line_bytes':64,
+                 'mapping_alignment_verified':True,'raw_self_pointer_verified':True,'code_address_mod64':0,
+                 'cache_maintenance_completed':True,'event_ids':[1,2,3,4,5,6],'initial_backing':info}
+        rr=[dict(type='round',**r,ticks=0,enabled=100,running=100,
+             metrics={'0x11':100,'0x8':29,'0x3':0,'0x17':0,'0x34':0,'0x37':0}) for r in driver.matrix(0,'singletons')]
+        records=[c,runtime,*rr,{'type':'backing-final','backing':info}]
+        driver.validate(records,0,'singletons')
+        for kind in ('missing','duplicate','type','wrong-flag','wrong-profile'):
+            bad=copy.deepcopy(records)
+            if kind=='missing':bad.pop(10)
+            elif kind=='duplicate':bad[10]=bad[9]
+            elif kind=='type':bad[10]['trial']=True
+            elif kind=='wrong-flag':bad[0]['singletons_requested']=1
+            with self.subTest(kind=kind),self.assertRaises(ValueError):
+                driver.validate(bad,0,'pair' if kind=='wrong-profile' else 'singletons')
+
 if __name__=='__main__':unittest.main()
