@@ -98,4 +98,49 @@ class MissQualification(unittest.TestCase):
             config['memory_bytes']=16*1024*1024
             with self.assertRaises(ValueError): driver.validate_realized('rob-miss-qualify',opts,[config])
 
+
+class ThpQualification(unittest.TestCase):
+    def test_full_footprints_and_explicit_backing(self):
+        rows=driver.conditions('rob-miss-qualify-thp')
+        self.assertEqual(len(rows),6)
+        self.assertEqual([int(a[a.index('-m')+1]) for _,a in rows],[1,64,128,128,64,1])
+        for _,opts in rows:
+            mb=int(opts[opts.index('-m')+1])
+            self.assertEqual(opts[opts.index('--backing')+1], '4k' if mb==1 else 'thp2m')
+            self.assertGreaterEqual(int(opts[opts.index('-i')+1])*2,mb*1048576//64)
+    def test_real_backing_cannot_be_relabeled(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            exe=Path(tmp)/'exporter';code=Path(tmp)/'code.bin'
+            subprocess.run(['clang','-O2','-I',str(ROOT/'probes/common'),str(ROOT/'docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c'),'-o',str(exe)],check=True)
+            opts=driver.conditions('rob-miss-qualify-thp')[1][1]
+            export_opts=[o for o in opts if o!='--paired']
+            config=json.loads(subprocess.check_output([str(exe),*export_opts,'--write-asm',str(code)],text=True)); config['paired']=True
+            driver.validate_realized('rob-miss-qualify-thp',opts,[config])
+            config['backing_requested']='4k'
+            with self.assertRaises(ValueError): driver.validate_realized('rob-miss-qualify-thp',opts,[config])
+
+
+class BackingConsumption(unittest.TestCase):
+    def fixture(self):
+        info={'rss_kb':65536,'swap_kb':0,'anon_huge_kb':65536,'kernel_page_kb':4,'mmu_page_kb':4,'no_huge':False}
+        runtime={'backing_verified':True,'backing_page_bytes':2097152,'mapping_4k_verified':False,'backing_info':copy.deepcopy(info)}
+        rounds=[{'backing_verified':True,'backing_before':copy.deepcopy(info),'backing_after':copy.deepcopy(info)} for _ in range(6)]
+        return {'backing_requested':'thp2m','memory_bytes':67108864},runtime,rounds
+    def test_kernel_4k_field_does_not_deny_full_thp(self):
+        audit.validate_backing(*self.fixture())
+    def test_partial_post_or_requested_drift_cannot_pass(self):
+        for mutation in ('partial','rss','swap','missing','request'):
+            c,r,rr=self.fixture()
+            if mutation=='partial': rr[-1]['backing_after']['anon_huge_kb']-=2048
+            elif mutation=='rss': r['backing_info']['rss_kb']-=4
+            elif mutation=='swap': rr[1]['backing_before']['swap_kb']=4
+            elif mutation=='missing': del rr[2]['backing_verified']
+            else: c['backing_requested']='4k'
+            with self.assertRaises((AssertionError,KeyError)): audit.validate_backing(c,r,rr)
+
+
+class HistoryMatrix(unittest.TestCase):
+    def test_only_registered_target_and_epoch_order(self):
+        self.assertEqual(driver.conditions('tlb-history'),[(f'epoch-{i}',['100']+(['--reverse'] if i%2 else [])) for i in range(5)])
+
 if __name__=='__main__': unittest.main()

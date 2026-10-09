@@ -33,10 +33,17 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
 
 
-MODES = ('tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify')
+MODES = ('tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify', 'tlb-history', 'rob-miss-qualify-thp')
 OLD_PROTOCOL = 'docs/design/2026-10-09-minimal-tlb-rob-probes.md'
 CONFIRM_PROTOCOL = 'docs/design/2026-10-09-local-confirmation.md'
 BUILD_EVIDENCE = 'docs/reviews/evidence/2026-10-09-minimal-probes/build.json'
+NEW_EVIDENCE = {'tlb-history':'2026-10-09-tlb-history', 'rob-miss-qualify-thp':'2026-10-09-long-load-thp'}
+NEW_PROTOCOL = {'tlb-history':'docs/design/2026-10-09-tlb-history-discrimination.md',
+                'rob-miss-qualify-thp':'docs/design/2026-10-09-thp-load-qualification.md'}
+
+
+def binary_name(mode):
+    return 'tlb_history' if mode=='tlb-history' else 'tlb_local_pair' if mode.startswith('tlb') else 'rob_window_probe'
 
 
 def conditions(mode):
@@ -44,15 +51,16 @@ def conditions(mode):
         raise ValueError('unknown registered mode: '+mode)
     if mode.startswith('tlb'):
         # One excluded smoke epoch, then five mapping epochs (target200 primary).
-        target = '100' if mode == 'tlb-confirm100' else '200'
+        target = '100' if mode in ('tlb-confirm100','tlb-history') else '200'
         return [(f'epoch-{i}', [target]+(['--reverse'] if i%2 else [])) for i in range(1 if mode == 'tlb-smoke' else 5)]
     base = ['-i', '131072', '-r', '3', '--pin', '7', '--pmu-type', '8',
             '-e', '0x03', '-e', '0x17', '-e', '0x34', '-e', '0x02']
-    if mode == 'rob-miss-qualify':
+    if mode in ('rob-miss-qualify','rob-miss-qualify-thp'):
         rows=[]
         for epoch in range(2):
             for mb in ((1,64,128) if epoch==0 else (128,64,1)):
                 opts=base.copy(); opts[1]=str(max(131072,mb*8192)); opts[opts.index('0x02')]='0x37'
+                if mode=='rob-miss-qualify-thp': opts+=['--backing','4k' if mb==1 else 'thp2m']
                 rows.append((f'e{epoch}-miss-m{mb}-n0',opts+['-t','nop','-n','0','-a','miss','-m',str(mb),'--paired']))
         return rows
     if mode == 'rob-qualify':
@@ -88,6 +96,11 @@ def validate_realized(mode, opts, rows):
         geometry=[r for r in rows if r['type']=='geometry']
         if len(geometry)!=1 or geometry[0]['target']!=int(opts[0]):
             raise ValueError('requested/realized TLB target mismatch')
+        if mode=='tlb-history':
+            config=[r for r in rows if r['type']=='config']
+            expected={'type':'config','version':1,'target':100,'seed':137,'max_w':12,'old_prefix':9,
+                      'offset_rotate':True,'link_slots':4,'reverse':'--reverse' in opts,'cells':38,'windows':800}
+            if config!=[expected]: raise ValueError('requested/realized history config mismatch')
         return
     configs=[r for r in rows if r['type']=='config']
     if len(configs)!=1: raise ValueError('expected one ROB config')
@@ -101,6 +114,7 @@ def validate_realized(mode, opts, rows):
               'paired':'--paired' in opts,'serial':'--serial' in opts,'asymmetric':'--asymmetric' in opts,
               'chase_seed':int(value('--seed','42')),'exclude_kernel':True,'exclude_hv':True,
               'events':[17,8]+[int(opts[i+1],0) for i,v in enumerate(opts) if v=='-e']}
+    if mode=='rob-miss-qualify-thp': expected['backing_requested']=value('--backing','4k')
     for key,want in expected.items():
         if c.get(key)!=want: raise ValueError('requested/realized ROB '+key+' mismatch')
 
@@ -113,13 +127,15 @@ def main():
     args = parser.parse_args()
     protocol = CONFIRM_PROTOCOL if args.mode in ('tlb-confirm100','rob-fine') else OLD_PROTOCOL
     if args.mode=='rob-miss-qualify': protocol='docs/design/2026-10-09-long-load-qualification.md'
+    protocol=NEW_PROTOCOL.get(args.mode,protocol)
+    build_path='docs/reviews/evidence/'+NEW_EVIDENCE[args.mode]+'/build.json' if args.mode in NEW_EVIDENCE else BUILD_EVIDENCE
     launch_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
-    for rel in (protocol, 'tools/diagnostic/run_sm8650_minimal.py'):
+    for rel in (protocol, 'tools/diagnostic/run_sm8650_minimal.py',build_path):
         blob=subprocess.check_output(['git','show',launch_head+':'+rel],cwd=ROOT)
         if hashlib.sha256(blob).hexdigest()!=sha(ROOT/rel): raise SystemExit('STOP uncommitted protocol/driver')
-    build=json.loads((ROOT/BUILD_EVIDENCE).read_text())
-    binary_name='tlb_local_pair' if args.mode.startswith('tlb') else 'rob_window_probe'
-    if sha(args.binary)!=build['binaries'][binary_name]: raise SystemExit('STOP unregistered binary')
+    build=json.loads((ROOT/build_path).read_text())
+    probe_name=binary_name(args.mode)
+    if sha(args.binary)!=build['binaries'][probe_name]: raise SystemExit('STOP unregistered binary')
     for rel,digest in build['source_sha256'].items():
         if sha(ROOT/rel)!=digest: raise SystemExit('STOP probe source drift '+rel)
     if default_store().unfinished():
@@ -129,7 +145,7 @@ def main():
     if sum(line.endswith('\tdevice') for line in devices) != 1:
         raise SystemExit('STOP exactly one online target required')
     ex = AdbExecutor(timeout_s=120)
-    for name in ('ptr_chase','rob_window_probe','tlb_local_pair'):
+    for name in ('ptr_chase','rob_window_probe','tlb_local_pair','tlb_history'):
         active = ex.execute(['pidof',name])
         if active.returncode != 1 or active.stdout.strip():
             raise SystemExit('STOP active probe or failed process check')
@@ -144,11 +160,15 @@ def main():
     manifest = {'purpose':__doc__, 'mode':args.mode, 'target':'redmi-k70pro-01',
                 'source_branch':subprocess.check_output(['git','branch','--show-current'],cwd=ROOT,text=True).strip(),
                 'source_head':launch_head,
-                'binary_source_head':build['source_commit'], 'build_evidence_path':BUILD_EVIDENCE,
-                'build_evidence_sha256':sha(ROOT/BUILD_EVIDENCE), 'protocol_path':protocol,
+                'binary_source_head':build['source_commit'], 'build_evidence_path':build_path,
+                'build_evidence_sha256':sha(ROOT/build_path), 'protocol_path':protocol,
                 'binary_sha256':sha(args.binary),'driver_sha256':sha(__file__),
                 'protocol_sha256':sha(ROOT/protocol),
                 'conditions':[{'name':name,'args':opts} for name,opts in rows], 'results':[], 'status':'started'}
+    if 'plan_path' in build:
+        manifest['plan_path']=build['plan_path']; manifest['plan_sha256']=sha(ROOT/build['plan_path'])
+        plan_blob=subprocess.check_output(['git','show',launch_head+':'+build['plan_path']],cwd=ROOT)
+        if manifest['plan_sha256']!=build['plan_sha256'] or hashlib.sha256(plan_blob).hexdigest()!=build['plan_sha256']: raise RuntimeError('STOP production plan digest')
     if args.mode.startswith('tlb'): manifest['tlb_target']=int(rows[0][1][0])
     write(out/'manifest.json',manifest)
     write(out/'environment-policy.json',policy)
@@ -162,7 +182,7 @@ def main():
 
     try:
         inspect('initial')
-        remote='/data/local/tmp/cpu-uarch/'+('tlb_local_pair' if args.mode.startswith('tlb') else 'rob_window_probe')
+        remote='/data/local/tmp/cpu-uarch/'+probe_name
         subprocess.run(['adb','push',str(args.binary),remote],check=True,capture_output=True)
         result=ex.execute(['chmod','755',remote])
         if result.returncode: raise RuntimeError('deploy-chmod')
@@ -172,7 +192,7 @@ def main():
         if identity.returncode or [int(v,0) for v in identity.stdout.split()]!=[0x410fd821,4096]: raise RuntimeError('target-identity')
         manifest['midr']='0x410fd821'; manifest['base_page_bytes']=4096
         for name,opts in rows:
-            if args.mode=='rob-miss-qualify': time.sleep(15)
+            if args.mode in ('rob-miss-qualify','rob-miss-qualify-thp'): time.sleep(15)
             inspect(name+'-pre')
             result_code={}
             if args.host_exporter:
@@ -200,8 +220,15 @@ def main():
             expected=800 if args.mode.startswith('tlb') else 6 if '--paired' in opts else 3
             if len(rounds)!=expected: raise RuntimeError('STOP wrong round count')
             if any(row['enabled']<=0 or row['enabled']!=row['running'] for row in rounds): raise RuntimeError('STOP mux/empty window')
+            if args.mode=='tlb-history':
+                from tools.diagnostic.tlb_history_analysis import audit_history
+                plan=json.loads((ROOT/build['plan_path']).read_text())
+                audit_history(parsed,'--reverse' in opts,plan['reverse' if '--reverse' in opts else 'forward'])
             if args.mode.startswith('rob'):
                 config=next(row for row in parsed if row['type']=='config')
+                if args.mode=='rob-miss-qualify-thp':
+                    from tools.diagnostic.summarize_sm8650_minimal import validate_backing
+                    validate_backing(config,next(row for row in parsed if row['type']=='runtime'),rounds)
                 expected_retired=config['iterations']*config['loop_instructions']+config['loop_offset']//4+1
                 for row in rounds:
                     retired=row['metrics']['0x8']

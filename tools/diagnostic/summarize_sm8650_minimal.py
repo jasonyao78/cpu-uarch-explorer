@@ -9,10 +9,30 @@ import statistics as st
 import subprocess
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
-from tools.diagnostic.run_sm8650_minimal import conditions, validate_realized, OLD_PROTOCOL
+from tools.diagnostic.run_sm8650_minimal import conditions, validate_realized, OLD_PROTOCOL, binary_name
 
 
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def validate_backing(config, runtime, rounds):
+    """New binary's actual backing must flow through every initial/pre/post record."""
+    requested=config['backing_requested']
+    assert requested in ('4k','thp2m')
+    huge=requested=='thp2m'; kb=config['memory_bytes']//1024
+    assert runtime['backing_verified'] is True and runtime['backing_page_bytes']==(2097152 if huge else 4096)
+    assert runtime['mapping_4k_verified'] is (not huge)
+    def backing(info):
+        assert all(type(info[k]) is int for k in ('rss_kb','swap_kb','anon_huge_kb','kernel_page_kb','mmu_page_kb'))
+        assert info['rss_kb']==kb and info['swap_kb']==0
+        assert info['anon_huge_kb']==(kb if huge else 0)
+        assert info['no_huge'] is (not huge)
+        assert info['kernel_page_kb'] in ((4,2048) if huge else (4,))
+        assert info['mmu_page_kb'] in ((4,2048) if huge else (4,))
+    backing(runtime['backing_info'])
+    for row in rounds:
+        assert row['backing_verified'] is True
+        backing(row['backing_before']);backing(row['backing_after'])
 
 
 def summarize(path):
@@ -31,24 +51,35 @@ def summarize(path):
         build_blob=subprocess.check_output(['git','show',m['source_head']+':'+m['build_evidence_path']],cwd=root)
         assert hashlib.sha256(build_blob).hexdigest()==m['build_evidence_sha256']
         build=json.loads(build_blob)
-        binary_name='tlb_local_pair' if m['mode'].startswith('tlb') else 'rob_window_probe'
-        assert build['binaries'][binary_name]==m['binary_sha256'] and build['source_commit']==m['binary_source_head']
+        assert build['binaries'][binary_name(m['mode'])]==m['binary_sha256'] and build['source_commit']==m['binary_source_head']
         for rel,digest in build['source_sha256'].items():
             assert hashlib.sha256(subprocess.check_output(['git','show',m['source_head']+':'+rel],cwd=root)).hexdigest()==digest
     if m['mode'].startswith('tlb'):
         assert m.get('tlb_target',int(registered[0]['args'][0]))==int(registered[0]['args'][0]), 'manifest target'
+    history_plan=None
+    if m['mode']=='tlb-history':
+        plan_blob=subprocess.check_output(['git','show',m['source_head']+':'+m['plan_path']],cwd=root)
+        assert hashlib.sha256(plan_blob).hexdigest()==m['plan_sha256']==build['plan_sha256']
+        history_plan=json.loads(plan_blob)
     expected_envs={'initial-environment.json','final-environment.json'}
     expected_envs|={entry['name']+'-'+suffix+'-environment.json' for entry in m['results'] for suffix in ('pre','post')}
     assert {env.name for env in path.glob('*-environment.json')}==expected_envs
     envs=[]
     for env in path.glob('*-environment.json'):
         e=json.loads(env.read_text()); assert not e['violations'] and not e['warnings']; envs.append(e['snapshot'])
+    if m['mode'] in ('tlb-history','rob-miss-qualify-thp'):
+        from tools.diagnostic.analyze_long_load import audit_environment
+        profile=json.loads(subprocess.check_output(['git','show',m['source_head']+':configs/platforms/redmi-k70pro-01.json'],cwd=root))
+        policy=profile['environment_profiles']['charging-thermal']['measurement_environment']
+        policy['preconditions']['cpufreq_governor']='walt'
+        saved=json.loads((path/'environment-policy.json').read_text())
+        audit_environment({p.name:json.loads(p.read_text()) for p in path.glob('*-environment.json')},saved,policy)
     result={'mode':m['mode'],'source_branch':m['source_branch'],'source_head':m['source_head'],
             'binary_sha256':m['binary_sha256'],'manifest_sha256':sha(path/'manifest.json'),
             'raw_directory':path.name,'processes':len(m['results']),'rows':[],
             'max_cpu_c_range':[min(e['thermal']['max_cpu_c'] for e in envs),max(e['thermal']['max_cpu_c'] for e in envs)],
             'wall_seconds':sum(e['wall_seconds'] for e in m['results'])}
-    if m['mode'] in ('tlb-confirm100','rob-fine','rob-miss-qualify'):
+    if m['mode'] in ('tlb-confirm100','rob-fine','rob-miss-qualify','tlb-history','rob-miss-qualify-thp'):
         result.update({k:m[k] for k in ('binary_source_head','build_evidence_sha256','driver_sha256','protocol_path','protocol_sha256')})
         if m['mode'].startswith('tlb'): result['tlb_target']=m['tlb_target']
     for entry in sorted(m['results'],key=lambda e:next(i for i,c in enumerate(registered) if c['name']==e['name'])):
@@ -60,7 +91,12 @@ def summarize(path):
         validate_realized(m['mode'],opts,rows)
         rounds=[r for r in rows if r['type']=='round']
         assert all(r['enabled']>0 and r['enabled']==r['running'] for r in rounds)
-        if m['mode'].startswith('tlb'):
+        if m['mode']=='tlb-history':
+            from tools.diagnostic.tlb_history_analysis import audit_history
+            reverse='--reverse' in opts
+            cells=audit_history(rows,reverse,history_plan['reverse' if reverse else 'forward'])
+            for cell in cells: result['rows'].append({'epoch':entry['name'],**cell})
+        elif m['mode'].startswith('tlb'):
             geometry=next(r for r in rows if r['type']=='geometry')
             ts=geometry['target_pages']; filler=geometry['filler_pages']
             def index(h,va):
@@ -100,8 +136,10 @@ def summarize(path):
             config=next(r for r in rows if r['type']=='config')
             runtime=next(r for r in rows if r['type']=='runtime')
             assert runtime['cpu']==7 and runtime['fpcr']==0 and runtime['loop_address_mod64']==config['loop_mod64']
-            if config['anchor']=='miss': assert runtime['mapping_4k_verified']
-            if m['mode']=='rob-miss-qualify':
+            if config['anchor']=='miss':
+                if m['mode']=='rob-miss-qualify-thp': validate_backing(config,runtime,rounds)
+                else: assert runtime['mapping_4k_verified']
+            if m['mode'] in ('rob-miss-qualify','rob-miss-qualify-thp'):
                 assert runtime['distinct_lines_per_call']==runtime['ring_nodes']==config['memory_bytes']//64
             assert len(rounds)==(6 if config['paired'] else 3)
             for generated in entry['generated_code'].values():
@@ -119,7 +157,7 @@ def summarize(path):
                                       'counts_per_iteration':{k:[r['metrics'][k]/config['iterations'] for r in rr] for k in rr[0]['metrics']},
                                       'retired_relative_error':[abs(r['metrics']['0x8']-expected)/expected for r in rr],
                                       'generated_code_sha256':{k:v['sha256'] for k,v in entry['generated_code'].items()}})
-                if m['mode'] in ('rob-fine','rob-miss-qualify'):
+                if m['mode'] in ('rob-fine','rob-miss-qualify','rob-miss-qualify-thp'):
                     result['rows'][-1].update({'loop_mod64':config['loop_mod64'],'iterations':config['iterations'],
                                                'chase_seed':config['chase_seed'],'epoch':int(entry['name'][1])})
     return result
