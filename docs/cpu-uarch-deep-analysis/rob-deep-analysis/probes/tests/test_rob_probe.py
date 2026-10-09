@@ -1,4 +1,4 @@
-"""Validate exported A64 instructions, not emitter source strings."""
+"""核验真实A64生成码及backing契约，防止THP请求被误报为实际大页。"""
 import json
 import pathlib
 import struct
@@ -38,6 +38,34 @@ class RobCode(unittest.TestCase):
 
     def test_zero_filler_is_real_anchor_control(self):
         self.dump('-t', 'nop', '-n', '0', '-i', '8', '-r', '1', '-m', '1')
+
+    def test_backing_export_preserves_generated_code(self):
+        """内存backing不改变JIT码；host导出不能冒称验证过目标映射。"""
+        default_words, default_stdout = self.dump('-t', 'nop', '-n', '64')
+        self.assertEqual(json.loads(default_stdout).get('backing_requested'), '4k')
+        for kind in ('4k', 'thp2m'):
+            with self.subTest(backing=kind):
+                words, stdout = self.dump('-t', 'nop', '-n', '64', '--backing', kind)
+                self.assertEqual(words, default_words)
+                self.assertEqual(json.loads(stdout)['backing_requested'], kind)
+                self.assertNotIn('backing_verified', json.loads(stdout))
+
+    def test_invalid_backing_is_structured_failure(self):
+        """禁止未知backing、非miss THP及不完整2MiB映射静默降级。"""
+        for opts, reason in [
+            (('--backing', 'bogus'), 'backing-unknown'),
+            (('--backing', 'thp2m', '-a', 'fsqrt'), 'backing-thp2m-requires-miss'),
+            (('--backing', 'thp2m', '-m', '3'), 'backing-thp2m-requires-2m-multiple'),
+        ]:
+            with self.subTest(opts=opts):
+                p = subprocess.run([str(self.exe), '-t', 'nop', '-n', '0', *opts],
+                                   capture_output=True, text=True)
+                self.assertNotEqual(p.returncode, 0)
+                self.assertTrue(p.stdout.strip(), '缺少结构化backing失败记录')
+                failure = json.loads(p.stdout)
+                self.assertEqual(failure['type'], 'failure')
+                self.assertEqual(failure['metrics'], {})
+                self.assertEqual(failure['failure']['reason'], reason)
 
     def test_fp_fillers_do_not_clobber_anchor_or_abi(self):
         words, _ = self.dump('-t', 'fadd', '-n', '64', '-a', 'fsqrt', '-i', '8', '-r', '1')
@@ -89,6 +117,88 @@ class RobCode(unittest.TestCase):
             m=json.loads(stdout); first=m['loop_offset']//4
             self.assertEqual(words[first+10],0xf9400000 if flag=='--serial' else 0xf9400021)
             self.assertEqual(m['fillers_per_iteration'],18 if flag=='--serial' else 9)
+
+    def test_production_smaps_and_aligned_mapping(self):
+        """执行生产解析器/真实mmap，拒绝只看THP hint、混合覆盖及伪造完整VMA。"""
+        header = ROOT / 'probes/common/rob_backing.h'
+        self.assertTrue(header.exists(), '缺少实际smaps/backing验收helper')
+        harness = pathlib.Path(self.tmp.name) / 'backing.c'
+        harness.write_text(r'''#include "rob_backing.h"
+#include <assert.h>
+static bool parse(const char *text, struct rob_backing_info *out) {
+    FILE *f=tmpfile(); assert(f); assert(fputs(text,f)>=0); rewind(f);
+    bool ok=rob_backing_parse(f,0x200000,0x400000,out); assert(!fclose(f)); return ok;
+}
+static bool sample(size_t huge,size_t rss,size_t swap,const char *flags,bool thp) {
+    char text[1024]; struct rob_backing_info out;
+    snprintf(text,sizeof(text),
+        "100000-180000 rw-p 00000000 00:00 0\nAnonHugePages: 512 kB\n"
+        "200000-600000 rw-p 00000000 00:00 0\n"
+        "KernelPageSize: 4 kB\nMMUPageSize: 4 kB\nAnonHugePages: %zu kB\n"
+        "Rss: %zu kB\nSwap: %zu kB\nVmFlags: %s\n"
+        "700000-800000 rw-p 00000000 00:00 0\nAnonHugePages: 0 kB\n",
+        huge,rss,swap,flags);
+    assert(parse(text,&out));
+    assert(out.kernel_kb==4 && out.mmu_kb==4 && out.huge_kb==huge);
+    return rob_backing_matches(&out,0x400000,thp,ROB_PMD_BYTES);
+}
+int main(void) {
+    assert(sample(4096,4096,0,"rd wr mr mw me ac hg",true));
+    assert(sample(0,4096,0,"rd wr mr mw me ac nh",false));
+    assert(!sample(2048,4096,0,"rd wr mr mw me ac hg",true));
+    assert(!sample(4096,2048,0,"rd wr mr mw me ac hg",true));
+    assert(!sample(4096,4096,4,"rd wr mr mw me ac hg",true));
+    assert(!sample(4096,4096,0,"rd wr mr mw me ac nh",true));
+    assert(!sample(0,4096,0,"rd wr mr mw me ac nhx",false));
+    assert(!sample(0,4096,0,"rd wr mr mw me ac hg",true));
+    assert(!sample(4096,4096,0,"rd wr mr mw me ac hg",false));
+    struct rob_backing_info out;
+    const char *fields="KernelPageSize: 4 kB\nMMUPageSize: 4 kB\n"
+        "AnonHugePages: 4096 kB\nRss: 4096 kB\nSwap: 0 kB\nVmFlags: rd wr hg\n";
+    char text[1024];
+    snprintf(text,sizeof(text),"100000-600000 rw-p 0 00:00 0\n%s",fields);
+    assert(!parse(text,&out)); // 仅覆盖目标范围的大VMA不能冒充精确mapping。
+    snprintf(text,sizeof(text),"200000-600000 rw-p 0 00:00 0\n%s",fields);
+    assert(parse(text,&out));
+    assert(!rob_backing_matches(&out,0x400000,true,0x100000));
+    assert(!rob_backing_matches(&out,0x300000,true,ROB_PMD_BYTES));
+    assert(!parse("200000-600000 rw-p 0 00:00 0\nAnonHugePages: 4096 kB\n",&out));
+    snprintf(text,sizeof(text),"200000-600000 rw-p 0 00:00 0\n%sRss: 4096 kB\n",fields);
+    assert(!parse(text,&out));
+    snprintf(text,sizeof(text),"200000-600000 rw-p 0 00:00 0\n%sSwap: 0 MB\n",fields);
+    assert(!parse(text,&out));
+    FILE *pmd=tmpfile(); assert(pmd); fputs("2097152\n",pmd); rewind(pmd);
+    size_t pmd_bytes=0; assert(rob_backing_read_pmd(pmd,&pmd_bytes) && pmd_bytes==ROB_PMD_BYTES); fclose(pmd);
+    pmd=tmpfile(); assert(pmd); fputs("1048576\n",pmd); rewind(pmd);
+    assert(!rob_backing_read_pmd(pmd,&pmd_bytes)); fclose(pmd);
+    pmd=tmpfile(); assert(pmd); fputs("2097152 junk\n",pmd); rewind(pmd);
+    assert(!rob_backing_read_pmd(pmd,&pmd_bytes)); fclose(pmd);
+    for(unsigned i=1;i<=3;++i) {
+        size_t bytes=i*ROB_PMD_BYTES; char *mem=rob_backing_map_2m(bytes);
+        assert(mem!=MAP_FAILED && (uintptr_t)mem%ROB_PMD_BYTES==0);
+        mem[0]=1; mem[bytes-1]=2; assert(mem[0]==1 && mem[bytes-1]==2);
+        assert(!munmap(mem,bytes));
+    }
+    assert(rob_backing_map_2m(0)==MAP_FAILED);
+    assert(rob_backing_map_2m(ROB_PMD_BYTES+4096)==MAP_FAILED);
+    out=(struct rob_backing_info){.kernel_kb=4,.mmu_kb=4,.huge_kb=4096,.rss_kb=4096};
+    rob_backing_json(stdout,&out); putchar('\n'); rob_backing_json(stdout,NULL); putchar('\n');
+    return 0;
+}
+''')
+        exe = pathlib.Path(self.tmp.name) / 'backing'
+        compiled = subprocess.run(['clang', '-O2', '-Wall', '-Wextra', '-Werror', '-I',
+                        str(ROOT / 'probes/common'), str(harness), '-o', str(exe)],
+                        capture_output=True, text=True)
+        self.assertEqual(compiled.returncode, 0, compiled.stderr)
+        executed = subprocess.run([str(exe)], capture_output=True, text=True)
+        self.assertEqual(executed.returncode, 0, executed.stderr)
+        observation, absent = [json.loads(line) for line in executed.stdout.splitlines()]
+        self.assertEqual(observation, {
+            'kernel_page_kb': 4, 'mmu_page_kb': 4, 'anon_huge_kb': 4096,
+            'rss_kb': 4096, 'swap_kb': 0, 'no_huge': False,
+        })
+        self.assertIsNone(absent)
 
     def test_production_decoder_and_chase_graphs(self):
         # Include the actual production C implementation in a host-only harness.

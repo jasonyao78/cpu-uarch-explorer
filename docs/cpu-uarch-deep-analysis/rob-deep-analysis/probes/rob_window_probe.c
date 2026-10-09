@@ -3,6 +3,7 @@
  * Contracts/design: docs/design/2026-10-09-minimal-tlb-rob-probes.md.
  * Same-address independent/serial chase graphs; exact N filler per gap;
  * explicit loop alignment; exported code; strict GROUP+ID PMU windows.
+ * OI-ROB-PROBE-20261009：显式4k/实际2MiB THP；每窗前后验收，禁止静默fallback。
  * Host supports export/tests only. Measurement requires Linux AArch64.
  */
 #ifndef _GNU_SOURCE
@@ -21,6 +22,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include "perf_group_read.h"
+#include "rob_backing.h"
 #ifdef __linux__
 #include <linux/perf_event.h>
 #include <sched.h>
@@ -44,7 +46,7 @@
 static const char *classes[]={"nop","add","movi","movr","fadd","ldr","str"};
 struct options {
     unsigned cls,n,its,rounds,mb,align,chain,seed; int pin;
-    unsigned pmu_type; bool have_type,serial,asymmetric,paired;
+    unsigned pmu_type; bool have_type,serial,asymmetric,paired,thp2m;
     enum { MISS, SQRT, NONE } anchor;
     const char *dump,*rawlog;
     uint64_t events[PG_MAX_EVENTS]; size_t ne;
@@ -107,7 +109,7 @@ static void usage(void) {
         "[-a miss|fsqrt|none] [-i iterations] [-r rounds] [-m MiB] "
         "[--serial|--paired] [--asymmetric] [--align 0|16|32|48] [--chain 1..256] "
         "[--seed positive] [--pin cpu --pmu-type type] [-e raw_event] "
-        "[--write-asm file] [--rawlog file]\n");
+        "[--backing 4k|thp2m] [--write-asm file] [--rawlog file]\n");
     exit(2);
 }
 static uint64_t rng(uint64_t *state) {
@@ -162,25 +164,14 @@ static const char *snapshot(struct perf *p,struct pg_sample *s) {
     if(bytes<=0 || bytes%8) return "group-read-failed";
     return pg_decode(wire,(size_t)bytes/8,p->ids,p->n,s);
 }
-// Verify actual anonymous backing for precisely this mapping. MADV is only a request.
-static bool backing(char *mem,size_t bytes) {
+/* 验收恰好本次mapping；madvise仅是请求，smaps检查始终在PMU窗外。 */
+static bool backing(char *mem,size_t bytes,bool thp2m,size_t pmd_bytes,struct rob_backing_info *out) {
     FILE *f=fopen("/proc/self/smaps","r"); if(!f) return false;
-    char line[512]; unsigned long start=0,end=0; bool within=false,found=false,nh=false;
-    size_t kernel=0,mmu=0,huge=1;
-    while(fgets(line,sizeof(line),f)) {
-        unsigned long a,b;
-        if(sscanf(line,"%lx-%lx",&a,&b)==2) {
-            if(within) break;
-            within=a==(uintptr_t)mem && b==a+bytes; start=a; end=b; (void)start; (void)end;
-            if(within) found=true;
-        }
-        if(!within) continue;
-        (void)sscanf(line,"KernelPageSize: %zu kB",&kernel);
-        (void)sscanf(line,"MMUPageSize: %zu kB",&mmu);
-        (void)sscanf(line,"AnonHugePages: %zu kB",&huge);
-        if(!strncmp(line,"VmFlags:",8) && strstr(line," nh")) nh=true;
-    }
-    fclose(f); return found && kernel==4 && mmu==4 && huge==0 && nh;
+    bool ok=rob_backing_parse(f,(uintptr_t)mem,bytes,out)
+        && rob_backing_matches(out,bytes,thp2m,pmd_bytes);
+    if(fclose(f)) return false;
+    if(!ok) errno=EINVAL;
+    return ok;
 }
 #endif
 int main(int argc,char **argv) {
@@ -189,7 +180,7 @@ int main(int argc,char **argv) {
     static const struct option opts[]={
         {"write-asm",1,0,1},{"rawlog",1,0,2},{"pin",1,0,3},{"pmu-type",1,0,4},
         {"serial",0,0,5},{"asymmetric",0,0,6},{"align",1,0,7},{"chain",1,0,8},
-        {"seed",1,0,9},{"paired",0,0,10},{0,0,0,0}};
+        {"seed",1,0,9},{"paired",0,0,10},{"backing",1,0,11},{0,0,0,0}};
     int ch;
     while((ch=getopt_long(argc,argv,"t:n:a:i:r:m:e:h",opts,NULL))!=-1) {
         switch(ch) {
@@ -213,10 +204,17 @@ int main(int argc,char **argv) {
         case 8: o.chain=(unsigned)number(optarg,1,256); break;
         case 9: o.seed=(unsigned)number(optarg,1,UINT32_MAX); break;
         case 10: o.paired=true; break;
+        case 11:
+            if(!strcmp(optarg,"4k")) o.thp2m=false;
+            else if(!strcmp(optarg,"thp2m")) o.thp2m=true;
+            else { errno=EINVAL; return failure("backing-unknown"); }
+            break;
         default: usage();
         }
     }
     if(!have_class || !have_n || optind!=argc || ((o.serial || o.paired) && o.anchor!=MISS) || (o.serial && o.paired)) usage();
+    if(o.thp2m && o.anchor!=MISS) { errno=EINVAL; return failure("backing-thp2m-requires-miss"); }
+    if(o.thp2m && o.mb%2) { errno=EINVAL; return failure("backing-thp2m-requires-2m-multiple"); }
     const size_t capacity=65536;
     uint32_t *buf=mmap(NULL,capacity,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
     if(buf==MAP_FAILED) return failure("code-mmap");
@@ -234,10 +232,10 @@ int main(int argc,char **argv) {
            "\"iterations\":%u,\"rounds\":%u,\"serial\":%s,\"paired\":%s,\"asymmetric\":%s,\"chain\":%u,\"fsqrt_operand_bits\":\"0x3ff0000000000000\","
            "\"loop_offset\":%zu,\"loop_mod64\":%u,\"branch_offset\":%zu,\"loop_instructions\":%zu,"
            "\"fillers_per_iteration\":%u,\"anchors_per_iteration\":%u,\"code_bytes\":%zu,"
-           "\"memory_bytes\":%zu,\"chase_seed\":%u,\"pmu_type\":%u,\"exclude_kernel\":true,\"exclude_hv\":true,\"events\":[",
+           "\"memory_bytes\":%zu,\"backing_requested\":\"%s\",\"chase_seed\":%u,\"pmu_type\":%u,\"exclude_kernel\":true,\"exclude_hv\":true,\"events\":[",
            classes[o.cls],anchor,o.n,o.its,o.rounds,o.serial?"true":"false",o.paired?"true":"false",o.asymmetric?"true":"false",o.chain,
            c.loop*4,o.align,c.branch*4,c.branch-c.loop+1,c.fillers,c.anchors,c.pos*4,
-           o.anchor==MISS?((size_t)o.mb<<20):0,o.seed,o.pmu_type);
+           o.anchor==MISS?((size_t)o.mb<<20):0,o.thp2m?"thp2m":"4k",o.seed,o.pmu_type);
     for(size_t k=0;k<o.ne;++k) printf("%s%"PRIu64,k?",":"",o.events[k]); puts("]}");
     if(o.dump) {
         if(o.paired) usage();
@@ -254,12 +252,24 @@ int main(int argc,char **argv) {
     if(sched_setaffinity(0,sizeof(affinity),&affinity) || sched_getcpu()!=o.pin) return failure("affinity");
     uint64_t fpcr; __asm__ volatile("mrs %0, fpcr":"=r"(fpcr));
     if(fpcr) return failure("fpcr-nonzero"); // no silent rounding/FZ/trap inheritance
-    char *mem=NULL; size_t bytes=(size_t)o.mb<<20;
+    char *mem=NULL; size_t bytes=(size_t)o.mb<<20,pmd_bytes=0;
+    struct rob_backing_info initial={0};
     if(o.anchor==MISS) {
-        mem=mmap(NULL,bytes,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
-        if(mem==MAP_FAILED || madvise(mem,bytes,MADV_NOHUGEPAGE)) return failure("chase-mapping");
+        if(o.thp2m) {
+            FILE *f=fopen("/sys/kernel/mm/transparent_hugepage/hpage_pmd_size","r");
+            if(!f) return failure("backing-thp2m-pmd-size");
+            bool ok=rob_backing_read_pmd(f,&pmd_bytes);
+            if(fclose(f)) return failure("backing-thp2m-pmd-size");
+            if(!ok) { errno=EINVAL; return failure("backing-thp2m-pmd-size"); }
+        }
+        mem=o.thp2m?rob_backing_map_2m(bytes)
+            :mmap(NULL,bytes,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
+        if(mem==MAP_FAILED) return failure("chase-mapping");
+        /* 必须在init_chase写节点触页之前请求；失败绝不退回4k。 */
+        if(madvise(mem,bytes,o.thp2m?MADV_HUGEPAGE:MADV_NOHUGEPAGE)) return failure("chase-backing-madvise");
         if(!init_chase(mem,bytes,o.serial,o.seed)) return failure("chase-ring-validation");
-        if(!backing(mem,bytes)) return failure("chase-backing-not-4k");
+        if(!backing(mem,bytes,o.thp2m,pmd_bytes,&initial))
+            return failure(o.thp2m?"chase-backing-not-thp2m":"chase-backing-not-4k");
     }
     uint64_t hot[8]={1,2,3,4,5,6,7,8};
     __builtin___clear_cache((char *)buf,(char *)(buf+c.pos));
@@ -273,9 +283,12 @@ int main(int argc,char **argv) {
     routine_t routine=(routine_t)(void *)buf;
     const uint64_t accesses=2*(uint64_t)o.its, nodes=bytes/64;
     printf("{\"type\":\"runtime\",\"fpcr\":%"PRIu64",\"cpu\":%d,\"loop_address_mod64\":%zu,"
-           "\"ring_nodes\":%"PRIu64",\"distinct_lines_per_call\":%"PRIu64",\"mapping_4k_verified\":%s,\"event_ids\":[",
+           "\"ring_nodes\":%"PRIu64",\"distinct_lines_per_call\":%"PRIu64",\"mapping_4k_verified\":%s,"
+           "\"backing_verified\":%s,\"backing_page_bytes\":%zu,\"backing_info\":",
            fpcr,sched_getcpu(),((uintptr_t)buf+c.loop*4)%64,o.anchor==MISS?nodes:0,
-           o.anchor==MISS?(accesses<nodes?accesses:nodes):0,o.anchor==MISS?"true":"null");
+           o.anchor==MISS?(accesses<nodes?accesses:nodes):0,o.anchor==MISS?(o.thp2m?"false":"true"):"null",
+           mem?"true":"null",mem?(o.thp2m?pmd_bytes:4096):0);
+    rob_backing_json(stdout,mem?&initial:NULL); fputs(",\"event_ids\":[",stdout);
     for(size_t k=0;k<p.n;++k) printf("%s%"PRIu64,k?",":"",p.ids[k]); puts("]}");
     FILE *raw=o.rawlog?fopen(o.rawlog,"w"):NULL;
     if(o.rawlog && !raw) return failure("rawlog-open");
@@ -287,17 +300,24 @@ int main(int argc,char **argv) {
             routine=(routine_t)(void *)(is_serial?serial_buf:buf);
         }
         routine(chase_heads[0],chase_heads[1],hot,o.its); // same explicit warmup each round
+        struct rob_backing_info before={0},after={0};
+        if(mem && !backing(mem,bytes,o.thp2m,pmd_bytes,&before)) return failure("round-backing-before");
         struct pg_sample a,b,d; const char *err=snapshot(&p,&a); if(err) return failure(err);
         if(ioctl(p.fd[0],PERF_EVENT_IOC_ENABLE,PERF_IOC_FLAG_GROUP)) return failure("group-enable");
         uint64_t t0=now_ns(); routine(chase_heads[0],chase_heads[1],hot,o.its); uint64_t ns=now_ns()-t0;
         if(ioctl(p.fd[0],PERF_EVENT_IOC_DISABLE,PERF_IOC_FLAG_GROUP)) return failure("group-disable");
         if((err=snapshot(&p,&b)) || (err=pg_delta(&a,&b,p.n,&d))) return failure(err);
+        /* post不通过时不输出该窗的metrics；pre/post也不能证明窗内从未短暂拆页。 */
+        if(mem && !backing(mem,bytes,o.thp2m,pmd_bytes,&after)) return failure("round-backing-after");
         if(sched_getcpu()!=o.pin || !ns || !d.values[0]) return failure("round-cpu-or-timing");
         for(unsigned dest=0;dest<(raw?2u:1u);++dest) {
             FILE *f=dest?raw:stdout;
             fprintf(f,"{\"type\":\"round\",\"round\":%u,\"serial\":%s,\"pair_step\":%u,\"ns\":%"PRIu64",\"enabled\":%"PRIu64",\"running\":%"PRIu64",\"metrics\":{",round,is_serial?"true":"false",step,ns,d.enabled,d.running);
             for(size_t k=0;k<p.n;++k) fprintf(f,"%s\"0x%"PRIx64"\":%"PRIu64,k?",":"",o.events[k],d.values[k]);
-            fprintf(f,"}}\n"); if(fflush(f)) return failure("output-write");
+            fprintf(f,"},\"backing_verified\":%s,\"backing_before\":",mem?"true":"null");
+            rob_backing_json(f,mem?&before:NULL); fputs(",\"backing_after\":",f);
+            rob_backing_json(f,mem?&after:NULL); fputs("}\n",f);
+            if(fflush(f)) return failure("output-write");
         }
     }
       }
