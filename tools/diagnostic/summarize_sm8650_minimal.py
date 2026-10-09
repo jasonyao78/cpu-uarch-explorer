@@ -204,7 +204,7 @@ def summarize(path):
                                       'counts_per_iteration':{k:[r['metrics'][k]/config['iterations'] for r in rr] for k in rr[0]['metrics']},
                                       'retired_relative_error':[abs(r['metrics']['0x8']-expected)/expected for r in rr],
                                       'generated_code_sha256':{k:v['sha256'] for k,v in entry['generated_code'].items()}})
-                if m['mode']=='rob-xor-qualify':
+                if m['mode'] in ('rob-xor-qualify','rob-xor-canonical-qualify'):
                     result['rows'][-1].update({k:config[k] for k in
                         ('pointer_xor_requested','pointer_xor','decode_instructions_per_iteration','loop_instructions')})
                 if m['mode']=='rob-collapse-qualify':

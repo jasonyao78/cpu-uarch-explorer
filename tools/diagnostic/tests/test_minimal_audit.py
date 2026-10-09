@@ -47,6 +47,31 @@ class Matrix(unittest.TestCase):
             bad=copy.deepcopy(config); bad['loop_mod64']=0
             with self.assertRaises(ValueError): driver.validate_realized('rob-fine',opts,[bad])
 
+class CanonicalQualification(unittest.TestCase):
+    def test_canonical_profile_retains_matched_code_and_original_matrix(self):
+        self.assertIn('rob-xor-canonical-qualify',driver.MODES)
+        rows=driver.conditions('rob-xor-canonical-qualify')
+        old=driver.conditions('rob-xor-qualify')
+        self.assertEqual(len(rows),12)
+        expected=[(n.replace('ffff000000000000','0000000000100000'),
+                   [x.replace('0xffff000000000000','0x0000000000100000') for x in opts]) for n,opts in old]
+        self.assertEqual(rows,expected)
+        self.assertEqual(driver.NEW_PROTOCOL['rob-xor-canonical-qualify'],
+                         'docs/design/2026-10-09-canonical-load-qualification.md')
+        with tempfile.TemporaryDirectory() as tmp:
+            exe=Path(tmp)/'exporter';out=Path(tmp)/'out.bin'
+            subprocess.run(['clang','-O2','-Wall','-Wextra','-Werror','-I',str(ROOT/'probes/common'),
+                str(ROOT/'docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c'),'-o',str(exe)],check=True)
+            opts=rows[3][1]
+            config=json.loads(subprocess.check_output([str(exe),*[x for x in opts if x!='--paired'],
+                '--write-asm',str(out)],text=True));config['paired']=True
+            driver.validate_realized('rob-xor-canonical-qualify',opts,[config])
+            self.assertEqual(config['pointer_xor'],'0x0000000000100000')
+            self.assertEqual(config['loop_instructions'],6)
+            self.assertEqual(config['code_bytes'],92)
+            config['pointer_xor']='0xffff000000000000'
+            with self.assertRaises(ValueError):driver.validate_realized('rob-xor-canonical-qualify',opts,[config])
+
 class EncodedQualification(unittest.TestCase):
     def test_complete_matched_decoder_matrix_and_identity(self):
         self.assertIn('rob-xor-qualify',driver.MODES)
