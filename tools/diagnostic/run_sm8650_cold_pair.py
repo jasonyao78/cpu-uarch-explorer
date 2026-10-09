@@ -3,6 +3,7 @@
 
 Purpose: establish cold/hot and independent/serial discriminability at N0;
 Singleton diagnosis: docs/design/2026-10-10-cold-load-model.md.
+Four-state diagnosis: docs/design/2026-10-10-cold-state-injection.md.
 never infer ROB entries. Contract: docs/design/2026-10-09-cold-pair-qualification.md.
 Root owns the device exclusively; no frequency/governor/thermal modifications.
 """
@@ -46,9 +47,12 @@ def fields(actual,expected):
 
 
 def specification(profile='pair'):
-    """Two prospective profiles; legacy defaults never silently adopt singletons."""
-    if profile not in ('pair','singletons'):raise ValueError('unregistered profile')
+    """Explicit prospective profiles; legacy defaults keep their original matrix."""
+    if profile not in ('pair','singletons','singlecold'):raise ValueError('unregistered profile')
     if profile=='pair':return dict(mode=MODE,protocol=PROTOCOL,build=BUILD,plan=PLAN,members=['P','S','E'],cells=24,windows=3072)
+    if profile=='singlecold':return dict(mode='rob-cold-state',protocol='docs/design/2026-10-10-cold-state-injection.md',
+      build='docs/reviews/evidence/2026-10-10-cold-state/build.json',
+      plan='docs/reviews/evidence/2026-10-10-cold-state/plan.json',members=['P','S','E'],cells=48,windows=6144)
     return dict(mode='rob-cold-load-model',protocol='docs/design/2026-10-10-cold-load-model.md',
       build='docs/reviews/evidence/2026-10-10-cold-load-model/build.json',
       plan='docs/reviews/evidence/2026-10-10-cold-load-model/plan.json',members=['P','S','E','A','B'],cells=40,windows=5120)
@@ -56,16 +60,18 @@ def specification(profile='pair'):
 def plan(profile='pair'):
     """The fixed N0 2-mapping budget; no exploratory runtime parameters."""
     spec=specification(profile)
-    return {'mode':spec['mode'],'processes':2,'windows':spec['windows'],'trials':64,'cells_per_trial':spec['cells'],
-            'masks':[0,4096],'swaps':[0,1],'members':spec['members'],'states':['hot','cold'],
+    result={'mode':spec['mode'],'processes':2,'windows':spec['windows'],'trials':64,'cells_per_trial':spec['cells'],
+            'masks':[0,4096],'swaps':[0,1],'members':spec['members'],'states':['hot','first-cold','second-cold','cold'] if profile=='singlecold' else ['hot','cold'],
             'warmup_calls':128,'n':0,'mapping_bytes':8192,
-            'conditions':[{'name':'epoch-'+str(e),'args':['--epoch',str(e),'-n','0','--trials','64','--pin','7','--pmu-type','8']+(['--singletons'] if profile=='singletons' else [])} for e in (0,1)]}
+            'conditions':[{'name':'epoch-'+str(e),'args':['--epoch',str(e),'-n','0','--trials','64','--pin','7','--pmu-type','8']+(['--single-cold'] if profile=='singlecold' else ['--singletons'] if profile=='singletons' else [])} for e in (0,1)]}
+    if profile=='singlecold':result['state_cold_slot_masks']=[0,1,2,3]
+    return result
 
 def matrix(epoch,profile='pair'):
     """Independent Python expectation for the actual C rotation/reversal producer."""
     if type(epoch) is not int or epoch not in (0,1):raise ValueError('invalid epoch')
     spec=specification(profile)
-    base=list(itertools.product((0,4096),(0,1),spec['members'],('hot','cold')))
+    base=list(itertools.product((0,4096),(0,1),spec['members'],('hot','first-cold','second-cold','cold') if profile=='singlecold' else ('hot','cold')))
     rows=[]
     for trial in range(64):
         order=base[trial%len(base):]+base[:trial%len(base)]
@@ -75,13 +81,15 @@ def matrix(epoch,profile='pair'):
 
 def validate_config(config,epoch,export=None,profile='pair'):
     spec=specification(profile)
-    expected={'type':'config','version':2 if profile=='singletons' else 1,'probe':'rob-load-model' if profile=='singletons' else 'rob-cold-pair','n':0,'trials':64,'epoch':epoch,
+    expected={'type':'config','version':3 if profile=='singlecold' else 2 if profile=='singletons' else 1,'probe':'rob-cold-state' if profile=='singlecold' else 'rob-load-model' if profile=='singletons' else 'rob-cold-pair','n':0,'trials':64,'epoch':epoch,
       'matrix_cells_per_trial':spec['cells'],'windows':spec['windows']//2,'memory_bytes':8192,'mapping_alignment':8192,
-      'node_offsets':[0,4096],'masks':[0,4096],'members':spec['members'],'states':['hot','cold'],
+      'node_offsets':[0,4096],'masks':[0,4096],'members':spec['members'],'states':['hot','first-cold','second-cold','cold'] if profile=='singlecold' else ['hot','cold'],
       'warmup_calls':128,'internal_clock':'cntvct_el0','code_bytes':116,'kernel_instructions':29,
       'pin':7,'pmu_type':8,'events':[17,8,3,23,52,55],'exclude_kernel':True,'exclude_hv':True,'backing_requested':'4k'}
     if profile=='singletons':expected['singletons_requested']=True
     elif 'singletons_requested' in config:raise ValueError('unexpected singleton identity')
+    if profile=='singlecold':expected.update(single_cold_requested=True,state_cold_slot_masks=[0,1,2,3])
+    elif 'single_cold_requested' in config or 'state_cold_slot_masks' in config:raise ValueError('unexpected four-state identity')
     fields(config,expected)
     if export is None:
         if 'export' in config:raise ValueError('measurement unexpectedly export-only')
@@ -113,7 +121,7 @@ def validate(records,epoch,profile='pair'):
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--binary',type=Path,required=True);parser.add_argument('--host-exporter',type=Path,required=True)
-    parser.add_argument('--profile',choices=('pair','singletons'),default='pair')
+    parser.add_argument('--profile',choices=('pair','singletons','singlecold'),default='pair')
     args=parser.parse_args(argv)
     spec=specification(args.profile);protocol_path=spec['protocol'];build_path=spec['build'];plan_path=spec['plan']
     launch=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()

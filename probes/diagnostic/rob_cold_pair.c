@@ -2,6 +2,7 @@
  * Single-shot dual-line mechanism, never a physical ROB-entry counter.
  * Contract: docs/design/2026-10-09-cold-pair-qualification.md.
  * Singleton profile: docs/design/2026-10-10-cold-load-model.md.
+ * Four-state profile: docs/design/2026-10-10-cold-state-injection.md.
  * Internal CNTVCT time is distinct from whole user PMU wrapper counts.
  * All cache maintenance is on this process's own two nodes, outside the window.
  * Host builds export real generated code/map tests; Linux AArch64 measures.
@@ -36,7 +37,16 @@
 enum member { P, S, E, A_ONLY, B_ONLY };
 static const char *const names[]={"P","S","E","A","B"};
 struct pair_mapping { char *reservation,*data; size_t reserved; };
-struct cell { unsigned mask,swap; enum member member; bool cold; };
+struct cell { unsigned mask,swap; enum member member; bool cold; unsigned cooling; };
+static const char *const states[]={"hot","first-cold","second-cold","cold"};
+struct cold_addresses { uintptr_t address[2]; unsigned count; };
+/* Cold slot bits refer to actual swapped heads, including S's decoded successor. */
+static struct cold_addresses select_cold_heads(uintptr_t head0,uintptr_t head1,unsigned cooling) {
+    struct cold_addresses chosen={0};
+    if(cooling&1)chosen.address[chosen.count++]=head0;
+    if(cooling&2)chosen.address[chosen.count++]=head1;
+    return chosen;
+}
 
 /* Own PROT_NONE guards prevent a neighboring VMA from merging the data range. */
 static bool map_pair(struct pair_mapping *p) {
@@ -71,6 +81,14 @@ static struct cell cell_at_profile(unsigned epoch,unsigned trial,unsigned positi
 static struct cell cell_at(unsigned epoch,unsigned trial,unsigned position) {
     return cell_at_profile(epoch,trial,position,false);
 }
+/* Independent 48-cell profile; this function drives the actual production calls. */
+static struct cell cell_at_single_cold(unsigned epoch,unsigned trial,unsigned position) {
+    unsigned j=(trial+epoch)%2 ? 47-position : position;
+    j=(j+trial%48)%48;
+    struct cell c={.mask=(j/24)*4096,.swap=(j/12)%2,
+        .member=(enum member)((j/4)%3),.cold=j%4!=0,.cooling=j%4};
+    return c;
+}
 /* x0/x1=actual node heads; x12 mask; x13/14 clocks. Only caller-saved regs. */
 static size_t build(uint32_t *buf,size_t capacity,unsigned n,unsigned mask,enum member member) {
     size_t words=29+2*(size_t)n; if(words>capacity) return 0;
@@ -98,15 +116,17 @@ static unsigned number(const char *s,unsigned lo,unsigned hi){
     char *end;errno=0;if(!s || !*s || *s=='-')exit(2);
     unsigned long v=strtoul(s,&end,0);if(errno || *end || v<lo || v>hi)exit(2);return (unsigned)v;
 }
-static void config(unsigned n,unsigned epoch,int pin,unsigned type,const char *dump,unsigned mask,enum member member,bool singletons){
+static void config(unsigned n,unsigned epoch,int pin,unsigned type,const char *dump,unsigned mask,enum member member,bool singletons,bool single_cold){
     printf("{\"type\":\"config\",\"version\":%u,\"probe\":\"%s\",\"n\":%u,\"trials\":64,\"epoch\":%u,"
       "\"matrix_cells_per_trial\":%u,\"windows\":%u,\"memory_bytes\":8192,\"mapping_alignment\":8192,"
-      "\"node_offsets\":[0,4096],\"masks\":[0,4096],\"members\":%s,\"states\":[\"hot\",\"cold\"],"
+      "\"node_offsets\":[0,4096],\"masks\":[0,4096],\"members\":%s,\"states\":%s,"
       "\"warmup_calls\":128,\"internal_clock\":\"cntvct_el0\",\"code_bytes\":%u,\"kernel_instructions\":%u,"
       "\"pin\":%d,\"pmu_type\":%u,\"events\":[17,8,3,23,52,55],\"exclude_kernel\":true,\"exclude_hv\":true,"
-      "\"backing_requested\":\"4k\"",singletons?2:1,singletons?"rob-load-model":"rob-cold-pair",n,epoch,
-        singletons?40:24,singletons?2560:1536,singletons?"[\"P\",\"S\",\"E\",\"A\",\"B\"]":"[\"P\",\"S\",\"E\"]",
+      "\"backing_requested\":\"4k\"",single_cold?3:(singletons?2:1),single_cold?"rob-cold-state":(singletons?"rob-load-model":"rob-cold-pair"),n,epoch,
+        single_cold?48:(singletons?40:24),single_cold?3072:(singletons?2560:1536),singletons?"[\"P\",\"S\",\"E\",\"A\",\"B\"]":"[\"P\",\"S\",\"E\"]",
+        single_cold?"[\"hot\",\"first-cold\",\"second-cold\",\"cold\"]":"[\"hot\",\"cold\"]",
         4*(29+2*n),29+2*n,pin,type);
+    if(single_cold)fputs(",\"single_cold_requested\":true,\"state_cold_slot_masks\":[0,1,2,3]",stdout);
     if(singletons)fputs(",\"singletons_requested\":true",stdout);
     if(dump)printf(",\"export\":{\"mask\":%u,\"member\":\"%s\"}",mask,names[member]);puts("}");
 }
@@ -133,6 +153,13 @@ static bool backing(const struct pair_mapping *p,struct rob_backing_info *info){
 }
 static void barrier(void){__asm__ volatile("dsb sy":::"memory");}
 static void flush_pair(uintptr_t a,uintptr_t b){__asm__ volatile("dc civac,%0\n\tdc civac,%1\n\tdsb sy"::"r"(a),"r"(b):"memory");}
+/* Same touch/barrier base for all four states; DC operations stay outside the window. */
+static void prepare_single_cold(uintptr_t a,uintptr_t b,uintptr_t head0,uintptr_t head1,unsigned cooling) {
+    (void)*(volatile uintptr_t *)a;(void)*(volatile uintptr_t *)b;barrier();
+    struct cold_addresses selected=select_cold_heads(head0,head1,cooling);
+    for(unsigned i=0;i<selected.count;++i)__asm__ volatile("dc civac,%0"::"r"(selected.address[i]):"memory");
+    barrier();
+}
 static sigjmp_buf capability_jump;static volatile sig_atomic_t checking;
 static void signal_failure(int sig){
     if(checking)siglongjmp(capability_jump,sig);
@@ -154,9 +181,9 @@ static bool capabilities(uintptr_t a,uintptr_t b,routine_t fn,uint64_t *freq,siz
 }
 #endif
 int main(int argc,char **argv){
-    unsigned n=0,epoch=0,mask=0,type=0;enum member member=P;int pin=-1;const char *dump=NULL;bool member_set=false,mask_set=false,singletons=false;
+    unsigned n=0,epoch=0,mask=0,type=0;enum member member=P;int pin=-1;const char *dump=NULL;bool member_set=false,mask_set=false,singletons=false,single_cold=false;
     static const struct option opts[]={{"epoch",1,0,1},{"trials",1,0,2},{"pin",1,0,3},{"pmu-type",1,0,4},
-      {"mask",1,0,5},{"member",1,0,6},{"write-asm",1,0,7},{"singletons",0,0,8},{0,0,0,0}};int ch;
+      {"mask",1,0,5},{"member",1,0,6},{"write-asm",1,0,7},{"singletons",0,0,8},{"single-cold",0,0,9},{0,0,0,0}};int ch;
     while((ch=getopt_long(argc,argv,"n:",opts,NULL))!=-1){
         switch(ch){
         case 'n':n=number(optarg,0,4096);break;case 1:epoch=number(optarg,0,1);break;
@@ -164,17 +191,17 @@ int main(int argc,char **argv){
         case 4:type=number(optarg,1,UINT32_MAX);break;
         case 5:mask=number(optarg,0,4096);if(mask!=0 && mask!=4096)return 2;mask_set=true;break;
         case 6:member_set=true;{bool ok=false;for(unsigned i=0;i<5;++i)if(!strcmp(optarg,names[i])){member=(enum member)i;ok=true;}if(!ok)return 2;}break;
-        case 7:dump=optarg;break;case 8:singletons=true;break;default:return 2;
+        case 7:dump=optarg;break;case 8:singletons=true;break;case 9:single_cold=true;break;default:return 2;
         }
     }
-    if(optind!=argc || (!dump && (member_set || mask_set)) || (!singletons && member>E))return 2;
-    config(n,epoch,pin,type,dump,mask,member,singletons);
+    if((singletons && single_cold) || optind!=argc || (!dump && (member_set || mask_set)) || (!singletons && member>E))return 2;
+    config(n,epoch,pin,type,dump,mask,member,singletons,single_cold);
     if(dump){
         uint32_t buf[8221];size_t words=build(buf,8221,n,mask,member);if(!words)return failure("code-capacity");
         FILE *f=fopen(dump,"wb");if(!f)return failure("code-export-open");bool ok=fwrite(buf,4,words,f)==words;if(fclose(f))ok=false;return ok?0:failure("code-export-write");
     }
 #if !defined(__linux__) || !defined(__aarch64__)
-    (void)map_pair;(void)fill_pair;(void)cell_at;(void)cell_at_profile;return failure("measurement-requires-linux-aarch64");
+    (void)map_pair;(void)fill_pair;(void)cell_at;(void)cell_at_profile;(void)cell_at_single_cold;(void)select_cold_heads;(void)states;return failure("measurement-requires-linux-aarch64");
 #else
     if(n || pin<0 || !type || sysconf(_SC_PAGESIZE)!=4096)return failure("qualification-requires-n0-pin-type-4k");
     cpu_set_t affinity;CPU_ZERO(&affinity);CPU_SET(pin,&affinity);
@@ -198,11 +225,12 @@ int main(int argc,char **argv){
       "\"mapping_alignment_verified\":true,\"raw_self_pointer_verified\":true,\"code_address_mod64\":0,"
       "\"cache_maintenance_completed\":true,\"initial_backing\":",sched_getcpu(),freq,line);
     rob_backing_json(stdout,&before);fputs(",\"event_ids\":[",stdout);for(unsigned j=0;j<6;++j)printf("%s%"PRIu64,j?",":"",perf.ids[j]);puts("]}");
-    for(unsigned trial=0;trial<64;++trial)for(unsigned pos=0;pos<member_count*8;++pos){
-        struct cell c=singletons?cell_at_profile(epoch,trial,pos,true):cell_at(epoch,trial,pos);if(!fill_pair(&data,c.mask))return failure("round-graph");
+    for(unsigned trial=0;trial<64;++trial)for(unsigned pos=0;pos<(single_cold?48:member_count*8);++pos){
+        struct cell c=single_cold?cell_at_single_cold(epoch,trial,pos):singletons?cell_at_profile(epoch,trial,pos,true):cell_at(epoch,trial,pos);if(!fill_pair(&data,c.mask))return failure("round-graph");
         uintptr_t head0=c.swap?b:a,head1=c.swap?a:b;routine_t fn=routines[c.mask/4096][c.member];
         for(unsigned j=0;j<128;++j)sink=fn(head0,head1);barrier();
-        if(c.cold)flush_pair(a,b);else{sink=*(volatile uintptr_t *)a;sink=*(volatile uintptr_t *)b;barrier();}
+        if(single_cold)prepare_single_cold(a,b,head0,head1,c.cooling);
+        else if(c.cold)flush_pair(a,b);else{sink=*(volatile uintptr_t *)a;sink=*(volatile uintptr_t *)b;barrier();}
         struct pg_sample start,end,delta;const char *error=snapshot(&perf,&start);if(error)return failure(error);
         if(ioctl(perf.fd[0],PERF_EVENT_IOC_ENABLE,PERF_IOC_FLAG_GROUP))return failure("group-enable");
         uint64_t ticks=fn(head0,head1);
@@ -211,7 +239,7 @@ int main(int argc,char **argv){
         if(sched_getcpu()!=pin || delta.values[1]<29 || delta.values[1]>1029)return failure("cpu-or-retired-count");
         printf("{\"type\":\"round\",\"epoch\":%u,\"trial\":%u,\"mask\":%u,\"swap\":%u,\"member\":\"%s\","
           "\"state\":\"%s\",\"ticks\":%"PRIu64",\"enabled\":%"PRIu64",\"running\":%"PRIu64",\"metrics\":{",
-          epoch,trial,c.mask,c.swap,names[c.member],c.cold?"cold":"hot",ticks,delta.enabled,delta.running);
+          epoch,trial,c.mask,c.swap,names[c.member],single_cold?states[c.cooling]:(c.cold?"cold":"hot"),ticks,delta.enabled,delta.running);
         for(unsigned j=0;j<6;++j)printf("%s\"0x%"PRIx64"\":%"PRIu64,j?",":"",events[j],delta.values[j]);puts("}}");
         if(fflush(stdout))return failure("output-write");
     }
