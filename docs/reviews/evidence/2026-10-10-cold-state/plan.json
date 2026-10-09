@@ -1,0 +1,69 @@
+{
+  "mode": "rob-cold-state",
+  "processes": 2,
+  "windows": 6144,
+  "trials": 64,
+  "cells_per_trial": 48,
+  "masks": [
+    0,
+    4096
+  ],
+  "swaps": [
+    0,
+    1
+  ],
+  "members": [
+    "P",
+    "S",
+    "E"
+  ],
+  "states": [
+    "hot",
+    "first-cold",
+    "second-cold",
+    "cold"
+  ],
+  "warmup_calls": 128,
+  "n": 0,
+  "mapping_bytes": 8192,
+  "conditions": [
+    {
+      "name": "epoch-0",
+      "args": [
+        "--epoch",
+        "0",
+        "-n",
+        "0",
+        "--trials",
+        "64",
+        "--pin",
+        "7",
+        "--pmu-type",
+        "8",
+        "--single-cold"
+      ]
+    },
+    {
+      "name": "epoch-1",
+      "args": [
+        "--epoch",
+        "1",
+        "-n",
+        "0",
+        "--trials",
+        "64",
+        "--pin",
+        "7",
+        "--pmu-type",
+        "8",
+        "--single-cold"
+      ]
+    }
+  ],
+  "state_cold_slot_masks": [
+    0,
+    1,
+    2,
+    3
+  ]
+}

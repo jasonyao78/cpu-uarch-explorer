@@ -1,0 +1,25 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "1fac9db361eb1777bd6cb9aeccdaa3db5e9b1ba7",
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "flags": [
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common"
+  ],
+  "independent_rebuild_byte_identical": true,
+  "binaries": {
+    "rob_cold_pair": "31f15218613516806c7820a75f367c3f26eb60d8e57c598f7f8ff25f7d911c64"
+  },
+  "source_sha256": {
+    "probes/diagnostic/rob_cold_pair.c": "5e79312bb8532751c0ee56d7cd5c2da3e8e183179e9425d87249d55b993ab18f",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/rob_backing.h": "ef1dd0f7f38dad99713322f06b3d5c70caac3e9a56ca214f687120f3fafedd29"
+  },
+  "plan_path": "docs/reviews/evidence/2026-10-10-cold-state/plan.json",
+  "plan_sha256": "be48c19ca945fde4a8200ce2001f7cdfb890556c427a6b2e5998298a44613214"
+}
