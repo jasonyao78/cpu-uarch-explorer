@@ -80,7 +80,7 @@ def summarize(path):
     envs=[]
     for env in path.glob('*-environment.json'):
         e=json.loads(env.read_text()); assert not e['violations'] and not e['warnings']; envs.append(e['snapshot'])
-    if m['mode'] in ('tlb-history','rob-miss-qualify-thp'):
+    if m['mode'] in ('tlb-history','rob-miss-qualify-thp','rob-miss-wide-thp'):
         from tools.diagnostic.analyze_long_load import audit_environment
         profile=json.loads(subprocess.check_output(['git','show',m['source_head']+':configs/platforms/redmi-k70pro-01.json'],cwd=root))
         policy=profile['environment_profiles']['charging-thermal']['measurement_environment']
@@ -92,7 +92,7 @@ def summarize(path):
             'raw_directory':path.name,'processes':len(m['results']),'rows':[],
             'max_cpu_c_range':[min(e['thermal']['max_cpu_c'] for e in envs),max(e['thermal']['max_cpu_c'] for e in envs)],
             'wall_seconds':sum(e['wall_seconds'] for e in m['results'])}
-    if m['mode'] in ('tlb-confirm100','rob-fine','rob-miss-qualify','tlb-history','rob-miss-qualify-thp'):
+    if m['mode'] in ('tlb-confirm100','rob-fine','rob-miss-qualify','tlb-history','rob-miss-qualify-thp','rob-miss-wide-thp'):
         result.update({k:m[k] for k in ('binary_source_head','build_evidence_sha256','driver_sha256','protocol_path','protocol_sha256')})
         if m['mode'].startswith('tlb'): result['tlb_target']=m['tlb_target']
     for entry in sorted(m['results'],key=lambda e:next(i for i,c in enumerate(registered) if c['name']==e['name'])):
@@ -150,9 +150,9 @@ def summarize(path):
             runtime=next(r for r in rows if r['type']=='runtime')
             assert runtime['cpu']==7 and runtime['fpcr']==0 and runtime['loop_address_mod64']==config['loop_mod64']
             if config['anchor']=='miss':
-                if m['mode']=='rob-miss-qualify-thp': validate_backing(config,runtime,rounds)
+                if m['mode'] in ('rob-miss-qualify-thp','rob-miss-wide-thp'): validate_backing(config,runtime,rounds)
                 else: assert runtime['mapping_4k_verified']
-            if m['mode'] in ('rob-miss-qualify','rob-miss-qualify-thp'):
+            if m['mode'] in ('rob-miss-qualify','rob-miss-qualify-thp','rob-miss-wide-thp'):
                 assert runtime['distinct_lines_per_call']==runtime['ring_nodes']==config['memory_bytes']//64
             assert len(rounds)==(6 if config['paired'] else 3)
             for generated in entry['generated_code'].values():
@@ -170,7 +170,7 @@ def summarize(path):
                                       'counts_per_iteration':{k:[r['metrics'][k]/config['iterations'] for r in rr] for k in rr[0]['metrics']},
                                       'retired_relative_error':[abs(r['metrics']['0x8']-expected)/expected for r in rr],
                                       'generated_code_sha256':{k:v['sha256'] for k,v in entry['generated_code'].items()}})
-                if m['mode'] in ('rob-fine','rob-miss-qualify','rob-miss-qualify-thp'):
+                if m['mode'] in ('rob-fine','rob-miss-qualify','rob-miss-qualify-thp','rob-miss-wide-thp'):
                     result['rows'][-1].update({'loop_mod64':config['loop_mod64'],'iterations':config['iterations'],
                                                'chase_seed':config['chase_seed'],'epoch':int(entry['name'][1])})
     return result

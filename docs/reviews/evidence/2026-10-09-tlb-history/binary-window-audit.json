@@ -1,0 +1,18 @@
+{
+  "binary_sha256": "8d046bfb68370ccfd21b144864aa77d48f061398a694cae5e4d45732a884c22e",
+  "source_commit": "2a37795107163a9c3effd8fc3e25410c0dd75695",
+  "source_path": "probes/diagnostic/tlb_history.cpp",
+  "ndk": "27.2.12479018",
+  "disassembly_path": "docs/reviews/evidence/2026-10-09-tlb-history/binary-window-audit.txt",
+  "disassembly_sha256": "7e96e2ef67143ae97dd58dfc620956789ba9f08549e4fa98f733db794cbc073e",
+  "snapshot_calls": [
+    "0x244164",
+    "0x244210"
+  ],
+  "victim_target_load": "0x244200",
+  "active_loop": [
+    "0x2441b8",
+    "0x2441c0"
+  ],
+  "caveat": "One target pointer load in kind2, but metadata loads and snapshot user wrappers remain inside the observed interval."
+}

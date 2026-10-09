@@ -120,9 +120,20 @@ class ThpQualification(unittest.TestCase):
             with self.assertRaises(ValueError): driver.validate_realized('rob-miss-qualify-thp',opts,[config])
 
 
+class WideFootprints(unittest.TestCase):
+    def test_full_wide_matrix_keeps_hot_control(self):
+        rows=driver.conditions('rob-miss-wide-thp')
+        self.assertEqual(len(rows),6)
+        self.assertEqual([int(a[a.index('-m')+1]) for _,a in rows],[1,256,512,512,256,1])
+        for _,opts in rows:
+            mb=int(opts[opts.index('-m')+1])
+            self.assertEqual(opts[opts.index('--backing')+1], '4k' if mb==1 else 'thp2m')
+            self.assertEqual(int(opts[opts.index('-i')+1]),max(131072,mb*8192))
+
+
 class RegisteredEvidence(unittest.TestCase):
     def test_new_mode_cannot_omit_or_substitute_build(self):
-        for mode in ('tlb-history','rob-miss-qualify-thp'):
+        for mode in ('tlb-history','rob-miss-qualify-thp','rob-miss-wide-thp'):
             m={'mode':mode,'protocol_path':driver.NEW_PROTOCOL[mode]}
             for path in (None,driver.BUILD_EVIDENCE):
                 if path is not None: m['build_evidence_path']=path

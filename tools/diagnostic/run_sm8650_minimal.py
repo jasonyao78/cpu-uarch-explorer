@@ -33,12 +33,12 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
 
 
-MODES = ('tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify', 'tlb-history', 'rob-miss-qualify-thp')
+MODES = ('tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify', 'tlb-history', 'rob-miss-qualify-thp', 'rob-miss-wide-thp')
 OLD_PROTOCOL = 'docs/design/2026-10-09-minimal-tlb-rob-probes.md'
 CONFIRM_PROTOCOL = 'docs/design/2026-10-09-local-confirmation.md'
 BUILD_EVIDENCE = 'docs/reviews/evidence/2026-10-09-minimal-probes/build.json'
-NEW_EVIDENCE = {'tlb-history':'2026-10-09-tlb-history', 'rob-miss-qualify-thp':'2026-10-09-long-load-thp'}
-NEW_PROTOCOL = {'tlb-history':'docs/design/2026-10-09-tlb-history-discrimination.md',
+NEW_EVIDENCE = {'rob-miss-wide-thp':'2026-10-09-long-load-wide', 'tlb-history':'2026-10-09-tlb-history', 'rob-miss-qualify-thp':'2026-10-09-long-load-thp'}
+NEW_PROTOCOL = {'rob-miss-wide-thp':'docs/design/2026-10-09-wide-load-qualification.md', 'tlb-history':'docs/design/2026-10-09-tlb-history-discrimination.md',
                 'rob-miss-qualify-thp':'docs/design/2026-10-09-thp-load-qualification.md'}
 
 
@@ -55,12 +55,13 @@ def conditions(mode):
         return [(f'epoch-{i}', [target]+(['--reverse'] if i%2 else [])) for i in range(1 if mode == 'tlb-smoke' else 5)]
     base = ['-i', '131072', '-r', '3', '--pin', '7', '--pmu-type', '8',
             '-e', '0x03', '-e', '0x17', '-e', '0x34', '-e', '0x02']
-    if mode in ('rob-miss-qualify','rob-miss-qualify-thp'):
+    if mode in ('rob-miss-qualify','rob-miss-qualify-thp', 'rob-miss-wide-thp'):
         rows=[]
         for epoch in range(2):
-            for mb in ((1,64,128) if epoch==0 else (128,64,1)):
+            footprints=(1,256,512) if mode=='rob-miss-wide-thp' else (1,64,128)
+            for mb in (footprints if epoch==0 else reversed(footprints)):
                 opts=base.copy(); opts[1]=str(max(131072,mb*8192)); opts[opts.index('0x02')]='0x37'
-                if mode=='rob-miss-qualify-thp': opts+=['--backing','4k' if mb==1 else 'thp2m']
+                if mode in ('rob-miss-qualify-thp','rob-miss-wide-thp'): opts+=['--backing','4k' if mb==1 else 'thp2m']
                 rows.append((f'e{epoch}-miss-m{mb}-n0',opts+['-t','nop','-n','0','-a','miss','-m',str(mb),'--paired']))
         return rows
     if mode == 'rob-qualify':
@@ -114,7 +115,7 @@ def validate_realized(mode, opts, rows):
               'paired':'--paired' in opts,'serial':'--serial' in opts,'asymmetric':'--asymmetric' in opts,
               'chase_seed':int(value('--seed','42')),'exclude_kernel':True,'exclude_hv':True,
               'events':[17,8]+[int(opts[i+1],0) for i,v in enumerate(opts) if v=='-e']}
-    if mode=='rob-miss-qualify-thp': expected['backing_requested']=value('--backing','4k')
+    if mode in ('rob-miss-qualify-thp','rob-miss-wide-thp'): expected['backing_requested']=value('--backing','4k')
     for key,want in expected.items():
         if c.get(key)!=want: raise ValueError('requested/realized ROB '+key+' mismatch')
 
@@ -192,7 +193,7 @@ def main():
         if identity.returncode or [int(v,0) for v in identity.stdout.split()]!=[0x410fd821,4096]: raise RuntimeError('target-identity')
         manifest['midr']='0x410fd821'; manifest['base_page_bytes']=4096
         for name,opts in rows:
-            if args.mode in ('rob-miss-qualify','rob-miss-qualify-thp'): time.sleep(15)
+            if args.mode in ('rob-miss-qualify','rob-miss-qualify-thp', 'rob-miss-wide-thp'): time.sleep(15)
             inspect(name+'-pre')
             result_code={}
             if args.host_exporter:
@@ -226,7 +227,7 @@ def main():
                 audit_history(parsed,'--reverse' in opts,plan['reverse' if '--reverse' in opts else 'forward'])
             if args.mode.startswith('rob'):
                 config=next(row for row in parsed if row['type']=='config')
-                if args.mode=='rob-miss-qualify-thp':
+                if args.mode in ('rob-miss-qualify-thp','rob-miss-wide-thp'):
                     from tools.diagnostic.summarize_sm8650_minimal import validate_backing
                     validate_backing(config,next(row for row in parsed if row['type']=='runtime'),rounds)
                 expected_retired=config['iterations']*config['loop_instructions']+config['loop_offset']//4+1
