@@ -4,6 +4,8 @@
  * Same-address independent/serial chase graphs; exact N filler per gap;
  * explicit loop alignment; exported code; strict GROUP+ID PMU windows.
  * OI-ROB-PROBE-20261009：显式4k/实际2MiB THP；每窗前后验收，禁止静默fallback。
+ * Encoded pointer contrast: docs/design/2026-10-09-encoded-load-qualification.md.
+ * Explicit mask0 retains the same EOR instructions; default code is unchanged.
  * Host supports export/tests only. Measurement requires Linux AArch64.
  */
 #ifndef _GNU_SOURCE
@@ -33,6 +35,7 @@
 #define NOP 0xd503201fu
 #define RET 0xd65f03c0u
 #define ADD(d,n,m) (0x8b000000u|((m)<<16)|((n)<<5)|(d))
+#define EOR(d,n,m) (0xca000000u|((m)<<16)|((n)<<5)|(d))
 #define MOV(d,m) (0xaa0003e0u|((m)<<16)|(d))
 #define MOVZ(d,v) (0xd2800000u|(((v)&65535u)<<5)|(d))
 #define MOVK(d,v,s) (0xf2800000u|(((v)&65535u)<<5)|(((s)/16)<<21)|(d))
@@ -46,7 +49,8 @@
 static const char *classes[]={"nop","add","movi","movr","fadd","ldr","str"};
 struct options {
     unsigned cls,n,its,rounds,mb,align,chain,seed; int pin;
-    unsigned pmu_type; bool have_type,serial,asymmetric,paired,thp2m,collapse;
+    unsigned pmu_type; bool have_type,serial,asymmetric,paired,thp2m,collapse,have_xor;
+    uint64_t pointer_xor;
     enum { MISS, SQRT, NONE } anchor;
     const char *dump,*rawlog;
     uint64_t events[PG_MAX_EVENTS]; size_t ne;
@@ -76,6 +80,7 @@ static struct code build(uint32_t *buf,size_t cap,const struct options *o) {
     struct code c={.words=buf,.cap=cap};
     emit(&c,MOV(14,2));
     imm(&c,16,0x1111); imm(&c,17,0x2222);
+    if(o->have_xor) imm(&c,12,o->pointer_xor); // x12 caller-saved; no filler writes it
     if(o->anchor==SQRT || o->cls==4) {
         imm(&c,15,UINT64_C(0x3ff0000000000000)); // exact stable sqrt(1.0)
         emit(&c,FMOV(0,15)); emit(&c,FMOV(16,15)); emit(&c,FMOV(17,15));
@@ -83,7 +88,10 @@ static struct code build(uint32_t *buf,size_t cap,const struct options *o) {
     while ((c.pos*4)%64!=o->align) emit(&c,NOP);
     c.loop=c.pos;
     for(unsigned side=0;side<2;++side) {
-        if(o->anchor==MISS) { emit(&c,LDR(o->serial?0:side,o->serial?0:side,0)); ++c.anchors; }
+        if(o->anchor==MISS) {
+            unsigned r=o->serial?0:side; emit(&c,LDR(r,r,0)); ++c.anchors;
+            if(o->have_xor) emit(&c,EOR(r,r,12)); // decode before the next dereference
+        }
         if(o->anchor==SQRT) for(unsigned j=0;j<o->chain;++j) { emit(&c,FSQRT(0,0)); ++c.anchors; }
         if(!side || !o->asymmetric) for(unsigned j=0;j<o->n;++j) filler(&c,o->cls,j);
     }
@@ -109,7 +117,7 @@ static void usage(void) {
         "[-a miss|fsqrt|none] [-i iterations] [-r rounds] [-m MiB] "
         "[--serial|--paired] [--asymmetric] [--align 0|16|32|48] [--chain 1..256] "
         "[--seed positive] [--pin cpu --pmu-type type] [-e raw_event] "
-        "[--backing 4k|thp2m] [--collapse] [--write-asm file] [--rawlog file]\n");
+        "[--backing 4k|thp2m] [--collapse] [--pointer-xor uint64] [--write-asm file] [--rawlog file]\n");
     exit(2);
 }
 static uint64_t rng(uint64_t *state) {
@@ -117,7 +125,7 @@ static uint64_t rng(uint64_t *state) {
 }
 // π[2j],π[2j+1] are A_j,B_j. Independent and serial modes read same addresses.
 // Every node is one 64-byte line; whole permutation is explicitly checked.
-static bool init_chase(char *mem,size_t bytes,bool serial,unsigned seed) {
+static bool init_chase_encoded(char *mem,size_t bytes,bool serial,unsigned seed,uint64_t mask) {
     size_t nodes=bytes/64; uint32_t *order=malloc(nodes*sizeof(*order));
     if(!order) return false;
     for(size_t i=0;i<nodes;++i) order[i]=(uint32_t)i;
@@ -125,18 +133,22 @@ static bool init_chase(char *mem,size_t bytes,bool serial,unsigned seed) {
     for(size_t i=nodes-1;i>0;--i) { size_t j=rng(&state)%(i+1); uint32_t t=order[i]; order[i]=order[j]; order[j]=t; }
     for(size_t i=0;i<nodes;++i) {
         size_t next=serial?(i+1)%nodes:(i+2)%nodes;
-        *(uintptr_t *)(void *)(mem+64*order[i])=(uintptr_t)(mem+64*order[next]);
+        *(uintptr_t *)(void *)(mem+64*order[i])=(uintptr_t)(mem+64*order[next]) ^ mask;
     }
     // Inspect all links against the defining permutation, including wrap-around.
     bool ok=true;
     for(size_t i=0;i<nodes;++i) {
         size_t next=serial?(i+1)%nodes:(i+2)%nodes;
-        if(*(uintptr_t *)(void *)(mem+64*order[i])!=(uintptr_t)(mem+64*order[next])) ok=false;
+        if((*(uintptr_t *)(void *)(mem+64*order[i]) ^ mask)!=(uintptr_t)(mem+64*order[next])) ok=false;
     }
     // Put heads in a separate global pair; do not overwrite node contents.
     extern uintptr_t chase_heads[2];
     chase_heads[0]=(uintptr_t)(mem+64*order[0]); chase_heads[1]=(uintptr_t)(mem+64*order[1]);
     free(order); return ok;
+}
+// Legacy call shape: no mask, no graph change.
+static bool init_chase(char *mem,size_t bytes,bool serial,unsigned seed) {
+    return init_chase_encoded(mem,bytes,serial,seed,0);
 }
 uintptr_t chase_heads[2];
 static uint64_t now_ns(void) {
@@ -187,7 +199,7 @@ int main(int argc,char **argv) {
     static const struct option opts[]={
         {"write-asm",1,0,1},{"rawlog",1,0,2},{"pin",1,0,3},{"pmu-type",1,0,4},
         {"serial",0,0,5},{"asymmetric",0,0,6},{"align",1,0,7},{"chain",1,0,8},
-        {"seed",1,0,9},{"paired",0,0,10},{"backing",1,0,11},{"collapse",0,0,12},{0,0,0,0}};
+        {"seed",1,0,9},{"paired",0,0,10},{"backing",1,0,11},{"collapse",0,0,12},{"pointer-xor",1,0,13},{0,0,0,0}};
     int ch;
     while((ch=getopt_long(argc,argv,"t:n:a:i:r:m:e:h",opts,NULL))!=-1) {
         switch(ch) {
@@ -217,10 +229,12 @@ int main(int argc,char **argv) {
             else { errno=EINVAL; return failure("backing-unknown"); }
             break;
         case 12: o.collapse=true; break;
+        case 13: o.pointer_xor=number(optarg,0,UINT64_MAX); o.have_xor=true; break;
         default: usage();
         }
     }
     if(!have_class || !have_n || optind!=argc || ((o.serial || o.paired) && o.anchor!=MISS) || (o.serial && o.paired)) usage();
+    if(o.have_xor && o.anchor!=MISS) { errno=EINVAL; return failure("pointer-xor-requires-miss"); }
     if(o.collapse && (!o.thp2m || o.anchor!=MISS)) { errno=EINVAL; return failure("collapse-requires-thp2m-miss"); }
     if(o.thp2m && o.anchor!=MISS) { errno=EINVAL; return failure("backing-thp2m-requires-miss"); }
     if(o.thp2m && o.mb%2) { errno=EINVAL; return failure("backing-thp2m-requires-2m-multiple"); }
@@ -246,7 +260,9 @@ int main(int argc,char **argv) {
            c.loop*4,o.align,c.branch*4,c.branch-c.loop+1,c.fillers,c.anchors,c.pos*4,
            o.anchor==MISS?((size_t)o.mb<<20):0,o.thp2m?"thp2m":"4k",o.seed,o.pmu_type);
     for(size_t k=0;k<o.ne;++k) printf("%s%"PRIu64,k?",":"",o.events[k]);
-    fputs("]",stdout); if(o.collapse) fputs(",\"collapse_requested\":true",stdout); puts("}");
+    fputs("]",stdout); if(o.collapse) fputs(",\"collapse_requested\":true",stdout);
+    if(o.have_xor) printf(",\"pointer_xor_requested\":true,\"pointer_xor\":\"0x%016"PRIx64"\",\"decode_instructions_per_iteration\":2",o.pointer_xor);
+    puts("}");
     if(o.dump) {
         if(o.paired) usage();
         FILE *f=fopen(o.dump,"wb"); if(!f) return failure("code-export-open");
@@ -277,7 +293,7 @@ int main(int argc,char **argv) {
         if(mem==MAP_FAILED) return failure("chase-mapping");
         /* 必须在init_chase写节点触页之前请求；失败绝不退回4k。 */
         if(madvise(mem,bytes,o.thp2m?MADV_HUGEPAGE:MADV_NOHUGEPAGE)) return failure("chase-backing-madvise");
-        if(!init_chase(mem,bytes,o.serial,o.seed)) return failure("chase-ring-validation");
+        if(!(o.have_xor?init_chase_encoded(mem,bytes,o.serial,o.seed,o.pointer_xor):init_chase(mem,bytes,o.serial,o.seed))) return failure("chase-ring-validation");
         if(o.collapse) {
             struct rob_backing_info before={0}; enum rob_backing_status before_status;
             if(!backing(mem,bytes,true,pmd_bytes,&before,&before_status)
@@ -325,7 +341,7 @@ int main(int argc,char **argv) {
       for(unsigned step=0;step<(o.paired?2u:1u);++step) {
         bool is_serial=o.paired?((round+step)%2!=0):o.serial;
         if(o.paired) {
-            if(!init_chase(mem,bytes,is_serial,o.seed)) return failure("paired-ring-validation");
+            if(!(o.have_xor?init_chase_encoded(mem,bytes,is_serial,o.seed,o.pointer_xor):init_chase(mem,bytes,is_serial,o.seed))) return failure("paired-ring-validation");
             routine=(routine_t)(void *)(is_serial?serial_buf:buf);
         }
         routine(chase_heads[0],chase_heads[1],hot,o.its); // same explicit warmup each round

@@ -419,3 +419,5 @@
 
 - **局部转折已测 / TLB负责人 / 触发=精确ways或替换命名前**：源码`ea32ba4`/启动`620588a`、证据`db4808e`，`docs/reviews/2026-10-09-tlb-capacity-results.md`完整5mapping/10400窗。F128双方向(8,9]5/5，F512哨兵同区间；victim joint0/5，无响应4/5、K11右端未确认1/5，全部窗保留。下一对照应分别检验竞争页是否充分到达相关层级与替换历史，不能把整圈walk换算初始驻留数。候选为固定K7–11、pass1/2/4/8，每pass前F128施加重复prime，相关层级激励需实测确认；此为设计候选，未预注册/未测，不宣称足以认证LRU或ways。
 - **当前覆盖缺口已分型 / ROB软件与锚点负责人 / 触发=局部合并资格**：源码`1474a7a`/启动`07bb9ba`的一次仪表复现 `docs/reviews/2026-10-09-backing-observation-results.md`，完整解析的当前映射Huge224/Rss256MiB、Swap0、PMD2MiB，仅全Huge谓词失败。缺口成因、具体子范围仍OPEN，旧失败不回填。`docs/design/2026-10-09-local-collapse-qualification.md`冻结仅自有映射一次MADV_COLLAPSE和1/256MiB双epoch24窗，先源码/二进制/消费接线，再实际验证；不写全局sysfs、不重试至成功、原c93门不改。若不支持/不能完整覆盖或科学门不通过，下一有限对照转小足迹编码指针/访问次序，不继续增足迹追门。
+
+- **局部合并有限尝试结束 / ROB锚点负责人 / 触发=编码值对照**：`docs/reviews/2026-10-09-local-collapse-results.md`（source3b4e66d/launch68f0991）在256MiB一次MADV_COLLAPSE返回ENOMEM，Huge222→238MiB、Rss256/Swap0，初始覆盖仍不合格，只有热点6窗，科学不可计算。不能称设备全局OOM或定位碎片根因，不重试至成功。新协议 `docs/design/2026-10-09-encoded-load-qualification.md` 冻结1/64/128MiB×显式同EOR零/非零mask×双epoch12进程72窗，各mask独立原c93门；只有两epoch资格通过才有限N扫描。物理ROB/PRF/RS/融合仍OPEN；跨编码进程VA/PFN与zero-elision残差保留，后续因果对照由锚点负责人在值域差异出现时另案注册。

@@ -28,6 +28,67 @@ class RobCode(unittest.TestCase):
         data = path.read_bytes()
         return list(struct.unpack('<' + 'I' * (len(data)//4), data)), p.stdout
 
+    def test_explicit_xor_zero_and_mask_have_matched_decode_loop(self):
+        legacy, old = self.dump('-t','nop','-n','0')
+        self.assertNotIn('pointer_xor',json.loads(old))
+        tails=[]
+        for mask in ('0x0000000000000000','0xffff000000000000'):
+            for serial in (False, True):
+                words,out=self.dump('-t','nop','-n','0','--pointer-xor',mask,
+                                    *(['--serial'] if serial else []))
+                config=json.loads(out)
+                self.assertEqual(config['pointer_xor'],mask)
+                self.assertIs(config['pointer_xor_requested'],True)
+                self.assertEqual(config['decode_instructions_per_iteration'],2)
+                self.assertEqual(config['loop_instructions'],6)
+                self.assertEqual(config['code_bytes'],92)
+                self.assertEqual(config['loop_offset'],64)
+                self.assertEqual(words[-7:],[0xf9400000,0xca0c0000,
+                    0xf9400000 if serial else 0xf9400021,
+                    0xca0c0000 if serial else 0xca0c0021,
+                    0xf1000463,0x54ffff61,0xd65f03c0])
+                tails.append(words[-7:])
+        self.assertEqual(tails[:2],tails[2:])
+        self.assertEqual(len(legacy)*4,84)
+
+    def test_pointer_xor_rejects_non_miss(self):
+        for anchor in ('fsqrt','none'):
+            p=subprocess.run([str(self.exe),'-t','nop','-n','0','-a',anchor,
+                              '--pointer-xor','0'],capture_output=True,text=True)
+            self.assertNotEqual(p.returncode,0)
+            self.assertTrue(p.stdout.strip(),'缺少结构化pointer-xor失败')
+            row=json.loads(p.stdout)
+            self.assertEqual(row['metrics'],{})
+            self.assertEqual(row['failure']['reason'],'pointer-xor-requires-miss')
+
+    def test_encoded_graph_is_same_production_topology(self):
+        harness=pathlib.Path(self.tmp.name)/'encoded.c'
+        harness.write_text('#define main rob_probe_main\n#include "'+str(SRC)+'"\n#undef main\n'+r'''int main(void) {
+    enum{N=256}; _Alignas(64) char mem[N*64]; uintptr_t addresses[N];
+    assert(init_chase(mem,sizeof(mem),false,42));
+    uintptr_t x=chase_heads[0],y=chase_heads[1];
+    for(unsigned i=0;i<N/2;++i) { addresses[2*i]=x; addresses[2*i+1]=y; x=*(uintptr_t*)x; y=*(uintptr_t*)y; }
+    uint64_t masks[]={0,UINT64_C(0xffff000000000000)};
+    for(unsigned m=0;m<2;++m) for(unsigned serial=0;serial<2;++serial) {
+        uint64_t mask=masks[m]; assert(init_chase_encoded(mem,sizeof(mem),serial,42,mask));
+        x=chase_heads[0]; y=chase_heads[1];
+        assert(x==addresses[0] && y==addresses[1]);
+        for(unsigned i=0;i<N/2;++i) {
+            assert(x==addresses[2*i]); x=*(uintptr_t*)x ^ mask;
+            if(serial) { assert(x==addresses[2*i+1]); x=*(uintptr_t*)x ^ mask; }
+            else { assert(y==addresses[2*i+1]); y=*(uintptr_t*)y ^ mask; }
+        }
+        assert(x==chase_heads[0]); if(!serial) assert(y==chase_heads[1]);
+    }
+    return 0;
+}
+''')
+        exe=pathlib.Path(self.tmp.name)/'encoded'
+        p=subprocess.run(['clang','-O2','-Wall','-Wextra','-Werror','-I',str(ROOT/'probes/common'),
+                         str(harness),'-o',str(exe)],capture_output=True,text=True)
+        self.assertEqual(p.returncode,0,p.stderr)
+        subprocess.run([str(exe)],check=True)
+
     def test_branch_returns_to_first_anchor(self):
         words, _ = self.dump('-t', 'nop', '-n', '64', '-i', '8', '-r', '1', '-m', '1')
         first = words.index(0xF9400000)

@@ -33,16 +33,16 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
 
 
-MODES = ('tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify', 'tlb-history', 'tlb-capacity', 'rob-miss-qualify-thp', 'rob-miss-wide-thp', 'rob-miss-fixed-thp', 'rob-backing-observe', 'rob-collapse-qualify')
+MODES = ('tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify', 'tlb-history', 'tlb-capacity', 'rob-miss-qualify-thp', 'rob-miss-wide-thp', 'rob-miss-fixed-thp', 'rob-backing-observe', 'rob-collapse-qualify', 'rob-xor-qualify')
 QUALIFICATION_MODES = {'rob-miss-qualify':(1,64,128), 'rob-miss-qualify-thp':(1,64,128),
-                       'rob-miss-wide-thp':(1,256,512), 'rob-miss-fixed-thp':(1,256), 'rob-collapse-qualify':(1,256)}
+                       'rob-miss-wide-thp':(1,256,512), 'rob-miss-fixed-thp':(1,256), 'rob-collapse-qualify':(1,256), 'rob-xor-qualify':(1,64,128)}
 THP_QUALIFICATION_MODES = (set(QUALIFICATION_MODES)-{'rob-miss-qualify'})|{'rob-backing-observe'}
 
 OLD_PROTOCOL = 'docs/design/2026-10-09-minimal-tlb-rob-probes.md'
 CONFIRM_PROTOCOL = 'docs/design/2026-10-09-local-confirmation.md'
 BUILD_EVIDENCE = 'docs/reviews/evidence/2026-10-09-minimal-probes/build.json'
-NEW_EVIDENCE = {'rob-collapse-qualify':'2026-10-09-local-collapse', 'rob-backing-observe':'2026-10-09-backing-observation', 'rob-miss-fixed-thp':'2026-10-09-long-load-fixed', 'tlb-capacity':'2026-10-09-tlb-capacity', 'rob-miss-wide-thp':'2026-10-09-long-load-wide', 'tlb-history':'2026-10-09-tlb-history', 'rob-miss-qualify-thp':'2026-10-09-long-load-thp'}
-NEW_PROTOCOL = {'rob-collapse-qualify':'docs/design/2026-10-09-local-collapse-qualification.md', 'rob-backing-observe':'docs/design/2026-10-09-backing-observation.md', 'rob-miss-fixed-thp':'docs/design/2026-10-09-fixed-load-qualification.md', 'tlb-capacity':'docs/design/2026-10-09-tlb-local-capacity.md', 'rob-miss-wide-thp':'docs/design/2026-10-09-wide-load-qualification.md', 'tlb-history':'docs/design/2026-10-09-tlb-history-discrimination.md',
+NEW_EVIDENCE = {'rob-xor-qualify':'2026-10-09-encoded-load', 'rob-collapse-qualify':'2026-10-09-local-collapse', 'rob-backing-observe':'2026-10-09-backing-observation', 'rob-miss-fixed-thp':'2026-10-09-long-load-fixed', 'tlb-capacity':'2026-10-09-tlb-capacity', 'rob-miss-wide-thp':'2026-10-09-long-load-wide', 'tlb-history':'2026-10-09-tlb-history', 'rob-miss-qualify-thp':'2026-10-09-long-load-thp'}
+NEW_PROTOCOL = {'rob-xor-qualify':'docs/design/2026-10-09-encoded-load-qualification.md', 'rob-collapse-qualify':'docs/design/2026-10-09-local-collapse-qualification.md', 'rob-backing-observe':'docs/design/2026-10-09-backing-observation.md', 'rob-miss-fixed-thp':'docs/design/2026-10-09-fixed-load-qualification.md', 'tlb-capacity':'docs/design/2026-10-09-tlb-local-capacity.md', 'rob-miss-wide-thp':'docs/design/2026-10-09-wide-load-qualification.md', 'tlb-history':'docs/design/2026-10-09-tlb-history-discrimination.md',
                 'rob-miss-qualify-thp':'docs/design/2026-10-09-thp-load-qualification.md'}
 
 
@@ -59,6 +59,16 @@ def conditions(mode):
         return [(f'epoch-{i}', [target]+(['--reverse'] if i%2 else [])) for i in range(1 if mode == 'tlb-smoke' else 5)]
     base = ['-i', '131072', '-r', '3', '--pin', '7', '--pmu-type', '8',
             '-e', '0x03', '-e', '0x17', '-e', '0x34', '-e', '0x02']
+    if mode == 'rob-xor-qualify':
+        # Same two EOR instructions for both masks; second epoch reverses ALL cells.
+        cells=[(mb,mask) for mb in (1,64,128) for mask in ('0x0000000000000000','0xffff000000000000')]
+        rows=[]
+        for epoch in range(2):
+            for mb,mask in (cells if epoch==0 else reversed(cells)):
+                opts=base.copy();opts[1]=str(max(131072,mb*8192));opts[opts.index('0x02')]='0x37'
+                rows.append((f'e{epoch}-xor{mask[2:]}-miss-m{mb}-n0',opts+['--pointer-xor',mask,
+                    '--backing','4k' if mb==1 else 'thp2m','-t','nop','-n','0','-a','miss','-m',str(mb),'--paired']))
+        return rows
     if mode == 'rob-backing-observe':
         # One instrumented reproduction; never a complete two-epoch qualification.
         opts=base.copy(); opts[1]='2097152'; opts[opts.index('0x02')]='0x37'
@@ -127,6 +137,14 @@ def validate_realized(mode, opts, rows):
               'events':[17,8]+[int(opts[i+1],0) for i,v in enumerate(opts) if v=='-e']}
     if mode in THP_QUALIFICATION_MODES: expected['backing_requested']=value('--backing','4k')
     if c.get('collapse_requested',False) is not ('--collapse' in opts): raise ValueError('requested/realized collapse mismatch')
+    if '--pointer-xor' in opts:
+        expected['pointer_xor']=f"0x{int(value('--pointer-xor','0'),0):016x}"
+        expected['decode_instructions_per_iteration']=2
+        expected['loop_instructions']=2*expected['n']+6
+        if expected['asymmetric']: expected['loop_instructions']=expected['n']+6
+        if c.get('pointer_xor_requested') is not True: raise ValueError('requested/realized xor flag mismatch')
+    elif any(k in c for k in ('pointer_xor','pointer_xor_requested','decode_instructions_per_iteration')):
+        raise ValueError('unexpected realized pointer xor')
     for key,want in expected.items():
         if c.get(key)!=want: raise ValueError('requested/realized ROB '+key+' mismatch')
 

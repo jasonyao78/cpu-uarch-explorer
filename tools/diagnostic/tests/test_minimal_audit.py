@@ -47,6 +47,33 @@ class Matrix(unittest.TestCase):
             bad=copy.deepcopy(config); bad['loop_mod64']=0
             with self.assertRaises(ValueError): driver.validate_realized('rob-fine',opts,[bad])
 
+class EncodedQualification(unittest.TestCase):
+    def test_complete_matched_decoder_matrix_and_identity(self):
+        self.assertIn('rob-xor-qualify',driver.MODES)
+        rows=driver.conditions('rob-xor-qualify')
+        self.assertEqual(len(rows),12)
+        self.assertEqual([a for _,a in rows[:6]],list(reversed([a for _,a in rows[6:]])))
+        self.assertEqual(len({n for n,_ in rows}),12)
+        with tempfile.TemporaryDirectory() as tmp:
+            exe=Path(tmp)/'exporter';out=Path(tmp)/'out.bin'
+            subprocess.run(['clang','-O2','-Wall','-Wextra','-Werror','-I',str(ROOT/'probes/common'),
+                str(ROOT/'docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c'),'-o',str(exe)],check=True)
+            for name,opts in rows:
+                mb=int(opts[opts.index('-m')+1]);mask=opts[opts.index('--pointer-xor')+1]
+                self.assertIn('xor'+mask[2:],name)
+                self.assertEqual(opts[opts.index('--backing')+1],'4k' if mb==1 else 'thp2m')
+                self.assertEqual(int(opts[opts.index('-i')+1]),max(131072,mb*8192))
+                config=json.loads(subprocess.check_output([str(exe),*[a for a in opts if a!='--paired'],
+                    '--write-asm',str(out)],text=True)); config['paired']=True
+                driver.validate_realized('rob-xor-qualify',opts,[config])
+                for key,bad in [('pointer_xor','0x1234'),('pointer_xor_requested',1),
+                                ('decode_instructions_per_iteration',0),('loop_instructions',4)]:
+                    c=dict(config);c[key]=bad
+                    with self.subTest(key=key):
+                        with self.assertRaises(ValueError):driver.validate_realized('rob-xor-qualify',opts,[c])
+                c=dict(config);del c['pointer_xor']
+                with self.assertRaises(ValueError):driver.validate_realized('rob-xor-qualify',opts,[c])
+
 @unittest.skipUnless(RAW.is_dir(), 'original private batch unavailable')
 class RealReplay(unittest.TestCase):
     def setUp(self):
