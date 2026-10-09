@@ -86,6 +86,11 @@ enum rob_backing_status {
     ROB_BACKING_VERIFIED, ROB_BACKING_OPEN_FAILED, ROB_BACKING_PARSE_FAILED,
     ROB_BACKING_COVERAGE_MISMATCH, ROB_BACKING_CLOSE_FAILED
 };
+static inline const char *rob_backing_status_name(enum rob_backing_status status) {
+    const char *names[]={"verified","smaps-open-failed","smaps-parse-failed",
+                         "coverage-mismatch","smaps-close-failed"};
+    return names[status]; // enum来自本模块，非外部输入。
+}
 static inline enum rob_backing_status rob_backing_inspect(FILE *f,uintptr_t start,size_t bytes,
         bool thp2m,size_t pmd_bytes,struct rob_backing_info *out) {
     if(!f) return ROB_BACKING_OPEN_FAILED;
@@ -114,12 +119,10 @@ static inline void rob_backing_json(FILE *f,const struct rob_backing_info *info)
  */
 static inline void rob_backing_failure_json(FILE *f,const char *why,size_t bytes,bool thp2m,
         size_t pmd_bytes,enum rob_backing_status status,const struct rob_backing_info *info) {
-    const char *names[]={"verified","smaps-open-failed","smaps-parse-failed",
-                         "coverage-mismatch","smaps-close-failed"};
     fprintf(f,"{\"type\":\"failure\",\"metrics\":{},\"failure\":{\"reason\":\"%s\","
               "\"backing_requested\":\"%s\",\"memory_bytes\":%zu,\"pmd_bytes\":%zu,"
               "\"backing_status\":\"%s\",\"backing_info\":",
-              why,thp2m?"thp2m":"4k",bytes,pmd_bytes,names[status]);
+              why,thp2m?"thp2m":"4k",bytes,pmd_bytes,rob_backing_status_name(status));
     rob_backing_json(f,(status==ROB_BACKING_VERIFIED || status==ROB_BACKING_COVERAGE_MISMATCH)?info:NULL);
     fputs("}}\n",f);
 }

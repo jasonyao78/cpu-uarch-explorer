@@ -33,16 +33,16 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
 
 
-MODES = ('tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify', 'tlb-history', 'tlb-capacity', 'rob-miss-qualify-thp', 'rob-miss-wide-thp', 'rob-miss-fixed-thp', 'rob-backing-observe')
+MODES = ('tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify', 'tlb-history', 'tlb-capacity', 'rob-miss-qualify-thp', 'rob-miss-wide-thp', 'rob-miss-fixed-thp', 'rob-backing-observe', 'rob-collapse-qualify')
 QUALIFICATION_MODES = {'rob-miss-qualify':(1,64,128), 'rob-miss-qualify-thp':(1,64,128),
-                       'rob-miss-wide-thp':(1,256,512), 'rob-miss-fixed-thp':(1,256)}
+                       'rob-miss-wide-thp':(1,256,512), 'rob-miss-fixed-thp':(1,256), 'rob-collapse-qualify':(1,256)}
 THP_QUALIFICATION_MODES = (set(QUALIFICATION_MODES)-{'rob-miss-qualify'})|{'rob-backing-observe'}
 
 OLD_PROTOCOL = 'docs/design/2026-10-09-minimal-tlb-rob-probes.md'
 CONFIRM_PROTOCOL = 'docs/design/2026-10-09-local-confirmation.md'
 BUILD_EVIDENCE = 'docs/reviews/evidence/2026-10-09-minimal-probes/build.json'
-NEW_EVIDENCE = {'rob-backing-observe':'2026-10-09-backing-observation', 'rob-miss-fixed-thp':'2026-10-09-long-load-fixed', 'tlb-capacity':'2026-10-09-tlb-capacity', 'rob-miss-wide-thp':'2026-10-09-long-load-wide', 'tlb-history':'2026-10-09-tlb-history', 'rob-miss-qualify-thp':'2026-10-09-long-load-thp'}
-NEW_PROTOCOL = {'rob-backing-observe':'docs/design/2026-10-09-backing-observation.md', 'rob-miss-fixed-thp':'docs/design/2026-10-09-fixed-load-qualification.md', 'tlb-capacity':'docs/design/2026-10-09-tlb-local-capacity.md', 'rob-miss-wide-thp':'docs/design/2026-10-09-wide-load-qualification.md', 'tlb-history':'docs/design/2026-10-09-tlb-history-discrimination.md',
+NEW_EVIDENCE = {'rob-collapse-qualify':'2026-10-09-local-collapse', 'rob-backing-observe':'2026-10-09-backing-observation', 'rob-miss-fixed-thp':'2026-10-09-long-load-fixed', 'tlb-capacity':'2026-10-09-tlb-capacity', 'rob-miss-wide-thp':'2026-10-09-long-load-wide', 'tlb-history':'2026-10-09-tlb-history', 'rob-miss-qualify-thp':'2026-10-09-long-load-thp'}
+NEW_PROTOCOL = {'rob-collapse-qualify':'docs/design/2026-10-09-local-collapse-qualification.md', 'rob-backing-observe':'docs/design/2026-10-09-backing-observation.md', 'rob-miss-fixed-thp':'docs/design/2026-10-09-fixed-load-qualification.md', 'tlb-capacity':'docs/design/2026-10-09-tlb-local-capacity.md', 'rob-miss-wide-thp':'docs/design/2026-10-09-wide-load-qualification.md', 'tlb-history':'docs/design/2026-10-09-tlb-history-discrimination.md',
                 'rob-miss-qualify-thp':'docs/design/2026-10-09-thp-load-qualification.md'}
 
 
@@ -70,6 +70,7 @@ def conditions(mode):
             for mb in (footprints if epoch==0 else reversed(footprints)):
                 opts=base.copy(); opts[1]=str(max(131072,mb*8192)); opts[opts.index('0x02')]='0x37'
                 if mode in THP_QUALIFICATION_MODES: opts+=['--backing','4k' if mb==1 else 'thp2m']
+                if mode=='rob-collapse-qualify' and mb>1: opts+=['--collapse']
                 rows.append((f'e{epoch}-miss-m{mb}-n0',opts+['-t','nop','-n','0','-a','miss','-m',str(mb),'--paired']))
         return rows
     if mode == 'rob-qualify':
@@ -125,6 +126,7 @@ def validate_realized(mode, opts, rows):
               'chase_seed':int(value('--seed','42')),'exclude_kernel':True,'exclude_hv':True,
               'events':[17,8]+[int(opts[i+1],0) for i,v in enumerate(opts) if v=='-e']}
     if mode in THP_QUALIFICATION_MODES: expected['backing_requested']=value('--backing','4k')
+    if c.get('collapse_requested',False) is not ('--collapse' in opts): raise ValueError('requested/realized collapse mismatch')
     for key,want in expected.items():
         if c.get(key)!=want: raise ValueError('requested/realized ROB '+key+' mismatch')
 
@@ -239,6 +241,9 @@ def main():
                 cell_audit(parsed,'--reverse' in opts,plan['reverse' if '--reverse' in opts else 'forward'])
             if args.mode.startswith('rob'):
                 config=next(row for row in parsed if row['type']=='config')
+                if args.mode=='rob-collapse-qualify':
+                    from tools.diagnostic.summarize_sm8650_minimal import validate_collapse
+                    validate_collapse(config,parsed)
                 if args.mode in THP_QUALIFICATION_MODES:
                     from tools.diagnostic.summarize_sm8650_minimal import validate_backing
                     validate_backing(config,next(row for row in parsed if row['type']=='runtime'),rounds)

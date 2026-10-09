@@ -94,6 +94,49 @@ class BackingObservation(unittest.TestCase):
                          'docs/design/2026-10-09-backing-observation.md')
 
 
+class CollapseQualification(unittest.TestCase):
+    def test_collapse_record_placement_and_actual_observation(self):
+        """合成记录只测合同；采数另用真实probe全链，不代替设备证据。"""
+        self.assertTrue(callable(getattr(audit,'validate_collapse',None)), '缺少collapse消费门')
+        info={'kernel_page_kb':4,'mmu_page_kb':4,'anon_huge_kb':262144,
+              'rss_kb':262144,'swap_kb':0,'no_huge':False}
+        config={'type':'config','memory_bytes':268435456,'backing_requested':'thp2m','collapse_requested':True}
+        record={'type':'backing-collapse','memory_bytes':268435456,'pmd_bytes':2097152,
+                'return_code':0,'errno':0,'before_status':'coverage-mismatch',
+                'after_status':'verified','before':dict(info,anon_huge_kb=229376),'after':info}
+        runtime={'type':'runtime','backing_info':info}
+        rows=[config,record,runtime]
+        audit.validate_collapse(config,rows)
+        for bad in ([config,runtime,record],[config,record,record,runtime],[config,runtime],
+                    [config,dict(record,return_code=-1),runtime],
+                    [config,dict(record,errno=12),runtime],
+                    [config,dict(record,after_status='coverage-mismatch'),runtime],
+                    [config,dict(record,after=dict(info,anon_huge_kb=229376)),runtime]):
+            with self.subTest(bad=bad):
+                with self.assertRaises((AssertionError,ValueError)):audit.validate_collapse(config,bad)
+        with self.assertRaises((AssertionError,ValueError)):
+            audit.validate_collapse(dict(config,collapse_requested=False),rows)
+        audit.validate_collapse({'type':'config'},[{'type':'config'}])
+
+    def test_complete_matrix_and_realized_collapse_identity(self):
+        rows=driver.conditions('rob-collapse-qualify')
+        self.assertEqual(len(rows),4)
+        self.assertEqual([int(a[a.index('-m')+1]) for _,a in rows],[1,256,256,1])
+        for _,a in rows:
+            mb=int(a[a.index('-m')+1])
+            self.assertEqual('--collapse' in a,mb==256)
+        with tempfile.TemporaryDirectory() as tmp:
+            exe=Path(tmp)/'exporter';out=Path(tmp)/'out.bin'
+            subprocess.run(['clang','-O2','-Wall','-Wextra','-Werror','-I',str(ROOT/'probes/common'),
+                str(ROOT/'docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c'),'-o',str(exe)],check=True)
+            opts=rows[1][1];export=[a for a in opts if a!='--paired']
+            config=json.loads(subprocess.check_output([str(exe),*export,'--write-asm',str(out)],text=True))
+            config['paired']=True
+            driver.validate_realized('rob-collapse-qualify',opts,[config])
+            del config['collapse_requested']
+            with self.assertRaises(ValueError):driver.validate_realized('rob-collapse-qualify',opts,[config])
+
+
 class MissQualification(unittest.TestCase):
     def test_allocation_is_fully_visited_and_order_balanced(self):
         rows=driver.conditions('rob-miss-qualify')

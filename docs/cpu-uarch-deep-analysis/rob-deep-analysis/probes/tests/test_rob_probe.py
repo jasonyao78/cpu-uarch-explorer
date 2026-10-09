@@ -50,6 +50,18 @@ class RobCode(unittest.TestCase):
                 self.assertEqual(json.loads(stdout)['backing_requested'], kind)
                 self.assertNotIn('backing_verified', json.loads(stdout))
 
+    def test_explicit_collapse_preserves_code_and_requires_thp(self):
+        default,stdout=self.dump('-t','nop','-n','0','--backing','thp2m','-m','256')
+        self.assertNotIn('collapse_requested',json.loads(stdout))
+        words,stdout=self.dump('-t','nop','-n','0','--backing','thp2m','-m','256','--collapse')
+        self.assertEqual(words,default)
+        self.assertIs(json.loads(stdout)['collapse_requested'],True)
+        p=subprocess.run([str(self.exe),'-t','nop','-n','0','--collapse'],capture_output=True,text=True)
+        self.assertNotEqual(p.returncode,0)
+        row=json.loads(p.stdout)
+        self.assertEqual(row['metrics'],{})
+        self.assertEqual(row['failure']['reason'],'collapse-requires-thp2m-miss')
+
     def test_invalid_backing_is_structured_failure(self):
         """禁止未知backing、非miss THP及不完整2MiB映射静默降级。"""
         for opts, reason in [

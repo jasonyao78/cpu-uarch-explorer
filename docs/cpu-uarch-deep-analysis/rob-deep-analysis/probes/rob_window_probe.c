@@ -46,7 +46,7 @@
 static const char *classes[]={"nop","add","movi","movr","fadd","ldr","str"};
 struct options {
     unsigned cls,n,its,rounds,mb,align,chain,seed; int pin;
-    unsigned pmu_type; bool have_type,serial,asymmetric,paired,thp2m;
+    unsigned pmu_type; bool have_type,serial,asymmetric,paired,thp2m,collapse;
     enum { MISS, SQRT, NONE } anchor;
     const char *dump,*rawlog;
     uint64_t events[PG_MAX_EVENTS]; size_t ne;
@@ -109,7 +109,7 @@ static void usage(void) {
         "[-a miss|fsqrt|none] [-i iterations] [-r rounds] [-m MiB] "
         "[--serial|--paired] [--asymmetric] [--align 0|16|32|48] [--chain 1..256] "
         "[--seed positive] [--pin cpu --pmu-type type] [-e raw_event] "
-        "[--backing 4k|thp2m] [--write-asm file] [--rawlog file]\n");
+        "[--backing 4k|thp2m] [--collapse] [--write-asm file] [--rawlog file]\n");
     exit(2);
 }
 static uint64_t rng(uint64_t *state) {
@@ -187,7 +187,7 @@ int main(int argc,char **argv) {
     static const struct option opts[]={
         {"write-asm",1,0,1},{"rawlog",1,0,2},{"pin",1,0,3},{"pmu-type",1,0,4},
         {"serial",0,0,5},{"asymmetric",0,0,6},{"align",1,0,7},{"chain",1,0,8},
-        {"seed",1,0,9},{"paired",0,0,10},{"backing",1,0,11},{0,0,0,0}};
+        {"seed",1,0,9},{"paired",0,0,10},{"backing",1,0,11},{"collapse",0,0,12},{0,0,0,0}};
     int ch;
     while((ch=getopt_long(argc,argv,"t:n:a:i:r:m:e:h",opts,NULL))!=-1) {
         switch(ch) {
@@ -216,10 +216,12 @@ int main(int argc,char **argv) {
             else if(!strcmp(optarg,"thp2m")) o.thp2m=true;
             else { errno=EINVAL; return failure("backing-unknown"); }
             break;
+        case 12: o.collapse=true; break;
         default: usage();
         }
     }
     if(!have_class || !have_n || optind!=argc || ((o.serial || o.paired) && o.anchor!=MISS) || (o.serial && o.paired)) usage();
+    if(o.collapse && (!o.thp2m || o.anchor!=MISS)) { errno=EINVAL; return failure("collapse-requires-thp2m-miss"); }
     if(o.thp2m && o.anchor!=MISS) { errno=EINVAL; return failure("backing-thp2m-requires-miss"); }
     if(o.thp2m && o.mb%2) { errno=EINVAL; return failure("backing-thp2m-requires-2m-multiple"); }
     const size_t capacity=65536;
@@ -243,7 +245,8 @@ int main(int argc,char **argv) {
            classes[o.cls],anchor,o.n,o.its,o.rounds,o.serial?"true":"false",o.paired?"true":"false",o.asymmetric?"true":"false",o.chain,
            c.loop*4,o.align,c.branch*4,c.branch-c.loop+1,c.fillers,c.anchors,c.pos*4,
            o.anchor==MISS?((size_t)o.mb<<20):0,o.thp2m?"thp2m":"4k",o.seed,o.pmu_type);
-    for(size_t k=0;k<o.ne;++k) printf("%s%"PRIu64,k?",":"",o.events[k]); puts("]}");
+    for(size_t k=0;k<o.ne;++k) printf("%s%"PRIu64,k?",":"",o.events[k]);
+    fputs("]",stdout); if(o.collapse) fputs(",\"collapse_requested\":true",stdout); puts("}");
     if(o.dump) {
         if(o.paired) usage();
         FILE *f=fopen(o.dump,"wb"); if(!f) return failure("code-export-open");
@@ -275,7 +278,25 @@ int main(int argc,char **argv) {
         /* 必须在init_chase写节点触页之前请求；失败绝不退回4k。 */
         if(madvise(mem,bytes,o.thp2m?MADV_HUGEPAGE:MADV_NOHUGEPAGE)) return failure("chase-backing-madvise");
         if(!init_chase(mem,bytes,o.serial,o.seed)) return failure("chase-ring-validation");
-        if(!backing(mem,bytes,o.thp2m,pmd_bytes,&initial,&backing_status))
+        if(o.collapse) {
+            struct rob_backing_info before={0}; enum rob_backing_status before_status;
+            if(!backing(mem,bytes,true,pmd_bytes,&before,&before_status)
+                    && before_status!=ROB_BACKING_COVERAGE_MISMATCH)
+                return backing_failure("collapse-before-unobservable",bytes,true,pmd_bytes,before_status,&before);
+            /* Linux6.1 UAPI:25；每映射只一次，仅进程自身区域，任何PMU窗之外。
+             * docs/design/2026-10-09-local-collapse-qualification.md；绝不回退或重试。
+             */
+            errno=0; int rc=madvise(mem,bytes,25); int call_errno=rc?errno:0;
+            bool ok=backing(mem,bytes,true,pmd_bytes,&initial,&backing_status);
+            printf("{\"type\":\"backing-collapse\",\"memory_bytes\":%zu,\"pmd_bytes\":%zu,"
+                   "\"return_code\":%d,\"errno\":%d,\"before_status\":\"%s\",\"after_status\":\"%s\",\"before\":",
+                   bytes,pmd_bytes,rc,call_errno,rob_backing_status_name(before_status),rob_backing_status_name(backing_status));
+            rob_backing_json(stdout,&before); fputs(",\"after\":",stdout);
+            rob_backing_json(stdout,(ok || backing_status==ROB_BACKING_COVERAGE_MISMATCH)?&initial:NULL); puts("}");
+            if(rc) { errno=call_errno; return failure("collapse-syscall"); }
+            if(!ok) return backing_failure("collapse-after-not-thp2m",bytes,true,pmd_bytes,backing_status,&initial);
+        }
+        if(!o.collapse && !backing(mem,bytes,o.thp2m,pmd_bytes,&initial,&backing_status))
             return backing_failure(o.thp2m?"chase-backing-not-thp2m":"chase-backing-not-4k",
                                    bytes,o.thp2m,pmd_bytes,backing_status,&initial);
     }

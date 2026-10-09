@@ -44,6 +44,36 @@ def validate_backing(config, runtime, rounds):
         backing(row['backing_before']);backing(row['backing_after'])
 
 
+def validate_collapse(config, rows):
+    """Require exactly one successful local collapse BEFORE runtime/PMU records.
+
+    Protocol: docs/design/2026-10-09-local-collapse-qualification.md. This
+    validates observation flow; actual full backing remains a separate gate.
+    """
+    records=[r for r in rows if r.get('type')=='backing-collapse']
+    requested=config.get('collapse_requested',False)
+    assert type(requested) is bool
+    if not requested:
+        assert not records
+        return
+    assert config['backing_requested']=='thp2m' and len(records)==1
+    assert len(rows)>2 and rows[0]==config and rows[1]==records[0] and rows[2]['type']=='runtime'
+    c=records[0]; kb=config['memory_bytes']//1024
+    assert type(c['memory_bytes']) is int and c['memory_bytes']==config['memory_bytes']
+    assert type(c['pmd_bytes']) is int and c['pmd_bytes']==2097152
+    assert type(c['return_code']) is int and c['return_code']==0
+    assert type(c['errno']) is int and c['errno']==0
+    assert c['before_status'] in ('verified','coverage-mismatch') and c['after_status']=='verified'
+    for key in ('before','after'):
+        info=c[key]
+        assert all(type(info[k]) is int for k in ('rss_kb','swap_kb','anon_huge_kb','kernel_page_kb','mmu_page_kb'))
+        assert info['rss_kb']==kb and info['swap_kb']==0 and info['no_huge'] is False
+        assert 0<=info['anon_huge_kb']<=kb and info['anon_huge_kb']%2048==0
+        assert info['kernel_page_kb'] in (4,2048) and info['mmu_page_kb'] in (4,2048)
+    assert (c['before']['anon_huge_kb']==kb)==(c['before_status']=='verified')
+    assert c['after']['anon_huge_kb']==kb and c['after']==rows[2]['backing_info']
+
+
 def summarize(path):
     m=json.loads((path/'manifest.json').read_text())
     require_registered_evidence(m)
@@ -151,6 +181,7 @@ def summarize(path):
         else:
             config=next(r for r in rows if r['type']=='config')
             runtime=next(r for r in rows if r['type']=='runtime')
+            if m['mode']=='rob-collapse-qualify': validate_collapse(config,rows)
             assert runtime['cpu']==7 and runtime['fpcr']==0 and runtime['loop_address_mod64']==config['loop_mod64']
             if config['anchor']=='miss':
                 if m['mode'] in THP_QUALIFICATION_MODES: validate_backing(config,runtime,rounds)
@@ -173,6 +204,8 @@ def summarize(path):
                                       'counts_per_iteration':{k:[r['metrics'][k]/config['iterations'] for r in rr] for k in rr[0]['metrics']},
                                       'retired_relative_error':[abs(r['metrics']['0x8']-expected)/expected for r in rr],
                                       'generated_code_sha256':{k:v['sha256'] for k,v in entry['generated_code'].items()}})
+                if m['mode']=='rob-collapse-qualify':
+                    result['rows'][-1]['collapse_requested']=config.get('collapse_requested',False)
                 if m['mode']=='rob-fine' or m['mode'] in QUALIFICATION_MODES:
                     result['rows'][-1].update({'loop_mod64':config['loop_mod64'],'iterations':config['iterations'],
                                                'chase_seed':config['chase_seed'],'epoch':int(entry['name'][1])})

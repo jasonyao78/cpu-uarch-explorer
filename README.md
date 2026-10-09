@@ -1,6 +1,6 @@
 # cpu-uarch-explorer
 
-**r2 当前进展（2026-10-09）**：当前Agent独占设备，按用户授权持续端到端推进TLB/ROB；m0b已完成集成使命，不恢复开发。TLB新增历史反证5mapping/4000窗，W8初始高walk可消退，整圈8walk不能当作窗前8项全不驻留；局部W6–12/victim竞争对照继续。ROB软件/实际4K与THP2MiB测量链已通过，长点大页使walk约降至1e-6/iter，但64/128MiB仍未通过原miss代理资格门；256/512MiB反证在512初始backing核验处停块，正重建固定256MiB的双epoch资格，不以NOP数换算物理ROB。既有细扫仍仅为有效窗口响应：k8/k16每gap N∈(672,704]/(640,672]，物理ROB/PRF/RS/融合开放。代码/协议/构建/启动与raw SHA分开锚定，旧正式A1/frozen不拼接。见[TLB历史反证](docs/reviews/2026-10-09-tlb-history-results.md)、[大页资格结果](docs/reviews/2026-10-09-long-load-thp-results.md)、[局部确认](docs/reviews/2026-10-09-local-confirmation-results.md)。
+**r2 当前进展（2026-10-09）**：当前Agent独占设备，按用户授权持续端到端推进TLB/ROB；m0b已完成集成使命。TLB历史反证5mapping/4000窗之后，局部容量/单victim竞争5mapping/10400窗已完成：F128正逆方向同epoch的稳态工作集转折均为(8,9]（5/5）；victim有界响应0/5、无响应4/5，两个估计量不可互换，未认证物理8ways。ROB 64/128MiB实际THP虽使walk约降至1e-6/iter，原科学资格仍不通过；wide512与fixed256均initial backing停块，科学不可计算。一次仪表复现定位当前256MiB映射仅224MiB计入AnonHugePages，根因不追溯回填旧批；正实现仅自有映射一次同步合并及独立双epoch资格，原门不放宽。既有细扫仅为有效窗口响应：k8/k16每gap N∈(672,704]/(640,672]，物理ROB/PRF/RS/融合仍OPEN。源码/构建/启动/协议与raw SHA分开，旧正式A1/frozen不拼接。见[TLB局部结果](docs/reviews/2026-10-09-tlb-capacity-results.md)、[历史反证](docs/reviews/2026-10-09-tlb-history-results.md)、[固定长点停止](docs/reviews/2026-10-09-long-load-fixed-results.md)、[backing仪表观测](docs/reviews/2026-10-09-backing-observation-results.md)。
 
 跨 ISA、跨 OS 的 CPU 微架构探索平台：真实设备微架构探测 → 统一实验协议与数据模型 → gem5 O3 建模与实机校准 → 综合 Benchmark 验证 → ARM / x86 / RISC-V 对比。
 
