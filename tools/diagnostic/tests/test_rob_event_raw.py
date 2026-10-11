@@ -75,10 +75,13 @@ class EventRawTests(unittest.TestCase):
  def test_actual_driver_producer_persistence_consumer_and_first_bad_id_stop(self):
   from types import SimpleNamespace
   from unittest.mock import patch
-  from tools.diagnostic import run_sm8650_minimal as driver
+  import importlib.util
+  historical=Path(self.folder.name)/'registered-driver.py';historical.write_bytes(self.blob('be0d35b','tools/diagnostic/run_sm8650_minimal.py'))
+  spec=importlib.util.spec_from_file_location('registered_event_driver',historical);driver=importlib.util.module_from_spec(spec);spec.loader.exec_module(driver)
   original_check=subprocess.check_output;original_run=subprocess.run
-  # Exercise the current committed driver; source/plan observations stay pinned.
-  launch=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+  # Exercise the registered historical launch; the new MOV0 source must not
+  # be mistaken for the unchanged binary used by this old batch.
+  launch=subprocess.check_output(['git','rev-parse','be0d35b'],cwd=ROOT,text=True).strip()
   for corrupt in (True,False):
    with tempfile.TemporaryDirectory() as d:
     root=Path(d);required=[model.BUILD,model.PLAN,model.PROTOCOL,'tools/diagnostic/run_sm8650_minimal.py','configs/platforms/redmi-k70pro-01.json',*self.build['source_sha256']]
