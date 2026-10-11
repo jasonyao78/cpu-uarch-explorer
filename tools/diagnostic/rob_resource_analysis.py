@@ -111,9 +111,13 @@ def analyze(rows):
 def audit_raw(path):
  """Committed launch/source/plan/env audit plus strict real-config/code/raw check."""
  m=json.loads((path/'manifest.json').read_text());plan=registered_plan()
+ expected_files={'manifest.json','driver.py','environment-policy.json','initial-environment.json','final-environment.json'}|{c['name']+suffix for c in plan['conditions'] for suffix in ('.stdout.jsonl','.stderr.log','-single.bin','-pre-environment.json','-post-environment.json')}
+ _require({p.name for p in path.iterdir()}==expected_files and all(p.is_file() for p in path.iterdir()),'resource complete raw file inventory mismatch')
  _fields(m,dict(mode=MODE,status='complete',target='redmi-k70pro-01',midr='0x410fd821',base_page_bytes=4096,protocol_path=PROTOCOL,build_evidence_path=BUILD,plan_path=PLAN),'resource manifest typed identity mismatch')
  _require(_same(m.get('conditions'),plan['conditions']) and type(m.get('results')) is list and len(m['results'])==140,'resource requested coverage')
  blob=subprocess.check_output(['git','show',m['source_head']+':'+PLAN],cwd=ROOT);_require(_same(json.loads(blob),plan),'resource registered actual plan mismatch')
+ build=json.loads(subprocess.check_output(['git','show',m['source_head']+':'+BUILD],cwd=ROOT))
+ _require(build.get('plan_path')==PLAN and hashlib.sha256(blob).hexdigest()==m.get('plan_sha256')==build.get('plan_sha256'),'resource plan SHA does not flow through manifest/build')
  rows=[]
  for entry,c in zip(m['results'],plan['conditions']):
   name=c['name'];_fields(entry,dict(name=name,exit_code=0,timed_out=False),'resource result order/status')
