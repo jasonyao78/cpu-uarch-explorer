@@ -14,7 +14,7 @@
 | Q-A 集合分布 | 主INCONCLUSIVE；random-set N1024十个delta全正[.04997349,.09777514]，严格未全过.05 | 保留方向、幅度和映射残差，分布是否达到冻结复制门未确定 | 不改名“无差异”，不后验调.05救门 |
 | latency反证 | N64/96 constant约11–12cycles/load并伴cache refill；rotated约4，TLB refill两者都低 | 数据布局足以改变延迟，单延迟曲线不足以判TLB容量；同N页/loads还须控制offset/line压力 | 不把约6cycles净差当纯translation latency |
 | Q-B victim冲突 | W9跨victim/历史/方向复制，W8仍有保留的孤立walk；固定victim的后续五mapping/双方向/双跨度得到target7/C1=(7,8]、100/C1=(8,9]，C2至10无onset | 可作地址族条件化的victim响应/操作性reach边界；通用“8页全命中”已被反例推翻 | 不命名7/8ways、LRU或纯数据entry容量；lookup不是admission，整圈walk不是初始缺失项数 |
-| Q-C 索引族探索 | 匹配C1正/C2负，跨度1/2/16保留target差异 | 两收集签名具有区分力，有限域候选可排除/保留 | 不把收集假设当硬件模型；高位折叠/descriptor/PFN/cache可等价，不选唯一hash |
+| Q-C 索引族探索 | 原单域C1/C2差异；新增四域34560窗W12两target十曲线全部I/G1正、G3负，主replicated-low-only-candidate-favored | 在这组共同victim/匹配几何条件下，低位候选获复制支持；旧H1/H3单域等价被打破 | 不把有限候选偏好命名全地址域唯一hash；PTE/CONT/PFN/cache/replacement未唯一排除，W8残差保存 |
 | Q-D 并行响应 | 495窗，长窗240/240门；固定总8192页K1/2/4/8的A/C=.553/1.085/2.106/3.039 | 同窗walk occupancy积分随并行链增大；完整counts支持有效在飞占用描述 | A/C>1不是“忙碌概率>100%”，不等于physical walker/MSHR/LQ数量 |
 | Q-D 两种作用域 | 固定每链8192页时，K8 loads/C低于K4，A/M与cache/walk流量增大；短门235/240 | 并行收益依赖总working set与窗长；不能只挑固定总页数曲线 | 不把全部短窗也叫qualified，不把A/M直接当纯walk延迟 |
 
@@ -69,3 +69,7 @@ r2不是main：m0b已完成软件集成使命，r2承担本批探测；main集�
 | ROB同VA配对与公共生成器 | `probes/diagnostic/rob_dependency_pair.c`、`probes/common/rob_codegen.h`、`tools/diagnostic/rob_pair_analysis.py`、`tools/diagnostic/run_sm8650_rob_pair.py`、`docs/reviews/2026-10-11-rob-same-address-pair-results.md` | 4cebc24 / 11abe30 / 4f44c98 / 494a981 |
 
 fresh整树软件出口：diagnostic298/298、runner203/203、formal analysis250/250、macOS CTest21/21；双NDK与目标执行逐批单独验证，不将native覆盖冒充Linux PMU。各批所有匿名count、完整schema-independent summary、实际code/plan、raw SHA和图在各自 `docs/reviews/evidence/2026-10-11-*/`。有限技术出口通过，物理容量命名出口不通过，两者不是同一个验收标准。
+
+## 本次继续推进的新增证据
+
+`docs/reviews/2026-10-11-rob-resident-control-results.md`（sourcefe53c23/launchb27d95b）240窗技术接受，但未额外本窗重写的NONE仍44–72cycles波动，原字节维护效应未复制；不唯一归因频率/Icache。`docs/reviews/2026-10-11-tlb-cross-region-results.md`（source7ed6434/launchf8edac7）34560窗主候选辨识通过，1440激励门全过、一个W8多walk比较INCOMPUTABLE完整保留。317诊断与本轮未改runner203/analysis250/CTest21通过。上述新增正交结果不改变物理ROB未测得的边界，但补充Q-C可使用的候选证据；下一ROB先校验双FSQRT独立性模型。

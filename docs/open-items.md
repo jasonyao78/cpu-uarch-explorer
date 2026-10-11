@@ -475,3 +475,7 @@
 - **原字节维护有限批完成 / 当前ROB负责人 / 触发=供给资格复核**：`docs/reviews/2026-10-11-rob-resident-control-results.md`；source fe53c23 / consumer71cb2a3 / actual launch b27d95b。240/240窗与66SHA技术接受，NONE independent的resident三进程全不稳定（36–59%），reinstall同样不稳；24配对差含正负，维护效应未复制，FSQRT控制稳定。没有额外本窗代码维护也会波动；不能唯一归因Icache、频率或当物理allocation标尺。诊断307/runner203/analysis250/CTest21 fresh全绿。下一新资源流/寄存器/生命周期干预前仍需供给资格；不重跑本批追门。
 - **TLB四域反证进行中 / 当前TLB负责人 / 触发=本次继续请求**：冻结 `docs/design/2026-10-11-tlb-cross-region.md`；三族I/G1/G3、共同victim、四个纯256MiB域，G1/G3匹配上层与L3项组的VA代理，候选相反数学预测。实现与34560窗设备验证尚未完成；PTE/CONT/PFN仍UNKNOWN，不强名唯一hardware hash或ways，不用旧A1数据替代。
 - **整体目标仍未全部达成 / 当前端到端负责人 / 触发=上述新干预提供可识别证据**：有限技术交付不等于物理TLB/ROB测得；原EXIT条目为前阶段有限终态，当前r2仍在授权范围内推进新问题。main/远端与生命周期规则未变。
+
+- **TLB四域有限批完成 / 当前TLB负责人 / 触发=候选模型复核**：`docs/reviews/2026-10-11-tlb-cross-region-results.md`，source7ed6434/consumer8bd0588/launchf8edac7，34560窗/26SHA技术接受；1440门全过，两个target十曲线W12均I/G1正G3负，replicated-low-only-candidate-favored。一个W8多walk比较INCOMPUTABLE保存，target100 G1/W8异质，不换算ways或唯一hash；60target+512filler prefault payload2288KiB，2GiB仅reserve。前“进行中”条目在本批关闭，physical归因沿EXIT项继续。
+- **EL3内部RAM能力边界 / TLB及平台负责人 / 触发=有明确授权的EL3/安全固件合作接口时**：X4 TRM r0p3 §9的TLB RAM read仅EL3，其它EL Undefined。Android root/KSU不等于EL3，当前不实施该接口或加载模块试错；文档2048/8-way与设备操作响应分列。
+- **ROB双锚点模型复核 / 当前ROB负责人 / 触发=下一新对照（当前）**：共用生成器 `probes/common/rob_codegen.h` 的旧SQRT两侧均FSQRT D0,D0，锚点互相依赖；旧响应保留为有效窗口，不能套经典双独立miss overlap。下一冻结先比较D0/D1与D0/D0同值/同指令数、N0重叠资格及匹配NOP供给，再决定新容量网格；不改历史码/判据、不强推384。

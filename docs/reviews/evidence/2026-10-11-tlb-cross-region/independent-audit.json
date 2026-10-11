@@ -1,0 +1,10 @@
+{
+  "checked_windows": 34560,
+  "checked_sha": 26,
+  "lookup_points": 1440,
+  "victim_points": 180,
+  "complete_raw_arithmetic_equal": true,
+  "summary_sha256": "9c7cc95d2c8a1f630a7b1e30855fad28cfba292d903be71a1af86423519e18a6",
+  "verdict": "replicated-low-only-candidate-favored",
+  "reviewer": "second arithmetic path by same root, not another reviewer"
+}
