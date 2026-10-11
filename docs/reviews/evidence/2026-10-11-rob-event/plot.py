@@ -30,7 +30,7 @@ for kind,evs,ylabel in [('operation-density',('0x3a','0x3b'),'Reported operation
      for p in rr:
       values=[(x-base)/(2*p['n']) for x in p['events'][event]['raw']] if kind=='operation-density' else p['events'][event]['cycle_fraction'];ax.scatter([p['n']+x for x in (-2,0,2)],values,s=13,color=colors[color],alpha=.65)
      color+=1
-   
+
    if kind=='operation-density':
     assert all(.95<=(x-base)/(2*p['n'])<=1.05 for anchor in ('none','fsqrt') for e in (0,1) for p in [p for p in points if p['class_name']==c and p['anchor']==anchor and p['epoch']==e and p['n']>0] for base in [next(b for b in points if b['class_name']==c and b['anchor']==anchor and b['epoch']==e and b['n']==0)['events'][event]['median']] for x in p['events'][event]['raw'])
     ax.set_ylim(.95,1.05);ax.ticklabel_format(axis='y',style='plain',useOffset=False)

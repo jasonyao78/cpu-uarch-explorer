@@ -126,7 +126,7 @@ diagnostic228/228、runner203/203、analysis250/250、macOS CTest21/21通过。�
 | `operation-density.png` | `6bd706a0a430583364dad778ff5b9e40bf37da90400abd4cd2c315be92984b36` |
 | `operation-density.svg` | `8e81b5dc46a0c3aaa4b326d2fb38c7250af442a8917722055e18ccbfc85cc5f3` |
 | `plan.json` | `44a7246b6dfa89e7080d0e41780f2c157e31a4672a1368cf106431861cbeb5d3` |
-| `plot.py` | `431b2a82b653a778b45e10e8ec60b1d965efb136d8e8f58f5ba8f6486c2bfd25` |
+| `plot.py` | `cce84d777ea8f7bf2a6e1e7c9c655d5addbc3b6bc3d5a83ae46c5fa6633ef232` |
 | `stall-fractions.png` | `69f212066fe8a40e3d9ed6952636e1a6cb49b1d7e21e403a5a03bbf73c877fac` |
 | `stall-fractions.svg` | `a3ff7266ef7b80f31ed99db0f3ec1ffc7c11877ce3df0db1ac08e2414129d5a4` |
 | `summary.json` | `2be93fba5ada9583c90dc3c56c0cb5f1ea2026d2475caf5c83fca5f8e95f2061` |
