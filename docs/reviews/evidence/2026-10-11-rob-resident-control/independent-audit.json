@@ -1,0 +1,8 @@
+{
+  "checked_windows": 240,
+  "checked_sha": 66,
+  "complete_raw_arithmetic_equal": true,
+  "summary_sha256": "ec464cfca0281012f226eb98305a47cdd2eac4ea56a88cac1487e59bd508eb8b",
+  "primary": "resident-supply-still-variable",
+  "reviewer": "second arithmetic path by same root, not another reviewer"
+}

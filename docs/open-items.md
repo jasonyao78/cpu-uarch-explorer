@@ -469,3 +469,9 @@
 - **TLB结构/归因OPEN / TLB负责人 / 触发=需physical ways/唯一hash/ATTRIBUTED命名之前**：target依赖操作区间、descriptor/PFN/cache/替换/投机/聚合等仍非唯一；HPA/PTE_CONT=UNKNOWN。Q-A主INCONCLUSIVE需新PTE/PFN/可观测aggregation或refill-tap干预，Q-D更大K/短窗需新作用域冻结；同曲线加密不作为默认下一任务。
 - **软件与生命周期后置 / 集成负责人 / 触发=需要正式配置矩阵或main集成时**：独立JSONL不等于formal schema v2；runner/schema/CMake接入与跨平台Linux验证沿原范围，main合并/测试/推送完成前不得删除r2分支。本轮远端暂不处理；他人.gitignore与六旧run目录未代提交，private原样保留，未回收worktree。
 - **独立部件项目 / ALU/FPU及BTB负责人 / 触发=用户后续部件路线或分配/生命周期标尺需要时**：完整operand/依赖链/独立链/争用标定仍未做。BTBSize_Probe_H2只提供可控branch布局思想，不视为BTB/ROB真值；Icache/iTLB与分支吞吐须单独控制。已登记后置不丢，有限TLB/ROB任务结束不意味着CPU全部部件完成。
+
+## CONT-TLB-ROB-20261011 用户恢复推进后的正交对照
+
+- **原字节维护有限批完成 / 当前ROB负责人 / 触发=供给资格复核**：`docs/reviews/2026-10-11-rob-resident-control-results.md`；source fe53c23 / consumer71cb2a3 / actual launch b27d95b。240/240窗与66SHA技术接受，NONE independent的resident三进程全不稳定（36–59%），reinstall同样不稳；24配对差含正负，维护效应未复制，FSQRT控制稳定。没有额外本窗代码维护也会波动；不能唯一归因Icache、频率或当物理allocation标尺。诊断307/runner203/analysis250/CTest21 fresh全绿。下一新资源流/寄存器/生命周期干预前仍需供给资格；不重跑本批追门。
+- **TLB四域反证进行中 / 当前TLB负责人 / 触发=本次继续请求**：冻结 `docs/design/2026-10-11-tlb-cross-region.md`；三族I/G1/G3、共同victim、四个纯256MiB域，G1/G3匹配上层与L3项组的VA代理，候选相反数学预测。实现与34560窗设备验证尚未完成；PTE/CONT/PFN仍UNKNOWN，不强名唯一hardware hash或ways，不用旧A1数据替代。
+- **整体目标仍未全部达成 / 当前端到端负责人 / 触发=上述新干预提供可识别证据**：有限技术交付不等于物理TLB/ROB测得；原EXIT条目为前阶段有限终态，当前r2仍在授权范围内推进新问题。main/远端与生命周期规则未变。
