@@ -14,7 +14,7 @@ class ZeroAnalysisTests(unittest.TestCase):
  @classmethod
  def setUpClass(cls):
   cls.folder=tempfile.TemporaryDirectory();d=Path(cls.folder.name)
-  for p in (SOURCE,'probes/common/perf_group_read.h','probes/common/rob_backing.h'):(d/Path(p).name).write_bytes((ROOT/p).read_bytes())
+  for p in (SOURCE,'probes/common/perf_group_read.h','probes/common/rob_backing.h','probes/common/rob_codegen.h'):(d/Path(p).name).write_bytes((ROOT/p).read_bytes())
   exe=d/'producer';subprocess.run(['clang','-O2','-Wall','-Wextra','-Werror','-I',str(d),str(d/'rob_window_probe.c'),'-o',str(exe)],check=True);cls.actual={}
   for c in conditions():
    f=d/'code';cfg=json.loads(subprocess.check_output([str(exe),*c['args'],'--write-asm',str(f)],text=True));cls.actual[c['name']]=(cfg,f.read_bytes())

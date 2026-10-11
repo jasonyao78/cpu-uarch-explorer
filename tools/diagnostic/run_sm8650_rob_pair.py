@@ -2,7 +2,7 @@
 """Observe same-code-VA dependency contrasts on one owned SM8650; no environment mutation.
 
 Purpose/finite protocol: docs/design/2026-10-11-rob-same-address-pair.md. Reuses
-validated environment and deployment primitives; the raw geometry consumer is
+validated environment and deployment primitives; the raw program/schedule consumer is
 mandatory before advancing. Partial attempts are retained, never patched.
 """
 import argparse,copy,hashlib,json,shlex,shutil,subprocess,sys,time
