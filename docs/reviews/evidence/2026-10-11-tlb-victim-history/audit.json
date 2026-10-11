@@ -1,0 +1,254 @@
+{
+  "independent_raw_math_passed": true,
+  "author": "root independent direct JSONL arithmetic; no separate reviewer",
+  "windows": 40320,
+  "lookup_points": 1920,
+  "observable": 1920,
+  "victim_points": 120,
+  "replication_points": 12,
+  "replication_passed": 6,
+  "all_raw_sha256": {
+    "driver.py": "666de5a6463d2a34d8c8923dadfae802bc27c8b27365b5e8c7d391c989561205",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "epoch-0-post-environment.json": "c1ba36f554862a117ac1dd3360cad4c9945d625070fad791b500ba2a9e5277c2",
+    "epoch-0-pre-environment.json": "638bd829e93ee14d55596807e593b37597c4abf5a417b380786cf6370f2569c2",
+    "epoch-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-0.stdout.jsonl": "649bb50abf769db43a46e8f0f2c383b7dc243ac21359cece600a0ee2e758bcb6",
+    "epoch-1-post-environment.json": "e4bbc64c0e45d0de5f1f1e2e66de3199f1fd8698dbd3fed8d722546c5d85e261",
+    "epoch-1-pre-environment.json": "052253b3e63d0bc36a0bcc6c44ad19e256bb3f1ba6f954bc3ee623b416382433",
+    "epoch-1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-1.stdout.jsonl": "7f2284466febceb5449a56add5486348bd69051ecfd5578d998bba2859455224",
+    "epoch-2-post-environment.json": "fcd9665da1a726268de278b243f75842b8d5385cfe7f5175de35abfee8bcf99d",
+    "epoch-2-pre-environment.json": "c45f8329f815c27b02fd92fc23172bf85b60791b0fa7c479647e801428bd5032",
+    "epoch-2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-2.stdout.jsonl": "609f5a47673a89b10b472aa07def25e4712ae0d53a2cc774b32c498d44d7de48",
+    "epoch-3-post-environment.json": "f46d22d0417adf9c5e57e7f82a9708e062f91d3baf9ef430473e319994842a36",
+    "epoch-3-pre-environment.json": "2a60ddbff80aa567912d0a3dfb43d1c4e560d4bb6458d919d8724f69a1c1382e",
+    "epoch-3.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-3.stdout.jsonl": "7016ec0fd6f4f960ef57a4b74e30914ceb89f761e39d89c358ca2338b21d7e6e",
+    "epoch-4-post-environment.json": "cd6e7a43c5c4aa4bd4561590ab12370643df8782840830805c37ac470e78e50b",
+    "epoch-4-pre-environment.json": "180d3253b5680bbe3d7da42d6171f6426bd53da296e297d496c8749053dc10de",
+    "epoch-4.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-4.stdout.jsonl": "3479cab8533fa2f48d8575d5575e109ed687d0c1ae27d877193ad7d5abad73a9",
+    "final-environment.json": "26e19473f4629044e1a58182500962e95b3de86083b21d313df0dc55344f3791",
+    "initial-environment.json": "7b3e349f98e543e6a471f4faab440a44f82e8a7d474619e70878f670534e05ba",
+    "manifest.json": "145fc0b30fa0b4094accdf060e64d6b7fd75323ccecfca35ab79cbea5a8f01c3"
+  },
+  "epochs": [
+    {
+      "epoch": 0,
+      "records": 8178,
+      "windows": 8064,
+      "wall_seconds": 0.18452666699886322
+    },
+    {
+      "epoch": 1,
+      "records": 8178,
+      "windows": 8064,
+      "wall_seconds": 0.17653150018304586
+    },
+    {
+      "epoch": 2,
+      "records": 8178,
+      "windows": 8064,
+      "wall_seconds": 0.1907070828601718
+    },
+    {
+      "epoch": 3,
+      "records": 8178,
+      "windows": 8064,
+      "wall_seconds": 0.19761520763859153
+    },
+    {
+      "epoch": 4,
+      "records": 8178,
+      "windows": 8064,
+      "wall_seconds": 0.18907541688531637
+    }
+  ],
+  "environment_endpoints": [
+    {
+      "endpoint": "epoch-0-post-environment.json",
+      "max_cpu_c": 40.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "epoch-0-pre-environment.json",
+      "max_cpu_c": 39.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "epoch-1-post-environment.json",
+      "max_cpu_c": 42.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "epoch-1-pre-environment.json",
+      "max_cpu_c": 39.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "epoch-2-post-environment.json",
+      "max_cpu_c": 39.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "epoch-2-pre-environment.json",
+      "max_cpu_c": 38.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "epoch-3-post-environment.json",
+      "max_cpu_c": 40.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "epoch-3-pre-environment.json",
+      "max_cpu_c": 39.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "epoch-4-post-environment.json",
+      "max_cpu_c": 40.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "epoch-4-pre-environment.json",
+      "max_cpu_c": 39.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "final-environment.json",
+      "max_cpu_c": 41.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "initial-environment.json",
+      "max_cpu_c": 38.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    }
+  ],
+  "all_event_statistics": [
+    {
+      "event": "0x11",
+      "minimum": 46,
+      "maximum": 440,
+      "nonzero": 40320,
+      "sum": 5468671
+    },
+    {
+      "event": "0x5",
+      "minimum": 0,
+      "maximum": 15,
+      "nonzero": 35205,
+      "sum": 235679
+    },
+    {
+      "event": "0x2d",
+      "minimum": 0,
+      "maximum": 8,
+      "nonzero": 3720,
+      "sum": 9679
+    },
+    {
+      "event": "0x2f",
+      "minimum": 0,
+      "maximum": 16,
+      "nonzero": 35210,
+      "sum": 235648
+    },
+    {
+      "event": "0x34",
+      "minimum": 0,
+      "maximum": 8,
+      "nonzero": 3715,
+      "sum": 9670
+    },
+    {
+      "event": "0x35",
+      "minimum": 0,
+      "maximum": 1,
+      "nonzero": 9,
+      "sum": 9
+    }
+  ],
+  "refill_equals_walk_sum": true,
+  "role_statistics": {
+    "competition": {
+      "windows": 35840,
+      "datawalk_nonzero": 2731,
+      "datawalk_over_one": 1580,
+      "itlb_nonzero": 7
+    },
+    "victim": {
+      "windows": 4480,
+      "datawalk_nonzero": 984,
+      "datawalk_over_one": 0,
+      "itlb_nonzero": 2
+    }
+  },
+  "source_head": "978ab69c7386afac9e7d730a6daa9c8d1c13d497",
+  "binary_source_head": "48d21c6aa77cb81e8a18b78e841f85c2bd38f0b9",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "binary_sha256": "6fcbfb2fa4414de4fe9a00ebd7ccbf4b03870edb810af81ee5ecf748fe35d4bf"
+}
