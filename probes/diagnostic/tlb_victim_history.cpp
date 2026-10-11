@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // 独立诊断：固定页集合的 victim 身份与准备次序对照。
-// 协议/技术原理：docs/design/2026-10-10-tlb-victim-history-observation.md（冻结 v1）。
+// 协议/技术原理：docs/design/2026-10-11-tlb-victim-history.md（冻结 v1）。
 // 圈内 walk 不能换算窗前缺失项；本组件保存全部窗口，不输出物理 ways。
 #include "tlb_victim_history_layout.h"
 #include "page_policy.h"
