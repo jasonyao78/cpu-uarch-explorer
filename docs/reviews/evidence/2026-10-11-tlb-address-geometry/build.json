@@ -1,0 +1,33 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "1db75b991922f2fd1e3632db30c269f1cc779a15",
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "flags": [
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-DCPU_UARCH_HAVE_PERF=1",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic"
+  ],
+  "independent_rebuild_byte_identical": true,
+  "binaries": {
+    "tlb_address_geometry": "0093bbfb6680412c27ad7006328a545ddb643f964c143dd413c7961fde1fd666"
+  },
+  "source_sha256": {
+    "probes/diagnostic/tlb_address_geometry.cpp": "256cd0763062e776891a3aaa701055c5f3a9407ca05876b98dfb4d68f78c6224",
+    "probes/diagnostic/tlb_address_geometry_layout.h": "87d97fcdfedf67476f38dad904024af4fd9f17bb6705813845860f2f90f45b86",
+    "probes/diagnostic/tlb_victim_history_layout.h": "b69320f23dcb26eb6473f5b089b361b767664427c7d7a2926b02b0b72ca2316f",
+    "probes/diagnostic/tlb_history_layout.h": "bd20d2f277e8742590297dec3d2131664ebde8d0459ac75437a32192ba371e6f",
+    "probes/diagnostic/tlb_local_layout.h": "083f6f81d4b6ec04e522cab16c01a9ee796135b30b1476485048859e9283f9d5",
+    "probes/common/tlb_set_collect.h": "ead8eaf63c36cfcc082aa54cb5af718a82de9c1af6426b9c5c9c50b257ceb4b1",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_window.h": "95dc834898a0feb47474b4b7899533f0762a9a7298315a71dd33830d907363c7"
+  },
+  "plan_path": "docs/reviews/evidence/2026-10-11-tlb-address-geometry/plan.json",
+  "plan_sha256": "5dc7ccad4e9d8e11196d1f3d85e81ce9a6d924ece0db02f433730f649635687f"
+}

@@ -22,7 +22,7 @@ class GeometryProducer(unittest.TestCase):
     rows=[json.loads(l) for l in subprocess.check_output([str(exe),'--plan',*(['--reverse'] if reverse else [])],text=True).splitlines()]
     self.assertEqual(rows[1:],expected_cells(reverse));self.assertEqual((rows[0]['cells'],rows[0]['windows']),(108,15552));self.assertIs(rows[0]['reverse'],reverse)
    for args in ([],['100'],['--plan','bad'],['--plan','--reverse','bad']):self.assertNotEqual(subprocess.run([str(exe),*args],capture_output=True).returncode,0)
- def test_real_selector_many_base_phases_and_actual_link_membership(self):
+ def test_real_selector_many_base_phases(self):
   self.assertTrue((ROOT/'probes/diagnostic/tlb_address_geometry_layout.h').exists(),'geometry selector missing')
   with tempfile.TemporaryDirectory() as d:
    src=Path(d)/'selector.cpp';src.write_text(r'''#include "tlb_address_geometry_layout.h"
@@ -32,4 +32,18 @@ int main(){for(uintptr_t base:{0x100000000ull,0x100001000ull,0x10fffe000ull,0x11
    exe=self.compile(d,src);lines=subprocess.check_output([str(exe)],text=True).splitlines();self.assertEqual(len(lines),72)
    for line in lines:
     base,t,s,h,*va=map(int,line.split());q0=((base>>12)+255)//256;want=[(((q0+i*s)<<8)|(t if h==1 else t^((q0+i*s)&255)))<<12 for i in range(12)];self.assertEqual(va,want);self.assertTrue(all(base<=v<base+65536*4096 for v in va))
+ def test_actual_family_links_and_all_production_shots(self):
+  with tempfile.TemporaryDirectory() as d:
+   src=Path(d)/'trace.cpp';src.write_text(r'''#include "tlb_address_geometry_layout.h"
+#include <cstdio>
+#include <sys/mman.h>
+int main(){size_t bytes=65536ull*4096;char* memory=static_cast<char*>(mmap(nullptr,bytes,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANON,-1,0));if(memory==MAP_FAILED)return 2;auto families=tlb_geometry::families(memory,65536);for(auto c:tlb_geometry::cells(false)){const auto& pages=families[tlb_geometry::family(c.target,c.step,c.h)];tlb_victim_history::link(pages,c);auto index=[&](uintptr_t p){for(unsigned i=0;i<12;++i)if(p==tlb_history::node(pages,i))return i;throw std::runtime_error("outside-family");};auto start=tlb_victim_history::history_start(pages,c),p=start;std::printf("H %s",c.id().c_str());for(unsigned i=0;i<12;++i){std::printf(" %u",index(p));p=tlb_history::walk(p,1,3);}if(p!=start)return 3;std::puts("");start=tlb_victim_history::competitor_start(pages,c);p=start;std::printf("C %s",c.id().c_str());for(unsigned i=0;i<c.w-1;++i){std::printf(" %u",index(p));p=tlb_history::walk(p,1,4);}if(p!=start)return 4;std::puts("");auto victim=tlb_history::node(pages,c.victim);if(tlb_history::walk(victim,1,0)!=victim)return 5;for(auto shot:tlb_victim_history::schedule(c))std::printf("S %s %u %u %u\n",c.id().c_str(),shot.round,shot.pass_index,shot.victim?1:0);}munmap(memory,bytes);}
+''')
+   exe=self.compile(d,src);actual=subprocess.check_output([str(exe)],text=True).splitlines();want=[]
+   for c in expected_cells():
+    order=[i for i in range(c['w']) if i!=c['victim']]
+    if c['direction']:order.reverse()
+    want.extend(['H '+c['cell']+' '+ ' '.join(map(str,range(12))),('C '+c['cell']+' '+ ' '.join(map(str,order))).rstrip()])
+    want.extend(f"S {c['cell']} {r} {j} {int(j==8)}" for r in range(16) for j in range(9))
+   self.assertEqual(actual,want);self.assertEqual(sum(l.startswith('S ') for l in actual),15552)
 if __name__=='__main__':unittest.main()
