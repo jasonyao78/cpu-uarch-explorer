@@ -41,7 +41,7 @@ class ResidentAnalysis(unittest.TestCase):
   from tools.diagnostic import rob_resident_analysis
   return rob_resident_analysis
  def records(self,c):
-  model=self.model();a,link,n,rev=model.identity(c);want=self.actual[f'{a}-{link}-{n}-{int(rev)}'];cfg,program,*schedule=want
+  model=self.model();a,link,n,rev=model.identity(c);want=json.loads(json.dumps(self.actual[f'{a}-{link}-{n}-{int(rev)}']));cfg,program,*schedule=want
   records=[cfg,program,dict(type='runtime',cpu=7,fpcr=0,code_base=0x100000,event_ids=list(range(101,107)))]
   for s in schedule:
    cycle=2 if n==0 else (50 if a=='none' else 416)
