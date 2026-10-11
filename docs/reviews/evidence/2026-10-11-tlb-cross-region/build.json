@@ -1,0 +1,52 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "7ed6434d846fd49e609097f396a5cdac2cd1161d",
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "flags": [
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-DCPU_UARCH_HAVE_PERF=1",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic"
+  ],
+  "binaries": {
+    "tlb_cross_region": "2ac083ee8e7905925cb8f20097c329a7fced2786e784056797b2004a28124a95"
+  },
+  "independent_build_sha256": [
+    "2ac083ee8e7905925cb8f20097c329a7fced2786e784056797b2004a28124a95",
+    "2ac083ee8e7905925cb8f20097c329a7fced2786e784056797b2004a28124a95"
+  ],
+  "source_sha256": {
+    "probes/diagnostic/tlb_cross_region.cpp": "ecc62af2e95cac161c8a748df4f84f874915de97ccf0fba834b26570f86e7f7c",
+    "probes/diagnostic/tlb_cross_region_layout.h": "b948eb077de1f5039107e1b6e15d54114e85688a12684af8e36d020a479221fb",
+    "probes/diagnostic/tlb_victim_history_layout.h": "b69320f23dcb26eb6473f5b089b361b767664427c7d7a2926b02b0b72ca2316f",
+    "probes/diagnostic/tlb_history_layout.h": "bd20d2f277e8742590297dec3d2131664ebde8d0459ac75437a32192ba371e6f",
+    "probes/diagnostic/tlb_local_layout.h": "083f6f81d4b6ec04e522cab16c01a9ee796135b30b1476485048859e9283f9d5",
+    "probes/common/tlb_set_collect.h": "ead8eaf63c36cfcc082aa54cb5af718a82de9c1af6426b9c5c9c50b257ceb4b1",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_window.h": "95dc834898a0feb47474b4b7899533f0762a9a7298315a71dd33830d907363c7"
+  },
+  "plan_path": "docs/reviews/evidence/2026-10-11-tlb-cross-region/plan.json",
+  "plan_sha256": "0b17174fde5fbbf7200873c723d15675e401d71a3c37c1bfe5cda917efe921df",
+  "recipe": [
+    "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android34-clang++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-DCPU_UARCH_HAVE_PERF=1",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic",
+    "probes/diagnostic/tlb_cross_region.cpp",
+    "-o",
+    "build/aarch64-linux-android/release/diagnostic/tlb_cross_region"
+  ],
+  "probe_role": "diagnostic JSONL, not formal schema-v2"
+}

@@ -49,4 +49,75 @@ int main(){auto m=probe_common::map_guarded_anonymous(524288ull*4096,static_cast
 """
   with tempfile.TemporaryDirectory() as d:
    c=Path(d)/'harness.cpp';c.write_text(source);exe=Path(d)/'harness';subprocess.run(['clang++','-std=c++17','-O2','-Wall','-Wextra','-Werror','-I'+str(ROOT/'probes/common'),'-I'+str(ROOT/'probes/diagnostic'),str(c),'-o',str(exe)],check=True);self.assertIn('48 real cells',subprocess.check_output([str(exe)],text=True))
+
+class RegionAnalysis(unittest.TestCase):
+ @classmethod
+ def setUpClass(cls):
+  RegionProducer.setUpClass();cls.exe=RegionProducer.exe;cls.actual={key:[json.loads(l) for l in subprocess.check_output([str(cls.exe),'--plan',*args],text=True).splitlines()] for key,args in [('forward',[]),('reverse',['--reverse'])]};cls.geometry=json.loads(subprocess.check_output([str(cls.exe),'--layout','0x3fc0001000'],text=True))
+ @classmethod
+ def tearDownClass(cls):RegionProducer.tearDownClass()
+ def model(self):
+  self.assertTrue((ROOT/'tools/diagnostic/tlb_region_analysis.py').exists(),'cross-region consumer missing')
+  from tools.diagnostic import tlb_region_analysis
+  return tlb_region_analysis
+ def records(self,rev):
+  import copy
+  cfg,*cells=copy.deepcopy(self.actual['reverse' if rev else 'forward']);rr=[cfg,copy.deepcopy(self.geometry)]
+  for c in cells:
+   rr.extend([dict(type='backing',cell=c['cell'],stage=stage,base_page_bytes=4096,anon_huge_kb=0) for stage in ('before','after')])
+   for t in range(16):
+    for p in range(9):
+     victim=p==8;k=1 if victim else c['w']-1;walk=int(victim and c['w']>1 and c['group']!=2)
+     rr.append(dict(type='round',**{k:c[k] for k in self.model().META},round=t,role='victim' if victim else 'competition',pass_index=p,enabled=100,running=100,counts=[100,k,walk,k,walk,0]))
+  return rr
+ def run_fixture(self):
+  m=self.model();rows=[];geometry=[]
+  for e in range(5):
+   rr=self.records(bool(e%2));rows.extend(dict(c,epoch=f'epoch-{e}') for c in m.audit_process(rr,bool(e%2),self.actual));geometry.append(dict(epoch=f'epoch-{e}',**m.check_geometry(rr[1])))
+  return dict(mode=m.MODE,processes=5,rows=rows,geometry=geometry)
+ def test_actual_plans_geometry_and_complete_decision(self):
+  m=self.model();m.validate_plan(self.actual);a=m.analyze(self.run_fixture());self.assertEqual((a['windows'],len(a['victim_points']),len(a['lookup_points'])),(34560,180,1440));self.assertEqual(a['verdict'],'replicated-low-only-candidate-favored');self.assertFalse(a['physical_ways_certified'])
+ def test_actual_geometry_and_raw_identity_negative_cases(self):
+  import copy
+  m=self.model()
+  for bad in ('missing','duplicate','order','backing','typed','region','victim','filler','count','mux','shot'):
+   rr=self.records(False)
+   if bad=='missing':rr.pop()
+   elif bad=='duplicate':rr.append(rr[-1])
+   elif bad=='order':rr[-2:]=rr[-2:][::-1]
+   elif bad=='backing':rr[2]['anon_huge_kb']=1
+   elif bad=='typed':rr[0]['reverse']=0
+   elif bad=='region':rr[1]['families'][1]['pages'][1]-=1<<28
+   elif bad=='victim':rr[1]['families'][2]['pages'][0]+=4096
+   elif bad=='filler':rr[1]['filler_pages'][1]=rr[1]['filler_pages'][0]
+   elif bad=='count':rr[4]['counts'][0]=True
+   elif bad=='mux':rr[4]['running']=99
+   elif bad=='shot':rr[4]['pass_index']=1
+   with self.subTest(bad=bad),self.assertRaises(ValueError):m.audit_process(rr,False,self.actual)
+ def test_controls_and_single_load_residual_never_become_negative_evidence(self):
+  m=self.model()
+  for bad in ('floor','lookup','control','multi-walk','geometry','order'):
+   run=self.run_fixture()
+   if bad=='floor':run['rows'][0]['samples'][0]['counts'][4]=1
+   elif bad=='lookup':
+    for z in run['rows'][3]['samples']:
+     if z['role']=='competition' and z['pass_index']==0:z['counts'][1]=0
+   elif bad=='control':
+    for c in run['rows']:
+     if c['target']==7 and c['group']==0 and c['w']==12:
+      for z in c['samples']:
+       if z['role']=='victim':z['counts'][4]=0
+   elif bad=='multi-walk':run['rows'][3]['samples'][8]['counts'][4]=2
+   elif bad=='geometry':
+    run['geometry'][0]['families'].pop()
+    with self.assertRaises(ValueError):m.analyze(run)
+    continue
+   elif bad=='order':
+    run['rows'][:2]=run['rows'][:2][::-1]
+    with self.assertRaises(ValueError):m.analyze(run)
+    continue
+   self.assertNotEqual(m.analyze(run)['verdict'],'replicated-low-only-candidate-favored',bad)
+class RegionDriverPresence(unittest.TestCase):
+ def test_real_driver_exists(self):
+  self.assertTrue((ROOT/'tools/diagnostic/run_sm8650_region.py').exists(),'cross-region driver missing')
 if __name__=='__main__':unittest.main()
