@@ -6,7 +6,7 @@
 
 ## 冻结条件与反证
 
-`probes/diagnostic/tlb_walk_parallel.cpp` / `probes/diagnostic/tlb_walk_parallel_layout.h` 实现 K={1,2,4,8}。两个 scope：total 固定8192节点；per-chain 每链8192节点（总8192K）。每节点恰占一个64B cache line。high 一节点/4K页，VA页索引17i，页内offset=64(i mod64)，稀疏未触碰页阻止把连续虚拟地址等同连续翻译；low 64节点/4K页、line offset轮转相同。低walk负控的数据line数/访问次数/链拓扑与high相同，物理页/PTE/cache set仍不同，缓存压力必须由实测0x03/0x17报告，不能声称完全隔离数据侧。
+`probes/diagnostic/tlb_walk_parallel.cpp` / `probes/diagnostic/tlb_walk_parallel_layout.h` 实现 K={1,2,4,8}。两个 scope：total 固定8192节点；per-chain 每链8192节点（总8192K）。每节点恰占一个64B cache line。high 一节点/4K页，VA页索引17i，页内offset=64(i mod64)，稀疏未触碰页阻止把连续虚拟地址等同连续翻译；low 64节点/4K页、line offset轮转相同。低walk负控的数据line数/访问次数/链拓扑与high相同，物理页/PTE/cache set仍不同，缓存压力必须由实测0x03/0x17报告，不能声称完全隔离数据侧。尤其Arm定义0x03包含translation table walk造成的refill，0x17也不提供纯数据load归属；两事件是共同流量辅助观测，不能用high-low差值直接当数据cache miss差值。
 
 每个条件独立 guarded 匿名 mapping，MADV_NOHUGEPAGE + before/after smaps AnonHugePages=0；mapping span与实际触碰页/line footprint分别输出。high最大VA span约4.25GiB、实际触碰65536页/256MiB、有效line4MiB；不扫描未触碰保留空间。每链固定无重复闭环。seed137的xorshift64（13,7,17）Fisher-Yates全局置换后均分K链，C++/Python独立复现，每个完整索引链保存供审计。
 
