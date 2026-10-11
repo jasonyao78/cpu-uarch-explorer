@@ -1,0 +1,33 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "18aff85b95a07180263876441b553187dae59e48",
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "flags": [
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-DCPU_UARCH_HAVE_PERF=1",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic",
+    "-std=c++17"
+  ],
+  "binaries": {
+    "tlb_competition": "432d0dc51480992b7d347cded756f5479812af5d308a1f8f127a9c01af5f2aa2"
+  },
+  "independent_rebuild_byte_identical": true,
+  "source_sha256": {
+    "probes/diagnostic/tlb_competition.cpp": "dde7874dd7b75ed6dde21a0a094fc9828f1061ca2c0503f0ea085a8541748b65",
+    "probes/diagnostic/tlb_competition_layout.h": "708f726cf3d2bce1fa580d08ed0b54a42df5ea90b4eaa0c845b597709070bd0a",
+    "probes/diagnostic/tlb_capacity_layout.h": "4b1c6d67b3a2469eaf757c4bc51ddd4e33f286826fb9ff85ca9fb73b58aba54f",
+    "probes/diagnostic/tlb_history_layout.h": "bd20d2f277e8742590297dec3d2131664ebde8d0459ac75437a32192ba371e6f",
+    "probes/diagnostic/tlb_local_layout.h": "083f6f81d4b6ec04e522cab16c01a9ee796135b30b1476485048859e9283f9d5",
+    "probes/common/tlb_set_collect.h": "ead8eaf63c36cfcc082aa54cb5af718a82de9c1af6426b9c5c9c50b257ceb4b1",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_window.h": "95dc834898a0feb47474b4b7899533f0762a9a7298315a71dd33830d907363c7"
+  },
+  "plan_path": "docs/reviews/evidence/2026-10-10-tlb-competition/plan.json",
+  "plan_sha256": "85dfbce5d311d11388399684fa82e243f5cfbc60b18f4bb5aab0c8d30012a466"
+}

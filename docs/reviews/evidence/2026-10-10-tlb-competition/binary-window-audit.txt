@@ -1,0 +1,688 @@
+Binary SHA256 432d0dc51480992b7d347cded756f5479812af5d308a1f8f127a9c01af5f2aa2
+Source 18aff85b95a07180263876441b553187dae59e48
+
+  2441cc: 940002ad     	bl	0x244c80 <measured_window(probe_common::PerfWindow&, unsigned long, unsigned int, unsigned int, unsigned long, unsigned int, probe_common::GroupSample*, probe_common::GroupSample*)>
+  2441d0: f9408be8     	ldr	x8, [sp, #0x110]
+  2441d4: f100191f     	cmp	x8, #0x6
+  2441d8: 54002a01     	b.ne	0x244718 <main+0x120c>
+  2441dc: f9403be8     	ldr	x8, [sp, #0x70]
+  2441e0: f100191f     	cmp	x8, #0x6
+  2441e4: 540029a1     	b.ne	0x244718 <main+0x120c>
+  2441e8: 6f00e400     	movi	v0.2d, #0000000000000000
+  2441ec: f9403fe8     	ldr	x8, [sp, #0x78]
+  2441f0: f9408fe9     	ldr	x9, [sp, #0x118]
+  2441f4: eb090108     	subs	x8, x8, x9
+  2441f8: 54002703     	b.lo	0x2446d8 <main+0x11cc>
+  2441fc: 9b137ee9     	mul	x9, x23, x19
+  244200: a94833eb     	ldp	x11, x12, [sp, #0x80]
+  244204: a9523bed     	ldp	x13, x14, [sp, #0x120]
+  244208: 9b137eea     	mul	x10, x23, x19
+  24420c: cb0d016b     	sub	x11, x11, x13
+  244210: f8296ac8     	str	x8, [x22, x9]
+  244214: 8b0a02c8     	add	x8, x22, x10
+  244218: eb0e018a     	subs	x10, x12, x14
+  24421c: f8008d0b     	str	x11, [x8, #0x8]!
+  244220: 54000042     	b.hs	0x244228 <main+0xd1c>
+  244224: 3808911f     	sturb	wzr, [x8, #0x89]
+  244228: 9b137eeb     	mul	x11, x23, x19
+  24422c: f9404bec     	ldr	x12, [sp, #0x90]
+  244230: f9409bed     	ldr	x13, [sp, #0x130]
+  244234: 8b0b02ce     	add	x14, x22, x11
+  244238: eb0d018b     	subs	x11, x12, x13
+  24423c: f90009ca     	str	x10, [x14, #0x10]
+  244240: 54000042     	b.hs	0x244248 <main+0xd3c>
+  244244: 3808911f     	sturb	wzr, [x8, #0x89]
+  244248: 9b137eea     	mul	x10, x23, x19
+  24424c: f9404fec     	ldr	x12, [sp, #0x98]
+  244250: f9409fed     	ldr	x13, [sp, #0x138]
+  244254: 8b0a02ce     	add	x14, x22, x10
+  244258: eb0d018a     	subs	x10, x12, x13
+  24425c: f9000dcb     	str	x11, [x14, #0x18]
+  244260: 54000042     	b.hs	0x244268 <main+0xd5c>
+  244264: 3808911f     	sturb	wzr, [x8, #0x89]
+  244268: 9b137eeb     	mul	x11, x23, x19
+  24426c: f94053ec     	ldr	x12, [sp, #0xa0]
+  244270: f940a3ed     	ldr	x13, [sp, #0x140]
+  244274: 8b0b02ce     	add	x14, x22, x11
+  244278: eb0d018b     	subs	x11, x12, x13
+  24427c: f90011ca     	str	x10, [x14, #0x20]
+  244280: 54000042     	b.hs	0x244288 <main+0xd7c>
+  244284: 3808911f     	sturb	wzr, [x8, #0x89]
+  244288: 9b137eea     	mul	x10, x23, x19
+  24428c: f94057ec     	ldr	x12, [sp, #0xa8]
+  244290: f940a7ed     	ldr	x13, [sp, #0x148]
+  244294: 8b0a02ce     	add	x14, x22, x10
+  244298: eb0d018a     	subs	x10, x12, x13
+  24429c: f90015cb     	str	x11, [x14, #0x28]
+  2442a0: 54000042     	b.hs	0x2442a8 <main+0xd9c>
+  2442a4: 3808911f     	sturb	wzr, [x8, #0x89]
+  2442a8: 9b137eeb     	mul	x11, x23, x19
+  2442ac: f9405bec     	ldr	x12, [sp, #0xb0]
+  2442b0: f940abed     	ldr	x13, [sp, #0x150]
+  2442b4: 8b0b02ce     	add	x14, x22, x11
+  2442b8: eb0d018b     	subs	x11, x12, x13
+  2442bc: f90019ca     	str	x10, [x14, #0x30]
+  2442c0: 54000042     	b.hs	0x2442c8 <main+0xdbc>
+  2442c4: 3808911f     	sturb	wzr, [x8, #0x89]
+  2442c8: 9b137eea     	mul	x10, x23, x19
+  2442cc: f8696ac9     	ldr	x9, [x22, x9]
+  2442d0: 8b0a02ca     	add	x10, x22, x10
+  2442d4: f9001d4b     	str	x11, [x10, #0x38]
+  2442d8: b40022c9     	cbz	x9, 0x244730 <main+0x1224>
+  2442dc: 9b137eea     	mul	x10, x23, x19
+  2442e0: f940010b     	ldr	x11, [x8]
+  2442e4: eb09017f     	cmp	x11, x9
+  2442e8: 8b0a02c9     	add	x9, x22, x10
+  2442ec: 54001fe1     	b.ne	0x2446e8 <main+0x11dc>
+  2442f0: 38489108     	ldurb	w8, [x8, #0x89]
+  2442f4: f0fffe0a     	adrp	x10, 0x207000 <year_lengths+0x6a20>
+  2442f8: 910df54a     	add	x10, x10, #0x37d
+  2442fc: 5280018b     	mov	w11, #0xc               // =12
+  244300: 3809013c     	sturb	w28, [x9, #0x90]
+  244304: f809812a     	stur	x10, [x9, #0x98]
+  244308: 34001fa8     	cbz	w8, 0x2446fc <main+0x11f0>
+  24430c: a95ca3fa     	ldp	x26, x8, [sp, #0x1c8]
+  244310: b201f3e9     	mov	x9, #-0x5555555555555556 // =-6148914691236517206
+  244314: f2955569     	movk	x9, #0xaaab
+  244318: 910006f7     	add	x23, x23, #0x1
+  24431c: cb1a0108     	sub	x8, x8, x26
+  244320: 9342fd08     	asr	x8, x8, #2
+  244324: 9b097d08     	mul	x8, x8, x9
+  244328: eb0802ff     	cmp	x23, x8
+  24432c: 54ffee03     	b.lo	0x2440ec <main+0xbe0>
+  244330: f9008bfc     	str	x28, [sp, #0x110]
+  244334: f9401fe0     	ldr	x0, [sp, #0x38]
+  244338: 910443e2     	add	x2, sp, #0x110
+  24433c: 52a20001     	mov	w1, #0x10000000         // =268435456
+  244340: 94000ded     	bl	0x247af4 <probe_common::read_anon_huge_kb(char const*, unsigned long, unsigned long*)>
+  244344: f9408be8     	ldr	x8, [sp, #0x110]
+  244348: f100011f     	cmp	x8, #0x0
+  24434c: 1a9f17e8     	cset	w8, eq
+  244350: 0a080008     	and	w8, w0, w8
+  244354: 36002508     	tbz	w8, #0x0, 0x2447f4 <main+0x12e8>
+  244358: f9008bfc     	str	x28, [sp, #0x110]
+  24435c: f94023e8     	ldr	x8, [sp, #0x40]
+  244360: 910443e2     	add	x2, sp, #0x110
+  244364: 52a01001     	mov	w1, #0x800000           // =8388608
+  244368: 91400500     	add	x0, x8, #0x1, lsl #12   // =0x1000
+  24436c: 94000de2     	bl	0x247af4 <probe_common::read_anon_huge_kb(char const*, unsigned long, unsigned long*)>
+  244370: f9408be8     	ldr	x8, [sp, #0x110]
+  244374: f100011f     	cmp	x8, #0x0
+  244378: 1a9f17e8     	cset	w8, eq
+  24437c: 0a080008     	and	w8, w0, w8
+  244380: 36002488     	tbz	w8, #0x0, 0x244810 <main+0x1304>
+  244384: 910443e8     	add	x8, sp, #0x110
+  244388: aa1803e0     	mov	x0, x24
+  24438c: 940007ec     	bl	0x24633c <tlb_competition::Cell::id() const>
+  244390: 394443e8     	ldrb	w8, [sp, #0x110]
+  244394: f94093e9     	ldr	x9, [sp, #0x120]
+  244398: b0fffe00     	adrp	x0, 0x205000 <year_lengths+0x4a20>
+  24439c: 912f0800     	add	x0, x0, #0xbc2
+  2443a0: 7200011f     	tst	w8, #0x1
+  2443a4: f9402fe8     	ldr	x8, [sp, #0x58]
+  2443a8: 9a890101     	csel	x1, x8, x9, eq
+  2443ac: 9402951c     	bl	0x2e981c <printf>
+  2443b0: 394443e8     	ldrb	w8, [sp, #0x110]
+  2443b4: 36000068     	tbz	w8, #0x0, 0x2443c0 <main+0xeb4>
+  2443b8: f94093e0     	ldr	x0, [sp, #0x120]
+  2443bc: 9401cffb     	bl	0x2b83a8 <operator delete(void*)>
+  2443c0: a95ca3fc     	ldp	x28, x8, [sp, #0x1c8]
+  2443c4: eb1c011f     	cmp	x8, x28
+  2443c8: 54000aa0     	b.eq	0x24451c <main+0x1010>
+  2443cc: f94033e8     	ldr	x8, [sp, #0x60]
+  2443d0: 52800289     	mov	w9, #0x14               // =20
+  2443d4: f9401bea     	ldr	x10, [sp, #0x30]
+  2443d8: aa1f03f5     	mov	x21, xzr
+  2443dc: aa1f03f6     	mov	x22, xzr
+  2443e0: 52800719     	mov	w25, #0x38              // =56
+  2443e4: 9b092917     	madd	x23, x8, x9, x10
+  2443e8: 14000028     	b	0x244488 <main+0xf7c>
+  2443ec: f85d8342     	ldur	x2, [x26, #-0x28]
+  2443f0: aa1b03e0     	mov	x0, x27
+  2443f4: d0fffde1     	adrp	x1, 0x202000 <year_lengths+0x1a20>
+  2443f8: 91021c21     	add	x1, x1, #0x87
+  2443fc: 94029508     	bl	0x2e981c <printf>
+  244400: f85e0342     	ldur	x2, [x26, #-0x20]
+  244404: aa1b03e0     	mov	x0, x27
+  244408: aa1403e1     	mov	x1, x20
+  24440c: 94029504     	bl	0x2e981c <printf>
+  244410: f85e8342     	ldur	x2, [x26, #-0x18]
+  244414: aa1b03e0     	mov	x0, x27
+  244418: aa1403e1     	mov	x1, x20
+  24441c: 94029500     	bl	0x2e981c <printf>
+  244420: f85f0342     	ldur	x2, [x26, #-0x10]
+  244424: aa1b03e0     	mov	x0, x27
+  244428: aa1403e1     	mov	x1, x20
+  24442c: 940294fc     	bl	0x2e981c <printf>
+  244430: f85f8342     	ldur	x2, [x26, #-0x8]
+  244434: aa1b03e0     	mov	x0, x27
+  244438: aa1403e1     	mov	x1, x20
+  24443c: 940294f8     	bl	0x2e981c <printf>
+  244440: f9400342     	ldr	x2, [x26]
+  244444: aa1b03e0     	mov	x0, x27
+  244448: aa1403e1     	mov	x1, x20
+  24444c: 940294f4     	bl	0x2e981c <printf>
+  244450: b0fffe00     	adrp	x0, 0x205000 <year_lengths+0x4a20>
+  244454: 911cbc00     	add	x0, x0, #0x72f
+  244458: 9402953a     	bl	0x2e9940 <puts>
+  24445c: a95ca3fc     	ldp	x28, x8, [sp, #0x1c8]
+  244460: b201f3e9     	mov	x9, #-0x5555555555555556 // =-6148914691236517206
+  244464: f2955569     	movk	x9, #0xaaab
+  244468: 910006d6     	add	x22, x22, #0x1
+  24446c: 91028339     	add	x25, x25, #0xa0
+  244470: 910032b5     	add	x21, x21, #0xc
+  244474: cb1c0108     	sub	x8, x8, x28
+  244478: 9342fd08     	asr	x8, x8, #2
+  24447c: 9b097d08     	mul	x8, x8, x9
+  244480: eb0802df     	cmp	x22, x8
+  244484: 540004c2     	b.hs	0x24451c <main+0x1010>
+  244488: f940dbfa     	ldr	x26, [sp, #0x1b0]
+  24448c: 910443e8     	add	x8, sp, #0x110
+  244490: aa1803e0     	mov	x0, x24
+  244494: 940007aa     	bl	0x24633c <tlb_competition::Cell::id() const>
+  244498: 394443e9     	ldrb	w9, [sp, #0x110]
+  24449c: f94037eb     	ldr	x11, [sp, #0x68]
+  2444a0: 8b150388     	add	x8, x28, x21
+  2444a4: f94093ea     	ldr	x10, [sp, #0x120]
+  2444a8: 8b19035a     	add	x26, x26, x25
+  2444ac: f9402bec     	ldr	x12, [sp, #0x50]
+  2444b0: 7200013f     	tst	w9, #0x1
+  2444b4: a9458be9     	ldp	x9, x2, [sp, #0x58]
+  2444b8: b9400164     	ldr	w4, [x11]
+  2444bc: 3940210b     	ldrb	w11, [x8, #0x8]
+  2444c0: d0fffe00     	adrp	x0, 0x206000 <year_lengths+0x5a20>
+  2444c4: 913a7000     	add	x0, x0, #0xe9c
+  2444c8: b9400303     	ldr	w3, [x24]
+  2444cc: b9400185     	ldr	w5, [x12]
+  2444d0: 9a8a0121     	csel	x1, x9, x10, eq
+  2444d4: a97cab49     	ldp	x9, x10, [x26, #-0x38]
+  2444d8: 29402107     	ldp	w7, w8, [x8]
+  2444dc: b840c2e6     	ldur	w6, [x23, #0xc]
+  2444e0: 7100017f     	cmp	w11, #0x0
+  2444e4: b0fffdeb     	adrp	x11, 0x201000 <year_lengths+0xa20>
+  2444e8: 911eed6b     	add	x11, x11, #0x7bb
+  2444ec: b0fffdec     	adrp	x12, 0x201000 <year_lengths+0xa20>
+  2444f0: 9132358c     	add	x12, x12, #0xc8d
+  2444f4: 9a8b018b     	csel	x11, x12, x11, eq
+  2444f8: a9012be9     	stp	x9, x10, [sp, #0x10]
+  2444fc: b9000be8     	str	w8, [sp, #0x8]
+  244500: f90003eb     	str	x11, [sp]
+  244504: 940294c6     	bl	0x2e981c <printf>
+  244508: 394443e8     	ldrb	w8, [sp, #0x110]
+  24450c: 3607f708     	tbz	w8, #0x0, 0x2443ec <main+0xee0>
+  244510: f94093e0     	ldr	x0, [sp, #0x120]
+  244514: 9401cfa5     	bl	0x2b83a8 <operator delete(void*)>
+  244518: 17ffffb5     	b	0x2443ec <main+0xee0>
+  24451c: 94025c26     	bl	0x2db5b4 <sched_getcpu>
+  244520: 5280003c     	mov	w28, #0x1               // =1
+  244524: 71001c1f     	cmp	w0, #0x7
+  244528: 54001581     	b.ne	0x2447d8 <main+0x12cc>
+  24452c: f940dbe0     	ldr	x0, [sp, #0x1b0]
+  244530: f94033fa     	ldr	x26, [sp, #0x60]
+  244534: b4000040     	cbz	x0, 0x24453c <main+0x1030>
+  244538: 9401cf9c     	bl	0x2b83a8 <operator delete(void*)>
+  24453c: f940e7e0     	ldr	x0, [sp, #0x1c8]
+  244540: b4ffcdc0     	cbz	x0, 0x243ef8 <main+0x9ec>
+  244544: f900ebe0     	str	x0, [sp, #0x1d0]
+  244548: 9401cf98     	bl	0x2b83a8 <operator delete(void*)>
+  24454c: 17fffe6b     	b	0x243ef8 <main+0x9ec>
+  244550: a9424ff4     	ldp	x20, x19, [sp, #0x20]
+  244554: 394913e8     	ldrb	w8, [sp, #0x244]
+  244558: 34001e48     	cbz	w8, 0x244920 <main+0x1414>
+  24455c: b94243e0     	ldr	w0, [sp, #0x240]
+  244560: 52848021     	mov	w1, #0x2401             // =9217
+  244564: 2a1f03e2     	mov	w2, wzr
+  244568: 94020711     	bl	0x2c61ac <ioctl>
+  24456c: 35001da0     	cbnz	w0, 0x244920 <main+0x1414>
+  244570: aa1303e0     	mov	x0, x19
+  244574: aa1403e1     	mov	x1, x20
+  244578: 9403067e     	bl	0x305f70 <munmap>
+  24457c: f94023e0     	ldr	x0, [sp, #0x40]
+  244580: 52840001     	mov	w1, #0x2000             // =8192
+  244584: 72a01001     	movk	w1, #0x80, lsl #16
+  244588: 9403067a     	bl	0x305f70 <munmap>
+  24458c: 910783e0     	add	x0, sp, #0x1e0
+  244590: 9400087a     	bl	0x246778 <probe_common::PerfWindow::~PerfWindow()>
+  244594: f9417fe0     	ldr	x0, [sp, #0x2f8]
+  244598: b4000060     	cbz	x0, 0x2445a4 <main+0x1098>
+  24459c: f90183e0     	str	x0, [sp, #0x300]
+  2445a0: 9401cf82     	bl	0x2b83a8 <operator delete(void*)>
+  2445a4: f85283a0     	ldur	x0, [x29, #-0xd8]
+  2445a8: b4000060     	cbz	x0, 0x2445b4 <main+0x10a8>
+  2445ac: f81303a0     	stur	x0, [x29, #-0xd0]
+  2445b0: 9401cf7e     	bl	0x2b83a8 <operator delete(void*)>
+  2445b4: f85403b3     	ldur	x19, [x29, #-0xc0]
+  2445b8: b4000253     	cbz	x19, 0x244600 <main+0x10f4>
+  2445bc: f85483a8     	ldur	x8, [x29, #-0xb8]
+  2445c0: aa1303e0     	mov	x0, x19
+  2445c4: eb13011f     	cmp	x8, x19
+  2445c8: 54000180     	b.eq	0x2445f8 <main+0x10ec>
+  2445cc: aa0803f4     	mov	x20, x8
+  2445d0: 14000004     	b	0x2445e0 <main+0x10d4>
+  2445d4: eb13029f     	cmp	x20, x19
+  2445d8: aa1403e8     	mov	x8, x20
+  2445dc: 540000c0     	b.eq	0x2445f4 <main+0x10e8>
+  2445e0: f85e8e80     	ldr	x0, [x20, #-0x18]!
+  2445e4: b4ffff80     	cbz	x0, 0x2445d4 <main+0x10c8>
+  2445e8: f81f0100     	stur	x0, [x8, #-0x10]
+  2445ec: 9401cf6f     	bl	0x2b83a8 <operator delete(void*)>
+  2445f0: 17fffff9     	b	0x2445d4 <main+0x10c8>
+  2445f4: f85403a0     	ldur	x0, [x29, #-0xc0]
+  2445f8: f81483b3     	stur	x19, [x29, #-0xb8]
+  2445fc: 9401cf6b     	bl	0x2b83a8 <operator delete(void*)>
+  244600: 2a1f03e0     	mov	w0, wzr
+  244604: 9136c3ff     	add	sp, sp, #0xdb0
+  244608: a9454ff4     	ldp	x20, x19, [sp, #0x50]
+  24460c: a94457f6     	ldp	x22, x21, [sp, #0x40]
+  244610: a9435ff8     	ldp	x24, x23, [sp, #0x30]
+  244614: a94267fa     	ldp	x26, x25, [sp, #0x20]
+  244618: a9416ffc     	ldp	x28, x27, [sp, #0x10]
+  24461c: a8c67bfd     	ldp	x29, x30, [sp], #0x60
+  244620: d65f03c0     	ret
+  244624: b2400e88     	orr	x8, x20, #0xf
+  244628: 91000518     	add	x24, x8, #0x1
+  24462c: aa1803e0     	mov	x0, x24
+  244630: 9401cf24     	bl	0x2b82c0 <operator new(unsigned long)>
+  244634: b2400308     	orr	x8, x24, #0x1
+  244638: aa0003f6     	mov	x22, x0
+  24463c: a91183f4     	stp	x20, x0, [sp, #0x118]
+  244640: f9008be8     	str	x8, [sp, #0x110]
+  244644: aa1603e0     	mov	x0, x22
+  244648: aa1503e1     	mov	x1, x21
+  24464c: aa1403e2     	mov	x2, x20
+  244650: 940325c8     	bl	0x30dd70 <memmove>
+  244654: 38346adf     	strb	wzr, [x22, x20]
+  244658: 394443e8     	ldrb	w8, [sp, #0x110]
+  24465c: f9408fe9     	ldr	x9, [sp, #0x118]
+  244660: d341fd0a     	lsr	x10, x8, #1
+  244664: 7200011f     	tst	w8, #0x1
+  244668: 9a890149     	csel	x9, x10, x9, eq
+  24466c: f100253f     	cmp	x9, #0x9
+  244670: 54000241     	b.ne	0x2446b8 <main+0x11ac>
+  244674: f94093e9     	ldr	x9, [sp, #0x120]
+  244678: 910443ea     	add	x10, sp, #0x110
+  24467c: 7200011f     	tst	w8, #0x1
+  244680: b240014a     	orr	x10, x10, #0x1
+  244684: d285a5ab     	mov	x11, #0x2d2d            // =11565
+  244688: 9a890149     	csel	x9, x10, x9, eq
+  24468c: f2acae4b     	movk	x11, #0x6572, lsl #16
+  244690: f940012a     	ldr	x10, [x9]
+  244694: f2ccaecb     	movk	x11, #0x6576, lsl #32
+  244698: 39402129     	ldrb	w9, [x9, #0x8]
+  24469c: f2ee6e4b     	movk	x11, #0x7372, lsl #48
+  2446a0: eb0b015f     	cmp	x10, x11
+  2446a4: 52800caa     	mov	w10, #0x65              // =101
+  2446a8: 7a4a0120     	ccmp	w9, w10, #0x0, eq
+  2446ac: 1a9f07f4     	cset	w20, ne
+  2446b0: 37000088     	tbnz	w8, #0x0, 0x2446c0 <main+0x11b4>
+  2446b4: 14000005     	b	0x2446c8 <main+0x11bc>
+  2446b8: 52800034     	mov	w20, #0x1               // =1
+  2446bc: 36000068     	tbz	w8, #0x0, 0x2446c8 <main+0x11bc>
+  2446c0: f94093e0     	ldr	x0, [sp, #0x120]
+  2446c4: 9401cf39     	bl	0x2b83a8 <operator delete(void*)>
+  2446c8: 35ff7fb9     	cbnz	w25, 0x2436bc <main+0x1b0>
+  2446cc: 17fffc00     	b	0x2436cc <main+0x1c0>
+  2446d0: 2a1f03f4     	mov	w20, wzr
+  2446d4: 17fffbfa     	b	0x2436bc <main+0x1b0>
+  2446d8: 52801408     	mov	w8, #0xa0               // =160
+  2446dc: 90fffe09     	adrp	x9, 0x204000 <year_lengths+0x3a20>
+  2446e0: 9139a529     	add	x9, x9, #0xe69
+  2446e4: 14000010     	b	0x244724 <main+0x1218>
+  2446e8: f0fffde8     	adrp	x8, 0x203000 <year_lengths+0x2a20>
+  2446ec: 91351108     	add	x8, x8, #0xd44
+  2446f0: 3809013f     	sturb	wzr, [x9, #0x90]
+  2446f4: f8098128     	stur	x8, [x9, #0x98]
+  2446f8: 14000015     	b	0x24474c <main+0x1240>
+  2446fc: 52800200     	mov	w0, #0x10               // =16
+  244700: 9401cf96     	bl	0x2b8558 <__cxa_allocate_exception>
+  244704: aa0003f5     	mov	x21, x0
+  244708: b0fffe01     	adrp	x1, 0x205000 <year_lengths+0x4a20>
+  24470c: 911c7c21     	add	x1, x1, #0x71f
+  244710: 94000faf     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  244714: 14000016     	b	0x24476c <main+0x1260>
+  244718: 52801408     	mov	w8, #0xa0               // =160
+  24471c: d0fffde9     	adrp	x9, 0x202000 <year_lengths+0x1a20>
+  244720: 91362529     	add	x9, x9, #0xd89
+  244724: 9b087ee8     	mul	x8, x23, x8
+  244728: 8b0802c8     	add	x8, x22, x8
+  24472c: 14000007     	b	0x244748 <main+0x123c>
+  244730: 52801408     	mov	w8, #0xa0               // =160
+  244734: f0fffde9     	adrp	x9, 0x203000 <year_lengths+0x2a20>
+  244738: 912a4529     	add	x9, x9, #0xa91
+  24473c: 9b087ee8     	mul	x8, x23, x8
+  244740: 8b0802c8     	add	x8, x22, x8
+  244744: 3902411f     	strb	wzr, [x8, #0x90]
+  244748: f9004d09     	str	x9, [x8, #0x98]
+  24474c: 52800200     	mov	w0, #0x10               // =16
+  244750: 9401cf82     	bl	0x2b8558 <__cxa_allocate_exception>
+  244754: 52801408     	mov	w8, #0xa0               // =160
+  244758: aa0003f5     	mov	x21, x0
+  24475c: 9b087ee8     	mul	x8, x23, x8
+  244760: 8b0802c8     	add	x8, x22, x8
+  244764: f9404d01     	ldr	x1, [x8, #0x98]
+  244768: 94000f99     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  24476c: f00006a1     	adrp	x1, 0x31b000 <__sys_error_names+0x190>
+  244770: f00006a2     	adrp	x2, 0x31b000 <__sys_error_names+0x190>
+  244774: aa1503e0     	mov	x0, x21
+  244778: f9457c21     	ldr	x1, [x1, #0xaf8]
+  24477c: f9458042     	ldr	x2, [x2, #0xb00]
+  244780: 9401cfcf     	bl	0x2b86bc <__cxa_throw>
+  244784: aa1503e0     	mov	x0, x21
+  244788: 94000cd6     	bl	0x247ae0 <std::__ndk1::vector<unsigned long, std::__ndk1::allocator<unsigned long>>::__throw_out_of_range[abi:ne180000]() const>
+  24478c: 52800200     	mov	w0, #0x10               // =16
+  244790: 9401cf72     	bl	0x2b8558 <__cxa_allocate_exception>
+  244794: aa0003f5     	mov	x21, x0
+  244798: d0fffe01     	adrp	x1, 0x206000 <year_lengths+0x5a20>
+  24479c: 91112c21     	add	x1, x1, #0x44b
+  2447a0: 94000f8b     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  2447a4: 14000007     	b	0x2447c0 <main+0x12b4>
+  2447a8: 52800200     	mov	w0, #0x10               // =16
+  2447ac: 9401cf6b     	bl	0x2b8558 <__cxa_allocate_exception>
+  2447b0: aa0003f5     	mov	x21, x0
+  2447b4: d0fffe01     	adrp	x1, 0x206000 <year_lengths+0x5a20>
+  2447b8: 91112c21     	add	x1, x1, #0x44b
+  2447bc: 94000f84     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  2447c0: f00006a1     	adrp	x1, 0x31b000 <__sys_error_names+0x190>
+  2447c4: f00006a2     	adrp	x2, 0x31b000 <__sys_error_names+0x190>
+  2447c8: aa1503e0     	mov	x0, x21
+  2447cc: f9457c21     	ldr	x1, [x1, #0xaf8]
+  2447d0: f9458042     	ldr	x2, [x2, #0xb00]
+  2447d4: 9401cfba     	bl	0x2b86bc <__cxa_throw>
+  2447d8: 52800200     	mov	w0, #0x10               // =16
+  2447dc: 9401cf5f     	bl	0x2b8558 <__cxa_allocate_exception>
+  2447e0: aa0003f5     	mov	x21, x0
+  2447e4: d0fffde1     	adrp	x1, 0x202000 <year_lengths+0x1a20>
+  2447e8: 91022021     	add	x1, x1, #0x88
+  2447ec: 94000f78     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  2447f0: 1400000e     	b	0x244828 <main+0x131c>
+  2447f4: 52800200     	mov	w0, #0x10               // =16
+  2447f8: 9401cf58     	bl	0x2b8558 <__cxa_allocate_exception>
+  2447fc: aa0003f5     	mov	x21, x0
+  244800: d0fffe01     	adrp	x1, 0x206000 <year_lengths+0x5a20>
+  244804: 91112c21     	add	x1, x1, #0x44b
+  244808: 94000f71     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  24480c: 14000007     	b	0x244828 <main+0x131c>
+  244810: 52800200     	mov	w0, #0x10               // =16
+  244814: 9401cf51     	bl	0x2b8558 <__cxa_allocate_exception>
+  244818: aa0003f5     	mov	x21, x0
+  24481c: d0fffe01     	adrp	x1, 0x206000 <year_lengths+0x5a20>
+  244820: 91112c21     	add	x1, x1, #0x44b
+  244824: 94000f6a     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  244828: f00006a1     	adrp	x1, 0x31b000 <__sys_error_names+0x190>
+  24482c: f00006a2     	adrp	x2, 0x31b000 <__sys_error_names+0x190>
+  244830: aa1503e0     	mov	x0, x21
+  244834: f9457c21     	ldr	x1, [x1, #0xaf8]
+  244838: f9458042     	ldr	x2, [x2, #0xb00]
+  24483c: 9401cfa0     	bl	0x2b86bc <__cxa_throw>
+  244840: 9106c3e0     	add	x0, sp, #0x1b0
+  244844: 94000ec7     	bl	0x248360 <std::__ndk1::vector<probe_common::WindowDelta, std::__ndk1::allocator<probe_common::WindowDelta>>::__throw_length_error[abi:ne180000]() const>
+  244848: 52800200     	mov	w0, #0x10               // =16
+  24484c: 9401cf43     	bl	0x2b8558 <__cxa_allocate_exception>
+  244850: aa0003f5     	mov	x21, x0
+  244854: b0fffde1     	adrp	x1, 0x201000 <year_lengths+0xa20>
+  244858: 910fb421     	add	x1, x1, #0x3ed
+  24485c: 94000f5c     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  244860: f00006a1     	adrp	x1, 0x31b000 <__sys_error_names+0x190>
+  244864: f00006a2     	adrp	x2, 0x31b000 <__sys_error_names+0x190>
+  244868: aa1503e0     	mov	x0, x21
+  24486c: f9457c21     	ldr	x1, [x1, #0xaf8]
+  244870: f9458042     	ldr	x2, [x2, #0xb00]
+  244874: 9401cf92     	bl	0x2b86bc <__cxa_throw>
+  244878: 14000050     	b	0x2449b8 <main+0x14ac>
+  24487c: 9100c100     	add	x0, x8, #0x30
+  244880: 94000c11     	bl	0x2478c4 <std::__ndk1::vector<bool, std::__ndk1::allocator<bool>>::__throw_out_of_range[abi:ne180000]() const>
+  244884: 91012100     	add	x0, x8, #0x48
+  244888: 94000c34     	bl	0x247958 <std::__ndk1::vector<int, std::__ndk1::allocator<int>>::__throw_out_of_range[abi:ne180000]() const>
+  24488c: 52800200     	mov	w0, #0x10               // =16
+  244890: 9401cf32     	bl	0x2b8558 <__cxa_allocate_exception>
+  244894: aa0003f5     	mov	x21, x0
+  244898: d0fffde1     	adrp	x1, 0x202000 <year_lengths+0x1a20>
+  24489c: 9133b421     	add	x1, x1, #0xced
+  2448a0: 94000f4b     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  2448a4: f00006a1     	adrp	x1, 0x31b000 <__sys_error_names+0x190>
+  2448a8: f00006a2     	adrp	x2, 0x31b000 <__sys_error_names+0x190>
+  2448ac: aa1503e0     	mov	x0, x21
+  2448b0: f9457c21     	ldr	x1, [x1, #0xaf8]
+  2448b4: f9458042     	ldr	x2, [x2, #0xb00]
+  2448b8: 9401cf81     	bl	0x2b86bc <__cxa_throw>
+  2448bc: 1400003f     	b	0x2449b8 <main+0x14ac>
+  2448c0: 910c43e0     	add	x0, sp, #0x310
+  2448c4: 94000bb0     	bl	0x247784 <std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>>::__throw_length_error[abi:ne180000]() const>
+  2448c8: 910c43e0     	add	x0, sp, #0x310
+  2448cc: 94000bae     	bl	0x247784 <std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>>::__throw_length_error[abi:ne180000]() const>
+  2448d0: 52800200     	mov	w0, #0x10               // =16
+  2448d4: 9401cf21     	bl	0x2b8558 <__cxa_allocate_exception>
+  2448d8: aa0003f5     	mov	x21, x0
+  2448dc: d0fffde1     	adrp	x1, 0x202000 <year_lengths+0x1a20>
+  2448e0: 91200821     	add	x1, x1, #0x802
+  2448e4: 94000f3a     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  2448e8: f00006a1     	adrp	x1, 0x31b000 <__sys_error_names+0x190>
+  2448ec: f00006a2     	adrp	x2, 0x31b000 <__sys_error_names+0x190>
+  2448f0: aa1503e0     	mov	x0, x21
+  2448f4: f9457c21     	ldr	x1, [x1, #0xaf8]
+  2448f8: f9458042     	ldr	x2, [x2, #0xb00]
+  2448fc: 9401cf70     	bl	0x2b86bc <__cxa_throw>
+  244900: 1400002e     	b	0x2449b8 <main+0x14ac>
+  244904: 52800200     	mov	w0, #0x10               // =16
+  244908: 9401cf14     	bl	0x2b8558 <__cxa_allocate_exception>
+  24490c: aa0003f5     	mov	x21, x0
+  244910: 90fffde1     	adrp	x1, 0x200000 <__scudo_default_options+0x200000>
+  244914: 91192021     	add	x1, x1, #0x648
+  244918: 94000f2d     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  24491c: 14000039     	b	0x244a00 <main+0x14f4>
+  244920: 52800200     	mov	w0, #0x10               // =16
+  244924: 9401cf0d     	bl	0x2b8558 <__cxa_allocate_exception>
+  244928: aa0003f5     	mov	x21, x0
+  24492c: f0fffe01     	adrp	x1, 0x207000 <year_lengths+0x6a20>
+  244930: 910dbc21     	add	x1, x1, #0x36f
+  244934: 94000f26     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  244938: 14000032     	b	0x244a00 <main+0x14f4>
+  24493c: d100a3a0     	sub	x0, x29, #0x28
+  244940: 94000b91     	bl	0x247784 <std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>>::__throw_length_error[abi:ne180000]() const>
+  244944: 52800200     	mov	w0, #0x10               // =16
+  244948: 9401cf04     	bl	0x2b8558 <__cxa_allocate_exception>
+  24494c: aa0003f5     	mov	x21, x0
+  244950: f0fffe01     	adrp	x1, 0x207000 <year_lengths+0x6a20>
+  244954: 913bf021     	add	x1, x1, #0xefc
+  244958: 94000f1d     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  24495c: f00006a1     	adrp	x1, 0x31b000 <__sys_error_names+0x190>
+  244960: f00006a2     	adrp	x2, 0x31b000 <__sys_error_names+0x190>
+  244964: aa1503e0     	mov	x0, x21
+  244968: f9457c21     	ldr	x1, [x1, #0xaf8]
+  24496c: f9458042     	ldr	x2, [x2, #0xb00]
+  244970: 9401cf53     	bl	0x2b86bc <__cxa_throw>
+  244974: 14000011     	b	0x2449b8 <main+0x14ac>
+  244978: f94023e0     	ldr	x0, [sp, #0x40]
+  24497c: 52840001     	mov	w1, #0x2000             // =8192
+  244980: 72a01001     	movk	w1, #0x80, lsl #16
+  244984: 9403057b     	bl	0x305f70 <munmap>
+  244988: 52800200     	mov	w0, #0x10               // =16
+  24498c: 9401cef3     	bl	0x2b8558 <__cxa_allocate_exception>
+  244990: aa0003f5     	mov	x21, x0
+  244994: 90fffde1     	adrp	x1, 0x200000 <__scudo_default_options+0x200000>
+  244998: 912e7c21     	add	x1, x1, #0xb9f
+  24499c: 94000f0c     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  2449a0: f00006a1     	adrp	x1, 0x31b000 <__sys_error_names+0x190>
+  2449a4: f00006a2     	adrp	x2, 0x31b000 <__sys_error_names+0x190>
+  2449a8: aa1503e0     	mov	x0, x21
+  2449ac: f9457c21     	ldr	x1, [x1, #0xaf8]
+  2449b0: f9458042     	ldr	x2, [x2, #0xb00]
+  2449b4: 9401cf42     	bl	0x2b86bc <__cxa_throw>
+  2449b8: 52800200     	mov	w0, #0x10               // =16
+  2449bc: 9401cee7     	bl	0x2b8558 <__cxa_allocate_exception>
+  2449c0: aa0003f5     	mov	x21, x0
+  2449c4: 90fffe21     	adrp	x1, 0x208000 <year_lengths+0x7a20>
+  2449c8: 91071821     	add	x1, x1, #0x1c6
+  2449cc: 94000f00     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  2449d0: f00006a1     	adrp	x1, 0x31b000 <__sys_error_names+0x190>
+  2449d4: f00006a2     	adrp	x2, 0x31b000 <__sys_error_names+0x190>
+  2449d8: aa1503e0     	mov	x0, x21
+  2449dc: f9457c21     	ldr	x1, [x1, #0xaf8]
+  2449e0: f9458042     	ldr	x2, [x2, #0xb00]
+  2449e4: 9401cf36     	bl	0x2b86bc <__cxa_throw>
+  2449e8: 52800200     	mov	w0, #0x10               // =16
+  2449ec: 9401cedb     	bl	0x2b8558 <__cxa_allocate_exception>
+  2449f0: aa0003f5     	mov	x21, x0
+  2449f4: f0fffde1     	adrp	x1, 0x203000 <year_lengths+0x2a20>
+  2449f8: 911cb021     	add	x1, x1, #0x72c
+  2449fc: 94000ef4     	bl	0x2485cc <std::runtime_error::runtime_error(char const*)>
+  244a00: f00006a1     	adrp	x1, 0x31b000 <__sys_error_names+0x190>
+  244a04: f00006a2     	adrp	x2, 0x31b000 <__sys_error_names+0x190>
+  244a08: aa1503e0     	mov	x0, x21
+  244a0c: f9457c21     	ldr	x1, [x1, #0xaf8]
+  244a10: f9458042     	ldr	x2, [x2, #0xb00]
+  244a14: 9401cf2a     	bl	0x2b86bc <__cxa_throw>
+  244a18: 910443e0     	add	x0, sp, #0x110
+  244a1c: 94000b5a     	bl	0x247784 <std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>>::__throw_length_error[abi:ne180000]() const>
+  244a20: 1400002b     	b	0x244acc <main+0x15c0>
+  244a24: 14000033     	b	0x244af0 <main+0x15e4>
+  244a28: aa0003f4     	mov	x20, x0
+  244a2c: aa1503e0     	mov	x0, x21
+  244a30: aa0103f3     	mov	x19, x1
+  244a34: 9401cf08     	bl	0x2b8654 <__cxa_free_exception>
+  244a38: 14000070     	b	0x244bf8 <main+0x16ec>
+  244a3c: 14000014     	b	0x244a8c <main+0x1580>
+  244a40: aa0103f3     	mov	x19, x1
+  244a44: aa0003f4     	mov	x20, x0
+  244a48: 34000319     	cbz	w25, 0x244aa8 <main+0x159c>
+  244a4c: 385d83a8     	ldurb	w8, [x29, #-0x28]
+  244a50: 360002c8     	tbz	w8, #0x0, 0x244aa8 <main+0x159c>
+  244a54: f85e83a0     	ldur	x0, [x29, #-0x18]
+  244a58: 9401ce54     	bl	0x2b83a8 <operator delete(void*)>
+  244a5c: 14000013     	b	0x244aa8 <main+0x159c>
+  244a60: 1400001b     	b	0x244acc <main+0x15c0>
+  244a64: 1400001a     	b	0x244acc <main+0x15c0>
+  244a68: 14000022     	b	0x244af0 <main+0x15e4>
+  244a6c: aa0103f3     	mov	x19, x1
+  244a70: aa0003f4     	mov	x20, x0
+  244a74: 14000065     	b	0x244c08 <main+0x16fc>
+  244a78: 1400001a     	b	0x244ae0 <main+0x15d4>
+  244a7c: 14000004     	b	0x244a8c <main+0x1580>
+  244a80: 14000018     	b	0x244ae0 <main+0x15d4>
+  244a84: 14000002     	b	0x244a8c <main+0x1580>
+  244a88: 14000016     	b	0x244ae0 <main+0x15d4>
+  244a8c: aa0003f4     	mov	x20, x0
+  244a90: aa1503e0     	mov	x0, x21
+  244a94: aa0103f3     	mov	x19, x1
+  244a98: 9401ceef     	bl	0x2b8654 <__cxa_free_exception>
+  244a9c: 1400005d     	b	0x244c10 <main+0x1704>
+  244aa0: aa0103f3     	mov	x19, x1
+  244aa4: aa0003f4     	mov	x20, x0
+  244aa8: 394c43e8     	ldrb	w8, [sp, #0x310]
+  244aac: 36000b28     	tbz	w8, #0x0, 0x244c10 <main+0x1704>
+  244ab0: f94193e0     	ldr	x0, [sp, #0x320]
+  244ab4: 9401ce3d     	bl	0x2b83a8 <operator delete(void*)>
+  244ab8: 14000056     	b	0x244c10 <main+0x1704>
+  244abc: 14000009     	b	0x244ae0 <main+0x15d4>
+  244ac0: 14000008     	b	0x244ae0 <main+0x15d4>
+  244ac4: 14000007     	b	0x244ae0 <main+0x15d4>
+  244ac8: 14000006     	b	0x244ae0 <main+0x15d4>
+  244acc: aa0003f4     	mov	x20, x0
+  244ad0: aa1503e0     	mov	x0, x21
+  244ad4: aa0103f3     	mov	x19, x1
+  244ad8: 9401cedf     	bl	0x2b8654 <__cxa_free_exception>
+  244adc: 14000041     	b	0x244be0 <main+0x16d4>
+  244ae0: aa0103f3     	mov	x19, x1
+  244ae4: aa0003f4     	mov	x20, x0
+  244ae8: 1400004a     	b	0x244c10 <main+0x1704>
+  244aec: 14000018     	b	0x244b4c <main+0x1640>
+  244af0: aa0103f3     	mov	x19, x1
+  244af4: aa0003f4     	mov	x20, x0
+  244af8: 14000040     	b	0x244bf8 <main+0x16ec>
+  244afc: 1400002b     	b	0x244ba8 <main+0x169c>
+  244b00: 1400002a     	b	0x244ba8 <main+0x169c>
+  244b04: 14000029     	b	0x244ba8 <main+0x169c>
+  244b08: 14000001     	b	0x244b0c <main+0x1600>
+  244b0c: aa0003f4     	mov	x20, x0
+  244b10: aa1503e0     	mov	x0, x21
+  244b14: aa0103f3     	mov	x19, x1
+  244b18: 9401cecf     	bl	0x2b8654 <__cxa_free_exception>
+  244b1c: 1400002d     	b	0x244bd0 <main+0x16c4>
+  244b20: 1400001b     	b	0x244b8c <main+0x1680>
+  244b24: f940dbe8     	ldr	x8, [sp, #0x1b0]
+  244b28: aa0103f3     	mov	x19, x1
+  244b2c: aa0003f4     	mov	x20, x0
+  244b30: b4000508     	cbz	x8, 0x244bd0 <main+0x16c4>
+  244b34: aa0803e0     	mov	x0, x8
+  244b38: f900dfe8     	str	x8, [sp, #0x1b8]
+  244b3c: 14000024     	b	0x244bcc <main+0x16c0>
+  244b40: 14000003     	b	0x244b4c <main+0x1640>
+  244b44: 1400001e     	b	0x244bbc <main+0x16b0>
+  244b48: 14000001     	b	0x244b4c <main+0x1640>
+  244b4c: aa0103f3     	mov	x19, x1
+  244b50: aa0003f4     	mov	x20, x0
+  244b54: 14000023     	b	0x244be0 <main+0x16d4>
+  244b58: 1400000d     	b	0x244b8c <main+0x1680>
+  244b5c: 1400000c     	b	0x244b8c <main+0x1680>
+  244b60: 1400000b     	b	0x244b8c <main+0x1680>
+  244b64: 1400000a     	b	0x244b8c <main+0x1680>
+  244b68: f9418be8     	ldr	x8, [sp, #0x310]
+  244b6c: aa0103f3     	mov	x19, x1
+  244b70: aa0003f4     	mov	x20, x0
+  244b74: b40004e8     	cbz	x8, 0x244c10 <main+0x1704>
+  244b78: aa0803e0     	mov	x0, x8
+  244b7c: f9018fe8     	str	x8, [sp, #0x318]
+  244b80: 9401ce0a     	bl	0x2b83a8 <operator delete(void*)>
+  244b84: 14000023     	b	0x244c10 <main+0x1704>
+  244b88: 1400000d     	b	0x244bbc <main+0x16b0>
+  244b8c: aa0103f3     	mov	x19, x1
+  244b90: aa0003f4     	mov	x20, x0
+  244b94: 1400000f     	b	0x244bd0 <main+0x16c4>
+  244b98: 14000009     	b	0x244bbc <main+0x16b0>
+  244b9c: 14000003     	b	0x244ba8 <main+0x169c>
+  244ba0: 14000007     	b	0x244bbc <main+0x16b0>
+  244ba4: 14000006     	b	0x244bbc <main+0x16b0>
+  244ba8: aa0003f4     	mov	x20, x0
+  244bac: aa1503e0     	mov	x0, x21
+  244bb0: aa0103f3     	mov	x19, x1
+  244bb4: 9401cea8     	bl	0x2b8654 <__cxa_free_exception>
+  244bb8: 14000003     	b	0x244bc4 <main+0x16b8>
+  244bbc: aa0103f3     	mov	x19, x1
+  244bc0: aa0003f4     	mov	x20, x0
+  244bc4: f940dbe0     	ldr	x0, [sp, #0x1b0]
+  244bc8: b4000040     	cbz	x0, 0x244bd0 <main+0x16c4>
+  244bcc: 9401cdf7     	bl	0x2b83a8 <operator delete(void*)>
+  244bd0: f940e7e0     	ldr	x0, [sp, #0x1c8]
+  244bd4: b4000060     	cbz	x0, 0x244be0 <main+0x16d4>
+  244bd8: f900ebe0     	str	x0, [sp, #0x1d0]
+  244bdc: 9401cdf3     	bl	0x2b83a8 <operator delete(void*)>
+  244be0: 910783e0     	add	x0, sp, #0x1e0
+  244be4: 940006e5     	bl	0x246778 <probe_common::PerfWindow::~PerfWindow()>
+  244be8: f9417fe0     	ldr	x0, [sp, #0x2f8]
+  244bec: b4000060     	cbz	x0, 0x244bf8 <main+0x16ec>
+  244bf0: f90183e0     	str	x0, [sp, #0x300]
+  244bf4: 9401cded     	bl	0x2b83a8 <operator delete(void*)>
+  244bf8: f85283a0     	ldur	x0, [x29, #-0xd8]
+  244bfc: b4000060     	cbz	x0, 0x244c08 <main+0x16fc>
+  244c00: f81303a0     	stur	x0, [x29, #-0xd0]
+  244c04: 9401cde9     	bl	0x2b83a8 <operator delete(void*)>
+  244c08: d10303a0     	sub	x0, x29, #0xc0
+  244c0c: 94000728     	bl	0x2468ac <std::__ndk1::vector<std::__ndk1::vector<unsigned long, std::__ndk1::allocator<unsigned long>>, std::__ndk1::allocator<std::__ndk1::vector<unsigned long, std::__ndk1::allocator<unsigned long>>>>::~vector[abi:ne180000]()>
+  244c10: aa1403e0     	mov	x0, x20
+  244c14: 7100067f     	cmp	w19, #0x1
+  244c18: 54000321     	b.ne	0x244c7c <main+0x1770>
+  244c1c: 9401ce63     	bl	0x2b85a8 <__cxa_begin_catch>
+  244c20: f00006a8     	adrp	x8, 0x31b000 <__sys_error_names+0x190>
+  244c24: aa0003f3     	mov	x19, x0
+  244c28: f9458508     	ldr	x8, [x8, #0xb08]
+  244c2c: f9400009     	ldr	x9, [x0]
+  244c30: f9400114     	ldr	x20, [x8]
+  244c34: f9400928     	ldr	x8, [x9, #0x10]
+  244c38: d63f0100     	blr	x8
+  244c3c: aa0003e2     	mov	x2, x0
+  244c40: d0fffde1     	adrp	x1, 0x202000 <year_lengths+0x1a20>
+  244c44: 9135b821     	add	x1, x1, #0xd6e
+  244c48: aa1403e0     	mov	x0, x20
+  244c4c: 94028e7e     	bl	0x2e8644 <fprintf>
+  244c50: f9400268     	ldr	x8, [x19]
+  244c54: aa1303e0     	mov	x0, x19
+  244c58: f9400908     	ldr	x8, [x8, #0x10]
+  244c5c: d63f0100     	blr	x8
+  244c60: aa0003e1     	mov	x1, x0
+  244c64: 90fffde0     	adrp	x0, 0x200000 <__scudo_default_options+0x200000>
+  244c68: 91195400     	add	x0, x0, #0x655
+  244c6c: 940292ec     	bl	0x2e981c <printf>
+  244c70: 9401ceda     	bl	0x2b87d8 <__cxa_end_catch>
+  244c74: 52800020     	mov	w0, #0x1                // =1
+  244c78: 17fffe63     	b	0x244604 <main+0x10f8>
+  244c7c: 9401d7d4     	bl	0x2babcc <_Unwind_Resume>
