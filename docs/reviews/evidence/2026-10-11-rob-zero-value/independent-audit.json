@@ -1,0 +1,43 @@
+{
+  "path": "direct JSONL/uint64/IR/raw SHA/bit difference; no consumer imports",
+  "processes": 64,
+  "windows": 192,
+  "raw_files": 325,
+  "unique_observed_kernel_ids": 384,
+  "ir_relative_error_range": [
+    1.2592203433543623e-06,
+    0.0009078390759876564
+  ],
+  "gates": [
+    {
+      "epoch": 0,
+      "class_name": "movi",
+      "rename_fraction": 0.871044930971373,
+      "cycle_spread": 1.0545257871810341e-05,
+      "rename_spread": 0.0002293490527303012
+    },
+    {
+      "epoch": 0,
+      "class_name": "mov0",
+      "rename_fraction": 0.0,
+      "cycle_spread": 1.725752982613745e-05,
+      "rename_spread": 0
+    },
+    {
+      "epoch": 1,
+      "class_name": "movi",
+      "rename_fraction": 0.8715477220874317,
+      "cycle_spread": 1.553357376566821e-05,
+      "rename_spread": 0.0013291911326851838
+    },
+    {
+      "epoch": 1,
+      "class_name": "mov0",
+      "rename_fraction": 0.0,
+      "cycle_spread": 1.7972757993805926e-05,
+      "rename_spread": 0
+    }
+  ],
+  "primary_status": "qualified-limited-response",
+  "physical_rob_entries_certified": false
+}
