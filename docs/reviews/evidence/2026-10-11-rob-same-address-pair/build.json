@@ -1,0 +1,27 @@
+{
+  "source_commit": "4cebc24e20f623f507d91eb610698a19602e8d8d",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_sha256": {
+    "probes/diagnostic/rob_dependency_pair.c": "6a283c65ec0e2442134e5fa4a5ba98dee8485d7f2dae715fe00bf9d53ce6a10d",
+    "probes/common/rob_codegen.h": "6feee6e79aa26e14655814ffb5ae61553cd45da72d1e3a94e4310f80d1f70da8",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6"
+  },
+  "ndk": "27.2.12479018",
+  "target": "aarch64-linux-android34",
+  "flags": [
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common"
+  ],
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -Iprobes/common probes/diagnostic/rob_dependency_pair.c -o build/aarch64-linux-android/release/diagnostic/rob_dependency_pair",
+  "independent_builds_identical": true,
+  "binaries": {
+    "rob_dependency_pair": "695cfc381b3fef229b3a2796889d09f598c150472caf1b38e7ed2d6ce7a8b383"
+  },
+  "plan_path": "docs/reviews/evidence/2026-10-11-rob-same-address-pair/plan.json",
+  "plan_sha256": "842365fc5d85832059dd671d4d5320083b6c4896dd5f7f19ebbc62e7a2493a86",
+  "code_audit_path": "docs/reviews/evidence/2026-10-11-rob-same-address-pair/code-audit.json"
+}
