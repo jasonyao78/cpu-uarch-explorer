@@ -455,3 +455,5 @@
 - **全目标收口对账 / 当前端到端TLB与ROB负责人 / 触发=下一两批结果归档后**：按用户第一性原理路线更新原r2合同的证据映射：Q-A分布敏感性、Q-B冲突行为、Q-D有效在飞占用为原必做项，Q-C索引族探索及物理ROB/PRF/RS为独立边界；不得用B类局部对照宣称全部TLB/ROB已完成。最终报告给已测/限定操作性/参考/不可识别逐项终态；未知问题需有限反证或正式不可识别说明，不能靠永续扫描兜底。正式软件接入和ALU/FPU专项按原触发保留。
 
 - 2026-10-11 Q-D有限必做关闭：`docs/reviews/2026-10-11-tlb-walk-parallel-results.md` / source0bda583 / launch38eb983，495窗及240长门通过。235/240短门，5个per-chain-low-K8短窗walk率越线；不升级短窗全qualified。owner=TLB端到端负责人；物理walker/MSHR/LQ与更大K不是本批识别项，触发=需要结构容量命名或改变窗长/working set时先独立冻结；Q-A/ROB继续按目标对账，不因本批关Q-D宣告整体完成。
+
+- 2026-10-11 Q-A有限必做关闭：`docs/reviews/2026-10-11-tlb-page-distribution-results.md` / source57f96a9 / launchf14f3de；2175窗技术接受，2160门通过，60条操作转折均(96,112]。主分布INCONCLUSIVE，random-set N1024 delta[.04997349,.09777514]严格未全跨.05门，保留同向数值而不救门；HPA/PTE_CONT/PFN归因未识别。owner=TLB端到端负责人；触发=需要机制ATTRIBUTED时先冻结可观测HPA/PTE/PFN干预或投机/refill归属对照，不以无限重复同曲线兜底。
