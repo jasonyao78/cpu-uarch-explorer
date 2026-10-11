@@ -6,6 +6,8 @@
  * OI-ROB-PROBE-20261009：显式4k/实际2MiB THP；每窗前后验收，禁止静默fallback。
  * Encoded pointer contrast: docs/design/2026-10-09-encoded-load-qualification.md.
  * Explicit mask0 retains the same EOR instructions; default code is unchanged.
+ * Zero immediate contrast: docs/design/2026-10-11-rob-zero-value.md.
+ * Append-only class mov0: same MOVZ family/destinations as movi, immediate 0/1.
  * Host supports export/tests only. Measurement requires Linux AArch64.
  */
 #ifndef _GNU_SOURCE
@@ -46,7 +48,7 @@
 #define STR(t,n,o) (0xf9000000u|(((o)/8)<<10)|((n)<<5)|(t))
 #define SUBS(d,n) (0xf1000400u|((n)<<5)|(d))
 #define BNE(w) (0x54000001u|(((uint32_t)(w)&0x7ffffu)<<5))
-static const char *classes[]={"nop","add","movi","movr","fadd","ldr","str"};
+static const char *classes[]={"nop","add","movi","movr","fadd","ldr","str","mov0"};
 struct options {
     unsigned cls,n,its,rounds,mb,align,chain,seed; int pin;
     unsigned pmu_type; bool have_type,serial,asymmetric,paired,thp2m,collapse,have_xor;
@@ -71,6 +73,7 @@ static void filler(struct code *c,unsigned cls,unsigned j) {
     case 4: emit(c,FADD(4+(j&3u),16,17)); break; // v0 anchor; v8..15 ABI preserved
     case 5: emit(c,LDR(rd,14,8*(j&7u))); break;
     case 6: emit(c,STR(16,14,8*(j&7u))); break;
+    case 7: emit(c,MOVZ(rd,0)); break; // zero value control, not an allocation claim
     default: abort();
     }
     ++c->fillers;
@@ -113,7 +116,7 @@ static uint64_t number(const char *s,uint64_t lo,uint64_t hi) {
     return (uint64_t)n;
 }
 static void usage(void) {
-    fprintf(stderr,"rob_window_probe -t nop|add|movi|movr|fadd|ldr|str -n 0..4096 "
+    fprintf(stderr,"rob_window_probe -t nop|add|movi|movr|fadd|ldr|str|mov0 -n 0..4096 "
         "[-a miss|fsqrt|none] [-i iterations] [-r rounds] [-m MiB] "
         "[--serial|--paired] [--asymmetric] [--align 0|16|32|48] [--chain 1..256] "
         "[--seed positive] [--pin cpu --pmu-type type] [-e raw_event] "
@@ -204,7 +207,7 @@ int main(int argc,char **argv) {
     while((ch=getopt_long(argc,argv,"t:n:a:i:r:m:e:h",opts,NULL))!=-1) {
         switch(ch) {
         case 't': {
-            bool found=false; for(unsigned k=0;k<7;++k) if(!strcmp(optarg,classes[k])) { o.cls=k; found=true; }
+            bool found=false; for(unsigned k=0;k<sizeof(classes)/sizeof(classes[0]);++k) if(!strcmp(optarg,classes[k])) { o.cls=k; found=true; }
             if(!found) usage(); have_class=true; break; }
         case 'n': o.n=(unsigned)number(optarg,0,4096); have_n=true; break;
         case 'a': if(!strcmp(optarg,"miss")) o.anchor=MISS; else if(!strcmp(optarg,"fsqrt")) o.anchor=SQRT;
