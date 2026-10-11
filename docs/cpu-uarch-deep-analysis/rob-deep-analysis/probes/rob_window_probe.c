@@ -8,6 +8,8 @@
  * Explicit mask0 retains the same EOR instructions; default code is unchanged.
  * Zero immediate contrast: docs/design/2026-10-11-rob-zero-value.md.
  * Append-only class mov0: same MOVZ family/destinations as movi, immediate 0/1.
+ * Anchor dependency: docs/design/2026-10-11-rob-anchor-dependency.md.
+ * Optional FMOV bridge is present in both controls; only ADD Rn differs.
  * Host supports export/tests only. Measurement requires Linux AArch64.
  */
 #ifndef _GNU_SOURCE
@@ -43,6 +45,7 @@
 #define MOVK(d,v,s) (0xf2800000u|(((v)&65535u)<<5)|(((s)/16)<<21)|(d))
 #define FADD(d,n,m) (0x1e602800u|((m)<<16)|((n)<<5)|(d))
 #define FSQRT(d,n) (0x1e61c000u|((n)<<5)|(d))
+#define FMOV_TO_GPR(d,n) (0x9e660000u|((n)<<5)|(d))
 #define FMOV(d,n) (0x9e670000u|((n)<<5)|(d))
 #define LDR(t,n,o) (0xf9400000u|(((o)/8)<<10)|((n)<<5)|(t))
 #define STR(t,n,o) (0xf9000000u|(((o)/8)<<10)|((n)<<5)|(t))
@@ -51,7 +54,8 @@
 static const char *classes[]={"nop","add","movi","movr","fadd","ldr","str","mov0"};
 struct options {
     unsigned cls,n,its,rounds,mb,align,chain,seed; int pin;
-    unsigned pmu_type; bool have_type,serial,asymmetric,paired,thp2m,collapse,have_xor;
+    unsigned pmu_type; bool have_type,serial,asymmetric,paired,thp2m,collapse,have_xor,have_link;
+    bool dependent_link;
     uint64_t pointer_xor;
     enum { MISS, SQRT, NONE } anchor;
     const char *dump,*rawlog;
@@ -63,11 +67,11 @@ static void imm(struct code *c,unsigned r,uint64_t v) {
     emit(c,MOVZ(r,(unsigned)v));
     for(unsigned s=16;s<64;s+=16) emit(c,MOVK(r,(unsigned)(v>>s),s));
 }
-static void filler(struct code *c,unsigned cls,unsigned j) {
+static void filler(struct code *c,unsigned cls,unsigned j,unsigned source) {
     unsigned rd=4+(j&7u);
     switch(cls) {
     case 0: emit(c,NOP); break;
-    case 1: emit(c,ADD(rd,16,17)); break;
+    case 1: emit(c,ADD(rd,source,17)); break;
     case 2: emit(c,MOVZ(rd,1)); break;
     case 3: emit(c,MOV(rd,16)); break;
     case 4: emit(c,FADD(4+(j&3u),16,17)); break; // v0 anchor; v8..15 ABI preserved
@@ -82,9 +86,9 @@ static void filler(struct code *c,unsigned cls,unsigned j) {
 static struct code build(uint32_t *buf,size_t cap,const struct options *o) {
     struct code c={.words=buf,.cap=cap};
     emit(&c,MOV(14,2));
-    imm(&c,16,0x1111); imm(&c,17,0x2222);
+    imm(&c,16,o->have_link?UINT64_C(0x3ff0000000000000):0x1111); imm(&c,17,0x2222);
     if(o->have_xor) imm(&c,12,o->pointer_xor); // x12 caller-saved; no filler writes it
-    if(o->anchor==SQRT || o->cls==4) {
+    if(o->anchor==SQRT || o->cls==4 || o->have_link) {
         imm(&c,15,UINT64_C(0x3ff0000000000000)); // exact stable sqrt(1.0)
         emit(&c,FMOV(0,15)); emit(&c,FMOV(16,15)); emit(&c,FMOV(17,15));
     }
@@ -96,7 +100,10 @@ static struct code build(uint32_t *buf,size_t cap,const struct options *o) {
             if(o->have_xor) emit(&c,EOR(r,r,12)); // decode before the next dereference
         }
         if(o->anchor==SQRT) for(unsigned j=0;j<o->chain;++j) { emit(&c,FSQRT(0,0)); ++c.anchors; }
-        if(!side || !o->asymmetric) for(unsigned j=0;j<o->n;++j) filler(&c,o->cls,j);
+        // Both modes carry the same bridge; X12 has identical stable 1.0 bits.
+        if(o->have_link) emit(&c,FMOV_TO_GPR(12,0));
+        if(!side || !o->asymmetric) for(unsigned j=0;j<o->n;++j)
+            filler(&c,o->cls,j,o->have_link && o->dependent_link?12:16);
     }
     emit(&c,SUBS(3,3)); c.branch=c.pos;
     const int64_t displacement=(int64_t)c.loop-(int64_t)c.branch; // instruction words, NOT bytes
@@ -120,7 +127,7 @@ static void usage(void) {
         "[-a miss|fsqrt|none] [-i iterations] [-r rounds] [-m MiB] "
         "[--serial|--paired] [--asymmetric] [--align 0|16|32|48] [--chain 1..256] "
         "[--seed positive] [--pin cpu --pmu-type type] [-e raw_event] "
-        "[--backing 4k|thp2m] [--collapse] [--pointer-xor uint64] [--write-asm file] [--rawlog file]\n");
+        "[--backing 4k|thp2m] [--collapse] [--pointer-xor uint64] [--anchor-link independent|dependent] [--write-asm file] [--rawlog file]\n");
     exit(2);
 }
 static uint64_t rng(uint64_t *state) {
@@ -202,7 +209,7 @@ int main(int argc,char **argv) {
     static const struct option opts[]={
         {"write-asm",1,0,1},{"rawlog",1,0,2},{"pin",1,0,3},{"pmu-type",1,0,4},
         {"serial",0,0,5},{"asymmetric",0,0,6},{"align",1,0,7},{"chain",1,0,8},
-        {"seed",1,0,9},{"paired",0,0,10},{"backing",1,0,11},{"collapse",0,0,12},{"pointer-xor",1,0,13},{0,0,0,0}};
+        {"seed",1,0,9},{"paired",0,0,10},{"backing",1,0,11},{"collapse",0,0,12},{"pointer-xor",1,0,13},{"anchor-link",1,0,14},{0,0,0,0}};
     int ch;
     while((ch=getopt_long(argc,argv,"t:n:a:i:r:m:e:h",opts,NULL))!=-1) {
         switch(ch) {
@@ -233,10 +240,16 @@ int main(int argc,char **argv) {
             break;
         case 12: o.collapse=true; break;
         case 13: o.pointer_xor=number(optarg,0,UINT64_MAX); o.have_xor=true; break;
+        case 14:
+            if(!strcmp(optarg,"independent")) o.dependent_link=false;
+            else if(!strcmp(optarg,"dependent")) o.dependent_link=true;
+            else usage();
+            o.have_link=true; break;
         default: usage();
         }
     }
     if(!have_class || !have_n || optind!=argc || ((o.serial || o.paired) && o.anchor!=MISS) || (o.serial && o.paired)) usage();
+    if(o.have_link && (o.cls!=1 || o.anchor==MISS || o.serial || o.paired || o.asymmetric || o.have_xor)) usage();
     if(o.have_xor && o.anchor!=MISS) { errno=EINVAL; return failure("pointer-xor-requires-miss"); }
     if(o.collapse && (!o.thp2m || o.anchor!=MISS)) { errno=EINVAL; return failure("collapse-requires-thp2m-miss"); }
     if(o.thp2m && o.anchor!=MISS) { errno=EINVAL; return failure("backing-thp2m-requires-miss"); }
@@ -265,6 +278,7 @@ int main(int argc,char **argv) {
     for(size_t k=0;k<o.ne;++k) printf("%s%"PRIu64,k?",":"",o.events[k]);
     fputs("]",stdout); if(o.collapse) fputs(",\"collapse_requested\":true",stdout);
     if(o.have_xor) printf(",\"pointer_xor_requested\":true,\"pointer_xor\":\"0x%016"PRIx64"\",\"decode_instructions_per_iteration\":2",o.pointer_xor);
+    if(o.have_link) printf(",\"anchor_link\":\"%s\",\"bridges_per_iteration\":2",o.dependent_link?"dependent":"independent");
     puts("}");
     if(o.dump) {
         if(o.paired) usage();
