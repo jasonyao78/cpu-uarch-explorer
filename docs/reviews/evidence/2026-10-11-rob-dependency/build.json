@@ -1,0 +1,25 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "310fe961e4616143e193c48d8d64bf512d59ebe8",
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "flags": [
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common"
+  ],
+  "independent_rebuild_byte_identical": true,
+  "binaries": {
+    "rob_window_probe": "d2f39f4fbb4cdabe94b58a763a4c06245d9256fb4d678cd44c21eb2f533c9ea4"
+  },
+  "source_sha256": {
+    "docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c": "5718a0e81def4067ea6f741ed072d67ee9ae728e7e40882867615bc3644d76c2",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/rob_backing.h": "ef1dd0f7f38dad99713322f06b3d5c70caac3e9a56ca214f687120f3fafedd29"
+  },
+  "plan_path": "docs/reviews/evidence/2026-10-11-rob-dependency/plan.json",
+  "plan_sha256": "bb33d18146fa6e355011626b24cbafef9c6994adcfe724aae64fd7b3cb466be7"
+}

@@ -75,15 +75,16 @@ class ZeroRawTests(unittest.TestCase):
  def test_actual_driver_producer_persistence_consumer_and_first_bad_id_stop(self):
   from types import SimpleNamespace
   from unittest.mock import patch
-  from tools.diagnostic import run_sm8650_minimal as driver
+  import importlib.util
   original_check=subprocess.check_output;original_run=subprocess.run
-  # Exercise the current committed driver; source/plan observations stay pinned.
-  launch=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+  # Exact completed zero launch, rather than pairing a newer source with old binary.
+  launch=subprocess.check_output(['git','rev-parse','36031d0'],cwd=ROOT,text=True).strip()
   for corrupt in (True,False):
    with tempfile.TemporaryDirectory() as d:
     root=Path(d);required=[model.BUILD,model.PLAN,model.PROTOCOL,'tools/diagnostic/run_sm8650_minimal.py','configs/platforms/redmi-k70pro-01.json',*self.build['source_sha256']]
     for rel in required:
      p=root/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(self.blob(launch,rel))
+    spec=importlib.util.spec_from_file_location('zero_historical_driver',root/'tools/diagnostic/run_sm8650_minimal.py');driver=importlib.util.module_from_spec(spec);spec.loader.exec_module(driver)
     exe=Path(self.folder.name)/'producer';binary=root/'synthetic-binary';binary.write_bytes(b'not a target binary; only external registration stub')
     profile=json.loads((root/'configs/platforms/redmi-k70pro-01.json').read_text());policy=profile['environment_profiles']['charging-thermal']['measurement_environment']
     snapshot=dict(power=dict(wakefulness='Dozing',screen_on=False),device_idle=dict(force_idle=False),camera=dict(active=False),services=dict(mi_thermald='running'),airplane_mode=True,thermal=dict(max_cpu_c=40),cpufreq={n:dict(governor='walt',min_khz=672000,max_khz=v) for n,v in policy['preconditions']['cpufreq_max_khz'].items()})

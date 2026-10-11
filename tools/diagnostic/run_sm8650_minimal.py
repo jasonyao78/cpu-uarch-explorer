@@ -33,7 +33,7 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
 
 
-MODES = ('rob-zero-value', 'tlb-victim-history', 'rob-event-qualify', 'rob-resource', 'tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify', 'tlb-history', 'tlb-capacity', 'tlb-competition', 'rob-miss-qualify-thp', 'rob-miss-wide-thp', 'rob-miss-fixed-thp', 'rob-backing-observe', 'rob-collapse-qualify', 'rob-xor-qualify', 'rob-xor-canonical-qualify')
+MODES = ('rob-dependency', 'rob-zero-value', 'tlb-victim-history', 'rob-event-qualify', 'rob-resource', 'tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify', 'tlb-history', 'tlb-capacity', 'tlb-competition', 'rob-miss-qualify-thp', 'rob-miss-wide-thp', 'rob-miss-fixed-thp', 'rob-backing-observe', 'rob-collapse-qualify', 'rob-xor-qualify', 'rob-xor-canonical-qualify')
 QUALIFICATION_MODES = {'rob-miss-qualify':(1,64,128), 'rob-miss-qualify-thp':(1,64,128),
                        'rob-miss-wide-thp':(1,256,512), 'rob-miss-fixed-thp':(1,256), 'rob-collapse-qualify':(1,256), 'rob-xor-qualify':(1,64,128), 'rob-xor-canonical-qualify':(1,64,128)}
 THP_QUALIFICATION_MODES = (set(QUALIFICATION_MODES)-{'rob-miss-qualify'})|{'rob-backing-observe'}
@@ -41,8 +41,8 @@ THP_QUALIFICATION_MODES = (set(QUALIFICATION_MODES)-{'rob-miss-qualify'})|{'rob-
 OLD_PROTOCOL = 'docs/design/2026-10-09-minimal-tlb-rob-probes.md'
 CONFIRM_PROTOCOL = 'docs/design/2026-10-09-local-confirmation.md'
 BUILD_EVIDENCE = 'docs/reviews/evidence/2026-10-09-minimal-probes/build.json'
-NEW_EVIDENCE = {'rob-zero-value':'2026-10-11-rob-zero-value', 'tlb-victim-history':'2026-10-11-tlb-victim-history', 'rob-event-qualify':'2026-10-11-rob-event', 'rob-resource':'2026-10-11-rob-resource', 'tlb-competition':'2026-10-10-tlb-competition', 'rob-xor-canonical-qualify':'2026-10-09-canonical-load', 'rob-xor-qualify':'2026-10-09-encoded-load', 'rob-collapse-qualify':'2026-10-09-local-collapse', 'rob-backing-observe':'2026-10-09-backing-observation', 'rob-miss-fixed-thp':'2026-10-09-long-load-fixed', 'tlb-capacity':'2026-10-09-tlb-capacity', 'rob-miss-wide-thp':'2026-10-09-long-load-wide', 'tlb-history':'2026-10-09-tlb-history', 'rob-miss-qualify-thp':'2026-10-09-long-load-thp'}
-NEW_PROTOCOL = {'rob-zero-value':'docs/design/2026-10-11-rob-zero-value.md', 'tlb-victim-history':'docs/design/2026-10-11-tlb-victim-history.md', 'rob-event-qualify':'docs/design/2026-10-11-rob-event-qualification.md', 'rob-resource':'docs/design/2026-10-11-rob-filler-resource.md', 'tlb-competition':'docs/design/2026-10-10-tlb-competition-observation.md', 'rob-xor-canonical-qualify':'docs/design/2026-10-09-canonical-load-qualification.md', 'rob-xor-qualify':'docs/design/2026-10-09-encoded-load-qualification.md', 'rob-collapse-qualify':'docs/design/2026-10-09-local-collapse-qualification.md', 'rob-backing-observe':'docs/design/2026-10-09-backing-observation.md', 'rob-miss-fixed-thp':'docs/design/2026-10-09-fixed-load-qualification.md', 'tlb-capacity':'docs/design/2026-10-09-tlb-local-capacity.md', 'rob-miss-wide-thp':'docs/design/2026-10-09-wide-load-qualification.md', 'tlb-history':'docs/design/2026-10-09-tlb-history-discrimination.md',
+NEW_EVIDENCE = {'rob-dependency':'2026-10-11-rob-dependency', 'rob-zero-value':'2026-10-11-rob-zero-value', 'tlb-victim-history':'2026-10-11-tlb-victim-history', 'rob-event-qualify':'2026-10-11-rob-event', 'rob-resource':'2026-10-11-rob-resource', 'tlb-competition':'2026-10-10-tlb-competition', 'rob-xor-canonical-qualify':'2026-10-09-canonical-load', 'rob-xor-qualify':'2026-10-09-encoded-load', 'rob-collapse-qualify':'2026-10-09-local-collapse', 'rob-backing-observe':'2026-10-09-backing-observation', 'rob-miss-fixed-thp':'2026-10-09-long-load-fixed', 'tlb-capacity':'2026-10-09-tlb-capacity', 'rob-miss-wide-thp':'2026-10-09-long-load-wide', 'tlb-history':'2026-10-09-tlb-history', 'rob-miss-qualify-thp':'2026-10-09-long-load-thp'}
+NEW_PROTOCOL = {'rob-dependency':'docs/design/2026-10-11-rob-anchor-dependency.md', 'rob-zero-value':'docs/design/2026-10-11-rob-zero-value.md', 'tlb-victim-history':'docs/design/2026-10-11-tlb-victim-history.md', 'rob-event-qualify':'docs/design/2026-10-11-rob-event-qualification.md', 'rob-resource':'docs/design/2026-10-11-rob-filler-resource.md', 'tlb-competition':'docs/design/2026-10-10-tlb-competition-observation.md', 'rob-xor-canonical-qualify':'docs/design/2026-10-09-canonical-load-qualification.md', 'rob-xor-qualify':'docs/design/2026-10-09-encoded-load-qualification.md', 'rob-collapse-qualify':'docs/design/2026-10-09-local-collapse-qualification.md', 'rob-backing-observe':'docs/design/2026-10-09-backing-observation.md', 'rob-miss-fixed-thp':'docs/design/2026-10-09-fixed-load-qualification.md', 'tlb-capacity':'docs/design/2026-10-09-tlb-local-capacity.md', 'rob-miss-wide-thp':'docs/design/2026-10-09-wide-load-qualification.md', 'tlb-history':'docs/design/2026-10-09-tlb-history-discrimination.md',
                 'rob-miss-qualify-thp':'docs/design/2026-10-09-thp-load-qualification.md'}
 
 
@@ -53,6 +53,9 @@ def binary_name(mode):
 def conditions(mode):
     if mode not in MODES:
         raise ValueError('unknown registered mode: '+mode)
+    if mode=='rob-dependency':
+        from tools.diagnostic.rob_dependency_analysis import registered_plan
+        return [(c['name'],c['args']) for c in registered_plan()['conditions']]
     if mode=='rob-zero-value':
         from tools.diagnostic.rob_zero_analysis import registered_plan
         return [(c['name'],c['args']) for c in registered_plan()['conditions']]
@@ -164,6 +167,10 @@ def validate_realized(mode, opts, rows):
         if c.get('pointer_xor_requested') is not True: raise ValueError('requested/realized xor flag mismatch')
     elif any(k in c for k in ('pointer_xor','pointer_xor_requested','decode_instructions_per_iteration')):
         raise ValueError('unexpected realized pointer xor')
+    if '--anchor-link' in opts:
+        expected.update(anchor_link=value('--anchor-link',''),bridges_per_iteration=2)
+    elif any(k in c for k in ('anchor_link','bridges_per_iteration')):
+        raise ValueError('unexpected realized anchor dependency')
     for key,want in expected.items():
         if c.get(key)!=want: raise ValueError('requested/realized ROB '+key+' mismatch')
 
@@ -174,7 +181,7 @@ def main():
     parser.add_argument('--binary', type=Path, required=True)
     parser.add_argument('--host-exporter', type=Path)
     args = parser.parse_args()
-    if args.mode in ('rob-resource','rob-event-qualify','rob-zero-value') and not args.host_exporter:raise SystemExit('STOP resource requires actual host exporter')
+    if args.mode in ('rob-resource','rob-event-qualify','rob-zero-value','rob-dependency') and not args.host_exporter:raise SystemExit('STOP resource requires actual host exporter')
     protocol = CONFIRM_PROTOCOL if args.mode in ('tlb-confirm100','rob-fine') else OLD_PROTOCOL
     if args.mode=='rob-miss-qualify': protocol='docs/design/2026-10-09-long-load-qualification.md'
     protocol=NEW_PROTOCOL.get(args.mode,protocol)
@@ -195,7 +202,7 @@ def main():
     if sum(line.endswith('\tdevice') for line in devices) != 1:
         raise SystemExit('STOP exactly one online target required')
     ex = AdbExecutor(timeout_s=120)
-    for name in ('ptr_chase','rob_window_probe','tlb_local_pair','tlb_history','tlb_capacity','tlb_competition','tlb_victim_history','rob_cold_pair'):
+    for name in ('ptr_chase','rob_window_probe','tlb_local_pair','tlb_history','tlb_capacity','tlb_competition','tlb_victim_history','tlb_address_geometry','rob_cold_pair'):
         active = ex.execute(['pidof',name])
         if active.returncode != 1 or active.stdout.strip():
             raise SystemExit('STOP active probe or failed process check')
@@ -243,7 +250,7 @@ def main():
         manifest['midr']='0x410fd821'; manifest['base_page_bytes']=4096
         for name,opts in rows:
             if args.mode in QUALIFICATION_MODES or args.mode in ('rob-backing-observe','tlb-competition','tlb-victim-history'): time.sleep(15)
-            if args.mode in ('rob-resource','rob-event-qualify','rob-zero-value'):time.sleep(1)
+            if args.mode in ('rob-resource','rob-event-qualify','rob-zero-value','rob-dependency'):time.sleep(1)
             inspect(name+'-pre')
             result_code={}
             if args.host_exporter:
@@ -283,6 +290,10 @@ def main():
                     from tools.diagnostic.tlb_history_analysis import audit_history as cell_audit
                 plan=json.loads((ROOT/build['plan_path']).read_text())
                 cell_audit(parsed,'--reverse' in opts,plan['reverse' if '--reverse' in opts else 'forward'])
+            if args.mode=='rob-dependency':
+                from tools.diagnostic.rob_dependency_analysis import audit_process
+                if result.timed_out or result.stderr:raise RuntimeError('STOP dependency timeout/stderr '+name)
+                audit_process(parsed,{'name':name,'args':opts},(out/(name+'-single.bin')).read_bytes())
             if args.mode=='rob-zero-value':
                 from tools.diagnostic.rob_zero_analysis import audit_process
                 if result.timed_out or result.stderr:raise RuntimeError('STOP zero timeout/stderr '+name)
