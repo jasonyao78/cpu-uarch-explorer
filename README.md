@@ -1,8 +1,8 @@
 # cpu-uarch-explorer
 
-**r2 当前进展（2026-10-11）**：当前 Agent 独占设备，持续端到端推进 TLB/ROB；m0b 已完成集成使命。TLB 固定地址集的工作集转折 (8,9]、W9 单 victim 响应跨 victim/历史/方向复制；物理 ways 与硬件索引未认证。地址几何对照五mapping/77760窗已完成：target7在W8即复制，100/200在W9才复制，三跨度一致；通用8页边界被反例推翻，局部转折五新mapping/69120窗确认target7=(7,8]、100=(8,9]，两跨度/双order十曲线一致，C2至W10无转折。下一项转Q-A分布及Q-D有效在飞占用。ROB 零值对照已完成 64 进程/192 窗，有限主门 12/12 通过：MOVZ #0/#1 同码形下 rename 响应显著不同，说明资源和值域敏感；不换算 ROB/PRF 项数。同值锚点依赖48进程/144窗完成：带锚点Rn改变伴随周期及rename改变，但NONE负控波动使主门失败，按not-qualified归档。长 load 路线因模型资格不足停止，NOP 细扫仍只报告有效窗口区间。旧正式 A1、旧 frozen 与旧不完整 L1 不拼接。来源、构建、启动和 raw SHA 逐批核验；正式 runner 接入及窗内 clock 后置项保留于 `docs/open-items.md`。
+**r2 当前进展（2026-10-11）**：当前 Agent 独占设备，持续端到端推进 TLB/ROB；m0b 已完成集成使命。TLB 固定地址集的工作集转折 (8,9]、W9 单 victim 响应跨 victim/历史/方向复制；物理 ways 与硬件索引未认证。地址几何对照五mapping/77760窗已完成：target7在W8即复制，100/200在W9才复制，三跨度一致；通用8页边界被反例推翻，局部转折五新mapping/69120窗确认target7=(7,8]、100=(8,9]，两跨度/双order十曲线一致，C2至W10无转折。Q-D有效在飞占用495窗/240长门通过，固定总8192页K1→8 A/C=.553→3.039；短门235/240部分不合格保留，不认证walker数。下一项转Q-A页集合/offset/order分布。ROB 零值对照已完成 64 进程/192 窗，有限主门 12/12 通过：MOVZ #0/#1 同码形下 rename 响应显著不同，说明资源和值域敏感；不换算 ROB/PRF 项数。同值锚点依赖48进程/144窗完成：带锚点Rn改变伴随周期及rename改变，但NONE负控波动使主门失败，按not-qualified归档。长 load 路线因模型资格不足停止，NOP 细扫仍只报告有效窗口区间。旧正式 A1、旧 frozen 与旧不完整 L1 不拼接。来源、构建、启动和 raw SHA 逐批核验；正式 runner 接入及窗内 clock 后置项保留于 `docs/open-items.md`。
 
-最新证据：[TLB 地址族局部转折](docs/reviews/2026-10-11-tlb-local-turn-results.md)、[ROB 同值依赖](docs/reviews/2026-10-11-rob-dependency-results.md)、[TLB 地址几何反例](docs/reviews/2026-10-11-tlb-address-geometry-results.md)、[TLB victim/历史对照](docs/reviews/2026-10-11-tlb-victim-history-results.md)、[ROB 零值对照](docs/reviews/2026-10-11-rob-zero-value-results.md)、[ROB 操作事件资格](docs/reviews/2026-10-11-rob-event-results.md)。历次反例和全部原始窗口按各报告路径保留，结果不晋升为物理容量结论。
+最新证据：[TLB K链有效占用](docs/reviews/2026-10-11-tlb-walk-parallel-results.md)、[TLB 地址族局部转折](docs/reviews/2026-10-11-tlb-local-turn-results.md)、[ROB 同值依赖](docs/reviews/2026-10-11-rob-dependency-results.md)、[TLB 地址几何反例](docs/reviews/2026-10-11-tlb-address-geometry-results.md)、[TLB victim/历史对照](docs/reviews/2026-10-11-tlb-victim-history-results.md)、[ROB 零值对照](docs/reviews/2026-10-11-rob-zero-value-results.md)、[ROB 操作事件资格](docs/reviews/2026-10-11-rob-event-results.md)。历次反例和全部原始窗口按各报告路径保留，结果不晋升为物理容量结论。
 
 跨 ISA、跨 OS 的 CPU 微架构探索平台：真实设备微架构探测 → 统一实验协议与数据模型 → gem5 O3 建模与实机校准 → 综合 Benchmark 验证 → ARM / x86 / RISC-V 对比。
 
@@ -71,5 +71,3 @@ OI-1/OI-6）。
 - 主仓许可证：Apache-2.0（见 `LICENSE`；决策背景见 `docs/adr/ADR-0002-license-apache2.md`，含历史 demo 代码来源审计）。
 - 仓库未来转公开时 git 历史全量可见：从第一个 commit 起即执行设备匿名化与 secret 扫描，请勿提交设备序列号、NDA 资料。
 - 第三方参考材料位于**仓库外** `../cpu-uarch-ref/`（只读约束），受跟踪索引见 `docs/reference-materials.md`；仅仓库所有者明确授权的三份调查文档按原文归档在 `docs/reference-materials/`，其来源与协作属性在目录 README 单独披露。
-
-Q-D有效在飞占用有限结果：[`2026-10-11-tlb-walk-parallel-results.md`](docs/reviews/2026-10-11-tlb-walk-parallel-results.md)，495窗、240/240长窗门；固定总8192页K1→8 A/C=.553→3.039，不认证walker数量，短窗235/240部分不合格原样保留。
