@@ -446,4 +446,8 @@
 
 - **ROB零立即数有限批已完成 / 当前ROB负责人 / 触发=依赖生命周期与锚点长度控制**：源码 `e23c6bb`、实际启动 `36031d0`、二进制 SHA `60f974931e7d6b0d8303381b3aa6bd77ded1568eb74803a1d260c1b0e98c12e4`；`docs/reviews/2026-10-11-rob-zero-value-results.md` 完整64进程/192窗技术接受、12/12有限主门通过。MOVI/fsqrt/N128 rename占比约87%、MOV0为0，总周期均约416；零值影响本协议的资源响应，不认证物理ROB/PRF或一般zero elimination。直接raw第二算术路径、实际码字bit5唯一差、NDK两次一致及全部325 raw SHA通过。结果依赖/生命周期、锚点长度、rename满结构专门正控、窗内clock、正式runner/schema/CMake与ALU/FPU仍按原归属开放；下一设计由本结果选有区分力的控制，不重复加密NOP。
 
-- **TLB地址几何控制已冻结 / 当前TLB负责人 / 触发=本轮生产链验收后串行上板**：`docs/design/2026-10-11-tlb-address-geometry.md`、源码 `1db75b9`，路径 `probes/diagnostic/tlb_address_geometry.cpp`、`tools/diagnostic/tlb_geometry_analysis.py`、`tools/diagnostic/run_sm8650_geometry.py`；同mapping三个target×三跨度，五mapping/77760窗，W1控制及W8/9同victim。仅VA几何代理，不据此认证物理descriptor/hash/ways；当前没有此批目标数据，须实链、来源与失败停止核验后才执行。物理ways、PFN/cache与翻译共享继续沿OI-TLB-LOCAL跟踪。
+- **TLB地址几何有限批已完成 / 当前TLB负责人 / 触发=局部转折确认设计**：source `1db75b9` / consumer `817da5d` / actual launch `8a60ad7`；`docs/reviews/2026-10-11-tlb-address-geometry-results.md` 完整五mapping/77760窗、2880/2880 lookup技术门通过。target7 C1的W8/W9均5/5，100/200仅W9，三跨度1/2/16均同模式；C2无复制。通用8页边界已反证；不换算物理7/8ways。全部原值、VA几何代理、25 raw SHA及直接第二算术路径保留；下一批按该差异冻结同max页集/固定victim W6–9、matched负控和跨度，不围绕单target追门。物理ways、descriptor/未建模hash/PFN/cache及翻译共享仍OPEN，沿OI-TLB-LOCAL跟踪。
+
+- **ROB锚点依赖控制已冻结 / 当前ROB负责人 / 触发=软件生产链与双构建验收后串行上板**：`docs/design/2026-10-11-rob-anchor-dependency.md`；源 `310fe96`，`docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c` 可选同FMOV桥、同ADD结果、Rn域独立/依赖控制。两档锚点与none、48进程/144窗预注册；当前无该批目标数据，须consumer、实际码及driver写盘/raw验收。只能报告依赖相关有限响应，不认证ROB/PRF/RS项数，旧八类无旗标字节/配置保持。
+
+- **全目标收口对账 / 当前端到端TLB与ROB负责人 / 触发=下一两批结果归档后**：按用户第一性原理路线更新原r2合同的证据映射：Q-A分布敏感性、Q-B冲突行为、Q-D有效在飞占用为原必做项，Q-C索引族探索及物理ROB/PRF/RS为独立边界；不得用B类局部对照宣称全部TLB/ROB已完成。最终报告给已测/限定操作性/参考/不可识别逐项终态；未知问题需有限反证或正式不可识别说明，不能靠永续扫描兜底。正式软件接入和ALU/FPU专项按原触发保留。

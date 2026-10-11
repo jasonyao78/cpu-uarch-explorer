@@ -1,0 +1,4686 @@
+{
+  "interpretation": "independent arithmetic by same root, not another reviewer",
+  "processes": 5,
+  "windows": 77760,
+  "raw_files": 25,
+  "all_raw_sha256": {
+    "driver.py": "6ab722396ab5269bc34d8febbaadf7f8c7f7e2cf3f37d93db838af4c42055db7",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "epoch-0-post-environment.json": "a4b80287dd87ee7df05dffde7a60c6c55ea58aa63be6e5b94bd1088ba9a28762",
+    "epoch-0-pre-environment.json": "cec196c32c58670439f642da45320a7487b80c8f75cbb98a1a411a1b2e27b6ec",
+    "epoch-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-0.stdout.jsonl": "c082ba7df210405d9692bf12ad708628625196a03eaa064c922f7ebe8e5188e1",
+    "epoch-1-post-environment.json": "c087fcb54ebaf6fb1b26487da2f37d900d4a087c46d424287bd8a3ddad9143b7",
+    "epoch-1-pre-environment.json": "3f14d283d7e5d5a5fd47d5b43e4ba3fbf560cff7fdd1786fdec27f6b521cbaf1",
+    "epoch-1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-1.stdout.jsonl": "41d3869d875bb53f2278ab5248de27930ceb01e9bc63fd5b2e6fb45abba8cac2",
+    "epoch-2-post-environment.json": "71f09b499b6d13dba9f0398d433284aa4b1ee1059d15690f032debc25933a84e",
+    "epoch-2-pre-environment.json": "d8b346c565949c87d8c08df40fbc5769451a83a644ce64c069752067a59006ad",
+    "epoch-2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-2.stdout.jsonl": "e6d5f674b3466469f0a67a071cabc67449bcb0226790d6b515fcfd180ff05d20",
+    "epoch-3-post-environment.json": "47af6670757f96a0f0926debf7178e4b9b0c3fa8f3869ec9b13678c8b6bcb4a0",
+    "epoch-3-pre-environment.json": "909406328465d16a43ca10acc072e5c07ac3c2a54b7c0614766e66ddf54fa5c9",
+    "epoch-3.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-3.stdout.jsonl": "7a1854e8dfc3b9eaa808c944042dac1d1421d25ff4bd94075c75abc801dc8aca",
+    "epoch-4-post-environment.json": "d83d4a14a659ee64e75463502e47d6acf31686c41c3fb4c4ecff5c3a0858bbb9",
+    "epoch-4-pre-environment.json": "ecbe883ab15a6a71ff6bd71792150312215c07bab542c49a32f86b175b7d4bde",
+    "epoch-4.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-4.stdout.jsonl": "d17f87a888ab431ebb14077baa51b67d3766ba828457487500c4acbd47534112",
+    "final-environment.json": "adbc4b5f35228c89b3aab0a9c4d86d0f14eee4fd56352c404e25a1302c556087",
+    "initial-environment.json": "b3f9ed2759be76a8fc03a76519ed93a6d69cd6173d387645a5b68ffdd27564c5",
+    "manifest.json": "bcc093af66383256f08f7f59d4e68816c2f8425ae18a2080825206179e52e632"
+  },
+  "lookup_passed": 2880,
+  "lookup_points": 2880,
+  "replication": [
+    {
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "mappings": []
+    },
+    {
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "mappings": []
+    },
+    {
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "mappings": []
+    },
+    {
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "mappings": []
+    },
+    {
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "mappings": []
+    },
+    {
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "mappings": []
+    },
+    {
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "mappings": []
+    },
+    {
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "mappings": []
+    },
+    {
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "mappings": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "mappings": []
+    },
+    {
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "mappings": []
+    }
+  ],
+  "victim_rates": [
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.25,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.25,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.25,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.25,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.1875,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.25,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.125,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 0,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 0,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 8,
+      "order": 1,
+      "rate": 0.0625,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "W": 9,
+      "order": 1,
+      "rate": 1,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 8,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "W": 9,
+      "order": 1,
+      "rate": 0,
+      "issues": []
+    }
+  ],
+  "VA_geometry_proxies": [
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 4,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 4,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 0,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 4,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 4,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 0,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 4,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 4,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 0,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 1,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 2,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 3,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 7,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 100,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 1,
+      "C": 1,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 1,
+      "C": 2,
+      "region_count_w8": 5,
+      "region_count_w9": 5
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 2,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 2,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 16,
+      "C": 1,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    },
+    {
+      "mapping": 4,
+      "target": 200,
+      "step": 16,
+      "C": 2,
+      "region_count_w8": 8,
+      "region_count_w9": 9
+    }
+  ],
+  "physical_ways_certified": false
+}
