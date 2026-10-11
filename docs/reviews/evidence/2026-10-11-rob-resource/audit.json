@@ -1,0 +1,2894 @@
+{
+  "direct_raw_arithmetic_passed": true,
+  "reviewer": "root second arithmetic path; no independent reviewer claim",
+  "processes": 140,
+  "windows": 420,
+  "raw_files": 705,
+  "environment_endpoints": 282,
+  "temperature_range": [
+    38.0,
+    55.7
+  ],
+  "retired_relative_error_range": [
+    1.1565578015492306e-06,
+    0.0009078390759876564
+  ],
+  "event_statistics": [
+    {
+      "event": "0x11",
+      "minimum": 131393,
+      "maximum": 109356822,
+      "sum": 17168603619,
+      "nonzero": 420
+    },
+    {
+      "event": "0x8",
+      "minimum": 262399,
+      "maximum": 205783295,
+      "sum": 44276228700,
+      "nonzero": 420
+    },
+    {
+      "event": "0x3",
+      "minimum": 0,
+      "maximum": 22,
+      "sum": 5679,
+      "nonzero": 419
+    },
+    {
+      "event": "0x17",
+      "minimum": 0,
+      "maximum": 54,
+      "sum": 4719,
+      "nonzero": 281
+    },
+    {
+      "event": "0x34",
+      "minimum": 0,
+      "maximum": 2,
+      "sum": 156,
+      "nonzero": 144
+    },
+    {
+      "event": "0x2",
+      "minimum": 0,
+      "maximum": 50,
+      "sum": 7176,
+      "nonzero": 415
+    }
+  ],
+  "environment": [
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 41.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 41.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 41.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 41.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 41.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 41.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 42.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-fsqrt-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 40.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 40.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 40.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 41.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-add-none-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 41.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 55.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-fsqrt-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 46.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-fadd-none-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-fsqrt-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 41.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 42.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movi-none-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 42.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-fsqrt-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 44.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-movr-none-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 41.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 41.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 40.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 40.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-fsqrt-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 42.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 40.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 38.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 41.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 39.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 40.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 41.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 41.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 40.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 41.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 41.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 41.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 41.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 42.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e0-nop-none-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 41.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 44.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 44.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-fsqrt-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 44.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-add-none-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 44.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-fsqrt-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 44.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 44.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 45.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-fadd-none-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-fsqrt-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movi-none-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 43.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 43.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 45.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-fsqrt-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 43.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-movr-none-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 45.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 45.5,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 43.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 45.1,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-fsqrt-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 43.4,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n0-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n0-pre-environment.json",
+      "max_cpu_c": 43.8,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n128-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n128-pre-environment.json",
+      "max_cpu_c": 44.2,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n256-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n256-pre-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n384-post-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n384-pre-environment.json",
+      "max_cpu_c": 44.6,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n512-post-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n512-pre-environment.json",
+      "max_cpu_c": 45.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n704-post-environment.json",
+      "max_cpu_c": 45.3,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n704-pre-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n768-post-environment.json",
+      "max_cpu_c": 45.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "e1-nop-none-k16-a0-n768-pre-environment.json",
+      "max_cpu_c": 44.9,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "final-environment.json",
+      "max_cpu_c": 45.7,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    },
+    {
+      "endpoint": "initial-environment.json",
+      "max_cpu_c": 38.0,
+      "policy7": {
+        "governor": "walt",
+        "min_khz": 672000,
+        "max_khz": 2745600,
+        "cur_khz": 672000
+      }
+    }
+  ],
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_head": "1551c99252c36d088ab66145bb92d6aefc551170",
+  "binary_source_head": "1ef4baad5e9a34310b6bc53e566bd0b5b7fbfbb7",
+  "binary_sha256": "cb4645f65d8352e839144541bcaefab32cad5a7ce2006d9fb219479c8384d5ba",
+  "wall_seconds": 22.481920078396797,
+  "class_status": {
+    "nop": "interval",
+    "add": "interval",
+    "movi": "interval",
+    "movr": "interval",
+    "fadd": "ambiguous"
+  }
+}

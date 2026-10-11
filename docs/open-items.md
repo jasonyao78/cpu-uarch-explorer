@@ -436,3 +436,6 @@
 - **同码形四状态有限诊断结束 / 当前ROB负责人 / 触发=资源/重叠新问题设计**：source1fac9db/launchf339b66，`docs/reviews/2026-10-10-cold-state-results.md`完整2mapping/6144窗技术通过、激励8/8、模型0/8；400门376通过/24未过，全部IR92/datawalk0、617负残差与[-26,12]范围保留。相同P/S码形S残差中位−7..−9.5，单独A/B码形差异不是充分解释；不单归DMP/DVFS/缓存维护/内存系统，不认证DRAM、物理ROB或原N扫描资格，不重复至过门。若采用新的有效重叠扫描，需另冻具体估计量及filler/串行/依赖对照，allocation/fusion、PRF/RS与精确计时合同仍OPEN。下一TLB对照需观测竞争访问本身是否有相关翻译层激励，不能把无victim响应当未被evict的物理ways结论；归当前端到端负责人，不拼旧正式A1。
 
 - **TLB竞争逐遍有限批完成 / 当前端到端负责人 / 触发=下一victim身份/历史对照**：source18aff85/launchff55b06，`docs/reviews/2026-10-11-tlb-competition-results.md` 5mapping/36480窗技术通过，1500/1500激励门过；8遍K8..11双order5/5响应、4遍K11为4/5，5/20复制项过门。两格准备漂移与孤立K7窗保留，旧10400重放字节一致。lookup不认证admission/真实same-set，短遍K非单调不命名物理ways；下一有限对照先换同页集victim身份/训练次序，不盲目增K，不拼旧A1。ROB另冻资源/有效重叠估计量、保持精确计时/分配认证OPEN，沿OI-ROB-PROBE-20261009。
+
+
+- **ROB五类资源对照完成 / 当前端到端负责人 / 触发=专门事件资格与依赖对照**：复用source1ef4baa/launch1551c99，`docs/reviews/2026-10-11-rob-resource-results.md` 完整140进程/420窗技术通过，NOP(512,704]、ADD/MOVI/MOVR(128,256]，FADD四格range超10%为ambiguous。全部705原始SHA与第二算术路径相符；最高55.7°C、端点频率非窗内恒频，分类/时间残差保留。N阈值不通用于所有filler；MOVI#1/MOVR接近不认证elimination，NONE简单max不足但不排除前端/分配组合效应。下一小型设计先核target r0p1操作/rename事件语义、支持与计数控制，配实际生成码；操作比不是物理ROB allocation，PRF/RS/融合/精确计时仍OPEN。不得用更密NOP或选择FADD安静样本追容量；TLB victim身份/历史按既有条目继续。冻结稿0x02标签勘误v1.0.1透明保留启动v1 SHA，编码与统计不变。正式runner/schema/CMake接入、固定频率与ALU/FPU专项沿原触发，不隐藏后置。
