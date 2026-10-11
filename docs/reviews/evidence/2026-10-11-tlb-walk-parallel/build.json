@@ -1,0 +1,28 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "0bda583e793fa61ed32e7e9f9ba3e384dae29965",
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "flags": [
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic"
+  ],
+  "independent_rebuild_byte_identical": true,
+  "binaries": {
+    "tlb_walk_parallel": "0038f7f17769532cf5f9a5abae3b5ebbd88d82a56758b4fbb45736fc1415c7d1"
+  },
+  "source_sha256": {
+    "probes/diagnostic/tlb_walk_parallel.cpp": "7b8429fe14eb6e18f9f8a36e8089d18c67155bc805e46d6fd0bf34200cd712db",
+    "probes/diagnostic/tlb_walk_parallel_layout.h": "c1b38819ae8761ab561097bf88f5e29b06c31cc5de364853e03e04800b682454",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6"
+  },
+  "plan_path": "docs/reviews/evidence/2026-10-11-tlb-walk-parallel/plan.json",
+  "plan_sha256": "cedbfd09cef8968d28114d5d28ed1614f6ee38f6b1e770ca60e14cac7c0a3bb2"
+}

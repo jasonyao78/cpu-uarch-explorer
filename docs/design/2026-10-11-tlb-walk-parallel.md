@@ -18,7 +18,7 @@
 
 `tools/diagnostic/tlb_walk_parallel_analysis.py` 验完整请求/实现/序列/索引/PMU IDs/backing/窗口/源二进制谱系。每观测 C=cycles,M=walk,A=walk-cycle积分，给出A/C、M/C、A/M（M=0为None+walk-inactive）、loads/C。汇总是Σ计数比，禁止median(A)/median(C)。不预设A/C≤1；驻留量是事件定义下的有效平均而非每个walker的物理时延。
 
-技术IR门：[.95,1.05]*(loads+2loads/K)，允许固定函数/读包装开销；空窗不套此门。作用域资格：每个长窗high M/loads≥0.1且A>0，low M/loads≤0.001；0x8128/0x34随high/low方向共变。空窗中位C、A、M分别必须≤每个非空窗对应值的1%才能声明其事件背景可忽略；分母为0时要求背景0。分别命名每个背景门，不因为A/C或M/C失败丢数据。短/长统计并列，给背景相减值（负值保留）；命名合格以长窗high/low及背景门为依据，任一不满足输出not-qualified，不追改阈值。不设置拟合平台或硬件容量门。
+技术IR门：[.95,1.05]*(loads+2loads/K)，允许固定函数/读包装开销；空窗不套此门。作用域资格：每个长窗high M/loads≥0.1且A>0，low M/loads≤0.001；0x8128/0x34随high/low方向共变：每个high长窗A必须大于同epoch/scope/K/loads的low三窗中位A，二者load数相同。空窗中位C、A、M分别必须≤每个非空窗对应值的1%才能声明其事件背景可忽略；分母为0时要求背景0。分别命名每个背景门，不因为A/C或M/C失败丢数据。短/长统计并列，给背景相减值（负值保留）；命名合格以长窗high/low及背景门为依据，任一不满足输出not-qualified，不追改阈值。不设置拟合平台或硬件容量门。
 
 技术全合格也不保证缓存压力匹配。每K报告每load L1D/L2D refill、low loads/C与high loads/C；若两者同样受限，不能独归因walker。翻译占用可以支持有效并发有增长，平台只能称有限K范围的负载响应。
 
