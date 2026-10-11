@@ -1,0 +1,28 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "57f96a9a35128b7b27aaba67f8d819516b7c96a4",
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "flags": [
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic"
+  ],
+  "independent_rebuild_byte_identical": true,
+  "binaries": {
+    "tlb_page_distribution": "5cb662dfd5e0d88cbc0502b510fc499a32de3f1dbdf103020f9c7c1ceec39cbf"
+  },
+  "source_sha256": {
+    "probes/diagnostic/tlb_page_distribution.cpp": "59e99c10099923b3805bfeeabd15de53021bb7e7b6ff11ab29b26e9b5c4a1855",
+    "probes/diagnostic/tlb_page_distribution_layout.h": "718061e15f8ee8032b0fbe0593cb1df27c88956e01702d3394ea9772f874ed43",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6"
+  },
+  "plan_path": "docs/reviews/evidence/2026-10-11-tlb-page-distribution/plan.json",
+  "plan_sha256": "043ddc6510376b65e785e2db80ff4d1694dc603f4c0612a89ba2ccbf6c505a3c"
+}

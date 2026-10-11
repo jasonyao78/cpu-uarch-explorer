@@ -20,7 +20,7 @@ N=[32,64,80,96,112,128,160,192,256,512,1024,2048]，3集合×2offset×2order×12
 
 CPU7/type8/GROUP+ID/exclude_kernel,hv/pinned；六事件[0x11 cycles,0x08 IR,0x05 L1D_TLB_REFILL,0x03 L1D_CACHE_REFILL,0x34 DTLB_WALK,0x35 ITLB_WALK]。完整请求/实现/源二进制谱系、PMU IDs、before/after4K backing、每窗等时不mux、计数不回退与同N三族offset直方图通过才接受技术记录。IR门[.95,1.05]*3loads，包含read/call固定user开销。
 
-消费者 `tools/diagnostic/tlb_distribution_analysis.py` 输出每窗及Σ比的refills/load、walks/load、data-refills/load、I-walk/load、cycles/load；保留空窗相减及负值，不用ratio-of-medians。背景门：floor中位cycles≤非空窗C的1%；floor L1D-TLB refill≤非空loads*.001；每非空I-walk/loads≤.001。未过门保持原窗输出INCONCLUSIVE，禁止删点救门。0x03包括walk产生的cache流量，不是纯data load miss；常量offset只能揭露cache竞争解释，不能严格单独剥离它。
+消费者 `tools/diagnostic/tlb_distribution_analysis.py` 输出每窗及Σ比的refills/load、walks/load、data-refills/load、I-walk/load、cycles/load；保留空窗相减及负值，不用ratio-of-medians。背景门：floor中位cycles≤非空窗C的1%；floor L1D-TLB refill≤非空loads*.001；每非空I-walk/loads≤.001。未过门保持原窗，全局输出INCONCLUSIVE；该epoch/集合/offset/order任一N背景失败时，曲线出口INCOMPUTABLE，不再命名区间；比较出口admissible=false/replicated=false，数值复制另保留numeric_replicated，不可脱离门读为已确认差异。禁止删点救门。0x03包括walk产生的cache流量，不是纯data load miss；常量offset只能揭露cache竞争解释，不能严格单独剥离它。
 
 主对比只用rotated：sparse-contiguous与random-set-contiguous，按同epoch/N/order配对。预注册有限可复现差异：至少一个N/对照在两order、五epochs共10个delta均同方向且|delta|≥.05 refill/load →DISTRIBUTION_SENSITIVE；所有主delta都|delta|<.05 →NO_DIFFERENCE_DETECTED（报告实际delta范围与.05操作检出门，不冒称置信区间/物理无差异）；其余INCONCLUSIVE。非主constant结果完整并列，若offset也改变响应必须醒目保留。不存在ATTRIBUTED升级态，本协议无HPA或PFN干预能力。
 

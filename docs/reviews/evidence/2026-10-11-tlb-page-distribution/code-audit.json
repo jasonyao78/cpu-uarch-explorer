@@ -1,0 +1,58 @@
+{
+  "binary_sha256": "5cb662dfd5e0d88cbc0502b510fc499a32de3f1dbdf103020f9c7c1ceec39cbf",
+  "capstone_version": "5.0.7",
+  "kernels": [
+    {
+      "k": 1,
+      "symbol": "distribution_k1",
+      "address": "0x2431cc",
+      "bytes": 32,
+      "loop_address": "0x2431d8",
+      "instructions": [
+        {
+          "address": "0x2431cc",
+          "mnemonic": "mov",
+          "operands": "x9, x0"
+        },
+        {
+          "address": "0x2431d0",
+          "mnemonic": "ldr",
+          "operands": "x0, [x9]"
+        },
+        {
+          "address": "0x2431d4",
+          "mnemonic": "mov",
+          "operands": "x8, x1"
+        },
+        {
+          "address": "0x2431d8",
+          "mnemonic": "ldr",
+          "operands": "x0, [x0]"
+        },
+        {
+          "address": "0x2431dc",
+          "mnemonic": "subs",
+          "operands": "x8, x8, #1"
+        },
+        {
+          "address": "0x2431e0",
+          "mnemonic": "b.ne",
+          "operands": "#0x2431d8"
+        },
+        {
+          "address": "0x2431e4",
+          "mnemonic": "str",
+          "operands": "x0, [x9]"
+        },
+        {
+          "address": "0x2431e8",
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ],
+      "loop_loads": 1,
+      "loop_instructions": 3,
+      "loop_spills": 0
+    }
+  ]
+}
