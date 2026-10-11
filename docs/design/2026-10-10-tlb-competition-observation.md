@@ -1,4 +1,4 @@
-# TLB竞争访问观测与遍数对照（冻结v1）
+# TLB竞争访问观测与遍数对照（冻结v1.0.1）
 
 ## 本次任务的目的（给人类看）
 
@@ -28,5 +28,5 @@ victim逐H/K/order/passes披露walk>0率、均值、count>1、前后8率差；A�
 
 1. `tools/diagnostic/tests/test_tlb_competition_producer.py`先真实clang++编译/请求--plan，缺源RED；独立Python96cell/7296role顺序期待；include真实layout打印每trial production schedule；覆盖K/遍数/方向/slot4闭环，GREEN后源提交。
 2. `tools/diagnostic/tests/test_tlb_competition_analysis.py`先实际producer plan/config/geometry→仅合成外部测量→审计，缺消费者RED；全36480覆盖和typed字段/no-mux/role/pass/缺失重复乱序、坏plan/raw/source/env/code绑定反例。纯计数金样分别测K事件激励、K0背景、重复响应/污染、漂移和H/epoch不得覆盖。GREEN后接driver/summarizer，旧10400raw重放字节一致；新/邻近及完整diagnostic回归。
-3. 已提交源以NDK27.2/API34 `-O2 -Wall -Wextra -Werror -static -DCPU_UARCH_HAVE_PERF=1 -Iprobes/common -Iprobes/diagnostic`加 `probes/common/perf_window.cpp`两次独立构建一致；真实host --plan正反生成注册计划，登记全部递归自有依赖SHA并提交，实际binary窗反汇编核最后F/竞争/单victim load边界。
+3. 已提交源以NDK27.2/API34 `-O2 -Wall -Wextra -Werror -static -DCPU_UARCH_HAVE_PERF=1 -Iprobes/common -Iprobes/diagnostic`以header-only `probes/common/perf_window.h`两次独立构建一致（源码核实不存在perf_window.cpp，非数学/预算变更）；真实host --plan正反生成注册计划，登记全部递归自有依赖SHA并提交，实际binary窗反汇编核最后F/竞争/单victim load边界。
 4. root有限5mapping→消费者全raw接受→另一条直接计数复算→ `docs/reviews/2026-10-10-tlb-competition-results.md`、全部匿名窗口/图、README/OI，按结果另案选择replacement/geometry反例，不拼旧A1或不停重测。任何未竟科学问题登记OI与触发，物理ROB沿已登记资源/计时合同。
