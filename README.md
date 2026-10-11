@@ -1,8 +1,8 @@
 # cpu-uarch-explorer
 
-**r2 当前进展（2026-10-11）**：当前 Agent 独占设备，持续端到端推进 TLB/ROB；m0b 已完成集成使命。TLB 固定地址集的工作集转折 (8,9]、W9 单 victim 响应跨 victim/历史/方向复制；物理 ways 与硬件索引未认证。地址几何对照五mapping/77760窗已完成：target7在W8即复制，100/200在W9才复制，三跨度一致；通用8页边界被反例推翻，下一局部转折针对地址族差异。ROB 零值对照已完成 64 进程/192 窗，有限主门 12/12 通过：MOVZ #0/#1 同码形下 rename 响应显著不同，说明资源和值域敏感；不换算 ROB/PRF 项数。锚点依赖对照已冻结、源码310fe96，尚未上板。长 load 路线因模型资格不足停止，NOP 细扫仍只报告有效窗口区间。旧正式 A1、旧 frozen 与旧不完整 L1 不拼接。来源、构建、启动和 raw SHA 逐批核验；正式 runner 接入及窗内 clock 后置项保留于 `docs/open-items.md`。
+**r2 当前进展（2026-10-11）**：当前 Agent 独占设备，持续端到端推进 TLB/ROB；m0b 已完成集成使命。TLB 固定地址集的工作集转折 (8,9]、W9 单 victim 响应跨 victim/历史/方向复制；物理 ways 与硬件索引未认证。地址几何对照五mapping/77760窗已完成：target7在W8即复制，100/200在W9才复制，三跨度一致；通用8页边界被反例推翻，下一局部转折针对地址族差异。ROB 零值对照已完成 64 进程/192 窗，有限主门 12/12 通过：MOVZ #0/#1 同码形下 rename 响应显著不同，说明资源和值域敏感；不换算 ROB/PRF 项数。同值锚点依赖48进程/144窗完成：带锚点Rn改变伴随周期及rename改变，但NONE负控波动使主门失败，按not-qualified归档。长 load 路线因模型资格不足停止，NOP 细扫仍只报告有效窗口区间。旧正式 A1、旧 frozen 与旧不完整 L1 不拼接。来源、构建、启动和 raw SHA 逐批核验；正式 runner 接入及窗内 clock 后置项保留于 `docs/open-items.md`。
 
-最新证据：[TLB 地址几何反例](docs/reviews/2026-10-11-tlb-address-geometry-results.md)、[TLB victim/历史对照](docs/reviews/2026-10-11-tlb-victim-history-results.md)、[ROB 零值对照](docs/reviews/2026-10-11-rob-zero-value-results.md)、[ROB 操作事件资格](docs/reviews/2026-10-11-rob-event-results.md)。历次反例和全部原始窗口按各报告路径保留，结果不晋升为物理容量结论。
+最新证据：[ROB 同值依赖](docs/reviews/2026-10-11-rob-dependency-results.md)、[TLB 地址几何反例](docs/reviews/2026-10-11-tlb-address-geometry-results.md)、[TLB victim/历史对照](docs/reviews/2026-10-11-tlb-victim-history-results.md)、[ROB 零值对照](docs/reviews/2026-10-11-rob-zero-value-results.md)、[ROB 操作事件资格](docs/reviews/2026-10-11-rob-event-results.md)。历次反例和全部原始窗口按各报告路径保留，结果不晋升为物理容量结论。
 
 跨 ISA、跨 OS 的 CPU 微架构探索平台：真实设备微架构探测 → 统一实验协议与数据模型 → gem5 O3 建模与实机校准 → 综合 Benchmark 验证 → ARM / x86 / RISC-V 对比。
 

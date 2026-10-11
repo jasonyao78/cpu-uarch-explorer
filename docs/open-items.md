@@ -448,6 +448,8 @@
 
 - **TLB地址几何有限批已完成 / 当前TLB负责人 / 触发=局部转折确认设计**：source `1db75b9` / consumer `817da5d` / actual launch `8a60ad7`；`docs/reviews/2026-10-11-tlb-address-geometry-results.md` 完整五mapping/77760窗、2880/2880 lookup技术门通过。target7 C1的W8/W9均5/5，100/200仅W9，三跨度1/2/16均同模式；C2无复制。通用8页边界已反证；不换算物理7/8ways。全部原值、VA几何代理、25 raw SHA及直接第二算术路径保留；下一批按该差异冻结同max页集/固定victim W6–9、matched负控和跨度，不围绕单target追门。物理ways、descriptor/未建模hash/PFN/cache及翻译共享仍OPEN，沿OI-TLB-LOCAL跟踪。
 
-- **ROB锚点依赖控制已冻结 / 当前ROB负责人 / 触发=软件生产链与双构建验收后串行上板**：`docs/design/2026-10-11-rob-anchor-dependency.md`；源 `310fe96`，`docs/cpu-uarch-deep-analysis/rob-deep-analysis/probes/rob_window_probe.c` 可选同FMOV桥、同ADD结果、Rn域独立/依赖控制。两档锚点与none、48进程/144窗预注册；当前无该批目标数据，须consumer、实际码及driver写盘/raw验收。只能报告依赖相关有限响应，不认证ROB/PRF/RS项数，旧八类无旗标字节/配置保持。
+- **ROB同值锚点依赖有限批完成 / 当前ROB负责人 / 触发=NONE波动及同进程配对控制设计**：source `310fe96` / consumer `3f5e4fd` / actual launch `ab8829f`；`docs/reviews/2026-10-11-rob-dependency-results.md` 48进程/144窗/245SHA技术接受，四主DID为正但全部因NONE独立流range/median超10%而not-qualified。带fsqrt匹配流周期稳定、N128依赖流增约33–35cycles，rename接近零（最大比例3.33e-6而非全零）；不认证RS/PRF/ROB条数。新码N0相同/非零仅2N Rn位域、双NDK及48体独立解码、直接raw第二算术精确一致。下一ROB针对供给波动与同进程配对，不直接重跑追门；物理allocation、窗内clock、专门语义正控沿原边界OPEN。
+
+- **TLB局部转折软件已验 / 当前TLB负责人 / 触发=本轮raw回归提交后串行上板**：`docs/design/2026-10-11-tlb-local-turn.md`，source `ac38cd3` / consumer `fd0685c`；`probes/diagnostic/tlb_local_turn.cpp`、`tools/diagnostic/tlb_turn_analysis.py`、`tools/diagnostic/run_sm8650_turn.py` 同max12页集/victim4，target7/100×step1/16×C1/2、W1/6..10，五mapping/69120窗。左右删失与非单调优先级反例、真实八族链接、双NDK/实窗反汇编、真实driver写盘/raw回读和十九类损坏拒绝通过；当前无此批目标数据。只报告条件化操作转折，科学命名必须十条mapping×order曲线一致；不命名物理ways，不拼旧A1。
 
 - **全目标收口对账 / 当前端到端TLB与ROB负责人 / 触发=下一两批结果归档后**：按用户第一性原理路线更新原r2合同的证据映射：Q-A分布敏感性、Q-B冲突行为、Q-D有效在飞占用为原必做项，Q-C索引族探索及物理ROB/PRF/RS为独立边界；不得用B类局部对照宣称全部TLB/ROB已完成。最终报告给已测/限定操作性/参考/不可识别逐项终态；未知问题需有限反证或正式不可识别说明，不能靠永续扫描兜底。正式软件接入和ALU/FPU专项按原触发保留。
