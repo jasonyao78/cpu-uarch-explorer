@@ -4,7 +4,9 @@
 
 ## OI-12 ROB 微架构深度分析项目（2026-09-30 登记，第二个部件探测项目）
 
-- **2026-10-09 当前裁定**：ROB软件研究与TLB并行，设备采样串行；旧v0.1骨架已由217e5e3及ec1d284修复版本替代，R1–R3的软件缺陷已修并完成目标机测量。物理ROB与长load科学资格仍开放，新增协议/输入/锚点与判据项见本文件 `OI-ROB-PROBE-20261009`，审查路径 `docs/reviews/2026-10-09-rob-probe-critical-reuse.md`。
+- **2026-10-11 最新裁定**：有限探针与反证控制交付完成，物理ROB为本组方法下MODEL_UNIDENTIFIABLE，entries未测得；最新整体 `docs/reviews/2026-10-11-tlb-rob-identifiability.md` / 同VA `docs/reviews/2026-10-11-rob-same-address-pair-results.md`。下面旧E0/J阶段表为原路线历史，不冒称逐条完成；新研究触发见本文件 `EXIT-TLB-ROB-20261011`。
+
+- **2026-10-09 历史裁定**：ROB软件研究与TLB并行，设备采样串行；旧v0.1骨架已由217e5e3及ec1d284修复版本替代，R1–R3的软件缺陷已修并完成目标机测量。物理ROB与长load科学资格仍开放，新增协议/输入/锚点与判据项见本文件 `OI-ROB-PROBE-20261009`，审查路径 `docs/reviews/2026-10-09-rob-probe-critical-reuse.md`。
 
 - **交付物（v0.1 已入库）**：`docs/cpu-uarch-deep-analysis/rob-deep-analysis/`——报告 v0.1（采数前版本：估计量定义/混淆清单/判据预注册 J1–J8/协议三要素）、探针骨架 `probes/rob_window_probe.c`（mini-JIT，7 类别 × 2 锚点，本机编译冒烟 + 生成码 capstone 核验通过）、probes README；方法迁移矩阵相应升级 v0.3。
 - **与 TLB 项目最大差异**：ROB 无 TRM 真值（已全文核验 TRM+优化指南零披露），走"估计量优先 + 第三方候选区间 + 交叉约束"（矩阵 C1 ✏️ 档）。
@@ -457,3 +459,13 @@
 - 2026-10-11 Q-D有限必做关闭：`docs/reviews/2026-10-11-tlb-walk-parallel-results.md` / source0bda583 / launch38eb983，495窗及240长门通过。235/240短门，5个per-chain-low-K8短窗walk率越线；不升级短窗全qualified。owner=TLB端到端负责人；物理walker/MSHR/LQ与更大K不是本批识别项，触发=需要结构容量命名或改变窗长/working set时先独立冻结；Q-A/ROB继续按目标对账，不因本批关Q-D宣告整体完成。
 
 - 2026-10-11 Q-A有限必做关闭：`docs/reviews/2026-10-11-tlb-page-distribution-results.md` / source57f96a9 / launchf14f3de；2175窗技术接受，2160门通过，60条操作转折均(96,112]。主分布INCONCLUSIVE，random-set N1024 delta[.04997349,.09777514]严格未全跨.05门，保留同向数值而不救门；HPA/PTE_CONT/PFN归因未识别。owner=TLB端到端负责人；触发=需要机制ATTRIBUTED时先冻结可观测HPA/PTE/PFN干预或投机/refill归属对照，不以无限重复同曲线兜底。
+
+
+## EXIT-TLB-ROB-20261011 有限探测终态与新研究触发
+
+- **已完成 / 当前端到端负责人**：整体 `docs/reviews/2026-10-11-tlb-rob-identifiability.md`、目标账 `docs/reviews/2026-10-11-tlb-rob-goal-ledger.md`。TLB反证/局部转折、Q-A分布/offset/order、Q-D两scope有限必做均完成；Q-B/Q-C限定操作响应，未伪装旧正式B1/B2/A1/A2/A3已执行。ROB长load资格/冷模型/类别/零值/依赖及同VA有限控制完成。source4cebc24、consumer11abe30、launch4f44c98、result494a981；同VA480窗/65SHA技术接受、N0 15/15/D 80/80但NONE不稳主not-qualified。新基线diagnostic298/runner203/analysis250/CTest21全部fresh通过。
+- **物理容量命名不通过 / ROB负责人 / 触发=获得可验证分配/packing单位标尺，并能独立确认ROB为活跃瓶颈时**：本组观测MODEL_UNIDENTIFIABLE，不是全局不可测；NOP/退休或操作比不能校准单位，384仍仅第三方。新可识别实验先冻结再采数；不放宽NONE门、删负控、重复同曲线追数字。
+- **NONE机制OPEN / ROB及前端/执行负责人 / 触发=下一新资源流或依赖对照前**：同进程/同代码VA仍有44–72cycles流量状态，N0稳定并不保证N128稳定；Icache维护残差、供给/执行/调度/干扰/窗内clock未唯一归因。若要差分归因，先选择真正可识别的状态控制/生命周期测量，不能以“地址已一致”跳过负控。当前失败批不补样、不晋升baseline。
+- **TLB结构/归因OPEN / TLB负责人 / 触发=需physical ways/唯一hash/ATTRIBUTED命名之前**：target依赖操作区间、descriptor/PFN/cache/替换/投机/聚合等仍非唯一；HPA/PTE_CONT=UNKNOWN。Q-A主INCONCLUSIVE需新PTE/PFN/可观测aggregation或refill-tap干预，Q-D更大K/短窗需新作用域冻结；同曲线加密不作为默认下一任务。
+- **软件与生命周期后置 / 集成负责人 / 触发=需要正式配置矩阵或main集成时**：独立JSONL不等于formal schema v2；runner/schema/CMake接入与跨平台Linux验证沿原范围，main合并/测试/推送完成前不得删除r2分支。本轮远端暂不处理；他人.gitignore与六旧run目录未代提交，private原样保留，未回收worktree。
+- **独立部件项目 / ALU/FPU及BTB负责人 / 触发=用户后续部件路线或分配/生命周期标尺需要时**：完整operand/依赖链/独立链/争用标定仍未做。BTBSize_Probe_H2只提供可控branch布局思想，不视为BTB/ROB真值；Icache/iTLB与分支吞吐须单独控制。已登记后置不丢，有限TLB/ROB任务结束不意味着CPU全部部件完成。

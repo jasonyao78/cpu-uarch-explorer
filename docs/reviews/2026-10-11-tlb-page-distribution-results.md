@@ -8,7 +8,7 @@
 
 ## 来源、程序与原始记录
 
-| 项 | 实際 |
+| 项 | 实际 |
 |---|---|
 | branch/worktree | `codex/sm8650-tlb-hierarchy-r2` / `/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2` |
 | binary source | `57f96a9a35128b7b27aaba67f8d819516b7c96a4`，consumer/build b6143a8 |

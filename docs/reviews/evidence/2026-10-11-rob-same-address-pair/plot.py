@@ -3,10 +3,9 @@
 import json,os,sys
 from pathlib import Path
 os.environ.setdefault('MPLCONFIGDIR','/tmp/sm8650-matplotlib-config')
-try:import matplotlib
-except ModuleNotFoundError:
- sys.path.insert(0,'/Users/michaelyao/.cache/uv/archive-v0/DGYnFId2HJPBPB--/lib/python3.12/site-packages');import matplotlib
-matplotlib.use('Agg');import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+matplotlib.rcParams['svg.hashsalt']='sm8650-2026-10-11';import matplotlib.pyplot as plt
 root=Path(sys.argv[1]) if len(sys.argv)>1 else Path(__file__).parent;a=json.loads((root/'analysis.json').read_text());fig,axes=plt.subplots(2,3,figsize=(14,8));variants=['i0','d0','i128','d128']
 for col,(anchor,k) in enumerate([('none',16),('fsqrt',8),('fsqrt',16)]):
  ax=axes[0,col]
@@ -25,4 +24,7 @@ ax=axes[1,2]
 for k in [8,16]:ax.plot(range(40),[d['D'] for d in a['contrasts'] if d['chain']==k],'.-',lw=.7,label=f'chain={k}')
 ax.axhline(5,c='r',ls='--',label='strict D > 5');ax.set_title('Matched D = T(fsqrt) - T(NONE)');ax.set_ylabel('cycles / iteration');ax.legend(fontsize=8);ax.grid(alpha=.2)
 for ax in axes[1]:ax.set_xlabel('epoch / block');ax.set_xticks([0,8,16,24,32],['e0','e1','e2','e3','e4'])
-fig.suptitle('SM8650 same-code-VA pair: '+a['verdict']+' (no physical entry inference)');fig.tight_layout(rect=[0,0,1,.95]);fig.savefig(root/'response.png',dpi=160);fig.savefig(root/'response.svg');plt.close(fig)
+fig.suptitle('SM8650 same-code-VA pair: '+a['verdict']+' (no physical entry inference)');fig.tight_layout(rect=[0,0,1,.95]);fig.savefig(root/'response.png',dpi=160);fig.savefig(root/'response.svg',metadata={'Date':None});plt.close(fig)
+
+svg=root/"response.svg"
+svg.write_text("\n".join(line.rstrip() for line in svg.read_text().splitlines())+"\n")

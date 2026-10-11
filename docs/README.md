@@ -37,7 +37,8 @@
 |---|---|---|---|
 | SM8650 TLB 层级探测（2026-09-30 退役） | `tasks/2026-09-28-sm8650-tlb-hierarchy.md`（v4.4） | `reviews/2026-09-28-sm8650-tlb-hierarchy.md`（终审；分阶段：`reviews/2026-09-29-sm8650-tlb-gate1.md`、`reviews/2026-09-30-sm8650-tlb-phase-{a,b,c,d}.md`） | `reports/2026-09-30-sm8650-tlb/report.md`（四图 + 同事版读法） |
 | SM8650 cache/L2（裁定 OPEN/INCONCLUSIVE） | —（证据重审制，无独立任务书） | `reviews/2026-09-28-sm8650-x4-p0prime.md`、`reviews/2026-09-27-sm8650-cache-evidence-reassessment.md`、`reviews/2026-09-28-sm8650-x4-l2-fine-sweep.md`、`reviews/2026-09-28-sm8650-pmu-positive-control.md`、`reviews/2026-09-27-sm8650-llcc-pmu-smoke.md` | — |
-| SM8650 TLB r2 A1（软件通过、设备待标定） | `tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md`（v1.9） | `reviews/2026-10-08-a1-software-exit-and-integration.md`；交接 `runbooks/2026-10-08-sm8650-a1-integrated-handoff.md` | — |
+| SM8650 TLB r2 原A1（软件通过、热阻断后冻结为历史） | `tasks/2026-09-30-sm8650-tlb-hierarchy-r2.md`（v1.9.1） | `reviews/2026-10-08-a1-software-exit-and-integration.md`；交接 `runbooks/2026-10-08-sm8650-a1-integrated-handoff.md` | — |
+| SM8650 TLB/ROB 第一性原理有限路线（2026-10-11终态；物理参数未识别） | `design/2026-10-11-tlb-page-distribution.md`、`design/2026-10-11-tlb-walk-parallel.md`、`design/2026-10-11-rob-same-address-pair.md` | `reviews/2026-10-11-tlb-rob-identifiability.md`、`reviews/2026-10-11-tlb-rob-goal-ledger.md`、`reviews/2026-10-11-rob-same-address-pair-results.md` | —（本阶段结论、代码/commit索引合并于可识别性裁定） |
 | GB10 借鉴迁移评审 | — | `reviews/2026-09-24-gb10-borrow-review.md` | — |
 
 新增战役/主题时在本表加一行；裁定文档进 `reviews/`、传播报告进
