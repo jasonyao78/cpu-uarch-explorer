@@ -439,3 +439,5 @@
 
 
 - **ROB五类资源对照完成 / 当前端到端负责人 / 触发=专门事件资格与依赖对照**：复用source1ef4baa/launch1551c99，`docs/reviews/2026-10-11-rob-resource-results.md` 完整140进程/420窗技术通过，NOP(512,704]、ADD/MOVI/MOVR(128,256]，FADD四格range超10%为ambiguous。全部705原始SHA与第二算术路径相符；最高55.7°C、端点频率非窗内恒频，分类/时间残差保留。N阈值不通用于所有filler；MOVI#1/MOVR接近不认证elimination，NONE简单max不足但不排除前端/分配组合效应。下一小型设计先核target r0p1操作/rename事件语义、支持与计数控制，配实际生成码；操作比不是物理ROB allocation，PRF/RS/融合/精确计时仍OPEN。不得用更密NOP或选择FADD安静样本追容量；TLB victim身份/历史按既有条目继续。冻结稿0x02标签勘误v1.0.1透明保留启动v1 SHA，编码与统计不变。正式runner/schema/CMake接入、固定频率与ALU/FPU专项沿原触发，不隐藏后置。
+
+- **下一TLB身份/历史有限合同已冻结 / 当前TLB负责人 / 触发=本轮ROB事件资格批收口后**：`docs/design/2026-10-11-tlb-victim-history.md` v1保留最大12页，W8/9各3victim、准备顺/逆、竞争顺/逆，W1空竞争控制，56cells/mapping×5=40320窗。先真实producer逐页trace、消费者/driver/raw拒绝、构建/反汇编及回归后才采；当前为冻结设计，源/二进制尚未交付，不声称已实测。旧A1不拼接；ways/hash/描述符/替换继续OPEN，由完整结果决定下一控制。
