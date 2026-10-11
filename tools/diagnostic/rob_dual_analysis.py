@@ -107,7 +107,8 @@ def audit_raw(path):
  if phase=='qualification':_require(qi is None,'dual qualification input must be absent')
  else:
   _require(type(qi) is dict and type(qi.get('raw_directory')) is str and Path(qi['raw_directory']).name==qi['raw_directory'] and qi['raw_directory']!=path.name,'dual qualification path')
-  qr,_=audit_raw(path.parent/qi['raw_directory']);qa=analyze(qr)
+  qp=path.parent/qi['raw_directory'];_fields(json.loads((qp/'manifest.json').read_text()),dict(mode=MODE,phase='qualification'),'dual linked phase')
+  qr,_=audit_raw(qp);qa=analyze(qr)
   _require(qr['phase']=='qualification' and qa['qualified'] and _same(qi,dict(raw_directory=qr['raw_directory'],manifest_sha256=qr['manifest_sha256'],binary_sha256=qr['binary_sha256'],qualified=True)) and qr['binary_sha256']==m['binary_sha256'],'dual qualification provenance/gate')
  from tools.diagnostic.analyze_long_load import audit_environment
  profile=json.loads(blob(head,'configs/platforms/redmi-k70pro-01.json'));policy=profile['environment_profiles']['charging-thermal']['measurement_environment'];policy['preconditions']['cpufreq_governor']='walt'
