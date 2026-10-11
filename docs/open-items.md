@@ -453,3 +453,5 @@
 - **TLB地址族局部转折有限批完成 / 当前TLB负责人 / 触发=原Q-A/Q-D缺口设计**：source `ac38cd3` / consumer `fd0685c` / actual launch `4aa3fe2`；`docs/reviews/2026-10-11-tlb-local-turn-results.md` 五新mapping/69120窗技术接受，3200/3200激励点通过；两跨度各target7/C1=(7,8]、100/C1=(8,9]，十条mapping×order曲线一致，C2负控至W10无转折。原值、400victim率/80曲线/8onset/25SHA与直接第二算术一致；停止同曲线无限加密。地址族操作性区间不等于物理7/8ways，descriptor/hash/PFN/cache仍未唯一识别。274诊断通过，runner/native未变既有203/250/21基线；左右删失/非单调优先级/首坏step与实际生产链反例均通过。下一项是Q-A分布敏感性与Q-D有效在飞占用、匹配供给负控，不拼旧A1/frozen/14条L1。
 
 - **全目标收口对账 / 当前端到端TLB与ROB负责人 / 触发=下一两批结果归档后**：按用户第一性原理路线更新原r2合同的证据映射：Q-A分布敏感性、Q-B冲突行为、Q-D有效在飞占用为原必做项，Q-C索引族探索及物理ROB/PRF/RS为独立边界；不得用B类局部对照宣称全部TLB/ROB已完成。最终报告给已测/限定操作性/参考/不可识别逐项终态；未知问题需有限反证或正式不可识别说明，不能靠永续扫描兜底。正式软件接入和ALU/FPU专项按原触发保留。
+
+- 2026-10-11 Q-D有限必做关闭：`docs/reviews/2026-10-11-tlb-walk-parallel-results.md` / source0bda583 / launch38eb983，495窗及240长门通过。235/240短门，5个per-chain-low-K8短窗walk率越线；不升级短窗全qualified。owner=TLB端到端负责人；物理walker/MSHR/LQ与更大K不是本批识别项，触发=需要结构容量命名或改变窗长/working set时先独立冻结；Q-A/ROB继续按目标对账，不因本批关Q-D宣告整体完成。

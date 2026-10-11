@@ -71,3 +71,5 @@ OI-1/OI-6）。
 - 主仓许可证：Apache-2.0（见 `LICENSE`；决策背景见 `docs/adr/ADR-0002-license-apache2.md`，含历史 demo 代码来源审计）。
 - 仓库未来转公开时 git 历史全量可见：从第一个 commit 起即执行设备匿名化与 secret 扫描，请勿提交设备序列号、NDA 资料。
 - 第三方参考材料位于**仓库外** `../cpu-uarch-ref/`（只读约束），受跟踪索引见 `docs/reference-materials.md`；仅仓库所有者明确授权的三份调查文档按原文归档在 `docs/reference-materials/`，其来源与协作属性在目录 README 单独披露。
+
+Q-D有效在飞占用有限结果：[`2026-10-11-tlb-walk-parallel-results.md`](docs/reviews/2026-10-11-tlb-walk-parallel-results.md)，495窗、240/240长窗门；固定总8192页K1→8 A/C=.553→3.039，不认证walker数量，短窗235/240部分不合格原样保留。
