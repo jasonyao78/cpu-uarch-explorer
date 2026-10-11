@@ -73,3 +73,9 @@ fresh整树软件出口：diagnostic298/298、runner203/203、formal analysis250
 ## 本次继续推进的新增证据
 
 `docs/reviews/2026-10-11-rob-resident-control-results.md`（sourcefe53c23/launchb27d95b）240窗技术接受，但未额外本窗重写的NONE仍44–72cycles波动，原字节维护效应未复制；不唯一归因频率/Icache。`docs/reviews/2026-10-11-tlb-cross-region-results.md`（source7ed6434/launchf8edac7）34560窗主候选辨识通过，1440激励门全过、一个W8多walk比较INCOMPUTABLE完整保留。317诊断与本轮未改runner203/analysis250/CTest21通过。上述新增正交结果不改变物理ROB未测得的边界，但补充Q-C可使用的候选证据；下一ROB先校验双FSQRT独立性模型。
+
+## 双独立锚点的新实证边界
+
+`docs/reviews/2026-10-11-rob-dual-anchor-v2-results.md`，source0d5ac03 / v2consumer-buildf685c8a / actual launch91e0cb7，新增fresh144资格与720扫描全部技术接受。原两FSQRT链同D0为串行，新D0/D1确有208/416重叠；NOP同N供给稳定，90进程各8窗稳定。N384开始约8%渐进增加，N512约21%处模糊带，N640以上响应、N704近串行，N896供给/控制门未过；单区间INCONCLUSIVE，物理entries仍None。旧v1的144窗not-qualified完整保留，未因修门晋升。343诊断通过。
+
+官方r0p1优化指南§4.11明确NOP+任意相邻指令fusion资格、MOP可分µOP；0x3a/0x3b是µOP计数，不直接标定ROB分配。`docs/reviews/2026-10-11-rob-fusion-unit-audit.md` 给下一匹配ADD/NOP+ADD/双NOP组的正交控制与单位校准边界；当前不以N/2迎合384，不复跑旧曲线追锐knee。旧MODEL_UNIDENTIFIABLE只限定当时模型族，新可用的重叠/流量证据独立保存。

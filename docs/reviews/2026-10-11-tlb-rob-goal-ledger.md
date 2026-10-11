@@ -15,6 +15,7 @@
 | ROB：区分资源限制 | **有限控制完成**：原跨进程144窗与新同VA480窗均技术接受、主门not-qualified；新15/15 N0稳定、80/80 D正，但NONE范围38.219cycles仍失败。`docs/reviews/2026-10-11-rob-same-address-pair-results.md` | 同VA控制不能等于供给稳定；新资源/packing/生命周期干预须先建立可识别判据，不重复追门 |
 | ROB：供给状态/代码维护 | **新增有限对照完成**：`docs/reviews/2026-10-11-rob-resident-control-results.md`，单程序/VA 240窗技术接受；NONE resident仍44–72cycles波动，原字节额外维护效应未一致复制 | 不认定Icache维护或频率为唯一根因；下一资源流/生命周期干预先冻结，不能以N0稳定跳过N128供给资格 |
 | TLB：高位折叠辨识 | **新有限主判据通过**：`docs/reviews/2026-10-11-tlb-cross-region-results.md`，34560窗、1440门、两个target的十曲线W12均I/G1正、G3负，low-only候选获支持；W8一多walk残差保留 | 只分辨本候选组，未唯一认证hardware hash/ways；root不是EL3，TRM内部RAM接口不能普通上板读取 |
+| ROB：真独立锚点与NOP间隔 | **新有限对照完成**：`docs/reviews/2026-10-11-rob-dual-anchor-v2-results.md`，D0/D1约208/D0串行约416；fresh144资格+720扫描技术过，90进程稳定；渐进退化至N704近串行，单区间INCONCLUSIVE。v1空循环门失败144窗另存不晋升 | 官方NOP+Any fusion提示单位问题；下一匹配ADD工作/值/目的集合的单位与生命周期控制，不能NOP/2报物理entry |
 | ROB：物理容量 | **本组方法正式终态MODEL_UNIDENTIFIABLE**。长load资格反例与NOP/零值/依赖/同VA完整有限控制已归档；384是第三方参考 | 审查已交付 `docs/reviews/2026-10-11-tlb-rob-identifiability.md`；新单位标尺与活跃约束认证触发另案，物理entries未测得 |
 | 软件交付与分支收口 | m0b使命已完成、代码在r2；source/build/launch/protocol/raw逐批分开 | 原独立JSONL不是正式schema v2；正式runner/CMake接入按稳定协议需要决定，未做项归 `docs/open-items.md`；main集成/测试/远端后才删除分支 |
 

@@ -1,0 +1,9 @@
+{
+  "checked_windows": 720,
+  "checked_sha": 366,
+  "complete_raw_arithmetic_equal": true,
+  "summary_sha256": "24d1abad72e6db383008f4b9121f8ba435d91f6966729b3a1ef505c6ca87f6cb",
+  "status": "inconclusive",
+  "interval": null,
+  "reviewer": "second arithmetic path by same root, not another reviewer"
+}

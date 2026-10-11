@@ -479,3 +479,7 @@
 - **TLB四域有限批完成 / 当前TLB负责人 / 触发=候选模型复核**：`docs/reviews/2026-10-11-tlb-cross-region-results.md`，source7ed6434/consumer8bd0588/launchf8edac7，34560窗/26SHA技术接受；1440门全过，两个target十曲线W12均I/G1正G3负，replicated-low-only-candidate-favored。一个W8多walk比较INCOMPUTABLE保存，target100 G1/W8异质，不换算ways或唯一hash；60target+512filler prefault payload2288KiB，2GiB仅reserve。前“进行中”条目在本批关闭，physical归因沿EXIT项继续。
 - **EL3内部RAM能力边界 / TLB及平台负责人 / 触发=有明确授权的EL3/安全固件合作接口时**：X4 TRM r0p3 §9的TLB RAM read仅EL3，其它EL Undefined。Android root/KSU不等于EL3，当前不实施该接口或加载模块试错；文档2048/8-way与设备操作响应分列。
 - **ROB双锚点模型复核 / 当前ROB负责人 / 触发=下一新对照（当前）**：共用生成器 `probes/common/rob_codegen.h` 的旧SQRT两侧均FSQRT D0,D0，锚点互相依赖；旧响应保留为有效窗口，不能套经典双独立miss overlap。下一冻结先比较D0/D1与D0/D0同值/同指令数、N0重叠资格及匹配NOP供给，再决定新容量网格；不改历史码/判据、不强推384。
+
+- **ROB fusion/分配单位控制 / 当前ROB负责人 / 触发=双独立锚点扫描完整审计后**：依据 `docs/reviews/2026-10-11-rob-fusion-unit-audit.md`，官方r0p1指南§4.11有NOP+任意指令融合资格，0x3a/0x3b是µOP而非ROB分配；后续匹配ADD工作/值/目的集合的ADD、NOP+ADD、双NOP组，先真实NONE供给/字节/结果/生命周期门。仍需α标尺及ROB活跃约束认证，不以NOP/2强报384。
+
+- **ROB双独立有限扫描完成 / 当前ROB负责人 / 触发=新fusion/单位控制**：`docs/reviews/2026-10-11-rob-dual-anchor-v2-results.md`，source0d5ac03/consumerf685c8a/launch91e0cb7；fresh144资格+720扫描、444合计rawSHA，双链208/416重叠实证，90进程稳定，渐进退化至N704近串行；N512模糊与N896未合格完整保留，单区间INCONCLUSIVE。v1空循环门失败144窗封存，不后验晋升。前“双锚点模型复核”有限项闭环；physical allocation/active constraint与fusion单位沿上述专项继续，main/正式runner接入未完成。
