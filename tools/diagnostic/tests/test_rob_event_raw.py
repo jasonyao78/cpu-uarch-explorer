@@ -77,11 +77,13 @@ class EventRawTests(unittest.TestCase):
   from unittest.mock import patch
   from tools.diagnostic import run_sm8650_minimal as driver
   original_check=subprocess.check_output;original_run=subprocess.run
+  # Exercise the current committed driver; source/plan observations stay pinned.
+  launch=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
   for corrupt in (True,False):
    with tempfile.TemporaryDirectory() as d:
     root=Path(d);required=[model.BUILD,model.PLAN,model.PROTOCOL,'tools/diagnostic/run_sm8650_minimal.py','configs/platforms/redmi-k70pro-01.json',*self.build['source_sha256']]
     for rel in required:
-     p=root/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(self.blob(self.launch,rel))
+     p=root/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(self.blob(launch,rel))
     exe=Path(self.folder.name)/'producer';binary=root/'synthetic-binary';binary.write_bytes(b'not a target binary; only external registration stub')
     profile=json.loads((root/'configs/platforms/redmi-k70pro-01.json').read_text());policy=profile['environment_profiles']['charging-thermal']['measurement_environment']
     snapshot=dict(power=dict(wakefulness='Dozing',screen_on=False),device_idle=dict(force_idle=False),camera=dict(active=False),services=dict(mi_thermald='running'),airplane_mode=True,thermal=dict(max_cpu_c=40),cpufreq={n:dict(governor='walt',min_khz=672000,max_khz=v) for n,v in policy['preconditions']['cpufreq_max_khz'].items()})
@@ -103,7 +105,7 @@ class EventRawTests(unittest.TestCase):
     self_build,self_plan,actual=self.build,self.plan,self.actual
     def check(cmd,*a,**kw):
      if cmd==['adb','devices']:return 'List of devices attached\nsynthetic-target\tdevice\n'
-     if cmd[:3]==['git','rev-parse','HEAD']:return self.launch+'\n'
+     if cmd[:3]==['git','rev-parse','HEAD']:return launch+'\n'
      if cmd[:3]==['git','branch','--show-current']:return 'synthetic-driver-test\n'
      if cmd[:2]==['git','show']:return original_check(cmd,cwd=ROOT)
      return original_check(cmd,*a,**kw)

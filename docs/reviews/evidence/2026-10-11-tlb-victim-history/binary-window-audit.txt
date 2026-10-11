@@ -1,0 +1,61 @@
+Binary SHA256 6fcbfb2fa4414de4fe9a00ebd7ccbf4b03870edb810af81ee5ecf748fe35d4bf
+Source 48d21c6aa77cb81e8a18b78e841f85c2bd38f0b9
+
+0000000000244e58 <measured_window(probe_common::PerfWindow&, unsigned long, unsigned int, unsigned int, unsigned long, unsigned int, probe_common::GroupSample*, probe_common::GroupSample*)>:
+  244e58: a9bc7bfd     	stp	x29, x30, [sp, #-0x40]!
+  244e5c: f9000bf7     	str	x23, [sp, #0x10]
+  244e60: a90257f6     	stp	x22, x21, [sp, #0x20]
+  244e64: a9034ff4     	stp	x20, x19, [sp, #0x30]
+  244e68: 910003fd     	mov	x29, sp
+  244e6c: aa0603f3     	mov	x19, x6
+  244e70: 2a0303f7     	mov	w23, w3
+  244e74: 2a0203f6     	mov	w22, w2
+  244e78: aa0103f5     	mov	x21, x1
+  244e7c: aa0003f4     	mov	x20, x0
+  244e80: 52801008     	mov	w8, #0x80               // =128
+  244e84: f9400484     	ldr	x4, [x4, #0x8]
+  244e88: 71000508     	subs	w8, w8, #0x1
+  244e8c: 54ffffc1     	b.ne	0x244e84 <measured_window(probe_common::PerfWindow&, unsigned long, unsigned int, unsigned int, unsigned long, unsigned int, probe_common::GroupSample*, probe_common::GroupSample*)+0x2c>
+  244e90: aa1403e0     	mov	x0, x20
+  244e94: aa0503e1     	mov	x1, x5
+  244e98: 94000d82     	bl	0x2484a0 <probe_common::PerfWindow::read_snapshot(probe_common::GroupSample*)>
+  244e9c: 360001e0     	tbz	w0, #0x0, 0x244ed8 <measured_window(probe_common::PerfWindow&, unsigned long, unsigned int, unsigned int, unsigned long, unsigned int, probe_common::GroupSample*, probe_common::GroupSample*)+0x80>
+  244ea0: 340000b6     	cbz	w22, 0x244eb4 <measured_window(probe_common::PerfWindow&, unsigned long, unsigned int, unsigned int, unsigned long, unsigned int, probe_common::GroupSample*, probe_common::GroupSample*)+0x5c>
+  244ea4: 531d72e8     	lsl	w8, w23, #3
+  244ea8: f8684ab5     	ldr	x21, [x21, w8, uxtw]
+  244eac: 710006d6     	subs	w22, w22, #0x1
+  244eb0: 54ffffc1     	b.ne	0x244ea8 <measured_window(probe_common::PerfWindow&, unsigned long, unsigned int, unsigned int, unsigned long, unsigned int, probe_common::GroupSample*, probe_common::GroupSample*)+0x50>
+  244eb4: aa1403e0     	mov	x0, x20
+  244eb8: aa1303e1     	mov	x1, x19
+  244ebc: 94000d79     	bl	0x2484a0 <probe_common::PerfWindow::read_snapshot(probe_common::GroupSample*)>
+  244ec0: 360001a0     	tbz	w0, #0x0, 0x244ef4 <measured_window(probe_common::PerfWindow&, unsigned long, unsigned int, unsigned int, unsigned long, unsigned int, probe_common::GroupSample*, probe_common::GroupSample*)+0x9c>
+  244ec4: a9434ff4     	ldp	x20, x19, [sp, #0x30]
+  244ec8: f9400bf7     	ldr	x23, [sp, #0x10]
+  244ecc: a94257f6     	ldp	x22, x21, [sp, #0x20]
+  244ed0: a8c47bfd     	ldp	x29, x30, [sp], #0x40
+  244ed4: d65f03c0     	ret
+  244ed8: 52800200     	mov	w0, #0x10               // =16
+  244edc: 9401ceaf     	bl	0x2b8998 <__cxa_allocate_exception>
+  244ee0: aa0003f3     	mov	x19, x0
+  244ee4: f0fffde1     	adrp	x1, 0x203000 <year_lengths+0x2a20>
+  244ee8: 91001821     	add	x1, x1, #0x6
+  244eec: 94000ec8     	bl	0x248a0c <std::runtime_error::runtime_error(char const*)>
+  244ef0: 14000007     	b	0x244f0c <measured_window(probe_common::PerfWindow&, unsigned long, unsigned int, unsigned int, unsigned long, unsigned int, probe_common::GroupSample*, probe_common::GroupSample*)+0xb4>
+  244ef4: 52800200     	mov	w0, #0x10               // =16
+  244ef8: 9401cea8     	bl	0x2b8998 <__cxa_allocate_exception>
+  244efc: aa0003f3     	mov	x19, x0
+  244f00: f0fffde1     	adrp	x1, 0x203000 <year_lengths+0x2a20>
+  244f04: 9111bc21     	add	x1, x1, #0x46f
+  244f08: 94000ec1     	bl	0x248a0c <std::runtime_error::runtime_error(char const*)>
+  244f0c: f00006a1     	adrp	x1, 0x31b000 <vtable for (anonymous namespace)::itanium_demangle::ElaboratedTypeSpefType+0x30>
+  244f10: f00006a2     	adrp	x2, 0x31b000 <vtable for (anonymous namespace)::itanium_demangle::ElaboratedTypeSpefType+0x30>
+  244f14: aa1303e0     	mov	x0, x19
+  244f18: f9479c21     	ldr	x1, [x1, #0xf38]
+  244f1c: f947a042     	ldr	x2, [x2, #0xf40]
+  244f20: 9401cef7     	bl	0x2b8afc <__cxa_throw>
+  244f24: 14000001     	b	0x244f28 <measured_window(probe_common::PerfWindow&, unsigned long, unsigned int, unsigned int, unsigned long, unsigned int, probe_common::GroupSample*, probe_common::GroupSample*)+0xd0>
+  244f28: aa0003f4     	mov	x20, x0
+  244f2c: aa1303e0     	mov	x0, x19
+  244f30: 9401ced9     	bl	0x2b8a94 <__cxa_free_exception>
+  244f34: aa1403e0     	mov	x0, x20
+  244f38: 9401d835     	bl	0x2bb00c <_Unwind_Resume>

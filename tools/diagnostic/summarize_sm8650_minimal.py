@@ -80,6 +80,9 @@ def summarize(path):
     if m['mode']=='tlb-competition':
         from tools.diagnostic.tlb_competition_analysis import validate_launch
         validate_launch(m)
+    if m['mode']=='tlb-victim-history':
+        from tools.diagnostic.tlb_victim_history_analysis import validate_launch
+        validate_launch(m)
     assert m['status']=='complete' and len(m['results'])==len(m['conditions'])
     registered=[{'name':n,'args':a} for n,a in conditions(m['mode'])]
     assert m['conditions']==registered, 'conditions differ from registered matrix'
@@ -102,7 +105,7 @@ def summarize(path):
     if m['mode'].startswith('tlb'):
         assert m.get('tlb_target',int(registered[0]['args'][0]))==int(registered[0]['args'][0]), 'manifest target'
     history_plan=None
-    if m['mode'] in ('tlb-history','tlb-capacity','tlb-competition'):
+    if m['mode'] in ('tlb-history','tlb-capacity','tlb-competition','tlb-victim-history'):
         assert m['plan_path']==build['plan_path']
         plan_blob=subprocess.check_output(['git','show',m['source_head']+':'+m['plan_path']],cwd=root)
         assert hashlib.sha256(plan_blob).hexdigest()==m['plan_sha256']==build['plan_sha256']
@@ -129,7 +132,7 @@ def summarize(path):
         result.update({k:m[k] for k in ('binary_source_head','build_evidence_sha256','driver_sha256','protocol_path','protocol_sha256')})
         if m['mode'].startswith('tlb'): result['tlb_target']=m['tlb_target']
     for entry in sorted(m['results'],key=lambda e:next(i for i,c in enumerate(registered) if c['name']==e['name'])):
-        if m['mode']=='tlb-competition':
+        if m['mode'] in ('tlb-competition','tlb-victim-history'):
             from tools.diagnostic.analyze_cold_pair import _require
             _require((path/(entry['name']+'.stderr.log')).read_bytes()==b'', 'competition unexpected stderr')
         raw=path/(entry['name']+'.stdout.jsonl')
@@ -140,8 +143,10 @@ def summarize(path):
         validate_realized(m['mode'],opts,rows)
         rounds=[r for r in rows if r['type']=='round']
         assert all(r['enabled']>0 and r['enabled']==r['running'] for r in rounds)
-        if m['mode'] in ('tlb-history','tlb-capacity','tlb-competition'):
-            if m['mode']=='tlb-competition':
+        if m['mode'] in ('tlb-history','tlb-capacity','tlb-competition','tlb-victim-history'):
+            if m['mode']=='tlb-victim-history':
+                from tools.diagnostic.tlb_victim_history_analysis import audit_victim_history as cell_audit
+            elif m['mode']=='tlb-competition':
                 from tools.diagnostic.tlb_competition_analysis import audit_competition as cell_audit
             elif m['mode']=='tlb-capacity':
                 from tools.diagnostic.tlb_capacity_analysis import audit_capacity as cell_audit

@@ -33,7 +33,7 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
 
 
-MODES = ('rob-event-qualify', 'rob-resource', 'tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify', 'tlb-history', 'tlb-capacity', 'tlb-competition', 'rob-miss-qualify-thp', 'rob-miss-wide-thp', 'rob-miss-fixed-thp', 'rob-backing-observe', 'rob-collapse-qualify', 'rob-xor-qualify', 'rob-xor-canonical-qualify')
+MODES = ('tlb-victim-history', 'rob-event-qualify', 'rob-resource', 'tlb-smoke', 'tlb', 'rob-qualify', 'rob-window', 'tlb-confirm100', 'rob-fine', 'rob-miss-qualify', 'tlb-history', 'tlb-capacity', 'tlb-competition', 'rob-miss-qualify-thp', 'rob-miss-wide-thp', 'rob-miss-fixed-thp', 'rob-backing-observe', 'rob-collapse-qualify', 'rob-xor-qualify', 'rob-xor-canonical-qualify')
 QUALIFICATION_MODES = {'rob-miss-qualify':(1,64,128), 'rob-miss-qualify-thp':(1,64,128),
                        'rob-miss-wide-thp':(1,256,512), 'rob-miss-fixed-thp':(1,256), 'rob-collapse-qualify':(1,256), 'rob-xor-qualify':(1,64,128), 'rob-xor-canonical-qualify':(1,64,128)}
 THP_QUALIFICATION_MODES = (set(QUALIFICATION_MODES)-{'rob-miss-qualify'})|{'rob-backing-observe'}
@@ -41,13 +41,13 @@ THP_QUALIFICATION_MODES = (set(QUALIFICATION_MODES)-{'rob-miss-qualify'})|{'rob-
 OLD_PROTOCOL = 'docs/design/2026-10-09-minimal-tlb-rob-probes.md'
 CONFIRM_PROTOCOL = 'docs/design/2026-10-09-local-confirmation.md'
 BUILD_EVIDENCE = 'docs/reviews/evidence/2026-10-09-minimal-probes/build.json'
-NEW_EVIDENCE = {'rob-event-qualify':'2026-10-11-rob-event', 'rob-resource':'2026-10-11-rob-resource', 'tlb-competition':'2026-10-10-tlb-competition', 'rob-xor-canonical-qualify':'2026-10-09-canonical-load', 'rob-xor-qualify':'2026-10-09-encoded-load', 'rob-collapse-qualify':'2026-10-09-local-collapse', 'rob-backing-observe':'2026-10-09-backing-observation', 'rob-miss-fixed-thp':'2026-10-09-long-load-fixed', 'tlb-capacity':'2026-10-09-tlb-capacity', 'rob-miss-wide-thp':'2026-10-09-long-load-wide', 'tlb-history':'2026-10-09-tlb-history', 'rob-miss-qualify-thp':'2026-10-09-long-load-thp'}
-NEW_PROTOCOL = {'rob-event-qualify':'docs/design/2026-10-11-rob-event-qualification.md', 'rob-resource':'docs/design/2026-10-11-rob-filler-resource.md', 'tlb-competition':'docs/design/2026-10-10-tlb-competition-observation.md', 'rob-xor-canonical-qualify':'docs/design/2026-10-09-canonical-load-qualification.md', 'rob-xor-qualify':'docs/design/2026-10-09-encoded-load-qualification.md', 'rob-collapse-qualify':'docs/design/2026-10-09-local-collapse-qualification.md', 'rob-backing-observe':'docs/design/2026-10-09-backing-observation.md', 'rob-miss-fixed-thp':'docs/design/2026-10-09-fixed-load-qualification.md', 'tlb-capacity':'docs/design/2026-10-09-tlb-local-capacity.md', 'rob-miss-wide-thp':'docs/design/2026-10-09-wide-load-qualification.md', 'tlb-history':'docs/design/2026-10-09-tlb-history-discrimination.md',
+NEW_EVIDENCE = {'tlb-victim-history':'2026-10-11-tlb-victim-history', 'rob-event-qualify':'2026-10-11-rob-event', 'rob-resource':'2026-10-11-rob-resource', 'tlb-competition':'2026-10-10-tlb-competition', 'rob-xor-canonical-qualify':'2026-10-09-canonical-load', 'rob-xor-qualify':'2026-10-09-encoded-load', 'rob-collapse-qualify':'2026-10-09-local-collapse', 'rob-backing-observe':'2026-10-09-backing-observation', 'rob-miss-fixed-thp':'2026-10-09-long-load-fixed', 'tlb-capacity':'2026-10-09-tlb-capacity', 'rob-miss-wide-thp':'2026-10-09-long-load-wide', 'tlb-history':'2026-10-09-tlb-history', 'rob-miss-qualify-thp':'2026-10-09-long-load-thp'}
+NEW_PROTOCOL = {'tlb-victim-history':'docs/design/2026-10-11-tlb-victim-history.md', 'rob-event-qualify':'docs/design/2026-10-11-rob-event-qualification.md', 'rob-resource':'docs/design/2026-10-11-rob-filler-resource.md', 'tlb-competition':'docs/design/2026-10-10-tlb-competition-observation.md', 'rob-xor-canonical-qualify':'docs/design/2026-10-09-canonical-load-qualification.md', 'rob-xor-qualify':'docs/design/2026-10-09-encoded-load-qualification.md', 'rob-collapse-qualify':'docs/design/2026-10-09-local-collapse-qualification.md', 'rob-backing-observe':'docs/design/2026-10-09-backing-observation.md', 'rob-miss-fixed-thp':'docs/design/2026-10-09-fixed-load-qualification.md', 'tlb-capacity':'docs/design/2026-10-09-tlb-local-capacity.md', 'rob-miss-wide-thp':'docs/design/2026-10-09-wide-load-qualification.md', 'tlb-history':'docs/design/2026-10-09-tlb-history-discrimination.md',
                 'rob-miss-qualify-thp':'docs/design/2026-10-09-thp-load-qualification.md'}
 
 
 def binary_name(mode):
-    return 'tlb_competition' if mode=='tlb-competition' else 'tlb_capacity' if mode=='tlb-capacity' else 'tlb_history' if mode=='tlb-history' else 'tlb_local_pair' if mode.startswith('tlb') else 'rob_window_probe'
+    return 'tlb_victim_history' if mode=='tlb-victim-history' else 'tlb_competition' if mode=='tlb-competition' else 'tlb_capacity' if mode=='tlb-capacity' else 'tlb_history' if mode=='tlb-history' else 'tlb_local_pair' if mode.startswith('tlb') else 'rob_window_probe'
 
 
 def conditions(mode):
@@ -61,7 +61,7 @@ def conditions(mode):
         return [(c['name'],c['args']) for c in registered_plan()['conditions']]
     if mode.startswith('tlb'):
         # One excluded smoke epoch, then five mapping epochs (target200 primary).
-        target = '100' if mode in ('tlb-confirm100','tlb-history','tlb-capacity','tlb-competition') else '200'
+        target = '100' if mode in ('tlb-confirm100','tlb-history','tlb-capacity','tlb-competition','tlb-victim-history') else '200'
         return [(f'epoch-{i}', [target]+(['--reverse'] if i%2 else [])) for i in range(1 if mode == 'tlb-smoke' else 5)]
     base = ['-i', '131072', '-r', '3', '--pin', '7', '--pmu-type', '8',
             '-e', '0x03', '-e', '0x17', '-e', '0x34', '-e', '0x02']
@@ -123,6 +123,10 @@ def validate_realized(mode, opts, rows):
         geometry=[r for r in rows if r['type']=='geometry']
         if len(geometry)!=1 or geometry[0]['target']!=int(opts[0]):
             raise ValueError('requested/realized TLB target mismatch')
+        if mode=='tlb-victim-history':
+            from tools.diagnostic.tlb_victim_history_analysis import config
+            from tools.diagnostic.analyze_cold_pair import _same
+            if not _same([r for r in rows if r['type']=='config'],[config('--reverse' in opts)]):raise ValueError('requested/realized victim history config mismatch')
         if mode=='tlb-competition':
             from tools.diagnostic.tlb_competition_analysis import config
             from tools.diagnostic.analyze_cold_pair import _same
@@ -188,7 +192,7 @@ def main():
     if sum(line.endswith('\tdevice') for line in devices) != 1:
         raise SystemExit('STOP exactly one online target required')
     ex = AdbExecutor(timeout_s=120)
-    for name in ('ptr_chase','rob_window_probe','tlb_local_pair','tlb_history','tlb_capacity','tlb_competition','rob_cold_pair'):
+    for name in ('ptr_chase','rob_window_probe','tlb_local_pair','tlb_history','tlb_capacity','tlb_competition','tlb_victim_history','rob_cold_pair'):
         active = ex.execute(['pidof',name])
         if active.returncode != 1 or active.stdout.strip():
             raise SystemExit('STOP active probe or failed process check')
@@ -235,7 +239,7 @@ def main():
         if identity.returncode or [int(v,0) for v in identity.stdout.split()]!=[0x410fd821,4096]: raise RuntimeError('target-identity')
         manifest['midr']='0x410fd821'; manifest['base_page_bytes']=4096
         for name,opts in rows:
-            if args.mode in QUALIFICATION_MODES or args.mode in ('rob-backing-observe','tlb-competition'): time.sleep(15)
+            if args.mode in QUALIFICATION_MODES or args.mode in ('rob-backing-observe','tlb-competition','tlb-victim-history'): time.sleep(15)
             if args.mode in ('rob-resource','rob-event-qualify'):time.sleep(1)
             inspect(name+'-pre')
             result_code={}
@@ -256,17 +260,19 @@ def main():
                    'wall_seconds':time.monotonic()-t,'stdout_sha256':sha(out/f'{name}.stdout.jsonl'),
                    'generated_code':result_code}
             manifest['results'].append(entry); write(out/'manifest.json',manifest)
-            if args.mode=='tlb-competition' and (result.timed_out or result.stderr):raise RuntimeError('STOP competition timeout/stderr '+name)
+            if args.mode in ('tlb-competition','tlb-victim-history') and (result.timed_out or result.stderr):raise RuntimeError('STOP competition timeout/stderr '+name)
             if result.returncode != 0: raise RuntimeError('STOP probe failure '+name)
             parsed=[json.loads(line) for line in result.stdout.splitlines()]
             if any(row['type']=='failure' for row in parsed): raise RuntimeError('STOP structured failure')
             validate_realized(args.mode,opts,parsed)
             rounds=[row for row in parsed if row['type']=='round']
-            expected=7296 if args.mode=='tlb-competition' else 2080 if args.mode=='tlb-capacity' else 800 if args.mode.startswith('tlb') else 6 if '--paired' in opts else 3
+            expected=8064 if args.mode=='tlb-victim-history' else 7296 if args.mode=='tlb-competition' else 2080 if args.mode=='tlb-capacity' else 800 if args.mode.startswith('tlb') else 6 if '--paired' in opts else 3
             if len(rounds)!=expected: raise RuntimeError('STOP wrong round count')
             if any(row['enabled']<=0 or row['enabled']!=row['running'] for row in rounds): raise RuntimeError('STOP mux/empty window')
-            if args.mode in ('tlb-history','tlb-capacity','tlb-competition'):
-                if args.mode=='tlb-competition':
+            if args.mode in ('tlb-history','tlb-capacity','tlb-competition','tlb-victim-history'):
+                if args.mode=='tlb-victim-history':
+                    from tools.diagnostic.tlb_victim_history_analysis import audit_victim_history as cell_audit
+                elif args.mode=='tlb-competition':
                     from tools.diagnostic.tlb_competition_analysis import audit_competition as cell_audit
                 elif args.mode=='tlb-capacity':
                     from tools.diagnostic.tlb_capacity_analysis import audit_capacity as cell_audit

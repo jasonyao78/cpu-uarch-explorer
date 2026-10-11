@@ -1,4 +1,4 @@
-# TLB victim身份与准备次序（冻结 v1）
+# TLB victim身份与准备次序（冻结 v1.0.1，采样前澄清）
 
 ## 本次任务的目的（给人类看）
 
@@ -18,7 +18,7 @@ config完整version/probe/W/rank/history/方向网格、56cells/8064windows；pl
 
 逐epoch/H/W/victim/history/竞争方向/pass，16窗原值与均值保留；W1匹配同H/history/竞争方向及pass位置。每非零K/pass的0x05及0x2f均值减W1均值须在[.75K,1.25K]，称相关层lookup激励相容，不称真实same-set或allocation。1920激励点全部披露，不能先丢失败cell。
 
-victim逐cell保存walk>0率、均值、count>1、前后8率差；H1−H2率≥.5且各W1对应H≤.125才称该有限条件有响应观察；任一H count>1或前后8漂移>.25命名窗口污染/准备漂移。每W/victim/history要求同mapping两竞争方向皆有效响应，≥4/5mapping才称重复响应，共12复制项。不存在首高点/物理capacity估计量；完整呈现W8与W9、3victim×2history响应表。即使全W8低/W9高也只约束本协议操作性边界，未测试其它victim/target、高位hash、描述符或真实替换算法，不声明物理8ways/LRU。
+响应称谓以该条件两个H全部8pass的lookup门通过为前置；失败格仍完整输出，不先删格。victim逐cell保存walk>0率、均值、count>1、前后8率差；H1−H2率≥.5且各W1对应H≤.125才称该有限条件有响应观察；任一H count>1或前后8漂移>.25命名窗口污染/准备漂移。每W/victim/history要求同mapping两竞争方向皆有效响应，≥4/5mapping才称重复响应，共12复制项。不存在首高点/物理capacity估计量；完整呈现W8与W9、3victim×2history响应表。即使全W8低/W9高也只约束本协议操作性边界，未测试其它victim/target、高位hash、描述符或真实替换算法，不声明物理8ways/LRU。
 
 ## 执行与验收
 
