@@ -515,3 +515,5 @@
 - **descriptor可观测性OPEN / 当前TLB负责人 / 触发=有限自有进程BPF能力检查**：`docs/reviews/2026-10-12-translation-observability-feasibility.md` 目标BTF可读，实际三层39/48-bit和task.mm/mm.pgd偏移已只读确认；kptr_restrict=2、全局地址masked且无BTF VAR。load/attach/kernel read尚未验证。下一先PID+syscall过滤、FD生命周期只读自有root descriptor，不盲猜direct-map偏置、不修改安全设置；leaf CONT/HPA及physical TLB容量保持OPEN。
 
 - **自有root descriptor能力已验证 / 当前TLB负责人 / 后续触发=owned leaf指针设计**：`docs/reviews/2026-10-12-translation-self-read-results.md`，source7224957/build30e6082/launch21c3034，78实际指令，3/3进程、每进程正控3/负控0，实际TGID/mm/pgd/两个table descriptor通过。首次read失败粘滞防覆盖，20raw SHA和双算法一致；所有FD回收，无全局写。前项kernel read未验证仅是历史检查状态，本有限root能力已关闭；leaf CONT/HPA/descriptor因果与physical参数仍OPEN，不盲猜direct-map偏置。
+
+- **owned leaf能力已验证 / 当前TLB负责人 / 触发=shared-memfd alias与性能观察分离的新协议**：`docs/reviews/2026-10-12-translation-self-leaf-results.md`，source0e8cd63/build49c7123/launchd235ce3，45实际指令、3/3进程正控1/负控0，old/requested PTE PFN匹配两端pagemap，20raw SHA独立复核。COW入口CONT0只在该时点，不回填旧批/稳态状态/HPA；physical PTETABLE PA未直接读到。下一先有限shared-alias触发资格，再定义descriptor cohort新控制，所有测量窗口前卸载observer并考虑缓存/翻译准备效应；物理TLB/ROB目标仍OPEN。

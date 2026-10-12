@@ -1,0 +1,40 @@
+{
+  "status": "passed",
+  "processes": 3,
+  "raw_sha_files": 20,
+  "checks": [
+    {
+      "epoch": 0,
+      "negative_captures": 0,
+      "positive_captures": 1,
+      "pte_pfn_pagemap_match": true,
+      "requested_pfn_match": true,
+      "observed_cont_bit": false,
+      "scope": "COW-trigger-entry-only",
+      "instruction_count": 45
+    },
+    {
+      "epoch": 1,
+      "negative_captures": 0,
+      "positive_captures": 1,
+      "pte_pfn_pagemap_match": true,
+      "requested_pfn_match": true,
+      "observed_cont_bit": false,
+      "scope": "COW-trigger-entry-only",
+      "instruction_count": 45
+    },
+    {
+      "epoch": 2,
+      "negative_captures": 0,
+      "positive_captures": 1,
+      "pte_pfn_pagemap_match": true,
+      "requested_pfn_match": true,
+      "observed_cont_bit": false,
+      "scope": "COW-trigger-entry-only",
+      "instruction_count": 45
+    }
+  ],
+  "absolute_addresses_published": false,
+  "steady_leaf_cont_state": "UNKNOWN",
+  "hpa_state": "UNKNOWN"
+}
