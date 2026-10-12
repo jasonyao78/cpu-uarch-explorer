@@ -1,0 +1,46 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "da1355dd0c6c38189bb0847042405f19961d2933",
+  "source_sha256": {
+    "probes/diagnostic/tlb_pointer_repr.cpp": "6414327f555cc00d0320019322b268beb164809091a3eb93701c0bae3e2618a9",
+    "probes/diagnostic/tlb_pointer_repr_layout.h": "3d47ba1c96e4e9d6e3e297127645e186fe8ea1cc8d44a8c93fa97f1464c3c410",
+    "probes/diagnostic/tlb_shared_alias_layout.h": "25345a7d404f122f82def7f2772bcc16b8d0a0442399f53b26a2e9b3ae7c90fe",
+    "probes/diagnostic/tlb_balanced_reach_layout.h": "3740d32888a7200b597a3ab9efb9372d9e2b50b9c0c8c7350d16494aefaeca19",
+    "probes/common/pagemap_decode.h": "ed47ecf077b44a5518029253055065168f500a949143eebf0fd9561a69bc5238",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "tools/diagnostic/tlb_alias_analysis.py": "18ed257b0d07fc7637254a19806bcb7f51800288f41e58d621734a8ef6e56071",
+    "tools/diagnostic/analyze_cold_pair.py": "44da32f8cf491c1c7388a4811b362780880ee0828e50119223baf274ecab3a09",
+    "tools/diagnostic/analyze_long_load.py": "77fcee5f22802a58d9d5b0d8e69bc4a51386b7cc8caa6dee6a3f4ae88821e3f5",
+    "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658"
+  },
+  "binaries": {
+    "tlb_pointer_repr": "59ba7a28279b2597498dd0ae868e21c5b1982c27ac4652cf84cf4a37febe1375"
+  },
+  "independent_rebuild_byte_identical": true,
+  "independent_build_sha256": [
+    "59ba7a28279b2597498dd0ae868e21c5b1982c27ac4652cf84cf4a37febe1375",
+    "59ba7a28279b2597498dd0ae868e21c5b1982c27ac4652cf84cf4a37febe1375"
+  ],
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "compiler": "Android (12470979, +pgo, -bolt, +lto, -mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)\nTarget: aarch64-unknown-linux-android34\nThread model: posix\nInstalledDir: /Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin\n",
+  "recipe": [
+    "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android34-clang++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic",
+    "probes/diagnostic/tlb_pointer_repr.cpp",
+    "-o",
+    "build/aarch64-linux-android/release/diagnostic/tlb_pointer_repr"
+  ],
+  "plan_path": "docs/reviews/evidence/2026-10-12-tlb-pointer-representation/plan.json",
+  "plan_sha256": "7c16039bbecc562b58d8a911f5b58b9de9ed4b00c3bc59c03c9991622cf70bfd",
+  "probe_role": "diagnostic JSONL, not formal schema-v2"
+}
