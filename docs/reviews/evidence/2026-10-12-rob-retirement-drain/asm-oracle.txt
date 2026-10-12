@@ -1,0 +1,18 @@
+
+/tmp/drain_oracle.o:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+0000000000000000 <drain_oracle>:
+       0: 9e66000d     	fmov	x13, d0
+       4: 9e66002e     	fmov	x14, d1
+       8: d53b440c     	mrs	x12, FPCR
+       c: d53b442c     	mrs	x12, FPSR
+      10: aa0c03f0     	mov	x16, x12
+      14: ca0f018c     	eor	x12, x12, x15
+      18: 9e670180     	fmov	d0, x12
+      1c: 9e670181     	fmov	d1, x12
+      20: f900004d     	str	x13, [x2]
+      24: f900044e     	str	x14, [x2, #0x8]
+      28: f9000850     	str	x16, [x2, #0x10]
+      2c: d65f03c0     	ret

@@ -1,0 +1,294 @@
+{
+  "status": "passed",
+  "actual_plans": 32,
+  "audits": [
+    {
+      "key": "none-fpcr-g0-k16-r0",
+      "code_sha256": "25cf7d82c936fff54427f9bc4040eebdd934ab5063770edaaa9cb937fbcaf64b",
+      "decoded_instructions": 30,
+      "loop_ir": 9,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "serial-fpcr-g0-k16-r0",
+      "code_sha256": "63b1a52c2f1f825ab1afd3f7bbc9af6228c705249b8ea2391f7cb48c3be6a116",
+      "decoded_instructions": 62,
+      "loop_ir": 41,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "independent-fpcr-g0-k16-r0",
+      "code_sha256": "947b8e09ce1f0f717f9cc957066836e2cae7c52c6d850d608b43be863bacadba",
+      "decoded_instructions": 62,
+      "loop_ir": 41,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "none-fpcr-g64-k16-r0",
+      "code_sha256": "7988839b3e2c59d3dd677465d58efb44762a213dfe05895d4265ade0f2823872",
+      "decoded_instructions": 286,
+      "loop_ir": 265,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "none-fpcr-g0-k32-r0",
+      "code_sha256": "25cf7d82c936fff54427f9bc4040eebdd934ab5063770edaaa9cb937fbcaf64b",
+      "decoded_instructions": 30,
+      "loop_ir": 9,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "serial-fpcr-g0-k32-r0",
+      "code_sha256": "2fcd329f512c049b0d05befed89bc8791589df81f80e341623af2d5263078850",
+      "decoded_instructions": 94,
+      "loop_ir": 73,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "independent-fpcr-g0-k32-r0",
+      "code_sha256": "8f24590c395c138008acabae0078760a92cccdb4792c138666589165fa3a810c",
+      "decoded_instructions": 94,
+      "loop_ir": 73,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "none-fpcr-g64-k32-r0",
+      "code_sha256": "7988839b3e2c59d3dd677465d58efb44762a213dfe05895d4265ade0f2823872",
+      "decoded_instructions": 286,
+      "loop_ir": 265,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "none-fpsr-g0-k16-r0",
+      "code_sha256": "b289c5dba945803b16dbaef80e32af2c9344f33dc89f134a284ea65ff03f3b19",
+      "decoded_instructions": 30,
+      "loop_ir": 9,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "serial-fpsr-g0-k16-r0",
+      "code_sha256": "04c1d9dc3d7103d82304ba742c319f77bf6fc20e5ee7d8b9d8c34f9a44a18cc2",
+      "decoded_instructions": 62,
+      "loop_ir": 41,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "independent-fpsr-g0-k16-r0",
+      "code_sha256": "8b9b22efccbc700a1b840ee8546ad5570b62be45a5ba1d79103f6ff53d75f7ae",
+      "decoded_instructions": 62,
+      "loop_ir": 41,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "none-fpsr-g64-k16-r0",
+      "code_sha256": "8ec443435870d36908f301a35f76d96bd4947c5802d49ee2477037ce261f64ad",
+      "decoded_instructions": 286,
+      "loop_ir": 265,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "none-fpsr-g0-k32-r0",
+      "code_sha256": "b289c5dba945803b16dbaef80e32af2c9344f33dc89f134a284ea65ff03f3b19",
+      "decoded_instructions": 30,
+      "loop_ir": 9,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "serial-fpsr-g0-k32-r0",
+      "code_sha256": "2ecebd2de820f15e729c934d3fa40da2bb7f1113cb7401988d8c1ef20983990e",
+      "decoded_instructions": 94,
+      "loop_ir": 73,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "independent-fpsr-g0-k32-r0",
+      "code_sha256": "648f545f6fab0e414fd2beed20142aefb8a640a1ce1b203cf866b63784059149",
+      "decoded_instructions": 94,
+      "loop_ir": 73,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "none-fpsr-g64-k32-r0",
+      "code_sha256": "8ec443435870d36908f301a35f76d96bd4947c5802d49ee2477037ce261f64ad",
+      "decoded_instructions": 286,
+      "loop_ir": 265,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "none-fpsr-g64-k32-r1",
+      "code_sha256": "8ec443435870d36908f301a35f76d96bd4947c5802d49ee2477037ce261f64ad",
+      "decoded_instructions": 286,
+      "loop_ir": 265,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "independent-fpsr-g0-k32-r1",
+      "code_sha256": "648f545f6fab0e414fd2beed20142aefb8a640a1ce1b203cf866b63784059149",
+      "decoded_instructions": 94,
+      "loop_ir": 73,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "serial-fpsr-g0-k32-r1",
+      "code_sha256": "2ecebd2de820f15e729c934d3fa40da2bb7f1113cb7401988d8c1ef20983990e",
+      "decoded_instructions": 94,
+      "loop_ir": 73,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "none-fpsr-g0-k32-r1",
+      "code_sha256": "b289c5dba945803b16dbaef80e32af2c9344f33dc89f134a284ea65ff03f3b19",
+      "decoded_instructions": 30,
+      "loop_ir": 9,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "none-fpsr-g64-k16-r1",
+      "code_sha256": "8ec443435870d36908f301a35f76d96bd4947c5802d49ee2477037ce261f64ad",
+      "decoded_instructions": 286,
+      "loop_ir": 265,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "independent-fpsr-g0-k16-r1",
+      "code_sha256": "8b9b22efccbc700a1b840ee8546ad5570b62be45a5ba1d79103f6ff53d75f7ae",
+      "decoded_instructions": 62,
+      "loop_ir": 41,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "serial-fpsr-g0-k16-r1",
+      "code_sha256": "04c1d9dc3d7103d82304ba742c319f77bf6fc20e5ee7d8b9d8c34f9a44a18cc2",
+      "decoded_instructions": 62,
+      "loop_ir": 41,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "none-fpsr-g0-k16-r1",
+      "code_sha256": "b289c5dba945803b16dbaef80e32af2c9344f33dc89f134a284ea65ff03f3b19",
+      "decoded_instructions": 30,
+      "loop_ir": 9,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpsr"
+    },
+    {
+      "key": "none-fpcr-g64-k32-r1",
+      "code_sha256": "7988839b3e2c59d3dd677465d58efb44762a213dfe05895d4265ade0f2823872",
+      "decoded_instructions": 286,
+      "loop_ir": 265,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "independent-fpcr-g0-k32-r1",
+      "code_sha256": "8f24590c395c138008acabae0078760a92cccdb4792c138666589165fa3a810c",
+      "decoded_instructions": 94,
+      "loop_ir": 73,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "serial-fpcr-g0-k32-r1",
+      "code_sha256": "2fcd329f512c049b0d05befed89bc8791589df81f80e341623af2d5263078850",
+      "decoded_instructions": 94,
+      "loop_ir": 73,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "none-fpcr-g0-k32-r1",
+      "code_sha256": "25cf7d82c936fff54427f9bc4040eebdd934ab5063770edaaa9cb937fbcaf64b",
+      "decoded_instructions": 30,
+      "loop_ir": 9,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "none-fpcr-g64-k16-r1",
+      "code_sha256": "7988839b3e2c59d3dd677465d58efb44762a213dfe05895d4265ade0f2823872",
+      "decoded_instructions": 286,
+      "loop_ir": 265,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "independent-fpcr-g0-k16-r1",
+      "code_sha256": "947b8e09ce1f0f717f9cc957066836e2cae7c52c6d850d608b43be863bacadba",
+      "decoded_instructions": 62,
+      "loop_ir": 41,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "serial-fpcr-g0-k16-r1",
+      "code_sha256": "63b1a52c2f1f825ab1afd3f7bbc9af6228c705249b8ea2391f7cb48c3be6a116",
+      "decoded_instructions": 62,
+      "loop_ir": 41,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    },
+    {
+      "key": "none-fpcr-g0-k16-r1",
+      "code_sha256": "25cf7d82c936fff54427f9bc4040eebdd934ab5063770edaaa9cb937fbcaf64b",
+      "decoded_instructions": 30,
+      "loop_ir": 9,
+      "capture_before_reset": true,
+      "three_stores_outside_loop": true,
+      "sysreg": "fpcr"
+    }
+  ]
+}
