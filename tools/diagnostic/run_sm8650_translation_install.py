@@ -19,7 +19,7 @@ def main(argv=None):
  devices=subprocess.check_output(['adb','devices'],text=True).splitlines()[1:]
  if sum(s.endswith('\tdevice') for s in devices)!=1:raise RuntimeError('STOP one owned device required')
  ex=AdbExecutor(timeout_s=30)
- for name in ('translation_install_read','translation_shared_leaf','translation_self_leaf','translation_self_read','ptr_chase','rob_zero_latency_units','tlb_pfn_association','rob_window_probe'):
+ for name in ('translation_install_read','translation_shared_leaf','translation_self_leaf','translation_self_read','ptr_chase','rob_zero_latency_units','tlb_pfn_association','rob_window_probe','rob_fp_drain','rob_dual_anchor','rob_retirement_units'):
   r=ex.execute(['pidof',name])
   if r.returncode!=1 or r.stdout.strip():raise RuntimeError('STOP active probe/ownership')
  r=ex.execute(['su','-c','sha256sum /sys/kernel/btf/vmlinux; cat /sys/devices/system/cpu/cpu7/regs/identification/midr_el1; getconf PAGESIZE'])

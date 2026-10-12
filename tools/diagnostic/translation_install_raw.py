@@ -45,4 +45,4 @@ def audit_raw(raw):
  else:need(verdicts[-1]['status']=='TECHNICAL_FAILURE','technical status');status='TECHNICAL_FAILURE'
  for p in raw.iterdir():
   if p.is_file() and p.name not in ('manifest.json','host-plan'):hashes[p.name]=sha(p)
- return dict(status=status,processes=len(entries),verdicts=verdicts,all_raw_sha256=hashes,source_branch=m['source_branch'],binary_source_head=source,launch_head=launch,binary_sha256=m['binary_sha256'],btf_sha256=model.BTF_SHA,steady_leaf_cont_state='UNKNOWN',hpa_state='UNKNOWN',physical_entries_certified=False)
+ return dict(status=status,processes=len(entries),verdicts=verdicts,all_raw_sha256=hashes,source_branch=m['source_branch'],binary_source_head=source,launch_head=launch,binary_sha256=m['binary_sha256'],btf_sha256=model.BTF_SHA,steady_cont_state='UNKNOWN',hpa_state='UNKNOWN',physical_entries_certified=False)
