@@ -35,3 +35,7 @@
 ## 2026-10-13 shared descriptor能力增补
 
 `docs/reviews/2026-10-13-translation-installation-read-results.md`：branch codex/sm8650-tlb-hierarchy-r2，source0fcccb2/buildfc2fdcc/launch81fc4d1。entry99/return32的新do_set_pte观察器3/3进程通过，负控0/entry1/return1，canonical-alias PFN及installed leaf匹配；实际父项类型/VA索引与两个层级地址关系一致，20 raw SHA第二算术复核。Linux table child PA可观察，machine DRAM/HPA与稳态CONT、TLB物理capacity/ways/hash仍未认证；三例安装CONT0只属该时点。31新旧关联tests通过，全量新回归另列最终证据。原shared-write NOT_EXCITED、旧ROB/TLB终态均不覆盖。下一先绑同进程性能graph的descriptor身份，再正交布局对照；ROB blocked/interleaved anchor顺序独立推进。
+
+## 2026-10-13 anchor-order参考残差复核
+
+`docs/reviews/2026-10-13-rob-anchor-order-results.md`，branch codex/sm8650-tlb-hierarchy-r2，source d1c99ea/build ead5e51/launch9be15af。完整12新进程768窗、54raw SHA，全部technical与negative/reference/background门通过，实际同进程同code PFN/slot交换；k32 blocked/interleaved≈462/433、六process DID≈29，k16两layout≈225。主BLOCKED_ANCHOR_ORDER_DELAY，辅助k16 median尺度阴性；原参考残差有register schedule贡献，不认证RS/PRF/ROB/physical allocation，不命名32-entry scheduler或用offset拟合384。433现在仅属新interleaved实测，旧blocked462/所有旧终态不回填。558/558完整诊断回归通过（471.147s）。下一采用更可解释排程的生命周期/单位正交资格另案，先注册不自动N扫；整体physical目标仍OPEN。

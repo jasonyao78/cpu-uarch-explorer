@@ -531,3 +531,5 @@
 - **shared安装与父表能力完成 / 当前TLB负责人 / 触发=同进程性能graph的descriptor身份与布局激励新协议**：`docs/reviews/2026-10-13-translation-installation-read-results.md`，source0fcccb2/buildfc2fdcc/launch81fc4d1；3/3、entry1/return1/负控0、leaf PFN/父表类型/索引/两级关系与20raw SHA通过。前项“待实施”属历史状态。安装CONT0不回填steady，Linux表child PA观察不认证machine DRAM/HPA；性能窗前卸载observer并对称准备，physical参数OPEN。下一新方案先验证实际descriptor布局激励，不复跑shared-write追事件。
 
 - **ROB anchor顺序有限协议已冻结 / 当前ROB负责人 / 触发=actual producer与raw生产链验证后12进程**：`docs/design/2026-10-13-rob-anchor-order.md` / `docs/superpowers/plans/2026-10-13-rob-anchor-order.md`；同进程同code PFN/slot交换，blocked/interleaved仅改FSQRT register order，NONE/SERIAL同码阴性，262144 iteration/768window有限。先解释实际k32≈462参考残差，不加offset拟合384，不自动容量扫描，旧终态保留。
+
+- **ROB anchor顺序有限批结束 / 当前ROB负责人 / 触发=采用interleaved reference的allocation/lifecycle正交新协议**：`docs/reviews/2026-10-13-rob-anchor-order-results.md`，source d1c99ea/build ead5e51/launch9be15af，12进程768窗/54raw SHA、全部controls通过；k32 blocked≈462/interleaved≈433、六process DID≈29，k16≈225基本无差，BLOCKED_ANCHOR_ORDER_DELAY。不同register order贡献成立，不唯一解释scheduler/PRF/ROB，不命名32-entry queue；旧scan/proxy不改。后续计量使用实际qualified/reference，不模型外推，actual units/active constraint仍OPEN。558完整诊断通过。
