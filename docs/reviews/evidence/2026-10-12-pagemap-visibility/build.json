@@ -1,0 +1,37 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "849f1456dfc865c0d37e4d6c0803632b910ed87f",
+  "source_sha256": {
+    "probes/diagnostic/pagemap_visibility.cpp": "61d7bf7749ccbb37aa22e55ada27e545e890ef60960b74c910cddc166760919d",
+    "probes/common/pagemap_decode.h": "ed47ecf077b44a5518029253055065168f500a949143eebf0fd9561a69bc5238",
+    "probes/diagnostic/tlb_balanced_reach_layout.h": "3740d32888a7200b597a3ab9efb9372d9e2b50b9c0c8c7350d16494aefaeca19",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7"
+  },
+  "binaries": {
+    "pagemap_visibility": "7ac9d5e1b31c645561977c4a011af44847590d8f751160d81e81fd498128750e"
+  },
+  "independent_rebuild_byte_identical": true,
+  "independent_build_sha256": [
+    "7ac9d5e1b31c645561977c4a011af44847590d8f751160d81e81fd498128750e",
+    "7ac9d5e1b31c645561977c4a011af44847590d8f751160d81e81fd498128750e"
+  ],
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "recipe": [
+    "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android34-clang++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic",
+    "probes/diagnostic/pagemap_visibility.cpp",
+    "-o",
+    "build/aarch64-linux-android/release/diagnostic/pagemap_visibility"
+  ],
+  "plan_path": "docs/reviews/evidence/2026-10-12-pagemap-visibility/plan.json",
+  "plan_sha256": "25e8de03535779dd3a3648b6b0131b333411e958eebbaaa002c344f64d527eb5",
+  "probe_role": "own-process capability JSONL, not PMU measurement"
+}
