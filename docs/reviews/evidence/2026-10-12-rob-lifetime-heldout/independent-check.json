@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "raw_windows": 2352,
+  "validation_curves_exact": true,
+  "predictions_and_proxy_exact": true,
+  "frontend_and_original_cache_gates_exact": true,
+  "discovery98_sha_exact": true,
+  "epoch2_empty_at_registration": true,
+  "unique_selected_cache_failures": 434
+}
