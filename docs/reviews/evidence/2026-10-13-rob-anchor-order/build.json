@@ -1,0 +1,25 @@
+{
+  "source_commit": "d1c99ead37789fccdccee20d922773686c66e418",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 -Iprobes/common probes/diagnostic/rob_anchor_order.c -o build/aarch64-linux-android/release/diagnostic/rob_anchor_order",
+  "source_sha256": {
+    "probes/diagnostic/rob_anchor_order.c": "84f800198e9d3b6e852ece6676badc0bb76e58fe3c3dba2ba02b6377dcfc6b7e",
+    "probes/common/rob_codegen.h": "6feee6e79aa26e14655814ffb5ae61553cd45da72d1e3a94e4310f80d1f70da8",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "tools/diagnostic/rob_order_analysis.py": "280e931b937df3a16574e63f734988b701169bc47f3624c1374888ecc4064343",
+    "tools/diagnostic/run_sm8650_rob_order.py": "a7622b044596899bb112e2271d5fa432b05b83b1ed6c3dcbf13ff939f8400b3b",
+    "tools/diagnostic/rob_drain_analysis.py": "cc6edf2bd0c2f5092df907eba36289af621bddf928f37aaea0efa4e8c8dc00cb",
+    "tools/diagnostic/analyze_cold_pair.py": "44da32f8cf491c1c7388a4811b362780880ee0828e50119223baf274ecab3a09"
+  },
+  "binaries": {
+    "rob_anchor_order": "4125fa376c5d0cb7b34e2cef1a99e36f9c314552d60aa085ad60b4b1af2f291a"
+  },
+  "plan_sha256": "553a286760d33719d030ea3dea450ee53d159dc77f5631092158e9f58a787284",
+  "two_independent_builds_equal": true,
+  "actual_native_plans": 8,
+  "independent_capstone_programs": 64,
+  "tests": 7,
+  "hardware_qualification_started": false
+}
