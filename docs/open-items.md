@@ -517,3 +517,5 @@
 - **自有root descriptor能力已验证 / 当前TLB负责人 / 后续触发=owned leaf指针设计**：`docs/reviews/2026-10-12-translation-self-read-results.md`，source7224957/build30e6082/launch21c3034，78实际指令，3/3进程、每进程正控3/负控0，实际TGID/mm/pgd/两个table descriptor通过。首次read失败粘滞防覆盖，20raw SHA和双算法一致；所有FD回收，无全局写。前项kernel read未验证仅是历史检查状态，本有限root能力已关闭；leaf CONT/HPA/descriptor因果与physical参数仍OPEN，不盲猜direct-map偏置。
 
 - **owned leaf能力已验证 / 当前TLB负责人 / 触发=shared-memfd alias与性能观察分离的新协议**：`docs/reviews/2026-10-12-translation-self-leaf-results.md`，source0e8cd63/build49c7123/launchd235ce3，45实际指令、3/3进程正控1/负控0，old/requested PTE PFN匹配两端pagemap，20raw SHA独立复核。COW入口CONT0只在该时点，不回填旧批/稳态状态/HPA；physical PTETABLE PA未直接读到。下一先有限shared-alias触发资格，再定义descriptor cohort新控制，所有测量窗口前卸载observer并考虑缓存/翻译准备效应；物理TLB/ROB目标仍OPEN。
+
+- **ROB退休边界正交原型OPEN / 当前ROB负责人 / 触发=shared leaf有限能力闭环后设计定稿**：`docs/design/2026-10-12-rob-retirement-drain-next.md` 为草案；MRS FPSR/FPCR、next-input重置与原结果捕获隔离。必须实际opcode/decode、IR及两mode参考资格定稿后才48process/384window，不冒充已实现/已冻结，不从新边界加offset拟合384。
