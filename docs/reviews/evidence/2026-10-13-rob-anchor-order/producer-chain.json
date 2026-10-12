@@ -1,0 +1,21 @@
+{
+  "tests": 13,
+  "passed": 13,
+  "elapsed_s": 9.725,
+  "producer_build": "ead5e51",
+  "source_commit": "d1c99ea",
+  "actual_native_plans": 8,
+  "independent_decoded_programs": 64,
+  "command": ".venv/bin/python -m unittest tools.diagnostic.tests.test_rob_order tools.diagnostic.tests.test_rob_order_analysis tools.diagnostic.tests.test_rob_order_raw",
+  "production_chain": "actual source/plan -> registered driver -> writer -> immutable source recompiled plans -> typed complete raw -> frozen contrast",
+  "external_pmu": "synthetic software fixture only",
+  "attacks": [
+    "missing/extra/duplicate/ordered process/window",
+    "request/plan/binary/source/driver/environment drift",
+    "wrong code/slot/migration/hidden PFN",
+    "original FP/GPR/status corruption",
+    "boolean numeric/mux/IR/time/count corruption",
+    "first bad program stops; bypass caught",
+    "control gate fails without rescue; no scan authority"
+  ]
+}
