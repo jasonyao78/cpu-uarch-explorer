@@ -12,11 +12,11 @@ class AliasAnalysis(unittest.TestCase):
  def tearDownClass(cls):cls.folder.cleanup()
  def module(self):return importlib.import_module('tools.diagnostic.tlb_alias_analysis')
  def records(self,reverse=False):
-  layout=copy.deepcopy(self.layouts['reverse' if reverse else 'forward']);mapping=layout[1];mapping['canonical_base']=85899345920;mapping['canonical_pfns']=list(range(12345,12345+2560));rows=[layout[0],dict(type='pmu',ids=[1,2,3,4,5,6]),mapping]
+  layout=copy.deepcopy(self.layouts['reverse' if reverse else 'forward']);mapping=layout[1];mapping['canonical_base']=85899345920;mapping['canonical_pfns']=list(range(12345,12345+2560));mapping['canonical_entries']=[(1<<63)|(1<<56)|v for v in mapping['canonical_pfns']];rows=[layout[0],dict(type='pmu',ids=[1,2,3,4,5,6]),mapping]
   for i in range(2,len(layout),2):
    c,g=layout[i:i+2];rows.extend([c,g])
    for stage in ('before','after'):
-    rows.append(dict(type='backing',cell=c['cell'],stage=stage,kernel_page_kb=4,mmu_page_kb=4,anon_huge_kb=0,shmem_pmd_kb=0,file_pmd_kb=0));rows.append(dict(type='pfn-certificate',cell=c['cell'],stage=stage,alias_pfns=mapping['canonical_pfns'][:c['n']]))
+    rows.append(dict(type='backing',cell=c['cell'],stage=stage,kernel_page_kb=4,mmu_page_kb=4,anon_huge_kb=0,shmem_pmd_kb=0,file_pmd_kb=0));rows.append(dict(type='pfn-certificate',cell=c['cell'],stage=stage,alias_pfns=mapping['canonical_pfns'][:c['n']],pagemap_entries=mapping['canonical_entries'][:c['n']]))
    for t in range(3):
     n=c['loads'];walk=0 if c['n']<1792 else .5 if c['shape']=='dense' else .75;rows.append(dict(type='round',cell=c['cell'],position=c['position'],round=t,head_returned=True,enabled=100,running=100,counts=[8*n+100,3*n+20,n,round(walk*n),n,round(walk*n)]))
   return rows
@@ -33,7 +33,7 @@ class AliasAnalysis(unittest.TestCase):
 int main(){char name[]="/tmp/alias-test-XXXXXX";int fd=mkstemp(name);if(fd<0)return 1;unlink(name);tlb_alias::Space space(fd,sysconf(_SC_PAGESIZE));unsigned count=0;for(auto c:tlb_alias::cells(false)){if(!c.n)continue;auto pp=tlb_reach::pages(c.shape,c.n);auto oo=tlb_reach::order(c);uintptr_t h=space.link(c),node=h;for(unsigned i=0;i<c.n;++i){unsigned index=oo[i],next=oo[(i+1)%c.n];if(node!=space.node(c.shape,index)||*reinterpret_cast<uintptr_t*>(space.canonical_node(index))!=space.node(c.shape,next))return 2;for(const char* sh:{"dense","spaced","balanced-random"})if(*reinterpret_cast<uintptr_t*>(space.node(sh,index))!=space.node(c.shape,next))return 3;node=*reinterpret_cast<uintptr_t*>(node);}if(node!=h)return 4;for(unsigned i=0;i<c.loads;++i)node=*reinterpret_cast<uintptr_t*>(node);if(node!=h)return 5;++count;}std::printf("%u\n",count);}''');subprocess.run(['clang++','-std=c++17','-O2','-Wall','-Wextra','-Werror','-I',str(ROOT/'probes/common'),'-I',str(ROOT/'probes/diagnostic'),str(src),'-o',str(exe)],check=True);self.assertEqual(subprocess.check_output([str(exe)],text=True),'30\n')
  def test_pfn_binding_and_backing_each_stage_reject(self):
   m=self.module()
-  for kind in ('missing','extra','typed-n','canonical-zero','canonical-duplicate','pfn-before','pfn-after','pfn-bool','huge','shmem','file','mmu','alias-base','geometry','mux','head','ir'):
+  for kind in ('missing','extra','typed-n','canonical-zero','canonical-duplicate','pfn-before','pfn-after','pfn-bool','wire-pfn','wire-present','wire-swap','wire-type','canonical-wire','huge','shmem','file','mmu','alias-base','geometry','mux','head','ir'):
    rr=self.records()
    if kind=='missing':rr.pop()
    elif kind=='extra':rr.append(rr[-1])
@@ -43,6 +43,11 @@ int main(){char name[]="/tmp/alias-test-XXXXXX";int fd=mkstemp(name);if(fd<0)ret
    elif kind=='pfn-before':rr[15]['alias_pfns'][0]+=1
    elif kind=='pfn-after':rr[17]['alias_pfns'][0]+=1
    elif kind=='pfn-bool':rr[15]['alias_pfns'][0]=True
+   elif kind=='wire-pfn':rr[15]['pagemap_entries'][0]+=1
+   elif kind=='wire-present':rr[15]['pagemap_entries'][0]&=~(1<<63)
+   elif kind=='wire-swap':rr[17]['pagemap_entries'][0]|=1<<62
+   elif kind=='wire-type':rr[17]['pagemap_entries'][0]=True
+   elif kind=='canonical-wire':rr[2]['canonical_entries'][0]&=~(1<<63)
    elif kind=='huge':rr[14]['anon_huge_kb']=1
    elif kind=='shmem':rr[14]['shmem_pmd_kb']=1
    elif kind=='file':rr[14]['file_pmd_kb']=1
