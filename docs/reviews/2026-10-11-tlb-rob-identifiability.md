@@ -96,3 +96,12 @@ fresh整树软件出口：diagnostic298/298、runner203/203、formal analysis250
 ## 架构目的控制与相对单位下一门（2026-10-12）
 
 `docs/reviews/2026-10-12-rob-destination-control-results.md`（sourcef85e2bb/build083c386/launchf640160/resultb93a392）192真机窗技术与参考资格过，XZR并未消除裸ADD波动，NOP+ADD两目的均稳定；主INCONCLUSIVE而非PRF/前端唯一归因。下一 `docs/design/2026-10-12-rob-retirement-units.md` 明示相对α只是被检验假设，比较同bytes无架构结果的三pattern及chain16/32；先192窗资格，过后2352窗有限扫描。新source df2171d / build47ff455，144独立反汇编/288实际计划、两NDK构建一致，7算法/码形及9生产链软件测试通过；fresh192真机资格已交付 `docs/reviews/2026-10-12-rob-retirement-units-results.md`（launchf2c99a9），两chain参考均稳但ADD+SUB供给45–50%波动、9取指门越线，not-qualified，2352扫描未启动。414整树diagnostic已通过。即使共同proxy区间存在，也不能把它直接改名物理ROB entries；仍须独立认证实际分配单位和活跃约束。
+
+
+## 2026-10-12 指针表示、零延迟类和下一正交控制
+
+`docs/reviews/2026-10-12-tlb-pointer-representation-results.md`（sourceda1355d/buildeed4aee/launch256cbbe/result708a691）333目标窗/324门，mask保留低48位，阴性不排除低位识别。全位 `docs/reviews/2026-10-12-tlb-full-pointer-representation-results.md`（sourcec719772/builddd31d08/launch4d7554d/result7266d9d）495目标窗/486主门，532992 raw pagemap/525312 stored words，其中175104 full投影真实改变；所有主DID绝对值<.10，最大.071。简单raw pointer投影不是本新协议几何效应必要解释；复杂预取/descriptor/aggregation仍UNKNOWN，不回填旧匿名PFN。
+
+`docs/reviews/2026-10-12-rob-zero-latency-units-results.md`（source5aecbbb/build7c7647e/qualification launch3c4d865/result3124a73）192真机资格全过，102 SHA、96FP精确1.0、三类NONE64均稳定，两个参考重叠比约.5。2352 scan实际launch3124a73仍运行，不预报最终区间。E0两NOP类链长转折约只移动16组，MOV/MOV末点右删失；原cache门也拒绝大代码窗。`docs/design/2026-10-12-rob-lifetime-heldout.md`（freeze365f0f2/scorer6109767）在E2零记录时另冻g+k候选预测，E1不入确认，frontend≤1%只为观测条件，原cache拒绝/consumer不改；不能称新物理ROB容量已测得。
+
+新TLB同VA/PFN邻接（`probes/diagnostic/tlb_pfn_association.cpp` / `probes/diagnostic/tlb_pfn_association_layout.h` / `probes/diagnostic/tlb_pfn_association_space.h` / `tools/diagnostic/tlb_association_analysis.py` / `tools/diagnostic/run_sm8650_tlb_association.py`）sourcee88adef/buildf054ae6/softwarea78539e，计划 `docs/design/2026-10-12-tlb-pfn-association.md` v1.1；17新测试与157全部TLB回归、两NDK、68 actual plan/272geometry和40-byte同decode kernel通过，当前尚无目标数据。activeπ保留mod64/同VA lines/物理图，inactive恢复identity；阳性有虚拟访问order残余，阴性须自然连续激励，不能唯一命名HPA。code/contract/component路径均已登记。launch前457整树与其后scope测试分列，不将software mock/旧基线当新增全部单次整树通过。

@@ -6,9 +6,9 @@
 
 | 方向 | 已验证的内容 | 距离物理定案的主要缺口 |
 |---|---|---|
-| TLB | 局部冲突转折、有限低位/高位候选区分、L1 refill曲线和walk并行有效响应；最新同PFN三VA族279窗/270门与330240原始pagemap位核对通过，几何差仍复制 | 分离descriptor/translation预取、stored-pointer识别与硬件聚合等可替代解释；认证物理容量/ways和足够范围内的索引规律 |
-| ROB | 真实生成码/PMU/IR/结果链可信；D0/D1独立参考约208/416，chain32约416/832；架构目的XZR控制及同码/同VA反例保留 | 建立稳定、可解释的资源流量控制，独立标定分配单位，并证明被碰到的活跃限制确为ROB；当前不能将NOP数、µOP/IR或第三方384改名entries |
-| 工程收口 | m0b已集成进r2并完成使命；414/414诊断回归、NDK构建与producer→raw审计通过 | 科学结果稳定后整合总报告及交付索引，核对main相关变更，完成集成回归/备份；不复活旧不完整正式矩阵 |
+| TLB | 局部冲突转折、有限低位/高位候选区分、L1 refill曲线和walk并行有效响应；同PFN279窗几何差复制；新增高位333/全位495窗编码对照技术与背景全过，实际全位投影干预后几何差仍未跨.10变化门 | 分离descriptor/translation预取、stored-pointer识别与硬件聚合等可替代解释；认证物理容量/ways和足够范围内的索引规律 |
+| ROB | 真实生成码/PMU/IR/结果链可信；D0/D1独立参考约208/416，chain32约416/832；架构目的XZR控制及同码/同VA反例保留 | 新零延迟live MOV的192窗供给/参考/取指资格通过；完整2352扫描运行中，仍须独立标定分配单位，并证明被碰到的活跃限制确为ROB；当前不能将NOP数、µOP/IR或第三方384改名entries |
+| 工程收口 | m0b已集成进r2并完成使命；launch前457/457诊断回归、NDK构建与producer→raw审计通过；新增PFN关联157 TLB回归与生命周期6金样通过 | 科学结果稳定后整合总报告及交付索引，核对main相关变更，完成集成回归/备份；不复活旧不完整正式矩阵 |
 
 ## 最新一块对距离判断的影响
 
@@ -25,3 +25,12 @@
 3. 结果逐项纳入 `docs/reviews/2026-10-11-tlb-rob-goal-ledger.md` / `docs/reviews/2026-10-11-tlb-rob-identifiability.md`，所有未竟问题、负责人和触发条件归 `docs/open-items.md`；软件和分支收口随后验证。
 
 当前工作树 `/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2`，分支 `codex/sm8650-tlb-hierarchy-r2`。本次新增代码 `probes/diagnostic/rob_retirement_units.c` / `tools/diagnostic/rob_units_analysis.py` / `tools/diagnostic/run_sm8650_rob_units.py`：source `df2171d`、build `47ff455`、真实launch `f2c99a9`、目标报告 `a0e6243`。本版无main合并或远端推送声明；其他会话.gitignore与旧六run目录原位保留。
+
+
+## 本次接续的新增阶段结果
+
+全位指针报告 `docs/reviews/2026-10-12-tlb-full-pointer-representation-results.md` /7266d9d 已独立核验495窗，最大主DID约.071（预注册.10），实际低地址投影改变但几何差保留。它削弱简单stored pointer识别的必要性解释，没有排除完整DMP/descriptor/聚合。下一 `docs/design/2026-10-12-tlb-pfn-association.md` v1.1（e88adef/f054ae6/a78539e）软件出口已完成，待ROB块结束后297窗；同VA lines/物理trace，实际0相邻PFN且保留虚拟order残余。
+
+ROB `docs/reviews/2026-10-12-rob-zero-latency-units-results.md` /3124a73：192真机资格全过，参考比约.5、三类供给稳定，正式2352扫描正在执行。原固定Icache门及g+2k静态公式受E0观察挑战，按原终态保留；`docs/design/2026-10-12-rob-lifetime-heldout.md` /365f0f2、`tools/diagnostic/rob_lifetime_analysis.py` /6109767 在E2开始前冻结新生命周期预测，既定6金样通过，尚未读取E2确认结果。不能将“资格通过”改写成“物理ROB容量完成”。
+
+当前README和目标ledger同步到上述阶段；窗口数只是本有限协议进度，整体物理目标仍未完成。所有新source/build/launch/报告commit均在r2本地，无main/推送声明。
