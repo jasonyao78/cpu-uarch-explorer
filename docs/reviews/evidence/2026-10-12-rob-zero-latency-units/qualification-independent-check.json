@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "direct_windows": 192,
+  "all_point_window_ratios_exact": true,
+  "qualification_values_exact": true,
+  "fp_windows_exact_one": 96,
+  "checksum_windows": 192,
+  "raw_sha_files": 102
+}
