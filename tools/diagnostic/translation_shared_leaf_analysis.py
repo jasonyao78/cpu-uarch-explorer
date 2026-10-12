@@ -12,7 +12,7 @@ PLAN='docs/reviews/evidence/2026-10-12-translation-shared-leaf/plan.json'
 CONSUMER='tools/diagnostic/translation_shared_leaf_analysis.py'
 DRIVER='tools/diagnostic/run_sm8650_shared_leaf.py'
 def audit_process(records,plan):
- need(type(records)is list and len(records)==1,'shared record coverage');d=records[0]
+ need(type(records)is list and len(records)==1,'shared record coverage');d=records[0];need(type(d)is dict,'shared record type')
  if d.get('type')=='failure':return base.audit_process(records,plan)
  need(d.get('backing')=='shared-memfd' and type(plan)is dict and plan.get('backing')=='shared-memfd','shared requested backing')
  for key,alias in [('canonical_before','pagemap_before'),('canonical_after','pagemap_after')]:

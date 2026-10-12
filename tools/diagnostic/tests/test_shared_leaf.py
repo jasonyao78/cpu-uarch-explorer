@@ -24,6 +24,9 @@ class TestSharedLeaf(unittest.TestCase):
    for value in (True,(1<<63)|0xaab,(1<<63)|(1<<62)|0xaaa):
     r=self.record();r[field][0]=value
     with self.assertRaises(ValueError):self.model.audit_process([r],self.plan)
+ def test_non_object_record_is_named_rejection(self):
+  for row in (None,True,1):
+   with self.assertRaises(ValueError):self.model.audit_process([row],self.plan)
  def test_wrong_backing_not_excited_negative_and_host_boundary(self):
   r=self.record();r['backing']='anonymous'
   with self.assertRaises(ValueError):self.model.audit_process([r],self.plan)
