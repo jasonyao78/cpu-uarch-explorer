@@ -1,0 +1,73 @@
+{
+  "decoder": "Capstone independent ELF symbol extraction",
+  "symbol": "repr_k1",
+  "code_sha256": "790164da43badb02ad057cd4a79c417d7201c3b2f7920e9aa9af02452a25183f",
+  "words": [
+    2852127721,
+    4181721376,
+    2852193256,
+    2852258801,
+    4181721088,
+    3390111744,
+    4043310344,
+    1426063265,
+    4177527072,
+    3596551104
+  ],
+  "assembly": [
+    {
+      "offset": 0,
+      "mnemonic": "mov",
+      "operands": "x9, x0"
+    },
+    {
+      "offset": 4,
+      "mnemonic": "ldr",
+      "operands": "x0, [x9]"
+    },
+    {
+      "offset": 8,
+      "mnemonic": "mov",
+      "operands": "x8, x1"
+    },
+    {
+      "offset": 12,
+      "mnemonic": "mov",
+      "operands": "x17, x2"
+    },
+    {
+      "offset": 16,
+      "mnemonic": "ldr",
+      "operands": "x0, [x0]"
+    },
+    {
+      "offset": 20,
+      "mnemonic": "eor",
+      "operands": "x0, x0, x17"
+    },
+    {
+      "offset": 24,
+      "mnemonic": "subs",
+      "operands": "x8, x8, #1"
+    },
+    {
+      "offset": 28,
+      "mnemonic": "b.ne",
+      "operands": "#0x2447dc"
+    },
+    {
+      "offset": 32,
+      "mnemonic": "str",
+      "operands": "x0, [x9]"
+    },
+    {
+      "offset": 36,
+      "mnemonic": "ret",
+      "operands": ""
+    }
+  ],
+  "actual_loop_instructions": 4,
+  "mask_from_dynamic_argument": true,
+  "plans": 68,
+  "layouts": 272
+}
