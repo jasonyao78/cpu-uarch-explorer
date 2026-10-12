@@ -32,7 +32,7 @@ def main(argv=None):
  devices=subprocess.check_output(['adb','devices'],text=True).splitlines()[1:]
  if sum(l.endswith('\tdevice') for l in devices)!=1:raise RuntimeError('STOP one online target required')
  ex=AdbExecutor(timeout_s=120)
- for name in ('ptr_chase','rob_window_probe','rob_dependency_pair','rob_fusion_groups','rob_resident_control','tlb_cross_region','tlb_page_distribution','tlb_address_geometry','tlb_walk_parallel','tlb_local_turn','tlb_victim_history','tlb_competition','tlb_capacity','tlb_history','tlb_local_pair','rob_cold_pair'):
+ for name in ('ptr_chase','rob_window_probe','rob_dependency_pair','rob_fusion_groups','rob_dual_anchor','rob_resident_control','tlb_cross_region','tlb_page_distribution','tlb_address_geometry','tlb_walk_parallel','tlb_local_turn','tlb_victim_history','tlb_competition','tlb_capacity','tlb_history','tlb_local_pair','rob_cold_pair'):
   active=ex.execute(['pidof',name])
   if active.returncode!=1 or active.stdout.strip():raise RuntimeError('STOP active probe or failed ownership check')
  profile=json.loads((ROOT/'configs/platforms/redmi-k70pro-01.json').read_text());policy=copy.deepcopy(profile['environment_profiles']['charging-thermal']['measurement_environment']);policy['preconditions']['cpufreq_governor']='walt'
