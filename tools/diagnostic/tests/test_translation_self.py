@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[3]
 MAP=0x20000;TASK=0x30000;MM=0x40000;PGD=0x50000;STACK=0x80000
 
-def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_present=True,prior=None):
+def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_present=True,prior=None,context_fields=None,additional_memory=None,allowed_reads=None):
     regs=[0]*11;regs[1]=0x10000;regs[10]=STACK;mem={};reads=[]
     def store(addr,value,size):
         for i,b in enumerate(int(value%(1<<(8*size))).to_bytes(size,'little')):mem[addr+i]=b
@@ -14,6 +14,8 @@ def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_pr
         for j,x in enumerate(prior):store(MAP+8*j,x,8)
     store(regs[1]+8,syscall_id,8);store(TASK+1588,task_pid,4);store(TASK+1440,MM,8);store(MM+56,PGD,8)
     store(PGD+3*8,0xabc003,8);store(PGD+4*8,0xdef003,8)
+    for off,value in (context_fields or {}).items():store(regs[1]+off,value,8)
+    for addr,(size,value) in (additional_memory or {}).items():store(addr,value,size)
     pc=0;steps=0
     while pc<len(program):
         steps+=1;assert steps<400
@@ -30,6 +32,8 @@ def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_pr
         elif code in (0x55,0x15):
             condition=regs[dst]!=(imm&0xffffffffffffffff)
             if condition==(code==0x55):next_pc+=off
+        elif code==0x5d:
+            if regs[dst]!=regs[src]:next_pc+=off
         elif code==0x85:
             if imm==14:regs[0]=(pid<<32)|pid
             elif imm==35:regs[0]=TASK
@@ -39,7 +43,7 @@ def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_pr
                 reads.append((regs[3],regs[2]));nth=len(reads)
                 if nth==fail_read:regs[0]=(-14)&0xffffffffffffffff
                 else:
-                    assert (regs[3],regs[2]) in [(TASK+1588,4),(TASK+1440,8),(MM+56,8),(PGD+24,8),(PGD+32,8)]
+                    assert (regs[3],regs[2]) in (allowed_reads if allowed_reads is not None else [(TASK+1588,4),(TASK+1440,8),(MM+56,8),(PGD+24,8),(PGD+32,8)])
                     value=load(regs[3],regs[2]);store(regs[1],value,regs[2]);regs[0]=0
             else:raise AssertionError('unknown helper')
             for j in range(1,6):regs[j]=0
