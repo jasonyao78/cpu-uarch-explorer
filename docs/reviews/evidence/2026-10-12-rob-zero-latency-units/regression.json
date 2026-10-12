@@ -1,0 +1,10 @@
+{
+  "evidence": "software verification, not device measurement",
+  "diagnostic_tests": 457,
+  "passed": true,
+  "seconds": 428.188,
+  "raw_chain_tests": 9,
+  "producer_tests": 7,
+  "log_sha256": "ee9524ed76d400db379a3cdcccbd53a87e62c55dab8aa3e961a9299032159b20",
+  "unmodified_formal_paths": "runner/analysis/CMake tests not rerun in this checkpoint"
+}
