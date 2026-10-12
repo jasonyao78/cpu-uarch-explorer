@@ -1,0 +1,45 @@
+  21a6e0:      	mov	w3, #0x20000            // =131072
+  21a6e4:      	blr	x21
+  21a6e8:      	add	x0, sp, #0x158
+  21a6ec:      	add	x1, sp, #0xc0
+  21a6f0:      	bl	0x21b15c <snapshot>
+  21a6f4:      	cbnz	x0, 0x21a970 <main+0x824>
+  21a6f8:      	ldr	w0, [sp, #0x158]
+  21a6fc:      	mov	w1, #0x2400             // =9216
+  21a700:      	mov	w2, #0x1                // =1
+  21a704:      	bl	0x222fa0 <ioctl>
+  21a708:      	cbnz	w0, 0x21a92c <main+0x7e0>
+  21a70c:      	bl	0x21b5d0 <ns>
+  21a710:      	mov	x26, x0
+  21a714:      	add	x2, sp, #0x110
+  21a718:      	mov	x0, xzr
+  21a71c:      	mov	x1, xzr
+  21a720:      	mov	w3, #0x20000            // =131072
+  21a724:      	blr	x21
+  21a728:      	mov	x23, x0
+  21a72c:      	cbz	w20, 0x21a73c <main+0x5f0>
+  21a730:      	fmov	x24, d0
+  21a734:      	fmov	x25, d1
+  21a738:      	b	0x21a744 <main+0x5f8>
+  21a73c:      	mov	x24, xzr
+  21a740:      	mov	x25, xzr
+  21a744:      	bl	0x21b5d0 <ns>
+  21a748:      	ldr	w8, [sp, #0x158]
+  21a74c:      	mov	x27, x0
+  21a750:      	mov	w1, #0x2401             // =9217
+  21a754:      	mov	w2, #0x1                // =1
+  21a758:      	mov	w0, w8
+  21a75c:      	bl	0x222fa0 <ioctl>
+  21a760:      	cbnz	w0, 0x21a938 <main+0x7ec>
+  21a764:      	add	x0, sp, #0x158
+  21a768:      	add	x1, sp, #0x70
+  21a76c:      	bl	0x21b15c <snapshot>
+  21a770:      	cbnz	x0, 0x21a970 <main+0x824>
+  21a774:      	add	x0, sp, #0xc0
+  21a778:      	add	x1, sp, #0x70
+  21a77c:      	add	x2, sp, #0x20
+  21a780:      	bl	0x21b60c <pg_delta>
+  21a784:      	cbnz	x0, 0x21a970 <main+0x824>
+  21a788:      	bl	0x237b64 <sched_getcpu>
+  21a78c:      	cmp	w0, #0x7
+  21a790:      	b.ne	0x21a95c <main+0x810>
