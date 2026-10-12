@@ -4,12 +4,14 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[3]
 MAP=0x20000;TASK=0x30000;MM=0x40000;PGD=0x50000;STACK=0x80000
 
-def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_present=True):
+def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_present=True,prior=None):
     regs=[0]*11;regs[1]=0x10000;regs[10]=STACK;mem={};reads=[]
     def store(addr,value,size):
         for i,b in enumerate(int(value%(1<<(8*size))).to_bytes(size,'little')):mem[addr+i]=b
     def load(addr,size):return int.from_bytes(bytes(mem.get(addr+i,0) for i in range(size)),'little')
     for j in range(64):store(MAP+j,0,1)
+    if prior is not None:
+        for j,x in enumerate(prior):store(MAP+8*j,x,8)
     store(regs[1]+8,syscall_id,8);store(TASK+1588,task_pid,4);store(TASK+1440,MM,8);store(MM+56,PGD,8)
     store(PGD+3*8,0xabc003,8);store(PGD+4*8,0xdef003,8)
     pc=0;steps=0
@@ -68,6 +70,10 @@ class TestSelfBytecode(unittest.TestCase):
             out,reads=interpret(self.program,fail_read=stage);self.assertEqual(out[0],stage);self.assertEqual(out[6],(1<<64)-14);self.assertEqual(len(reads),stage);self.assertEqual(out[7],1)
     def test_btf_tgid_sanity_mismatch_stops_before_mm(self):
         out,reads=interpret(self.program,task_pid=54321);self.assertEqual(out[0],1);self.assertEqual(len(reads),1)
+    def test_prior_read_failure_is_sticky_not_overwritten(self):
+        bad,_=interpret(self.program,fail_read=2);next_out,reads=interpret(self.program,prior=bad)
+        self.assertEqual(next_out,bad);self.assertEqual(reads,[])
+        ok,_=interpret(self.program);next_out,reads=interpret(self.program,prior=ok);self.assertEqual(next_out[7],2);self.assertEqual(next_out[0],6);self.assertEqual(len(reads),5)
     def test_map_missing_no_memory_read(self):
         out,reads=interpret(self.program,map_present=False);self.assertEqual(out,[0]*8);self.assertEqual(reads,[])
     def test_program_jump_bounds_and_host_cannot_claim_android(self):

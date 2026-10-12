@@ -10,7 +10,7 @@
 
 reserve 2GiB无物理承诺arena，仅offset0和1GiB两个4K页prefault；两个root索引由实际VA>>30 &511决定。读8-byte root描述符，不沿物理地址盲走下一级；安全direct-map偏置尚不可见，不猜常见RAM起点。叶PTE/CONT/HPA保持UNKNOWN。
 
-一个map，一个GPL raw-tracepoint程序，attach sys_enter；仅FD持有，无pin、无sysctl写/内核写入/tracefs永久配置。程序有限直线控制流；negative controls=自身gettid3次、子进程getpid3次（过滤应无capture），positive=自身getpid3次（capture恰3）；关闭attach/program/map所有FD后才输出。异常也close；进程退出由内核回收FD，无重试至成功。
+一个map，一个GPL raw-tracepoint程序，attach sys_enter；仅FD持有，无pin、无sysctl写/内核写入/tracefs永久配置。程序有限直线控制流；negative controls=自身gettid3次、子进程getpid3次（过滤应无capture），positive=自身getpid3次（capture恰3）；关闭attach/program/map所有FD后才输出。首次read失败保留并阻止后续覆盖，因此stage6/hits3必须经过三次完整成功；异常也close；进程退出由内核回收FD，无重试至成功。
 
 三fresh进程，串行、每个≤30秒、进程之间固定15秒；无PMU性能扫描。每次技术门为部署SHA/BTF/核/page、CPU7、读回TGID准确、负控0、正控3、read errno0、mm/pgd非零、两owned root项(table d&3==3)。所有三进程通过才 SELF_ROOT_DESCRIPTOR_READ；权限或helper/load/attach拒绝=CAPABILITY_UNAVAILABLE（保留stage/errno/verifier），其它不符=INCONCLUSIVE/技术失败，不输出假成功。不改kptr_restrict或放宽SELinux，不装模块绕过。
 

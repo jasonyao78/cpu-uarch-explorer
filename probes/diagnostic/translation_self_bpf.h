@@ -23,6 +23,10 @@ static struct self_program self_build(unsigned pid,unsigned index0,unsigned inde
  self_emit(&p,0x79,0,1,8,0);self_stop_if(&p,0x55,0,172); /* raw sys_enter arg1 */
  self_emit(&p,0x85,0,0,0,14);self_emit(&p,0x77,0,0,0,32);self_stop_if(&p,0x55,0,(int)pid);
  self_emit(&p,0x62,10,0,-64,0);self_emit(&p,0x18,1,1,0,mapfd);self_emit(&p,0,0,0,0,0);self_emit(&p,0xbf,2,10,0,0);self_emit(&p,0x07,2,0,0,-64);self_emit(&p,0x85,0,0,0,1);self_stop_if(&p,0x15,0,0);self_emit(&p,0xbf,6,0,0,0);
+ /* Once a capture fails, later successes cannot overwrite its evidence. */
+ self_emit(&p,0x79,0,6,56,0);self_emit(&p,0x15,0,0,4,0);
+ self_emit(&p,0x79,0,6,0,0);self_stop_if(&p,0x55,0,6);
+ self_emit(&p,0x79,0,6,48,0);self_stop_if(&p,0x55,0,0);
  self_emit(&p,0x79,0,6,56,0);self_emit(&p,0x07,0,0,0,1);self_emit(&p,0x7b,6,0,56,0);
  self_emit(&p,0x85,0,0,0,35);self_emit(&p,0xbf,7,0,0,0);
  self_read(&p,1,8,7,1588,4);self_emit(&p,0x61,0,6,8,0);self_stop_if(&p,0x55,0,(int)pid);
