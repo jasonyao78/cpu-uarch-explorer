@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "direct_windows": 825,
+  "raw_sha_files": 26,
+  "all_window_and_epoch_arithmetic_exact": true,
+  "background_gates_exact": true,
+  "curves_exact": 30,
+  "comparisons_exact": 18
+}
