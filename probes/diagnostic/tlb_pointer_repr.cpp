@@ -61,7 +61,7 @@ static void u64arr(const std::vector<uint64_t>& v){std::printf("[");for(size_t i
 static void certificate(const tlb_repr::Cell& c,const char* stage,const PfnSnapshot& snapshot){std::printf("{\"type\":\"pfn-certificate\",\"cell\":\"%s\",\"stage\":\"%s\",\"alias_pfns\":",c.id().c_str(),stage);u64arr(snapshot.values);std::printf(",\"pagemap_entries\":");u64arr(snapshot.entries);std::puts("}");}
 // Read actual shared backing contents before and after, never export only
 // intended graph words. Raw addresses/words stay private; consumer decodes all.
-static void graph(const tlb_repr::Cell& c,const tlb_alias::Space& sp,const char* stage,uintptr_t head){std::vector<uint64_t> words;for(unsigned i=0;i<c.trace.n;++i)words.push_back(*reinterpret_cast<volatile uintptr_t*>(sp.canonical_node(i)));std::printf("{\"type\":\"graph-certificate\",\"cell\":\"%s\",\"stage\":\"%s\",\"head\":%llu,\"stored_words\":",c.id().c_str(),stage,static_cast<unsigned long long>(head));u64arr(words);std::puts("}");}
+static void graph(const tlb_repr::Cell& c,const tlb_alias::Space& sp,const char* stage,uintptr_t head){std::vector<uint64_t> words;for(unsigned i=0;i<c.trace.n;++i){uint64_t stored=*reinterpret_cast<volatile uintptr_t*>(sp.canonical_node(i));words.push_back(stored);}std::printf("{\"type\":\"graph-certificate\",\"cell\":\"%s\",\"stage\":\"%s\",\"head\":%llu,\"stored_words\":",c.id().c_str(),stage,static_cast<unsigned long long>(head));u64arr(words);std::puts("}");}
 #endif
 int main(int argc,char** argv){
     try{
