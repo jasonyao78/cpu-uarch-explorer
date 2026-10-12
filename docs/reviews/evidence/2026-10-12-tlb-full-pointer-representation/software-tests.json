@@ -1,0 +1,21 @@
+{
+  "evidence": "software only; external PMU/ADB mocked",
+  "source_commit": "c719772",
+  "build_commit": "dd31d08",
+  "new_tests": {
+    "code_graph_lowbit_math": 9,
+    "producer_driver_raw": 5
+  },
+  "fresh_related_tests": {
+    "old_and_new_repr": 27,
+    "seconds": 32.522,
+    "result": "OK"
+  },
+  "last_prior_full_diagnostic": 427,
+  "kernel_bytes_identical_to_highbit_protocol": true,
+  "actual_direct_calls_to_audited_kernel": 2,
+  "test_file_sha256": {
+    "tools/diagnostic/tests/test_tlb_full_repr.py": "8357214180846ac294dc7ff1316c2f31ce81254b2db7f9a5f7899d0a916e5500",
+    "tools/diagnostic/tests/test_tlb_full_repr_raw.py": "5b59c405dbb75f0a1e992259befc69678c92f3c2d00cfafb6edb0aee5a0de96f"
+  }
+}
