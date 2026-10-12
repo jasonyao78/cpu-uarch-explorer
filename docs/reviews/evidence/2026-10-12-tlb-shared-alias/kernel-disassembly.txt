@@ -1,8 +1,8 @@
-  243ccc:      	mov	x9, x0
-  243cd0:      	ldr	x0, [x9]
-  243cd4:      	mov	x8, x1
-  243cd8:      	ldr	x0, [x0]
-  243cdc:      	subs	x8, x8, #0x1
-  243ce0:      	b.ne	0x243cd8 <alias_k1+0xc>
-  243ce4:      	str	x0, [x9]
-  243ce8:      	ret
+  243d4c:      	mov	x9, x0
+  243d50:      	ldr	x0, [x9]
+  243d54:      	mov	x8, x1
+  243d58:      	ldr	x0, [x0]
+  243d5c:      	subs	x8, x8, #0x1
+  243d60:      	b.ne	0x243d58 <alias_k1+0xc>
+  243d64:      	str	x0, [x9]
+  243d68:      	ret
