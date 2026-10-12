@@ -1,0 +1,63 @@
+{
+  "evidence": "target BTF types only, no kernel program loaded/attached and no PTE read",
+  "btf_sha256": "edf0efa6c0a4d661367567ae7386985c58e42d6e4cc700a0903f8eb831c6c6e1",
+  "type_count": 130435,
+  "structure_offsets": {
+    "task_struct": {
+      "type_id": 606,
+      "size": 4800,
+      "members": {
+        "mm": {
+          "name": "mm",
+          "type_id": 639,
+          "bit_offset": 11520,
+          "bitfield_bits": 0,
+          "byte_offset": 1440
+        },
+        "tgid": {
+          "name": "tgid",
+          "type_id": 1341,
+          "bit_offset": 12704,
+          "bitfield_bits": 0,
+          "byte_offset": 1588
+        }
+      }
+    },
+    "mm_struct": {
+      "type_id": 642,
+      "size": 960,
+      "members": {
+        "pgd": {
+          "name": "pgd",
+          "type_id": 649,
+          "bit_offset": 448,
+          "bitfield_bits": 0,
+          "byte_offset": 56
+        }
+      }
+    }
+  },
+  "variable_types": [],
+  "capability_state": "TYPE_LAYOUT_VISIBLE; KERNEL_READ_UNVERIFIED",
+  "kernel": "6.1.118-android14-11-ga3b9c44908dd-ab13320413",
+  "btf_bytes": 5629043,
+  "base_page_bytes": 4096,
+  "configured_pagetable_levels": 3,
+  "configured_va_bits": 39,
+  "configured_pa_bits": 48,
+  "kptr_restrict": 2,
+  "bpf_unprivileged_disabled": 0,
+  "kallsyms_required_global_addresses_visible": false,
+  "raw_syscalls_sys_enter_available": true,
+  "bpf_syscall_configured": true,
+  "bpf_events_configured": true,
+  "kprobes_configured": true,
+  "kvm_configured": true,
+  "kvm_active_mode": "UNKNOWN",
+  "raw_private_directory": "20261012-translation-observability",
+  "input_sha256": {
+    "read-only-capabilities.json": "c397c27c95d993d8f9976bb8c235728f805df8d159369a9d98f2a824a8375702",
+    "additional-read-only.json": "eb8598384bb72ef933ec56cd0e5a6f333469afffc6f48c7d36e0a95b06a833a3",
+    "type-layout.json": "f77cd9424b1679697ee2458292b7c896f42bdd781418617e71e8b5edcaecce4f"
+  }
+}

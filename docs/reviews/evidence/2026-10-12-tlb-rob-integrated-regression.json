@@ -1,0 +1,12 @@
+{
+  "command": ".venv/bin/python -m unittest discover -s tools/diagnostic/tests",
+  "tests": 480,
+  "seconds": 446.497,
+  "status": "passed",
+  "log_sha256": "d154bb3b5b86705635c52aa611eae670e7c00f565d9f14376e1c6d0939c882b0",
+  "tested_source_commit": "6109767",
+  "checkpoint_commit": "04d9985",
+  "formal_runner_analysis_cmake_changed": false,
+  "formal_tests_rerun": false,
+  "evidence": "local diagnostic software tests; hardware results audited separately"
+}
