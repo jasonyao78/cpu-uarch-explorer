@@ -492,3 +492,5 @@
 - **整树软件边界 / 当前端到端负责人 / 触发=下一行为改动或正式软件集成前**：本轮真实生产者/图/驱动写盘回读新增25项、全diagnostic368/368通过；formal runner203/analysis250/CTest21为此前未改路径基线，不冒充本轮fresh。双NDK、Linux目标执行、macOS图测试证据分列。main、远端、formal schema/CMake及分支回收尚未完成；只动本任务文件，原6runs/.gitignore他人修改原位保留。
 
 - **PFN能力有限检查通过 / 当前TLB负责人 / 触发=新同PA轨迹几何对照实现**：`docs/reviews/2026-10-12-pagemap-visibility-results.md`，source849f145 / build-consumerb16d2e4 / launch9e42d6a / resulta94b645；三进程47页×两snapshots=282观察，全部present/not-swapped、非零unique PFN、前后相等，18rawSHA与第二算术精确。只认证本批能力，不公开absolute PFN、不补旧raw；CONT/HPA及窗内迁移未认证。下一冻结 `docs/design/2026-10-12-tlb-shared-alias.md`，同memfd backing三VA族、实际PFN身份门，先真实宿主共享图/生产链后上板，不能把同PA demand轨迹当全部cache流量相同。
+
+- **ROB目的控制设计已冻结、尚未实施 / 当前ROB负责人 / 触发=同PFN TLB有限批结束后的串行下一项**：`docs/design/2026-10-12-rob-destination-control.md`，只对ADD/NOP+ADD改变架构Rd为XZR、保持input/码形/prefix，192窗有限对照；本批不N扫描。目标是状态变化伴生，不认证zero-dest仍同资源、PRF因果或α标尺；待研究live变量不当资格删掉，引用/双NOP/取指门仍保留。真实字节/返回/生产链之后才上板，旧not-qualified不回填。
