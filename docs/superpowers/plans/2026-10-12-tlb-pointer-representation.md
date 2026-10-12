@@ -13,4 +13,4 @@
 - [x] 实现 `tools/diagnostic/tlb_repr_analysis.py`：严格类型身份、410行raw/进程、before/after stored图独立decode、相对metadata；333窗/324背景门，plain基线复制后才DID主判，prefetch gate单独命名。完成真实码形与数学GREEN，source小步提交。
 - [x] 双NDK静态构建，两个actual plan/layout独立oracle比对，反汇编核验LDR/EOR-register/SUBS/B.NE及参数传入；source/hash/plan/recipe记录 `docs/reviews/evidence/2026-10-12-tlb-pointer-representation/{build,plan}.json`，source/build分列。
 - [x] 实现 `tools/diagnostic/run_sm8650_tlb_repr.py`，复用只读基线/所有已知probe ownership/部署哈希，complete/stopped raw原样落盘；`tools/diagnostic/tests/test_tlb_repr_raw.py` 必经真实producer→driver→写盘→audit原始形状，mock仅外部counter和adb。包含绕过消费入口、改完SHA仍图冲突、顺序/身份/环境/模式/源码绑定反例，运行两文件测试后整树diagnostic回归并提交launch基线。
-- [ ] 上板333窗，所有异常停止，不修数据。直接raw第二算术复算全部D/DID/ratio/gates/图PFN身份；完整匿名CSV、raw SHA、图与 `docs/reviews/2026-10-12-tlb-pointer-representation-results.md`。更新README/goal ledger/open-items；阴性和不合格均有限终态，物理参数未知不得改名完成。按结果推进下一正交研究。
+- [x] 上板333窗，所有异常停止，不修数据。直接raw第二算术复算全部D/DID/ratio/gates/图PFN身份；完整匿名CSV、raw SHA、图与 `docs/reviews/2026-10-12-tlb-pointer-representation-results.md`。更新README/goal ledger/open-items；阴性和不合格均有限终态，物理参数未知不得改名完成。按结果推进下一正交研究。
