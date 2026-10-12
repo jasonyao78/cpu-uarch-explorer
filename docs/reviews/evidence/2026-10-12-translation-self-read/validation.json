@@ -1,0 +1,72 @@
+{
+  "status": "SELF_ROOT_DESCRIPTOR_READ",
+  "processes": 3,
+  "verdicts": [
+    {
+      "status": "SELF_ROOT_DESCRIPTOR_READ",
+      "kernel_reads_per_capture": 5,
+      "negative_captures": 0,
+      "positive_captures": 3,
+      "root_table_descriptors": 2,
+      "owner_tgid_matches": true,
+      "fds_closed": true,
+      "leaf_cont_state": "UNKNOWN",
+      "hpa_state": "UNKNOWN",
+      "physical_entries_certified": false
+    },
+    {
+      "status": "SELF_ROOT_DESCRIPTOR_READ",
+      "kernel_reads_per_capture": 5,
+      "negative_captures": 0,
+      "positive_captures": 3,
+      "root_table_descriptors": 2,
+      "owner_tgid_matches": true,
+      "fds_closed": true,
+      "leaf_cont_state": "UNKNOWN",
+      "hpa_state": "UNKNOWN",
+      "physical_entries_certified": false
+    },
+    {
+      "status": "SELF_ROOT_DESCRIPTOR_READ",
+      "kernel_reads_per_capture": 5,
+      "negative_captures": 0,
+      "positive_captures": 3,
+      "root_table_descriptors": 2,
+      "owner_tgid_matches": true,
+      "fds_closed": true,
+      "leaf_cont_state": "UNKNOWN",
+      "hpa_state": "UNKNOWN",
+      "physical_entries_certified": false
+    }
+  ],
+  "all_raw_sha256": {
+    "epoch-1-actual-plan.json": "36ee0ea8aa5d4cd53d955f077e0e03faa95f93871ec2622182598b41f9ae256f",
+    "epoch-1-pre-environment.json": "8fab63276af1edfd47d9a70d9d34372c62e4d1631409a4046419f3359a4d35ee",
+    "epoch-2-post-environment.json": "459527b28e55427e088cccb1ae3cf4c5fe5c176d6c91fb8a18709a7517352cb8",
+    "final-environment.json": "44f61dcbb06516737190aba09513d271f9a41107f25bf6c818a261bc1391e61e",
+    "epoch-2.stdout.jsonl": "8bdf0f7d395072ee89cf7fb86b1a2a81f9df953b553bdabd197573626ff4f956",
+    "epoch-0-post-environment.json": "f28d326ecc67de6aed4915c79b7194213488070615561f0d5fcfe0248c74da6e",
+    "epoch-0-actual-plan.json": "e609410a337b194aa88d7648baba8114b2cd57dcbc3a1bb24643fa13862b5f6c",
+    "epoch-0-pre-environment.json": "9b800a42fce5db24de95b7241259c0ff0be9135ac17156033dd5921aa6309d3d",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "epoch-1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "initial-environment.json": "746bb3a644b50f31717bd9b050624ad0a38140e389bef2b27116218a0dab8853",
+    "consumer.py": "c011d37065068f2487015bc6532dfc18b08b1dcf11bd4aecb22c6fdfc126f0e5",
+    "epoch-2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-1-post-environment.json": "52808ce8bb62bbaf55660fc614148be70ece8a49ee87d3f9c234948fea2bcbe3",
+    "epoch-2-actual-plan.json": "a1c0548b36f0fbbec9e52cf91b3d883883c556cbea6bb937bbe1c1b79b708eb7",
+    "epoch-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "driver.py": "0ecf2bc7b92e811586d507984ea9fb299f9a9218f8755940f14cc721e674c066",
+    "epoch-0.stdout.jsonl": "889f4039d4a405490aa998f6dee17eb7ff9af94f679f24daa3e4246e437b2039",
+    "epoch-2-pre-environment.json": "889ac462c15b41be78ddf952f2acd1ebb4bf7dc2c6d91a1e939dfef2f6de5103",
+    "epoch-1.stdout.jsonl": "47d3ade53156ccf6d2d6a069a8be591ffbcdc3ec5bacf23b9c4552daf245fb7d"
+  },
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "binary_source_head": "72249578e5e6cc5565c3fc3f67ab14e9d1873f49",
+  "launch_head": "21c3034c240ce7f84584982bb2fa601665a5babd",
+  "binary_sha256": "ab9fd93fc919527bf20c34e9d8b483df7bc4a40baf229c27a42a7995ed1ba7e6",
+  "btf_sha256": "edf0efa6c0a4d661367567ae7386985c58e42d6e4cc700a0903f8eb831c6c6e1",
+  "leaf_cont_state": "UNKNOWN",
+  "hpa_state": "UNKNOWN",
+  "physical_entries_certified": false
+}

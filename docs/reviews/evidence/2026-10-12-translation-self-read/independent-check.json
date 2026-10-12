@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "processes": 3,
+  "snapshots": [
+    {
+      "epoch": 0,
+      "negative_captures": 0,
+      "positive_captures": 3,
+      "table_descriptors": 2,
+      "stage": 6,
+      "read_errno": 0,
+      "actual_instruction_count": 78
+    },
+    {
+      "epoch": 1,
+      "negative_captures": 0,
+      "positive_captures": 3,
+      "table_descriptors": 2,
+      "stage": 6,
+      "read_errno": 0,
+      "actual_instruction_count": 78
+    },
+    {
+      "epoch": 2,
+      "negative_captures": 0,
+      "positive_captures": 3,
+      "table_descriptors": 2,
+      "stage": 6,
+      "read_errno": 0,
+      "actual_instruction_count": 78
+    }
+  ],
+  "source_btf_exact": true,
+  "absolute_addresses_published": false,
+  "leaf_cont_state": "UNKNOWN",
+  "hpa_state": "UNKNOWN"
+}
