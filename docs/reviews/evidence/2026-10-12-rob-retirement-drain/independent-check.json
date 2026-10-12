@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "raw_windows": 384,
+  "raw_sha_files": 198,
+  "all_points_and_gates_exact": true,
+  "mode_statuses_exact": true,
+  "original_fp_result_windows": 384,
+  "status_zero_windows": 384,
+  "checksum_zero_windows": 384,
+  "physical_entries_certified": false
+}

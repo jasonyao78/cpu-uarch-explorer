@@ -523,3 +523,5 @@
 - **shared alias leaf触发资格结束NOT_EXCITED / 当前TLB负责人 / 触发=新内核入口或安全只读走表方案**：`docs/reviews/2026-10-12-translation-shared-leaf-results.md`，source2671b5b/buildff87b31/launch8953da2；首进程0capture按合同停止，实际1/计划3，无重试，canonical/alias PFN identity通过，10raw SHA复核。没有leaf读数，不回填CONT=0/HPA，不推翻root与匿名COW实证。为何无触发未唯一归因；下个方案先能力/激励合同，不复跑同页追事件。ROB下一草案独立推进，physical整体OPEN。
 
 - **ROB退休边界资格运行中 / 当前ROB负责人 / 触发=384窗完整raw复核**：前草案已由 `docs/design/2026-10-12-rob-retirement-drain-next.md` v1.0 /1c4f686冻结，source8ecf4b9+9d514b4/build50ee8f8/actual launchafe6bee。32实际计划、两NDK/Capstone/asm、13生产链反例和530全diagnostic通过；新48进程384窗正在执行，不预报mode资格。MRS/data reset约束执行/退休，不认证禁止所有未来speculative allocation或physical entry单位；只给per-mode参考资格，不自动扫N，不改旧终态。
+
+- **ROB退休边界有限资格结束 / 当前ROB负责人 / 触发=独立anchor排程/推测分配约束的新协议**：`docs/reviews/2026-10-12-rob-retirement-drain-results.md`，source8ecf4b9+9d514b4/build50ee8f8/launchafe6bee，完整384窗/198raw SHA独立复核。FPSR qualified，FPCR两个NONE0 range/median>5%保留not-qualified；FPSR I0/S0 k16≈225/432、k32≈462/848，禁止把k32套13*k+17写433。MRS约束较早FP execute/retire，不认证禁止后来fetch/rename/allocation。下一block vs interleaved anchor顺序可检验额外延迟贡献，先真实pair/slot/控制与预注册，不直接capacity扫描，physical单位/活跃约束仍OPEN。
