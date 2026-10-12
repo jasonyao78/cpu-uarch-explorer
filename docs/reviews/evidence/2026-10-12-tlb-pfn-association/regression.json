@@ -1,0 +1,19 @@
+{
+  "evidence": "software not target device",
+  "tlb_regression": {
+    "passed": true,
+    "tests": 157,
+    "seconds": 174.142,
+    "log_sha256": "32dc8c61530dc07c34114166b3236af028ae22d3a172831c1b3fe1597b17fe9b"
+  },
+  "new_layout_tests": 5,
+  "new_producer_consumer_tests": 7,
+  "new_raw_pipeline_tests": 5,
+  "prior_full_diagnostic": {
+    "passed": true,
+    "tests": 457,
+    "seconds": 428.188
+  },
+  "scope": "new isolated TLB namespace; no shared source/runner/schema/CMake edits",
+  "device_batch": "NOT_STARTED"
+}
