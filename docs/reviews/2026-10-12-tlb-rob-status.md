@@ -36,8 +36,10 @@ ROB下一选择直接约束跨迭代生命周期/释放的正交原型，先模�
 
 ## shared适用性与最新回归
 
-`docs/reviews/2026-10-12-translation-shared-leaf-results.md` /f330dff：shared alias首进程NOT_EXCITED，实际1/计划3，canonical/alias PFN相同、negative/positive capture皆0，10 raw SHA；按合同停止且无重试。匿名COW能力不能直接转为shared capability，机制仍需新入口或安全走表，不指定未验证HW_AF/DBM唯一原因。最新517完整diagnostic通过（444.694秒），`docs/reviews/evidence/2026-10-12-translation-shared-leaf/regression.json`。ROB下一退休边界草案 `docs/design/2026-10-12-rob-retirement-drain-next.md` /124ba55，尚未实现/冻结/采样；原scan和E2结果不修改。
+`docs/reviews/2026-10-12-translation-shared-leaf-results.md` /f330dff：shared alias首进程NOT_EXCITED，实际1/计划3，canonical/alias PFN相同、negative/positive capture皆0，10 raw SHA；按合同停止且无重试。匿名COW能力不能直接转为shared capability，机制仍需新入口或安全走表，不指定未验证HW_AF/DBM唯一原因。最新517完整diagnostic通过（444.694秒），`docs/reviews/evidence/2026-10-12-translation-shared-leaf/regression.json`。原ROB退休边界草案 `docs/design/2026-10-12-rob-retirement-drain-next.md` /124ba55是历史阶段，现由v1.0/1c4f686及b930bac完成结果替代；原scan和E2结果不修改。
 
-## 退休边界新资格正在执行
+## 退休边界新资格已完成
 
-`docs/design/2026-10-12-rob-retirement-drain-next.md` v1.0已冻结（1c4f686），producer `probes/diagnostic/rob_fp_drain.c` /8ecf4b9，consumer `tools/diagnostic/rob_drain_analysis.py` 与driver `tools/diagnostic/run_sm8650_rob_drain.py` /9d514b4，build50ee8f8/launchafe6bee。真实32计划/Capstone/独立asm oracle、双NDK和13生产链反例通过，530全diagnostic通过450.330秒；384目标资格窗仍运行，不预报main终态。每mode独立资格，原FP结果捕获在reset之前；原2352scan/E2代理状态不改。
+`docs/design/2026-10-12-rob-retirement-drain-next.md` v1.0已冻结（1c4f686），producer `probes/diagnostic/rob_fp_drain.c` /8ecf4b9，consumer `tools/diagnostic/rob_drain_analysis.py` 与driver `tools/diagnostic/run_sm8650_rob_drain.py` /9d514b4，build50ee8f8/launchafe6bee。真实32计划/Capstone/独立asm oracle、双NDK和13生产链反例通过，530全diagnostic通过450.330秒；384目标资格窗已完整复核：`docs/reviews/2026-10-12-rob-retirement-drain-results.md` /b930bac，FPSR qualified、FPCR not-qualified。每mode独立资格，原FP结果捕获在reset之前；原2352scan/E2代理状态不改。
+
+完整三轮FPSR参考I/S k16≈225/432、k32≈462/848。不要以13*k+17预测433替代k32实测；29cycle残差需新的blocked/interleaved排程控制。MRS等待不证明禁止以后推测allocation，physical单位仍未认证。下一TLB入口do_set_pte/finish_fault符号存在和vm_fault实际BTF偏移已查，但未加载/验证该新hook；只作为下一设计线索，不借前次COW能力直接准入shared。

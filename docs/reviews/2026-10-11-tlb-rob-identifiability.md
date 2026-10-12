@@ -121,3 +121,7 @@ fresh整树软件出口：diagnostic298/298、runner203/203、formal analysis250
 ## shared观测触发的真实适用范围
 
 source2671b5b/buildff87b31/launch8953da2/resultf330dff，`docs/reviews/2026-10-12-translation-shared-leaf-results.md`；`probes/diagnostic/translation_shared_leaf.c` / `tools/diagnostic/translation_shared_leaf_analysis.py` / `tools/diagnostic/translation_shared_leaf_raw.py` / `tools/diagnostic/run_sm8650_shared_leaf.py`。计划3进程、首进程0capture后停止，canonical/alias PFN identity通过；NOT_EXCITED和10raw SHA保留，不将COW能力自动视为shared证据。517整树diagnostic通过（444.694秒）；下一shared新入口或只读走表和ROB退休边界草案分列，未知状态不自动清零。
+
+## 退休状态边界完整资格（2026-10-12）
+
+source8ecf4b9+9d514b4/build50ee8f8/actual launchafe6bee/resultb930bac；`probes/diagnostic/rob_fp_drain.c` / `tools/diagnostic/rob_drain_analysis.py` / `tools/diagnostic/run_sm8650_rob_drain.py` / `docs/reviews/2026-10-12-rob-retirement-drain-results.md`。384窗/198raw SHA、原FP结果捕获/IR/noMUX/gates独立一致，FPSR qualified，FPCR两个NONE0组>5%保留not-qualified。FPSR I/S k16≈225/432、k32≈462/848，真实462不能由公式改433；下一排程控制解释残差。所有未来speculation/actual allocation仍未认证，不自动扫N或改旧终态；530全diagnostic已通过。
