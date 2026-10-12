@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Q-A page-set contrasts, independent offset/order and finite refill curves.
+"""Matched physical demand-page traces under different virtual geometries.
 
 Frozen contract: docs/design/2026-10-12-tlb-shared-alias.md. No HPA/PFN
 attribution, refill probability or physical entry naming from these counters.
@@ -64,7 +64,7 @@ def analyze(run):
  _fields(run,dict(mode=MODE,processes=3),'reach run');rows=run.get('rows');_require(type(rows) is list and len(rows)==93,'reach matrix');by={};cursor=0
  for e in range(3):
   for c in plan(bool(e%2))[1:]:
-   r=rows[cursor];cursor+=1;_fields(r,dict(c,epoch=f'epoch-{e}'),'reach output identity/order');_require(type(r.get('samples')) is list and len(r['samples'])==3,'reach sample coverage')
+   r=rows[cursor];cursor+=1;_fields(r,dict(c,epoch=f'epoch-{e}',physical_nodes_verified=c['n']),'reach output identity/order');_require(type(r.get('samples')) is list and len(r['samples'])==3,'reach sample coverage')
    for t,s in enumerate(r['samples']):sample_check(s,c,t)
    by[e,c['cell']]=r
  windows=[];checks=[];epoch_points=[];lookup={};valid={}

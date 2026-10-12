@@ -69,6 +69,12 @@ int main(){char name[]="/tmp/alias-test-XXXXXX";int fd=mkstemp(name);if(fd<0)ret
    if c['epoch']=='epoch-2' and c['n']==0:
     for s in c['samples']:s['counts'][0]=100000000
   a=m.analyze(r);self.assertEqual(a['verdict'],'INCONCLUSIVE');self.assertFalse(any(c['replicated'] for c in a['comparisons']))
+ def test_sanitized_summary_requires_every_identity_certificate(self):
+  for kind in ('missing','conflict','typed'):
+   r=self.data();row=r['rows'][1]
+   if kind=='missing':row.pop('physical_nodes_verified')
+   else:row['physical_nodes_verified']=True if kind=='typed' else 1
+   with self.subTest(kind=kind),self.assertRaises(ValueError):self.module().analyze(r)
  def test_native_usage_refuses_measurement(self):
   for args in (['--run'],['--layout','4096'],['--layout','True'],['--plan','--bad']):self.assertNotEqual(subprocess.run([str(self.exe),*args],capture_output=True).returncode,0)
 if __name__=='__main__':unittest.main()
