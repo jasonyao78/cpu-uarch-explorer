@@ -33,3 +33,7 @@ ROB下一选择直接约束跨迭代生命周期/释放的正交原型，先模�
 ## 最新leaf能力检查
 
 `docs/reviews/2026-10-12-translation-self-leaf-results.md` /77a3293：45实际指令、3/3进程正控1/负控0，old/requested PTE PFN与两端pagemap一致，20raw SHA及第二算术无差异。COW入口CONT0只属本次时点，不回填旧批/稳态CONT/HPA；页表physical PA仍未直接读到。下一shared-memfd read→write alias适用性资格优先，observer与性能窗口分离，缓存/翻译准备效应需匹配控制。最新完整508诊断通过（441.465秒）见 `docs/reviews/evidence/2026-10-12-translation-self-leaf/regression.json`，未重复formal基线。
+
+## shared适用性与最新回归
+
+`docs/reviews/2026-10-12-translation-shared-leaf-results.md` /f330dff：shared alias首进程NOT_EXCITED，实际1/计划3，canonical/alias PFN相同、negative/positive capture皆0，10 raw SHA；按合同停止且无重试。匿名COW能力不能直接转为shared capability，机制仍需新入口或安全走表，不指定未验证HW_AF/DBM唯一原因。最新517完整diagnostic通过（444.694秒），`docs/reviews/evidence/2026-10-12-translation-shared-leaf/regression.json`。ROB下一退休边界草案 `docs/design/2026-10-12-rob-retirement-drain-next.md` /124ba55，尚未实现/冻结/采样；原scan和E2结果不修改。

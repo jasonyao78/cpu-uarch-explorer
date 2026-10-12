@@ -36,3 +36,7 @@
 `probes/diagnostic/translation_leaf_bpf.h` 45实际指令先保存pt_regs context到r9，helper14过滤owner TGID，再用64-bit LD_IMM+JNE_REG比较x1(address)与selected VA，之后才helper1 lookup与helper113读取x2(ptep)的8-byte word；x3(requested entry)仅记录。r6 map/r7 source跨helper保留；first failure sticky，错误/重复/零事件分别处理，0事件NOT_EXCITED不能当因果阴性。
 
 `probes/diagnostic/translation_self_leaf.c` 用CPU7 perf-kprobe，type由sysfs读取，config1=ptep_set_access_flags，event→program→map退出回收。两个owned匿名页COW/reuse触发：foreign child和wrong VA负控0、parent selected正控1。三进程实际old/requested PTE page/PFN与两端pagemap一致，source0e8cd63/build49c7123/launchd235ce3/result77a3293，20 raw SHA已独立对账。实际ABI/BTF/PMU类型/计划/source绑定，完整28关联与508诊断通过。COW入口CONT0只属于该时点；shared-memfd alias适用性尚待验证，steady CONT/HPA不回填。后续性能窗口先卸载observer，观测对descriptor/cache准备的影响必须对称控制，页表物理PA仍未直接读取。
+
+## 必须保留的适用性反例
+
+`docs/reviews/2026-10-12-translation-shared-leaf-results.md` /f330dff：同45字节码/shared memfd canonical−alias PFN身份通过，首进程没有selected capture，NOT_EXCITED按合同停止（实际1/计划3）。单纯双映射/PFN相同不保证ptep_set_access_flags事件产生。root/匿名COW的成功不能跳过另一backing的能力/激励门；不循环写同页追事件，不将0capture改成CONT0或hardware aggregation阴性。为什么没触发仍未唯一归因，需新入口的有限方案。最新517完整diagnostic通过。

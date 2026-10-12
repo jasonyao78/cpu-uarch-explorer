@@ -117,3 +117,7 @@ fresh整树软件出口：diagnostic298/298、runner203/203、formal analysis250
 ## 自有leaf指针与PTE/PFN身份（2026-10-12）
 
 `docs/reviews/2026-10-12-translation-self-leaf-results.md` /77a3293，source0e8cd63/build49c7123/launchd235ce3；emitter `probes/diagnostic/translation_leaf_bpf.h` / producer `probes/diagnostic/translation_self_leaf.c`，消费 `tools/diagnostic/translation_leaf_analysis.py` / `tools/diagnostic/translation_leaf_raw.py`，driver `tools/diagnostic/run_sm8650_translation_leaf.py`。45实际指令、3/3真机进程正控1/负控0，old/requested PTE page/PFN与pagemap两端相同；20raw SHA与独立第二算术一致，全部FD回收。CONT0仅COW/reuse入口，steady/HPA与physical capacity保持未知；不猜PA偏置、不回填旧数据。新旧observer28关联及508整树diagnostic通过（441.465秒）。下一shared-memfd alias适用性和测量窗口/observer分离仍需冻结；ROB生命周期正交方案独立推进。
+
+## shared观测触发的真实适用范围
+
+source2671b5b/buildff87b31/launch8953da2/resultf330dff，`docs/reviews/2026-10-12-translation-shared-leaf-results.md`；`probes/diagnostic/translation_shared_leaf.c` / `tools/diagnostic/translation_shared_leaf_analysis.py` / `tools/diagnostic/translation_shared_leaf_raw.py` / `tools/diagnostic/run_sm8650_shared_leaf.py`。计划3进程、首进程0capture后停止，canonical/alias PFN identity通过；NOT_EXCITED和10raw SHA保留，不将COW能力自动视为shared证据。517整树diagnostic通过（444.694秒）；下一shared新入口或只读走表和ROB退休边界草案分列，未知状态不自动清零。
