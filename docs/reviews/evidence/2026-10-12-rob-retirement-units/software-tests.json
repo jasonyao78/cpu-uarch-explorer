@@ -1,0 +1,22 @@
+{
+  "evidence": "software-only; external PMU mocked, target qualification not yet run",
+  "branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "df2171d",
+  "build_commit": "47ff455",
+  "actual_plan_count": 288,
+  "independently_decoded_programs": 144,
+  "targeted_tests": {
+    "unit_code_model": 7,
+    "producer_driver_raw": 9
+  },
+  "diagnostic_regression": {
+    "tests": 414,
+    "seconds": 293.726,
+    "result": "OK",
+    "command": ".venv/bin/python -m unittest discover -s tools/diagnostic/tests"
+  },
+  "test_file_sha256": {
+    "tools/diagnostic/tests/test_rob_units.py": "73c99efb33fa00099d9fee4a0c9a0b20abb791d5e2d9662a548e79917dffa1bc",
+    "tools/diagnostic/tests/test_rob_units_raw.py": "01da6b40545a56b79996571594b423e45e226e1e9bd18a14c8b4ebcd556ecc9c"
+  }
+}

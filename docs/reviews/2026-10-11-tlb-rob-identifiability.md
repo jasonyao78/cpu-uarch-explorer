@@ -91,3 +91,8 @@ fresh整树软件出口：diagnostic298/298、runner203/203、formal analysis250
 ## 同PFN的新因果边界（2026-10-12）
 
 `docs/reviews/2026-10-12-tlb-shared-alias-results.md`（sourcea32ee8d/buildd74851d/consumer855350b/launchf5ae99a/result392d097）三fresh memfd279真机窗与270门全过，330240次原始pagemap位及PFN身份独立核验一致。同physical demand页/offset/order与候选低8位hist下，七个N×族差均六配对≥.10，GEOMETRY_SENSITIVE_WITH_MATCHED_DATA_PFNS。data PFN不同不是本协议几何效应必要条件；旧anonymous未观测PFN不能据此回填。descriptor物理布局/层级索引、pointer值引起的投机或DMP/cache流量、CONT/HPA仍没有唯一分开；16页连续条件0/160是非预注册诊断，不能冒充CONT位。此结果比单VA曲线更有区分力，但不提供physical entries证书。下一先ROB架构目的控制，再选择TLBpointer/descriptor可识别干预；386/386全diagnostic通过。
+
+
+## 架构目的控制与相对单位下一门（2026-10-12）
+
+`docs/reviews/2026-10-12-rob-destination-control-results.md`（sourcef85e2bb/build083c386/launchf640160/resultb93a392）192真机窗技术与参考资格过，XZR并未消除裸ADD波动，NOP+ADD两目的均稳定；主INCONCLUSIVE而非PRF/前端唯一归因。下一 `docs/design/2026-10-12-rob-retirement-units.md` 明示相对α只是被检验假设，比较同bytes无架构结果的三pattern及chain16/32；先192窗资格，过后2352窗有限扫描。新source df2171d / build47ff455，144独立反汇编/288实际计划、两NDK构建一致，7算法/码形及9生产链软件测试通过；本段登记时尚未上板。即使共同proxy区间存在，也不能把它直接改名物理ROB entries；仍须独立认证实际分配单位和活跃约束。
