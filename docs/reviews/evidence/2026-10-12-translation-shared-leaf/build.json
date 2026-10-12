@@ -1,0 +1,23 @@
+{
+  "source_commit": "db440eb4719415c263e0bfa8b89812c670260a05",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 probes/diagnostic/translation_shared_leaf.c -o build/aarch64-linux-android/release/diagnostic/translation_shared_leaf",
+  "source_sha256": {
+    "probes/diagnostic/translation_shared_leaf.c": "ebed243f1217ac83ca092ffcf6334b2629d320caf86429b1b3b78fa00a662dff",
+    "probes/diagnostic/translation_leaf_bpf.h": "5422c9c4b3dda3b578d581034f3eaa90c9ec1faf959507fbe64b2f5a6c281072",
+    "tools/diagnostic/translation_shared_leaf_analysis.py": "3132b95762a1d293353c8f12c091871e0e29afaf6e4b29e3b3cf4c5ba395e621",
+    "tools/diagnostic/run_sm8650_shared_leaf.py": "21afa43215b6fbb6065238999c33da64d5e567b782046b7ee788a1d41f833d90",
+    "tools/diagnostic/translation_leaf_analysis.py": "058ac35e061f27203dd2c231f7c584a1e209bd25254f36625fda9e0a51055b25",
+    "tools/diagnostic/translation_self_analysis.py": "c011d37065068f2487015bc6532dfc18b08b1dcf11bd4aecb22c6fdfc126f0e5"
+  },
+  "binary_sha256": "248da08cfdf72b77e2d952a6dea3e51ac96eb33a4dd9c03db089c66bcc8b5b4c",
+  "two_independent_builds_equal": true,
+  "actual_host_exported_plan": true,
+  "plan_sha256": "ebe56ab257bc4cccb1f0b2a3aa93f99f90cbca5db0b1642627c29cf0c672488d",
+  "btf_sha256": "edf0efa6c0a4d661367567ae7386985c58e42d6e4cc700a0903f8eb831c6c6e1",
+  "actual_bpf_instructions": 45,
+  "native_tests": 31,
+  "scope": "shared alias bytecode and contracts plus prior root regressions; no hardware capability claim"
+}
