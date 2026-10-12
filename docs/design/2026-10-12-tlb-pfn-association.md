@@ -1,4 +1,4 @@
-# TLB同VA集合的物理邻接干预（预注册v1）
+# TLB同VA集合的物理邻接干预（预注册v1.1，目标执行前软件复核）
 
 ## 本次任务的目的（给人类看）
 
@@ -8,10 +8,10 @@ Arm官方本地 `../cpu-uarch-ref/docs/Arm_Cortex_X4_Core_TRM_102484_0003_06_en.
 
 ## 配对与实际激励
 
-新 `probes/diagnostic/tlb_pfn_association.cpp` 和 `probes/diagnostic/tlb_pfn_association_layout.h`。4096页memfd与canonical映射；一个2MiB对齐、16MiB的自有VA arena全页base-backed/预fault，remap仅在自有映射内。每个N使用canonical节点0..N−1，两个assignment:
+新 `probes/diagnostic/tlb_pfn_association.cpp` 、pure `probes/diagnostic/tlb_pfn_association_layout.h` 与映射类 `probes/diagnostic/tlb_pfn_association_space.h`。4096页memfd与canonical映射；一个2MiB对齐、16MiB的自有VA arena全页base-backed/预fault，remap仅在自有映射内。每个N使用canonical节点0..N−1，两个assignment:
 
 - natural：VA位置j→物理节点j。
-- no-adjacent：VA位置j→节点π[j]，π为全排列、π[j]%64=j%64；每一对相邻active VA页实际PFN差不为±1。只重排前N映射；其余映射不删除，不能宣称物理PTE页地址不变（未观测）。
+- no-adjacent：VA位置j→节点π[j]，π为全排列、π[j]%64=j%64；每一对相邻active VA页实际PFN差不为±1。只重排前N映射；inactive逐页恢复identity，避免前一cell的置换遗留，测量前不留洞，不能宣称物理PTE页地址不变（未观测）。
 
 物理节点i始终offset=64*(i%64)，因此π保留余数同时保持**完全相同的VA页/line集合、offset分布、物理页/line集合与物理访问顺序**。相同seed137物理节点闭环与反向order，stored pointer均全位XOR 0x9e3779b97f4a7c15；复用相同四ISA decode body并独立审计真正调用点。π改变虚拟访问顺序，这是无法同时消除的残余，阳性只能称VA→PFN关联敏感（可能包含replacement/VA预取/descriptor时序），不唯一称HPA。
 
