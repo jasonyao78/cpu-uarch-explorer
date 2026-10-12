@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "direct_windows": 297,
+  "raw_pagemap_observations": 761856,
+  "raw_stored_words_decoded": 374784,
+  "actual_permutation_nodes": 187392,
+  "exact_virtual_line_sets": true,
+  "all_adjacency_gates_exact": true,
+  "all_point_ratios_and_gates_exact": true,
+  "all_signed_differences_and_primary_exact": true,
+  "all_curves_and_reach_exact": true,
+  "raw_sha_files": 18
+}
