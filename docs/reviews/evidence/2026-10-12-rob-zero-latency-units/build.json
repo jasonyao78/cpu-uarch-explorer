@@ -1,0 +1,31 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "5aecbbb04a68de41a72d3014f76720b9f3131f63",
+  "source_sha256": {
+    "probes/diagnostic/rob_zero_latency_units.c": "38766ba314144b5de78a577ec5c2e183fe007d3d16446c437150805e03aae733",
+    "probes/common/rob_codegen.h": "6feee6e79aa26e14655814ffb5ae61553cd45da72d1e3a94e4310f80d1f70da8",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6"
+  },
+  "binaries": {
+    "rob_zero_latency_units": "8fa4425cbfdbbd7d96358cbb6cd96bf9f4e46b3c5fa0ede6c2ee473b7f0d1b81"
+  },
+  "independent_build_sha256": [
+    "8fa4425cbfdbbd7d96358cbb6cd96bf9f4e46b3c5fa0ede6c2ee473b7f0d1b81",
+    "8fa4425cbfdbbd7d96358cbb6cd96bf9f4e46b3c5fa0ede6c2ee473b7f0d1b81"
+  ],
+  "compiler": "Android (12470979, +pgo, -bolt, +lto, -mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)\nTarget: aarch64-unknown-linux-android34\nThread model: posix\nInstalledDir: /Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin\n",
+  "recipe": [
+    "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android34-clang",
+    "-static",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Iprobes/common",
+    "probes/diagnostic/rob_zero_latency_units.c",
+    "-o",
+    "build/aarch64-linux-android/release/diagnostic/rob_zero_latency_units"
+  ],
+  "plan_sha256": "0fd67e4c0c1ed3b6ba0fb165712a14f97c20f82d6ccb18ae56a4f73dce478e27",
+  "probe_role": "diagnostic JSONL, not formal schema-v2"
+}
