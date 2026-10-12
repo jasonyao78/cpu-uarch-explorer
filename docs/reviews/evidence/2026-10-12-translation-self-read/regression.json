@@ -1,0 +1,10 @@
+{
+  "command": ".venv/bin/python -m unittest discover -s tools/diagnostic/tests",
+  "tests": 495,
+  "seconds": 456.79,
+  "status": "passed",
+  "tested_source_commit": "21c3034",
+  "log_sha256": "02752cbec327087cd983663ebc8d3e3a3599e5db9d62e30acf0d7f742dd83f74",
+  "evidence": "software tests; three target-process capability results separately audited",
+  "formal_tests_rerun": false
+}

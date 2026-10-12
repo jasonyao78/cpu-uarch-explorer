@@ -107,3 +107,9 @@ fresh整树软件出口：diagnostic298/298、runner203/203、formal analysis250
 同VA/PFN关联代码 `probes/diagnostic/tlb_pfn_association.cpp` / `probes/diagnostic/tlb_pfn_association_layout.h` / `probes/diagnostic/tlb_pfn_association_space.h`，consumer `tools/diagnostic/tlb_association_analysis.py` / driver `tools/diagnostic/run_sm8650_tlb_association.py`；sourcee88adef/buildf054ae6/softwarea78539e/actual launch04d9985/resultd4a6e9a。`docs/reviews/2026-10-12-tlb-pfn-association-results.md` 完整297窗/288门、761856pagemap/374784 stored words/187392π节点和18SHA独立核验，六no-adjacent曲线有效reach=(1792,2048]复制；自然激励NOT_EXCITED、关联main INCONCLUSIVE。保留虚拟order残余，不命名HPA或2048纯leaf physical entries。
 
 最新一次完整diagnostic480/480（446.497秒），`docs/reviews/evidence/2026-10-12-tlb-rob-integrated-regression.json`；未重复未改的formal runner/analysis/CMake。下一页表可观测性现状见 `docs/reviews/2026-10-12-translation-observability-feasibility.md`，类型可读不等于kernel read权限/CONT已观测。上述有限任务结束，整个物理目标仍未达成。
+
+## 自有root descriptor的直接观测（2026-10-12）
+
+`docs/reviews/2026-10-12-translation-self-read-results.md` /64dcbe4，source7224957/build30e6082/launch21c3034；代码 `probes/diagnostic/translation_self_bpf.h` / `probes/diagnostic/translation_self_read.c`，消费 `tools/diagnostic/translation_self_analysis.py` / `tools/diagnostic/translation_self_raw.py`，driver `tools/diagnostic/run_sm8650_translation_self.py`。3/3目标进程通过，双过滤负控0、正控3，两个owned root table项；20raw SHA独立核验，首次失败锁存不被成功覆盖。类型可读/实际load/attach/owned read已分层验证。leaf PTE/CONT/HPA依旧UNKNOWN，没有改kptr_restrict或猜direct-map偏置；不回填旧数据。495全诊断通过（456.790秒），证据 `docs/reviews/evidence/2026-10-12-translation-self-read/regression.json`。
+
+复用workflow `docs/methodology/self-descriptor-bpf-workflow.md` /1cd0ba9 与 `docs/methodology/diagnostic-resume-and-evidence-workflow.md` /5f29f71；记忆保留机制及边界，完整指令由plan/源码担任事实源。下一owned leaf观察与ROB生命周期重置是新控制，既有physical unknown不自动关闭。

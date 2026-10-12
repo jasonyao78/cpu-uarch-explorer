@@ -20,7 +20,7 @@
 
 ## 接续动作与停止条件
 
-优先TLB只读descriptor可观测性。目标BTF可读且类型可解析，但实际内核读取尚未验证；`docs/reviews/2026-10-12-translation-observability-feasibility.md` 分列能力与未知。先用有PID过滤、短生命期的自有进程检查验证能力，不修改kptr_restrict/内核/sysfs，不盲猜direct-map物理偏置；实际leaf CONT/HPA仍UNKNOWN。
+优先TLB只读descriptor可观测性。目标BTF可读且类型可解析；新增实际owned root读取能力3/3进程通过；`docs/reviews/2026-10-12-translation-observability-feasibility.md` 分列能力与未知。`docs/reviews/2026-10-12-translation-self-read-results.md` /64dcbe4已完成有PID过滤、短生命期的自有进程能力检查，不修改kptr_restrict/内核/sysfs，不盲猜direct-map物理偏置；实际leaf CONT/HPA仍UNKNOWN。
 
 ROB下一选择直接约束跨迭代生命周期/释放的正交原型，先模型和无filler/串并负控，供给与计时资格满足后才有新有限矩阵。继续同一chain/grid无法补齐分配单位标尺，故不默认追加扫描。
 
@@ -28,4 +28,4 @@ ROB下一选择直接约束跨迭代生命周期/释放的正交原型，先模�
 
 ## 验证口径
 
-最新一次完整diagnostic480/480、446.497秒，source至6109767、完整测试日志SHA见 `docs/reviews/evidence/2026-10-12-tlb-rob-integrated-regression.json`。本次未改变formal runner/analysis/CMake，不重复既有203/250/21，也不把旧基线冒充新执行。两批NDK/真实Android测量及三份raw第二算术与本机测试分列。
+最新一次完整diagnostic495/495、456.790秒，source至21c3034、完整测试日志SHA见 `docs/reviews/evidence/2026-10-12-translation-self-read/regression.json`。本次未改变formal runner/analysis/CMake，不重复既有203/250/21，也不把旧基线冒充新执行。两批NDK/真实Android测量及三份raw第二算术与本机测试分列。

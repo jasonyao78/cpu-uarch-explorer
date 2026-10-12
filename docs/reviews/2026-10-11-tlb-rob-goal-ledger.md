@@ -23,6 +23,7 @@
 | TLB：高位/全位stored pointer反证 | **新有限协议结束**：`docs/reviews/2026-10-12-tlb-pointer-representation-results.md` / `docs/reviews/2026-10-12-tlb-full-pointer-representation-results.md`，333/495窗、324/486主门，实际全位低地址干预和全部signed DID复核；.10尺度GEOMETRY_CONTRAST_NOT_CHANGED_AT_DETECTION_SCALE | 不是全部DMP/预取排除证书；全位简单raw projection非必要，descriptor/HPA/PTE_CONT仍需独立约束 |
 | TLB：同VA/同物理轨迹的PFN邻接 | **有限批完成**：`docs/reviews/2026-10-12-tlb-pfn-association-results.md` /d4a6e9a，297窗/288背景门、实际0邻接；六no-adjacent曲线reach=(1792,2048]复制 | 关联主INCONCLUSIVE，自然激励NOT_EXCITED；虚拟顺序残余、descriptor/HPA未知，不改名2048physical entries |
 | ROB：零延迟资源类与生命周期 | **有限批完成**：`docs/reviews/2026-10-12-rob-zero-latency-scan-results.md` /a1f0082，192资格+2352扫描；`docs/reviews/2026-10-12-rob-lifetime-heldout-results.md` /6f98b27，E2四预测复制，g+k=(352,368] | 原取指门1792窗失败、18曲线INCOMPUTABLE、main INCONCLUSIVE；实际分配单位和唯一活跃ROB限制仍未认证，下一生命周期干预 |
+| TLB：直接descriptor可观测性 | **自有root能力通过**：`docs/reviews/2026-10-12-translation-self-read-results.md` /64dcbe4，三进程正控3/负控0、两root表项，20raw SHA及实际78指令核验 | 只关闭load/attach/owned root read能力；leaf PTE/CONT/HPA/安全全层走表仍需新观测，不认证容量 |
 | ROB：物理容量 | **本组方法正式终态MODEL_UNIDENTIFIABLE**。长load资格反例与NOP/零值/依赖/同VA完整有限控制已归档；384是第三方参考 | 审查已交付 `docs/reviews/2026-10-11-tlb-rob-identifiability.md`；新单位标尺与活跃约束认证触发另案，物理entries未测得 |
 | 软件交付与分支收口 | m0b使命已完成、代码在r2；source/build/launch/protocol/raw逐批分开 | 原独立JSONL不是正式schema v2；正式runner/CMake接入按稳定协议需要决定，未做项归 `docs/open-items.md`；main集成/测试/远端后才删除分支 |
 
