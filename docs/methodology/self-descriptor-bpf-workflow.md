@@ -30,3 +30,9 @@
 `tools/diagnostic/tests/test_translation_self_raw.py` 与 `tools/diagnostic/tests/test_translation_self_driver.py` 锁真实生产计划/registered driver→writer→loader。`tools/diagnostic/translation_self_raw.py` 从binary_source不可变源码重编动态计划，检查原stdout SHA及source/build/protocol/launch、完整negative/positive状态、环境和退出码；重哈希损坏数据仍应拒绝。源码源7224957/build30e6082/launch21c3034/result64dcbe4，branch codex/sm8650-tlb-hierarchy-r2；15新测试/495全量diagnostic通过。
 
 真实目标3/3进程，每进程wrong syscall/foreign child负控0、自身getpid正控3、两个root table读数和20 raw SHA独立核验；结果 `docs/reviews/2026-10-12-translation-self-read-results.md`。此方法打开owned root descriptor观察能力；下一leaf指针仍需新合同和pagemap身份检查，不能由正控推“任意内核读取”“CONT=0”或physical capacity。
+
+## 第二条实际路线：owned leaf pointer（已真机验证）
+
+`probes/diagnostic/translation_leaf_bpf.h` 45实际指令先保存pt_regs context到r9，helper14过滤owner TGID，再用64-bit LD_IMM+JNE_REG比较x1(address)与selected VA，之后才helper1 lookup与helper113读取x2(ptep)的8-byte word；x3(requested entry)仅记录。r6 map/r7 source跨helper保留；first failure sticky，错误/重复/零事件分别处理，0事件NOT_EXCITED不能当因果阴性。
+
+`probes/diagnostic/translation_self_leaf.c` 用CPU7 perf-kprobe，type由sysfs读取，config1=ptep_set_access_flags，event→program→map退出回收。两个owned匿名页COW/reuse触发：foreign child和wrong VA负控0、parent selected正控1。三进程实际old/requested PTE page/PFN与两端pagemap一致，source0e8cd63/build49c7123/launchd235ce3/result77a3293，20 raw SHA已独立对账。实际ABI/BTF/PMU类型/计划/source绑定，完整28关联与508诊断通过。COW入口CONT0只属于该时点；shared-memfd alias适用性尚待验证，steady CONT/HPA不回填。后续性能窗口先卸载observer，观测对descriptor/cache准备的影响必须对称控制，页表物理PA仍未直接读取。

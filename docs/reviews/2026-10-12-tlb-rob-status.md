@@ -29,3 +29,7 @@ ROB下一选择直接约束跨迭代生命周期/释放的正交原型，先模�
 ## 验证口径
 
 最新一次完整diagnostic495/495、456.790秒，source至21c3034、完整测试日志SHA见 `docs/reviews/evidence/2026-10-12-translation-self-read/regression.json`。本次未改变formal runner/analysis/CMake，不重复既有203/250/21，也不把旧基线冒充新执行。两批NDK/真实Android测量及三份raw第二算术与本机测试分列。
+
+## 最新leaf能力检查
+
+`docs/reviews/2026-10-12-translation-self-leaf-results.md` /77a3293：45实际指令、3/3进程正控1/负控0，old/requested PTE PFN与两端pagemap一致，20raw SHA及第二算术无差异。COW入口CONT0只属本次时点，不回填旧批/稳态CONT/HPA；页表physical PA仍未直接读到。下一shared-memfd read→write alias适用性资格优先，observer与性能窗口分离，缓存/翻译准备效应需匹配控制。最新完整508诊断通过（441.465秒）见 `docs/reviews/evidence/2026-10-12-translation-self-leaf/regression.json`，未重复formal基线。

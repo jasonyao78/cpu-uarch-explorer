@@ -113,3 +113,7 @@ fresh整树软件出口：diagnostic298/298、runner203/203、formal analysis250
 `docs/reviews/2026-10-12-translation-self-read-results.md` /64dcbe4，source7224957/build30e6082/launch21c3034；代码 `probes/diagnostic/translation_self_bpf.h` / `probes/diagnostic/translation_self_read.c`，消费 `tools/diagnostic/translation_self_analysis.py` / `tools/diagnostic/translation_self_raw.py`，driver `tools/diagnostic/run_sm8650_translation_self.py`。3/3目标进程通过，双过滤负控0、正控3，两个owned root table项；20raw SHA独立核验，首次失败锁存不被成功覆盖。类型可读/实际load/attach/owned read已分层验证。leaf PTE/CONT/HPA依旧UNKNOWN，没有改kptr_restrict或猜direct-map偏置；不回填旧数据。495全诊断通过（456.790秒），证据 `docs/reviews/evidence/2026-10-12-translation-self-read/regression.json`。
 
 复用workflow `docs/methodology/self-descriptor-bpf-workflow.md` /1cd0ba9 与 `docs/methodology/diagnostic-resume-and-evidence-workflow.md` /5f29f71；记忆保留机制及边界，完整指令由plan/源码担任事实源。下一owned leaf观察与ROB生命周期重置是新控制，既有physical unknown不自动关闭。
+
+## 自有leaf指针与PTE/PFN身份（2026-10-12）
+
+`docs/reviews/2026-10-12-translation-self-leaf-results.md` /77a3293，source0e8cd63/build49c7123/launchd235ce3；emitter `probes/diagnostic/translation_leaf_bpf.h` / producer `probes/diagnostic/translation_self_leaf.c`，消费 `tools/diagnostic/translation_leaf_analysis.py` / `tools/diagnostic/translation_leaf_raw.py`，driver `tools/diagnostic/run_sm8650_translation_leaf.py`。45实际指令、3/3真机进程正控1/负控0，old/requested PTE page/PFN与pagemap两端相同；20raw SHA与独立第二算术一致，全部FD回收。CONT0仅COW/reuse入口，steady/HPA与physical capacity保持未知；不猜PA偏置、不回填旧数据。新旧observer28关联及508整树diagnostic通过（441.465秒）。下一shared-memfd alias适用性和测量窗口/observer分离仍需冻结；ROB生命周期正交方案独立推进。
