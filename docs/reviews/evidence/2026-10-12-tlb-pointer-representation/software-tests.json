@@ -1,0 +1,17 @@
+{
+  "evidence": "software only; external counter/ADB mocked",
+  "source_commit": "da1355d",
+  "build_commit": "eed4aee",
+  "tests": {
+    "actual_shared_graph_and_math": 8,
+    "producer_driver_raw": 5,
+    "diagnostic_total": 427
+  },
+  "diagnostic_seconds": 305.069,
+  "diagnostic_result": "OK",
+  "test_file_sha256": {
+    "tools/diagnostic/tests/test_tlb_repr.py": "2212b2bd5368522ce5241cf818051c4816d6c883aa2446c933c580f300c462ad",
+    "tools/diagnostic/tests/test_tlb_repr_raw.py": "ab3590a6baac9355741b4d471f790338a4c1e427a5d4c9939d4bf514be7c10c4"
+  },
+  "target_execution": "not yet at this software checkpoint"
+}
