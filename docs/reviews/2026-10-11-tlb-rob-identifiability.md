@@ -79,3 +79,10 @@ fresh整树软件出口：diagnostic298/298、runner203/203、formal analysis250
 `docs/reviews/2026-10-11-rob-dual-anchor-v2-results.md`，source0d5ac03 / v2consumer-buildf685c8a / actual launch91e0cb7，新增fresh144资格与720扫描全部技术接受。原两FSQRT链同D0为串行，新D0/D1确有208/416重叠；NOP同N供给稳定，90进程各8窗稳定。N384开始约8%渐进增加，N512约21%处模糊带，N640以上响应、N704近串行，N896供给/控制门未过；单区间INCONCLUSIVE，物理entries仍None。旧v1的144窗not-qualified完整保留，未因修门晋升。343诊断通过。
 
 官方r0p1优化指南§4.11明确NOP+任意相邻指令fusion资格、MOP可分µOP；0x3a/0x3b是µOP计数，不直接标定ROB分配。`docs/reviews/2026-10-11-rob-fusion-unit-audit.md` 给下一匹配ADD/NOP+ADD/双NOP组的正交控制与单位校准边界；当前不以N/2迎合384，不复跑旧曲线追锐knee。旧MODEL_UNIDENTIFIABLE只限定当时模型族，新可用的重叠/流量证据独立保存。
+
+
+## 2026-10-12 均衡几何与匹配组新证据
+
+`docs/reviews/2026-10-12-tlb-balanced-reach-results.md`（sourcefee3fbe / build-consumer7fb7bb0 / launch82871d1 / result698cf30）825真机窗与810技术门全过；控制实际VPN低8位/offset分布后，spaced与random相对dense仍有跨五mapping/双order复制的walk差。GEOMETRY_SENSITIVE是对简单页数/低位reach解释的新反证，三族各十曲线均heterogeneous，含右删失与ambiguous，不据均值给精确容量。官方r0p3 MMUTC还服务I/D/intermediate descriptor，不能预设2048纯4KiB leaf；下一物理PFN能力与descriptor VA代理控制须另冻，不回填历史UNKNOWN。
+
+`docs/reviews/2026-10-12-rob-fusion-groups-results.md`（source9a09fa2 / build-consumerb5e260f / launch04f3980 / result82871d1）144窗技术接受、锚点约208/416，但ADD NONE64三进程21–35.5cycles/轮波动，另1Icache窗134/131072越门。本批not-qualified，扫描未启动；NOP+ADD/双NOP更稳不能证明fusion/MOP allocation。架构目的/结果生命周期及活跃约束仍需新对照，不以NOP/2迎合384。全部raw/SHA、失败窗及直接第二算术保存，新整树diagnostic368/368通过；未改formal路径沿既有基线。

@@ -483,3 +483,10 @@
 - **ROB fusion/分配单位控制 / 当前ROB负责人 / 触发=双独立锚点扫描完整审计后**：依据 `docs/reviews/2026-10-11-rob-fusion-unit-audit.md`，官方r0p1指南§4.11有NOP+任意指令融合资格，0x3a/0x3b是µOP而非ROB分配；后续匹配ADD工作/值/目的集合的ADD、NOP+ADD、双NOP组，先真实NONE供给/字节/结果/生命周期门。仍需α标尺及ROB活跃约束认证，不以NOP/2强报384。
 
 - **ROB双独立有限扫描完成 / 当前ROB负责人 / 触发=新fusion/单位控制**：`docs/reviews/2026-10-11-rob-dual-anchor-v2-results.md`，source0d5ac03/consumerf685c8a/launch91e0cb7；fresh144资格+720扫描、444合计rawSHA，双链208/416重叠实证，90进程稳定，渐进退化至N704近串行；N512模糊与N896未合格完整保留，单区间INCONCLUSIVE。v1空循环门失败144窗封存，不后验晋升。前“双锚点模型复核”有限项闭环；physical allocation/active constraint与fusion单位沿上述专项继续，main/正式runner接入未完成。
+
+
+## CONT-TLB-ROB-20261012 均衡几何与匹配语法组
+
+- **TLB均衡几何有限批完成 / 当前TLB端到端负责人 / 触发=物理PFN/descriptor代理能力与正交干预设计**：`docs/reviews/2026-10-12-tlb-balanced-reach-results.md`，sourcefee3fbe / consumer-build7fb7bb0 / launch82871d1 / result698cf30，五mapping825窗/810门全过。实际VPN低8位和offset直方图匹配，spaced五N与random四N walk差全部十配对≥.10，GEOMETRY_SENSITIVE；30曲线三族heterogeneous、删失/跨线全部保留。4GiB只是reserve，9191prefault页payload35.902MiB；26rawSHA/第二算术精确。MMUTC包括I/D与intermediate descriptor参考，不预设2048纯leaf；下一先确认root pagemap是否提供非零PFN，再设计物理连续性/父项代理配对。历史PFN/HPA/CONT保持UNKNOWN，不回填旧raw、不无限加密同曲线。
+- **ROB匹配语法组有限资格结束 / 当前ROB负责人 / 触发=架构目的/结果生命周期或供给可观测状态控制设计**：`docs/reviews/2026-10-12-rob-fusion-groups-results.md`，source9a09fa2 / consumer-buildb5e260f / launch04f3980 / result82871d1。18进程144窗技术接受、78rawSHA；约208/416锚点稳定，但ADD NONE64三个进程range/median51.1–68.8%，serial0另1窗Icache134/131072>.001，not-qualified，扫描未启动。NOP+ADD/双NOP稳定不能认证fusion/MOP/ROB条目；根因不唯一，不能放宽门或重跑追门。下一个干预只在另冻判据/真实生产链之后采数；α及ROB活跃约束依原项OPEN。
+- **整树软件边界 / 当前端到端负责人 / 触发=下一行为改动或正式软件集成前**：本轮真实生产者/图/驱动写盘回读新增25项、全diagnostic368/368通过；formal runner203/analysis250/CTest21为此前未改路径基线，不冒充本轮fresh。双NDK、Linux目标执行、macOS图测试证据分列。main、远端、formal schema/CMake及分支回收尚未完成；只动本任务文件，原6runs/.gitignore他人修改原位保留。
