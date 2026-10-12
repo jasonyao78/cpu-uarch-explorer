@@ -17,6 +17,6 @@
   "plan_sha256": "5820eed3874ca921a1c4a55d3dd95c7c44af285121c116ad0874e4f0c3ccc5fc",
   "btf_sha256": "edf0efa6c0a4d661367567ae7386985c58e42d6e4cc700a0903f8eb831c6c6e1",
   "actual_bpf_instructions": 45,
-  "native_tests": 24,
+  "native_tests": 28,
   "scope": "actual leaf bytecode and contracts plus prior root regressions; no hardware capability claim"
 }

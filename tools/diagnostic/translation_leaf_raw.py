@@ -1,6 +1,6 @@
 """Re-read all raw owned-leaf records against immutable producer/launch inputs.
 
-Contract: docs/design/2026-10-12-translation-self-read.md. Compiles the source
+Contract: docs/design/2026-10-12-translation-self-leaf.md. Compiles the source
 at binary_source_head to rederive each dynamic instruction plan; never trusts a
 record's self-reported bytecode or silently promotes a stopped/partial run.
 """
