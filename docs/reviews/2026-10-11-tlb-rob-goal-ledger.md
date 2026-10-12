@@ -19,7 +19,7 @@
 | TLB：均衡全局reach与几何反证 | **新有限主通过**：`docs/reviews/2026-10-12-tlb-balanced-reach-results.md`，825窗/810門全过，同页数/低8位hist/offset仍复制walk差；GEOMETRY_SENSITIVE、三族曲线heterogeneous | 不能报精确物理entries；MMUTC I/D/descriptor代理、PFN/CONT/HPA未唯一辨识，先补可观测物理几何能力 |
 | ROB：匹配ADD工作/语法组 | **新有限资格结束**：`docs/reviews/2026-10-12-rob-fusion-groups-results.md`，144窗技术接受，ADD无锚点流波动、另1取指窗越门，not-qualified；扫描未启动 | 下一架构目的/生命周期控制，不以更稳NOP+ADD等同实际fusion或条目标尺；不复跑追门 |
 | TLB：同物理数据页几何反证 | **主通过**：`docs/reviews/2026-10-12-tlb-shared-alias-results.md`，279窗/270门，330240原始位及PFN身份通过；七个N/族配对差复制 | 只排除本新协议data PFN不同是必要解释；descriptor/虚拟高位/指针值预取及CONT仍待辨，不回填旧归因 |
-| ROB：架构目的与相对单位 | **新目的控制完成**：`docs/reviews/2026-10-12-rob-destination-control-results.md`，192真机窗参考资格过，裸ADD live/XZR均波动，主INCONCLUSIVE；`docs/design/2026-10-12-rob-retirement-units.md` 已冻结、源码df2171d/build47ff455 | 相对组×两链长先跑192资格，过后才有限扫描；实际allocation和活跃ROB约束仍未认证，软件16项通过不冒充目标测量 |
+| ROB：架构目的与相对单位 | **新目的控制完成**：`docs/reviews/2026-10-12-rob-destination-control-results.md`，192真机窗参考资格过，裸ADD live/XZR均波动，主INCONCLUSIVE；`docs/design/2026-10-12-rob-retirement-units.md` 已冻结、源码df2171d/build47ff455 | 新192真机资格亦已完成：`docs/reviews/2026-10-12-rob-retirement-units-results.md`，两链参考稳，ADD+SUB供给45–50%波动、9取指门失败；2352扫描未启动。实际allocation和活跃ROB约束仍未认证，下一正交干预须另冻 |
 | ROB：物理容量 | **本组方法正式终态MODEL_UNIDENTIFIABLE**。长load资格反例与NOP/零值/依赖/同VA完整有限控制已归档；384是第三方参考 | 审查已交付 `docs/reviews/2026-10-11-tlb-rob-identifiability.md`；新单位标尺与活跃约束认证触发另案，物理entries未测得 |
 | 软件交付与分支收口 | m0b使命已完成、代码在r2；source/build/launch/protocol/raw逐批分开 | 原独立JSONL不是正式schema v2；正式runner/CMake接入按稳定协议需要决定，未做项归 `docs/open-items.md`；main集成/测试/远端后才删除分支 |
 

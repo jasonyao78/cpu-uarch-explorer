@@ -1,0 +1,70 @@
+{
+  "evidence": "unregistered descriptive observation; not a capacity or clock certificate",
+  "mixed_cycles_per_iter": [
+    42.00341033935547,
+    71.00312805175781
+  ],
+  "mixed_average_cycles_per_ns": [
+    2.711519036025515,
+    2.746245707830762
+  ],
+  "mixed_ir_per_iter": [
+    258.0019836425781,
+    258.0019836425781
+  ],
+  "mixed_rename_per_iter": [
+    0.0,
+    0.00103759765625
+  ],
+  "mixed_frontend_per_iter": [
+    0.00058746337890625,
+    0.0260162353515625
+  ],
+  "icache_gate_exceptions": [
+    {
+      "condition": "e0-serial-nop-pair-g0-k16",
+      "position": 0,
+      "icache_count": 180
+    },
+    {
+      "condition": "e0-serial-nop-pair-g0-k32",
+      "position": 0,
+      "icache_count": 162
+    },
+    {
+      "condition": "e1-none-add-sub-discard-g64-k16",
+      "position": 0,
+      "icache_count": 155
+    },
+    {
+      "condition": "e1-serial-nop-pair-g0-k32",
+      "position": 0,
+      "icache_count": 143
+    },
+    {
+      "condition": "e1-independent-nop-pair-g0-k16",
+      "position": 0,
+      "icache_count": 135
+    },
+    {
+      "condition": "e2-independent-nop-pair-g0-k16",
+      "position": 0,
+      "icache_count": 134
+    },
+    {
+      "condition": "e2-serial-nop-pair-g0-k32",
+      "position": 0,
+      "icache_count": 177
+    },
+    {
+      "condition": "e2-serial-nop-pair-g0-k32",
+      "position": 5,
+      "icache_count": 143
+    },
+    {
+      "condition": "e2-serial-nop-pair-g0-k32",
+      "position": 7,
+      "icache_count": 147
+    }
+  ]
+}

@@ -95,4 +95,4 @@ fresh整树软件出口：diagnostic298/298、runner203/203、formal analysis250
 
 ## 架构目的控制与相对单位下一门（2026-10-12）
 
-`docs/reviews/2026-10-12-rob-destination-control-results.md`（sourcef85e2bb/build083c386/launchf640160/resultb93a392）192真机窗技术与参考资格过，XZR并未消除裸ADD波动，NOP+ADD两目的均稳定；主INCONCLUSIVE而非PRF/前端唯一归因。下一 `docs/design/2026-10-12-rob-retirement-units.md` 明示相对α只是被检验假设，比较同bytes无架构结果的三pattern及chain16/32；先192窗资格，过后2352窗有限扫描。新source df2171d / build47ff455，144独立反汇编/288实际计划、两NDK构建一致，7算法/码形及9生产链软件测试通过；本段登记时尚未上板。即使共同proxy区间存在，也不能把它直接改名物理ROB entries；仍须独立认证实际分配单位和活跃约束。
+`docs/reviews/2026-10-12-rob-destination-control-results.md`（sourcef85e2bb/build083c386/launchf640160/resultb93a392）192真机窗技术与参考资格过，XZR并未消除裸ADD波动，NOP+ADD两目的均稳定；主INCONCLUSIVE而非PRF/前端唯一归因。下一 `docs/design/2026-10-12-rob-retirement-units.md` 明示相对α只是被检验假设，比较同bytes无架构结果的三pattern及chain16/32；先192窗资格，过后2352窗有限扫描。新source df2171d / build47ff455，144独立反汇编/288实际计划、两NDK构建一致，7算法/码形及9生产链软件测试通过；fresh192真机资格已交付 `docs/reviews/2026-10-12-rob-retirement-units-results.md`（launchf2c99a9），两chain参考均稳但ADD+SUB供给45–50%波动、9取指门越线，not-qualified，2352扫描未启动。414整树diagnostic已通过。即使共同proxy区间存在，也不能把它直接改名物理ROB entries；仍须独立认证实际分配单位和活跃约束。
