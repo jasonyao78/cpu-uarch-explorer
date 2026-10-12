@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "direct_windows": 2352,
+  "all_point_window_ratios_exact": true,
+  "qualification_values_exact": true,
+  "all_curves_and_censoring_exact": true,
+  "all_replication_and_common_proxy_exact": true,
+  "fp_windows_exact_one": 1824,
+  "checksum_windows": 2352,
+  "raw_sha_files": 1182
+}
