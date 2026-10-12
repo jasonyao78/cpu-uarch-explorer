@@ -1,0 +1,38 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "fee3fbe9531d1b0ea1e97478afe634d559c57f9f",
+  "source_sha256": {
+    "probes/diagnostic/tlb_balanced_reach.cpp": "2bb117cbc775eeb9777f09daedbbfba1f387cd090ebcc5d0245f79d4d5d7b1b2",
+    "probes/diagnostic/tlb_balanced_reach_layout.h": "3740d32888a7200b597a3ab9efb9372d9e2b50b9c0c8c7350d16494aefaeca19",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6"
+  },
+  "binaries": {
+    "tlb_balanced_reach": "95abd5ba3fc3846b4236dd4133e057e58f99c4d1e93251bfb792c8fb05eec16c"
+  },
+  "independent_rebuild_byte_identical": true,
+  "independent_build_sha256": [
+    "95abd5ba3fc3846b4236dd4133e057e58f99c4d1e93251bfb792c8fb05eec16c",
+    "95abd5ba3fc3846b4236dd4133e057e58f99c4d1e93251bfb792c8fb05eec16c"
+  ],
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "compiler": "Android (12470979, +pgo, -bolt, +lto, -mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)\nTarget: aarch64-unknown-linux-android34\nThread model: posix\nInstalledDir: /Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin\n",
+  "recipe": [
+    "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android34-clang++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic",
+    "probes/diagnostic/tlb_balanced_reach.cpp",
+    "-o",
+    "build/aarch64-linux-android/release/diagnostic/tlb_balanced_reach"
+  ],
+  "plan_path": "docs/reviews/evidence/2026-10-12-tlb-balanced-reach/plan.json",
+  "plan_sha256": "d77842912a7acacf20a6a83f9a91f2c741a3c26bb24020347150e3c5e7faef01",
+  "probe_role": "diagnostic JSONL, not formal schema-v2"
+}
