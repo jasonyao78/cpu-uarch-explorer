@@ -12,7 +12,7 @@ class TestSharedDriver(unittest.TestCase):
  def setUpClass(cls):
   assert (ROOT/'tools/diagnostic/translation_shared_leaf_raw.py').exists(),'registered self-read raw reader missing'
   from tools.diagnostic import translation_shared_leaf_raw
-  cls.reader=translation_shared_leaf_raw;cls.launch='2e93241';cls.blob=staticmethod(lambda rel:subprocess.check_output(['git','show',cls.launch+':'+rel],cwd=ROOT));cls.build=json.loads(cls.blob(model.BUILD));cls.plan=json.loads(cls.blob(model.PLAN))
+  cls.reader=translation_shared_leaf_raw;cls.launch='ff87b31';cls.blob=staticmethod(lambda rel:subprocess.check_output(['git','show',cls.launch+':'+rel],cwd=ROOT));cls.build=json.loads(cls.blob(model.BUILD));cls.plan=json.loads(cls.blob(model.PLAN))
  def execute(self,root,denial=False,corrupt=False,not_excited=False):
   (root/'data/private').mkdir(parents=True,exist_ok=True)
   for rel in [model.DRIVER,model.CONSUMER,model.PROTOCOL,model.BUILD,model.PLAN,'configs/platforms/redmi-k70pro-01.json',*self.build['source_sha256']]:

@@ -18,6 +18,6 @@
   "plan_sha256": "ebe56ab257bc4cccb1f0b2a3aa93f99f90cbca5db0b1642627c29cf0c672488d",
   "btf_sha256": "edf0efa6c0a4d661367567ae7386985c58e42d6e4cc700a0903f8eb831c6c6e1",
   "actual_bpf_instructions": 45,
-  "native_tests": 31,
+  "native_tests": 37,
   "scope": "shared alias bytecode and contracts plus prior root regressions; no hardware capability claim"
 }
