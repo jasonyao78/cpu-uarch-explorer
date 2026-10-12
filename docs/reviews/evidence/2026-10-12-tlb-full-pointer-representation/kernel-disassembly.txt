@@ -1,0 +1,10 @@
+0000 mov x9, x0
+0004 ldr x0, [x9]
+0008 mov x8, x1
+000c mov x17, x2
+0010 ldr x0, [x0]
+0014 eor x0, x0, x17
+0018 subs x8, x8, #1
+001c b.ne #0x24411c
+0020 str x0, [x9]
+0024 ret
