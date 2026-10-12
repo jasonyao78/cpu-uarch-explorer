@@ -1,0 +1,28 @@
+{
+  "raw_directory": "20261012T031721Z-tlb-shared-alias",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "binary_source_head": "a32ee8de9346ed58a8fd1ed24a4dd8832d3d20fb",
+  "source_head": "f5ae99a968f5b40c2ae26e7257b463db7b19fc51",
+  "binary_sha256": "eba95f1f6f7811965223d51e85b93fb16918e795e7e11d0c8b55ac4afcfeb16e",
+  "manifest_sha256": "a819430fd4f4f164b93cce626f61e3ccfc7119279718e308ada7fdd78bedb362",
+  "all_raw_sha256": {
+    "consumer.py": "18ed257b0d07fc7637254a19806bcb7f51800288f41e58d621734a8ef6e56071",
+    "driver.py": "33cab5b77066368d3907da5c6745352128a6bda956f75d940fcad9a5b5e31981",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "epoch-0-post-environment.json": "bd7d53abf3cea049bb5c68ef74b5e6519be479f5b0955ed4e19df0e4a94cbad9",
+    "epoch-0-pre-environment.json": "e47831bc9e5b44a67b94b531297e6f3ba0980704b27eedb866887e7f06a7595c",
+    "epoch-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-0.stdout.jsonl": "71ce7e356cb447f4d74b50c3b924087a700bf28ee07f3212a355f6ca4d49de0c",
+    "epoch-1-post-environment.json": "0854f181496ebb207219fae4435d39a8fd65720dbc62c5414844e6eba3e26064",
+    "epoch-1-pre-environment.json": "f2f9f3ecf78fb6aedb10f33cdfd15d7712c70d9005649eef58cef22c53679ee3",
+    "epoch-1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-1.stdout.jsonl": "22b77e36a91ae7525982fc73f56090d8b7dd180818f754fff16cdcb9704509d7",
+    "epoch-2-post-environment.json": "3187a545bf02c2beb4d5a5ae5149db03f0b96e9e28b5c9b39e0a9555147a3fe8",
+    "epoch-2-pre-environment.json": "6a231fe58f6a39999c1ce4781621546a8389b54013d9400a94a124f88622d85a",
+    "epoch-2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-2.stdout.jsonl": "17ca547ed956b76f99b4d59c6b80e64bfecadb51c76633071ec1115965be3710",
+    "final-environment.json": "55145267b5242a2be36950ebe84c7830198b9719f8e3d108ed559792b5cf043d",
+    "initial-environment.json": "d903ebab6dcab90c47e2047843cf89fb4c0688ba00728fbc5b37cf1370afa561",
+    "manifest.json": "a819430fd4f4f164b93cce626f61e3ccfc7119279718e308ada7fdd78bedb362"
+  }
+}

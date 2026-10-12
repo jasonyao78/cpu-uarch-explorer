@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "direct_windows": 279,
+  "pagemap_wire_observations": 330240,
+  "all_pfn_present_not_swapped_and_mask_exact": true,
+  "all_alias_pfns_match_canonical": true,
+  "all_window_and_epoch_arithmetic_exact": true,
+  "background_gates_exact": true,
+  "comparisons_exact": 10,
+  "raw_sha_files": 18,
+  "absolute_pfns_public": false
+}

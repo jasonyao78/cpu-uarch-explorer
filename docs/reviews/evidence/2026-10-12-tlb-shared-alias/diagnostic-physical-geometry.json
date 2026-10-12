@@ -1,0 +1,26 @@
+[
+  {
+    "epoch": 0,
+    "registered_primary": false,
+    "criterion": "index i multiple16, PFN[i] multiple16, all16 PFN[i+j]=PFN[i]+j",
+    "matching_blocks": 0,
+    "total_full_blocks": 160,
+    "CONT_observed": false
+  },
+  {
+    "epoch": 1,
+    "registered_primary": false,
+    "criterion": "index i multiple16, PFN[i] multiple16, all16 PFN[i+j]=PFN[i]+j",
+    "matching_blocks": 0,
+    "total_full_blocks": 160,
+    "CONT_observed": false
+  },
+  {
+    "epoch": 2,
+    "registered_primary": false,
+    "criterion": "index i multiple16, PFN[i] multiple16, all16 PFN[i+j]=PFN[i]+j",
+    "matching_blocks": 0,
+    "total_full_blocks": 160,
+    "CONT_observed": false
+  }
+]
