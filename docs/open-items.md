@@ -508,4 +508,4 @@
 
 - **ROB零延迟MOV资源类已设计 / 当前ROB负责人 / 触发=全位TLB块完成、真实code及回归通过后192资格**：`docs/design/2026-10-12-rob-zero-latency-units.md` / `docs/superpowers/plans/2026-10-12-rob-zero-latency-units.md`；官方零延迟MOV #0、live zero返回、NOP资格对照与两chain，1048576迭代/15秒进程间隔。旧门不放宽/数据不晋升，不能将code与窗口共变唯一归因MOV；资格不过禁2352扫描，共同代理仍非physical entries。source5aecbbb / build7c7647e，两NDK一致、288实际plan/144独立decode、7函数/真实码+9生产链与457/457整树diagnostic通过。新模式软件出口通过，192目标资格待执行，不将synthetic共同proxy作实测。
 
-- **同VA/PFN邻接干预已冻结 / 当前TLB负责人 / 触发=布局、实际图、双NDK与生产链验证后串行297窗**：`docs/design/2026-10-12-tlb-pfn-association.md` / `docs/superpowers/plans/2026-10-12-tlb-pfn-association.md`。π保留mod64，实际active相邻PFN差非±1；同VA line集合与物理需求轨迹，虚拟顺序残余仍显式。negative需独立自然邻接激励；physical容量/descriptor/实际HPA仍OPEN，不晋升旧数据。尚无目标数据。
+- **同VA/PFN邻接干预已冻结 / 当前TLB负责人 / 触发=布局、实际图、双NDK与生产链验证后串行297窗**：`docs/design/2026-10-12-tlb-pfn-association.md` / `docs/superpowers/plans/2026-10-12-tlb-pfn-association.md`。π保留mod64，实际active相邻PFN差非±1；同VA line集合与物理需求轨迹，虚拟顺序残余仍显式。negative需独立自然邻接激励；pure布局与真实host共享FD图5/5通过，8N×5恶意PFN族保持bijection/mod64/0邻接，同VA line集合/物理闭环验证。producer/consumer/Android执行链待完成；physical容量/descriptor/实际HPA仍OPEN，不晋升旧数据，尚无目标数据。
