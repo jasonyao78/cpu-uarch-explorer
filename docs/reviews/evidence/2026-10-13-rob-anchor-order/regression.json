@@ -1,0 +1,10 @@
+{
+  "command": ".venv/bin/python -m unittest discover -s tools/diagnostic/tests",
+  "tests": 558,
+  "passed": 558,
+  "elapsed_s": 471.147,
+  "exit_code": 0,
+  "tested_source_head": "9be15af",
+  "full_output_sha256": "feb8c9eddbc1160f6b4661d9c6c2fddbfb776912bfd95ad7d5771cb6c80449b5",
+  "scope": "all diagnostic tests after ROB order and owned shared installation; unchanged formal runner/analysis/CMake not rerun"
+}
