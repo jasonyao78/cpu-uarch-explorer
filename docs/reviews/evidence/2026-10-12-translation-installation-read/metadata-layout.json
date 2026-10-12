@@ -1,0 +1,38 @@
+{
+  "btf_sha256": "edf0efa6c0a4d661367567ae7386985c58e42d6e4cc700a0903f8eb831c6c6e1",
+  "type_id": 700,
+  "size": 112,
+  "fields": {
+    "vma": {
+      "name": "vma",
+      "type_id": 663,
+      "bit_offset": 0,
+      "bitfield_bits": 0,
+      "byte_offset": 0
+    },
+    "address": {
+      "name": "address",
+      "type_id": 10,
+      "bit_offset": 192,
+      "bitfield_bits": 0,
+      "byte_offset": 24
+    },
+    "pmd": {
+      "name": "pmd",
+      "type_id": 703,
+      "bit_offset": 384,
+      "bitfield_bits": 0,
+      "byte_offset": 48
+    },
+    "pte": {
+      "name": "pte",
+      "type_id": 715,
+      "bit_offset": 704,
+      "bitfield_bits": 0,
+      "byte_offset": 88
+    }
+  },
+  "evidence": "BTF type offsets and symbol visibility only; new installation hook unverified",
+  "do_set_pte_symbol_visible": true,
+  "finish_fault_symbol_visible": true
+}
