@@ -4,12 +4,12 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[3]
 MAP=0x20000;TASK=0x30000;MM=0x40000;PGD=0x50000;STACK=0x80000
 
-def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_present=True,prior=None,context_fields=None,additional_memory=None,allowed_reads=None):
+def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_present=True,prior=None,context_fields=None,additional_memory=None,allowed_reads=None,output_words=8):
     regs=[0]*11;regs[1]=0x10000;regs[10]=STACK;mem={};reads=[]
     def store(addr,value,size):
         for i,b in enumerate(int(value%(1<<(8*size))).to_bytes(size,'little')):mem[addr+i]=b
     def load(addr,size):return int.from_bytes(bytes(mem.get(addr+i,0) for i in range(size)),'little')
-    for j in range(64):store(MAP+j,0,1)
+    for j in range(output_words*8):store(MAP+j,0,1)
     if prior is not None:
         for j,x in enumerate(prior):store(MAP+8*j,x,8)
     store(regs[1]+8,syscall_id,8);store(TASK+1588,task_pid,4);store(TASK+1440,MM,8);store(MM+56,PGD,8)
@@ -32,6 +32,7 @@ def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_pr
         elif code in (0x55,0x15):
             condition=regs[dst]!=(imm&0xffffffffffffffff)
             if condition==(code==0x55):next_pc+=off
+        elif code==0x05:next_pc+=off
         elif code==0x5d:
             if regs[dst]!=regs[src]:next_pc+=off
         elif code==0x85:
@@ -51,7 +52,7 @@ def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_pr
         else:raise AssertionError('unknown opcode '+hex(code))
         assert 0<=next_pc<len(program);pc=next_pc
     else:raise AssertionError('missing exit')
-    return [load(MAP+j*8,8) for j in range(8)],reads
+    return [load(MAP+j*8,8) for j in range(output_words)],reads
 
 class TestSelfBytecode(unittest.TestCase):
     @classmethod
