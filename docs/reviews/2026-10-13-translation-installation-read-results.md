@@ -19,3 +19,5 @@ raw保存在 `data/private/20261012T162402Z-translation-installation-read/`；�
 这比VA父项分组代理更进一步：本owned安装实例的Linux table descriptor、子表PA及leaf身份可以直接观察。它不等于任意kernel memory读权限、machine DRAM物理地址/HPA证书，也不证明旧TLB performance runs的descriptor布局或steady CONT。CONT读数只属于首次shared read安装时点；第三方或官方2048候选不能由本能力直接变为实测capacity。
 
 原 `docs/reviews/2026-10-12-translation-shared-leaf-results.md` 的NOT_EXCITED维持原终态；新入口没有覆盖或回填旧记录。下一有限设计应把已观察的leaf/父表身份绑定到同一进程的性能graph，先卸载observer再计数，并对观察造成的cache/translation准备历史做对称控制；只有实际descriptor布局形成激励，才能讨论它对几何reach的贡献。ROB继续独立anchor顺序控制；整体physical TLB/ROB目标仍OPEN，owner/触发见 `docs/open-items.md`。
+
+新观察器后完整diagnostic 545/545通过（460.360秒，exit0），测试source81fc4d1，输出SHA与scope在 `docs/reviews/evidence/2026-10-13-translation-installation-read/regression.json`；formal runner/analysis/CMake未改、此轮未重复。

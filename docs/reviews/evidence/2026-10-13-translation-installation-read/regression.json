@@ -1,0 +1,10 @@
+{
+  "command": ".venv/bin/python -m unittest discover -s tools/diagnostic/tests",
+  "tests": 545,
+  "passed": 545,
+  "exit_code": 0,
+  "elapsed_s": 460.36,
+  "tested_source_head": "81fc4d1",
+  "full_output_sha256": "ece01744dc7c2e4c1158d0b40fbb4087c43ef55c19bb83329185ed881626a820",
+  "scope": "all diagnostic producer/consumer/driver tests after new installation observer; unchanged formal runner/analysis/CMake not rerun"
+}
