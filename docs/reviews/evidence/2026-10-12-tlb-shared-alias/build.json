@@ -1,0 +1,40 @@
+{
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_commit": "142037136372022191b06d365f6b34d7405d642c",
+  "source_sha256": {
+    "probes/diagnostic/tlb_shared_alias.cpp": "2a84a249687df3eeed390282eba59084ece21b5a522b4368f3659c45490cccda",
+    "probes/diagnostic/tlb_shared_alias_layout.h": "25345a7d404f122f82def7f2772bcc16b8d0a0442399f53b26a2e9b3ae7c90fe",
+    "probes/diagnostic/tlb_balanced_reach_layout.h": "3740d32888a7200b597a3ab9efb9372d9e2b50b9c0c8c7350d16494aefaeca19",
+    "probes/common/pagemap_decode.h": "ed47ecf077b44a5518029253055065168f500a949143eebf0fd9561a69bc5238",
+    "probes/common/page_policy.h": "722bf1e991861b187917ac57cc2a3e0be282210c0d1163d4668900aebb3ffad7",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6"
+  },
+  "binaries": {
+    "tlb_shared_alias": "1a016d41045ade4e9b6e6dff0dd5da38141113b25f678c06f55bcbb435b02f68"
+  },
+  "independent_rebuild_byte_identical": true,
+  "independent_build_sha256": [
+    "1a016d41045ade4e9b6e6dff0dd5da38141113b25f678c06f55bcbb435b02f68",
+    "1a016d41045ade4e9b6e6dff0dd5da38141113b25f678c06f55bcbb435b02f68"
+  ],
+  "ndk": "27.2.12479018",
+  "api": 34,
+  "compiler": "Android (12470979, +pgo, -bolt, +lto, -mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)\nTarget: aarch64-unknown-linux-android34\nThread model: posix\nInstalledDir: /Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin\n",
+  "recipe": [
+    "/Users/michaelyao/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android34-clang++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-static",
+    "-Iprobes/common",
+    "-Iprobes/diagnostic",
+    "probes/diagnostic/tlb_shared_alias.cpp",
+    "-o",
+    "build/aarch64-linux-android/release/diagnostic/tlb_shared_alias"
+  ],
+  "plan_path": "docs/reviews/evidence/2026-10-12-tlb-shared-alias/plan.json",
+  "plan_sha256": "4b5a7243d044c84e764688678dbf63eb7678e7e8b2c11d730f6fec8ebe6e6877",
+  "probe_role": "diagnostic JSONL, not formal schema-v2"
+}
