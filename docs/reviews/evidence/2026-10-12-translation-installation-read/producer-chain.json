@@ -1,0 +1,17 @@
+{
+  "tests": 31,
+  "passed": 31,
+  "command": ".venv/bin/python -m unittest tools.diagnostic.tests.test_translation_install tools.diagnostic.tests.test_translation_install_analysis tools.diagnostic.tests.test_translation_install_driver tools.diagnostic.tests.test_translation_self tools.diagnostic.tests.test_translation_leaf tools.diagnostic.tests.test_shared_leaf",
+  "elapsed_s": 6.423,
+  "source_head": "fc2fdcc",
+  "producer_chain": "actual C export -> actual emitted-word VM with synthetic kernel memory -> registered driver -> JSONL writer -> immutable source raw reader",
+  "negative_cases": [
+    "denial stops first process",
+    "no excitation is distinct from denial",
+    "wrong PID/VA leave empty negative map",
+    "partial/sticky/duplicate rejected",
+    "rehashed canonical PFN drift rejected",
+    "rehashed parent relation/entry index/leaf PFN rejected"
+  ],
+  "evidence_level": "software; no target installation-hook assertion"
+}
