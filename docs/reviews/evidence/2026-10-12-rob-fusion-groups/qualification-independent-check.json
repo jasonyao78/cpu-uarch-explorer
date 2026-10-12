@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "direct_windows": 144,
+  "raw_sha_files": 78,
+  "point_arithmetic_exact": true,
+  "all_window_ratio_arithmetic_exact": true,
+  "qualification_recomputed_exact": true,
+  "checks": {
+    "anchors_stable": true,
+    "overlap_ratio": 0.5000480775094182,
+    "none_stable": false,
+    "none_zero_noise_ratio": 0.0005932504936937884,
+    "none_max_ratio": 0.170692405927854,
+    "icache_background": false
+  }
+}
