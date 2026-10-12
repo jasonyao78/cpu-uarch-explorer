@@ -125,3 +125,7 @@ source2671b5b/buildff87b31/launch8953da2/resultf330dff，`docs/reviews/2026-10-1
 ## 退休状态边界完整资格（2026-10-12）
 
 source8ecf4b9+9d514b4/build50ee8f8/actual launchafe6bee/resultb930bac；`probes/diagnostic/rob_fp_drain.c` / `tools/diagnostic/rob_drain_analysis.py` / `tools/diagnostic/run_sm8650_rob_drain.py` / `docs/reviews/2026-10-12-rob-retirement-drain-results.md`。384窗/198raw SHA、原FP结果捕获/IR/noMUX/gates独立一致，FPSR qualified，FPCR两个NONE0组>5%保留not-qualified。FPSR I/S k16≈225/432、k32≈462/848，真实462不能由公式改433；下一排程控制解释残差。所有未来speculation/actual allocation仍未认证，不自动扫N或改旧终态；530全diagnostic已通过。
+
+## 2026-10-13 shared descriptor能力增补
+
+`docs/reviews/2026-10-13-translation-installation-read-results.md`：branch codex/sm8650-tlb-hierarchy-r2，source0fcccb2/buildfc2fdcc/launch81fc4d1。entry99/return32的新do_set_pte观察器3/3进程通过，负控0/entry1/return1，canonical-alias PFN及installed leaf匹配；实际父项类型/VA索引与两个层级地址关系一致，20 raw SHA第二算术复核。Linux table child PA可观察，machine DRAM/HPA与稳态CONT、TLB物理capacity/ways/hash仍未认证；三例安装CONT0只属该时点。31新旧关联tests通过，全量新回归另列最终证据。原shared-write NOT_EXCITED、旧ROB/TLB终态均不覆盖。下一先绑同进程性能graph的descriptor身份，再正交布局对照；ROB blocked/interleaved anchor顺序独立推进。

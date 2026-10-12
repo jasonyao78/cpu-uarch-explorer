@@ -527,3 +527,5 @@
 - **ROB退休边界有限资格结束 / 当前ROB负责人 / 触发=独立anchor排程/推测分配约束的新协议**：`docs/reviews/2026-10-12-rob-retirement-drain-results.md`，source8ecf4b9+9d514b4/build50ee8f8/launchafe6bee，完整384窗/198raw SHA独立复核。FPSR qualified，FPCR两个NONE0 range/median>5%保留not-qualified；FPSR I0/S0 k16≈225/432、k32≈462/848，禁止把k32套13*k+17写433。MRS约束较早FP execute/retire，不认证禁止后来fetch/rename/allocation。下一block vs interleaved anchor顺序可检验额外延迟贡献，先真实pair/slot/控制与预注册，不直接capacity扫描，physical单位/活跃约束仍OPEN。
 
 - **shared安装descriptor能力已冻结待实施 / 当前TLB负责人 / 触发=entry/return生产链验证后3进程**：`docs/design/2026-10-12-translation-installation-read.md`。do_set_pte/finish_fault符号及vm_fault实际pmd48/pte88偏移只为线索，新hook未验证。PID+VA两过滤后的owned leaf/parent/root及两级偏置关系，不猜物理基址、不读其它进程，不借COW或shared write未激励结果直接准入。原physical/steady CONT/HPA仍OPEN。
+
+- **shared安装与父表能力完成 / 当前TLB负责人 / 触发=同进程性能graph的descriptor身份与布局激励新协议**：`docs/reviews/2026-10-13-translation-installation-read-results.md`，source0fcccb2/buildfc2fdcc/launch81fc4d1；3/3、entry1/return1/负控0、leaf PFN/父表类型/索引/两级关系与20raw SHA通过。前项“待实施”属历史状态。安装CONT0不回填steady，Linux表child PA观察不认证machine DRAM/HPA；性能窗前卸载observer并对称准备，physical参数OPEN。下一新方案先验证实际descriptor布局激励，不复跑shared-write追事件。

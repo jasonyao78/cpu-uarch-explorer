@@ -31,3 +31,7 @@
 此前阶段有限必做/反证/控制已闭环；用户本次要求继续，最新有限批已完成，下一可观测descriptor/生命周期正交研究继续推进。**技术交付通过；物理TLB/ROB容量命名不通过**。Q-A=INCONCLUSIVE、Q-D长窗有效响应通过、Q-B/Q-C仅限定行为/候选状态；ROB同VA科学负控不合格与物理MODEL_UNIDENTIFIABLE分别保存。原正式B1/B2、A1/A2/A3矩阵没有自动完成，按用户第一性原理路线的独立有限协议报告，不伪装合同等价。若“TLB和ROB完整完成”指精确全部物理参数，该目标仍未达成；当前结束的是具有事实终态的有限测量任务。未知问题需新增正交干预/单位标尺才有新可识别路线，不能无限加密或用预算结束冒称测得。ALU/FPU完整latency/throughput另列后置，fsqrt锚点不等于FPU完成。
 
 执行与归属：当前端到端负责人；工作树 `/Users/michaelyao/workspace/cpu-uarch-explorer-tlb-r2`，分支 `codex/sm8650-tlb-hierarchy-r2`。所有未完成项、触发条件和owner在 `docs/open-items.md`。远端按用户暂不处理，本文不声称push/main合并或worktree回收。
+
+## 2026-10-13 shared descriptor能力增补
+
+`docs/reviews/2026-10-13-translation-installation-read-results.md`：branch codex/sm8650-tlb-hierarchy-r2，source0fcccb2/buildfc2fdcc/launch81fc4d1。entry99/return32的新do_set_pte观察器3/3进程通过，负控0/entry1/return1，canonical-alias PFN及installed leaf匹配；实际父项类型/VA索引与两个层级地址关系一致，20 raw SHA第二算术复核。Linux table child PA可观察，machine DRAM/HPA与稳态CONT、TLB物理capacity/ways/hash仍未认证；三例安装CONT0只属该时点。31新旧关联tests通过，全量新回归另列最终证据。原shared-write NOT_EXCITED、旧ROB/TLB终态均不覆盖。下一先绑同进程性能graph的descriptor身份，再正交布局对照；ROB blocked/interleaved anchor顺序独立推进。

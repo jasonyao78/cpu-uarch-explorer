@@ -2,7 +2,7 @@
 
 ## 本次任务的目的（给人类看）
 
-保存一条真机验证过的直接观测路线及字节码验证方法。当前能力是只读自有root descriptor，不是通用任意内存读工具，也不是leaf CONT/HPA/ROB容量证书。
+保存一条真机验证过的直接观测路线及字节码验证方法。当前能力覆盖自有root、匿名COW leaf，以及shared首次安装的leaf与两级父表关系；仍须分别核验backing/触发，不是任意内存读取或容量证书。
 
 ## 可复用的78指令结构
 
@@ -40,3 +40,13 @@
 ## 必须保留的适用性反例
 
 `docs/reviews/2026-10-12-translation-shared-leaf-results.md` /f330dff：同45字节码/shared memfd canonical−alias PFN身份通过，首进程没有selected capture，NOT_EXCITED按合同停止（实际1/计划3）。单纯双映射/PFN相同不保证ptep_set_access_flags事件产生。root/匿名COW的成功不能跳过另一backing的能力/激励门；不循环写同页追事件，不将0capture改成CONT0或hardware aggregation阴性。为什么没触发仍未唯一归因，需新入口的有限方案。最新517完整diagnostic通过。
+
+## 第三条实际路线：shared安装entry/return与父表身份
+
+`probes/diagnostic/translation_install_bpf.h` 的entry99/return32实际指令，分别过滤owner TGID和entry pt_regs.x2 selected VA；所有kernel-read在过滤后。ARRAY128B保留stage、entry/return计数、owner/VA、vmf/pmdp/ptep、PMD/mm/pgd/PGD/installed leaf/error。entry先取得vmf.pmd48与pte88，再读PMD、current task.mm1440、mm.pgd56及selected root项；完整pending stage11才准return读取已捕获ptep，完成stage13/entry1/return1。重复entry命名失败，partial/error粘滞；unpaired return不读内核。helper破坏r1-r5，保留跨调用寄存器；LD64两槽和forward jump由实际VM核验。
+
+`probes/diagnostic/translation_install_read.c` 在shared memfd canonical prefault后创建selected/negative alias，中间guard阻止wrong-VA fault-around提前安装selected。foreign child/parent wrongVA负控0，parent first read selected正控配对；读取发生于正常do_set_pte安装上下文，观察器不写PTE或全局设置。BPF写自己的map，正常fault会安装owned PTE，不能用“没有任何内核写”概括。本hook/BTF布局与ABI不能照搬其它内核。
+
+`tools/diagnostic/translation_install_analysis.py` / `tools/diagnostic/translation_install_raw.py` / `tools/diagnostic/run_sm8650_translation_install.py` 强制canonical/alias pagemap稳定、installed PFN匹配、parent类型/索引正确，并核对(PMD pointer page−PGD descriptor child PA)与(PTE pointer page−PMD descriptor child PA)的u64差；只匹配这两条实际关系，不猜direct-map基址。raw从不可变binary source重编动态计划，恶意重新哈希的PFN/父项/索引/type也须拒绝。
+
+`docs/reviews/2026-10-13-translation-installation-read-results.md`：source0fcccb2/buildfc2fdcc/launch81fc4d1，三fresh进程3/3、每进程entry1/return1/负控0，两级关联与leaf PFN通过，20 raw SHA第二算术核对。31关联软件验证；实际安装CONT0三个实例只属首次shared read时点，不回填steady CONT、原TLB数据或HPA。此能力可用于另案绑定同进程性能graph的descriptor身份；计数前卸载observer，观察准备历史要对称控制。实际Linux table child PA观察不等于machine DRAM/EL2 stage2证书，原shared-write NOT_EXCITED仍保留。

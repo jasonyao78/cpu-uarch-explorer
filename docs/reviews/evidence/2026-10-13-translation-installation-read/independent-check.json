@@ -1,0 +1,50 @@
+{
+  "status": "passed",
+  "processes": 3,
+  "raw_sha_files": 20,
+  "checks": [
+    {
+      "epoch": 0,
+      "negative_captures": 0,
+      "entries": 1,
+      "returns": 1,
+      "installed_leaf_matches_canonical": true,
+      "table_types": true,
+      "table_entry_indices": true,
+      "two_level_relation_equal": true,
+      "two_parent_descriptor_child_pages_distinct": true,
+      "observed_installation_cont": false,
+      "fds_closed": true
+    },
+    {
+      "epoch": 1,
+      "negative_captures": 0,
+      "entries": 1,
+      "returns": 1,
+      "installed_leaf_matches_canonical": true,
+      "table_types": true,
+      "table_entry_indices": true,
+      "two_level_relation_equal": true,
+      "two_parent_descriptor_child_pages_distinct": true,
+      "observed_installation_cont": false,
+      "fds_closed": true
+    },
+    {
+      "epoch": 2,
+      "negative_captures": 0,
+      "entries": 1,
+      "returns": 1,
+      "installed_leaf_matches_canonical": true,
+      "table_types": true,
+      "table_entry_indices": true,
+      "two_level_relation_equal": true,
+      "two_parent_descriptor_child_pages_distinct": true,
+      "observed_installation_cont": false,
+      "fds_closed": true
+    }
+  ],
+  "observed_scope": "initial-shared-read-installation-only",
+  "machine_dram_pa_certified": false,
+  "hpa_state": "UNKNOWN",
+  "physical_tlb_capacity_certified": false
+}
