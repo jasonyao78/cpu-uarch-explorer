@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "metadata_observations": 282,
+  "pages_per_process": 47,
+  "processes": 3,
+  "bitmask_endpoint_arithmetic_exact": true,
+  "raw_sha_files": 18,
+  "absolute_pfns_public": false
+}

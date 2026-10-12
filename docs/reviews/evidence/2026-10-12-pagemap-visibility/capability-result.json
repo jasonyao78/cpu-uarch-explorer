@@ -1,0 +1,73 @@
+{
+  "mode": "pagemap-visibility",
+  "raw_directory": "20261012T024216Z-pagemap-visibility",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_head": "9e42d6a028bab152177e4e71390e2106f4745f07",
+  "binary_source_head": "849f1456dfc865c0d37e4d6c0803632b910ed87f",
+  "binary_sha256": "7ac9d5e1b31c645561977c4a011af44847590d8f751160d81e81fd498128750e",
+  "manifest_sha256": "d614284d29c9dd513bb058943f258d2b1ccc72f9a3b54a618cba5af1cd7eb612",
+  "processes": 3,
+  "rows": [
+    {
+      "epoch": "epoch-0",
+      "status": "visible-stable",
+      "pages": 47,
+      "snapshots": 2,
+      "nonzero": 47,
+      "unique_pfns": 47,
+      "changed_pfns": 0,
+      "present": 94,
+      "swapped": 0,
+      "pfn_contiguous_geometry_certified": false,
+      "pte_cont_state": "UNKNOWN"
+    },
+    {
+      "epoch": "epoch-1",
+      "status": "visible-stable",
+      "pages": 47,
+      "snapshots": 2,
+      "nonzero": 47,
+      "unique_pfns": 47,
+      "changed_pfns": 0,
+      "present": 94,
+      "swapped": 0,
+      "pfn_contiguous_geometry_certified": false,
+      "pte_cont_state": "UNKNOWN"
+    },
+    {
+      "epoch": "epoch-2",
+      "status": "visible-stable",
+      "pages": 47,
+      "snapshots": 2,
+      "nonzero": 47,
+      "unique_pfns": 47,
+      "changed_pfns": 0,
+      "present": 94,
+      "swapped": 0,
+      "pfn_contiguous_geometry_certified": false,
+      "pte_cont_state": "UNKNOWN"
+    }
+  ],
+  "visible": true,
+  "all_raw_sha256": {
+    "consumer.py": "344c27dbcc5e71eed86cfa9188ae09d4757a8ed82061b87b1be56f280c070db7",
+    "driver.py": "5a445b52eb85be8fec08b4cd9c758ef6dca1e07df3e8c83b77eeeb3a8e8ea3fd",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "epoch-0-post-environment.json": "a738acc2a81495c5d4026cc81c6aff118b37f57f6c8f5c40cf5a56f5ddf3faac",
+    "epoch-0-pre-environment.json": "364eab033fddfdc73ed90969668a7de697ebbe9be02ded73b27b6e9bba8ba4e8",
+    "epoch-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-0.stdout.jsonl": "f6ac6a020afc4e5afafec25093776d468d1152f57458b8848400e030fd786df0",
+    "epoch-1-post-environment.json": "82e8589537242cdb173c04e52534c1721bf3134d75c085ac41959bb07a2e8f9e",
+    "epoch-1-pre-environment.json": "ed11fbc6571b56c632a171c9e575e8f98e3f81656a3ac00e7f62c1a6bd1f1b8d",
+    "epoch-1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-1.stdout.jsonl": "e6fc644d396257ca4db952d4cd33480df45ab2b1736d5ddebf000885325d7e98",
+    "epoch-2-post-environment.json": "209a3639cc5b9ed9325b295669607cd34ad2f4e1c94886af63c08508658ba87a",
+    "epoch-2-pre-environment.json": "ecfa8f0d030cb3c37d5a0b060ef1676caba7324d763656f2b4fda4c6912a31c4",
+    "epoch-2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-2.stdout.jsonl": "610a6d8f3849b3dabc38ea8078e7359ac26cd9e33f5eeb6051dbc7cff9da3879",
+    "final-environment.json": "e958170b57dc91841b7f6e8e47b282b8f9cb3fcf4cca066f3dd7f55344b03ee4",
+    "initial-environment.json": "48dce4bd6124e596c47a0d28cf8df85d24bc7371309c9f121ec97a5023923900",
+    "manifest.json": "d614284d29c9dd513bb058943f258d2b1ccc72f9a3b54a618cba5af1cd7eb612"
+  },
+  "physical_capacity_certified": false
+}
