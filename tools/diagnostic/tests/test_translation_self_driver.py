@@ -11,7 +11,7 @@ class TestSelfDriver(unittest.TestCase):
  def setUpClass(cls):
   assert (ROOT/'tools/diagnostic/translation_self_raw.py').exists(),'registered self-read raw reader missing'
   from tools.diagnostic import translation_self_raw
-  cls.reader=translation_self_raw;cls.launch='aaa5af0';cls.blob=staticmethod(lambda rel:subprocess.check_output(['git','show',cls.launch+':'+rel],cwd=ROOT));cls.build=json.loads(cls.blob(model.BUILD));cls.plan=json.loads(cls.blob(model.PLAN))
+  cls.reader=translation_self_raw;cls.launch='30e6082';cls.blob=staticmethod(lambda rel:subprocess.check_output(['git','show',cls.launch+':'+rel],cwd=ROOT));cls.build=json.loads(cls.blob(model.BUILD));cls.plan=json.loads(cls.blob(model.PLAN))
  def execute(self,root,denial=False,corrupt=False):
   (root/'data/private').mkdir(parents=True,exist_ok=True)
   for rel in [model.DRIVER,model.CONSUMER,model.PROTOCOL,model.BUILD,model.PLAN,'configs/platforms/redmi-k70pro-01.json',*self.build['source_sha256']]:
