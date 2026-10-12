@@ -86,3 +86,8 @@ fresh整树软件出口：diagnostic298/298、runner203/203、formal analysis250
 `docs/reviews/2026-10-12-tlb-balanced-reach-results.md`（sourcefee3fbe / build-consumer7fb7bb0 / launch82871d1 / result698cf30）825真机窗与810技术门全过；控制实际VPN低8位/offset分布后，spaced与random相对dense仍有跨五mapping/双order复制的walk差。GEOMETRY_SENSITIVE是对简单页数/低位reach解释的新反证，三族各十曲线均heterogeneous，含右删失与ambiguous，不据均值给精确容量。官方r0p3 MMUTC还服务I/D/intermediate descriptor，不能预设2048纯4KiB leaf；下一物理PFN能力与descriptor VA代理控制须另冻，不回填历史UNKNOWN。
 
 `docs/reviews/2026-10-12-rob-fusion-groups-results.md`（source9a09fa2 / build-consumerb5e260f / launch04f3980 / result82871d1）144窗技术接受、锚点约208/416，但ADD NONE64三进程21–35.5cycles/轮波动，另1Icache窗134/131072越门。本批not-qualified，扫描未启动；NOP+ADD/双NOP更稳不能证明fusion/MOP allocation。架构目的/结果生命周期及活跃约束仍需新对照，不以NOP/2迎合384。全部raw/SHA、失败窗及直接第二算术保存，新整树diagnostic368/368通过；未改formal路径沿既有基线。
+
+
+## 同PFN的新因果边界（2026-10-12）
+
+`docs/reviews/2026-10-12-tlb-shared-alias-results.md`（sourcea32ee8d/buildd74851d/consumer855350b/launchf5ae99a/result392d097）三fresh memfd279真机窗与270门全过，330240次原始pagemap位及PFN身份独立核验一致。同physical demand页/offset/order与候选低8位hist下，七个N×族差均六配对≥.10，GEOMETRY_SENSITIVE_WITH_MATCHED_DATA_PFNS。data PFN不同不是本协议几何效应必要条件；旧anonymous未观测PFN不能据此回填。descriptor物理布局/层级索引、pointer值引起的投机或DMP/cache流量、CONT/HPA仍没有唯一分开；16页连续条件0/160是非预注册诊断，不能冒充CONT位。此结果比单VA曲线更有区分力，但不提供physical entries证书。下一先ROB架构目的控制，再选择TLBpointer/descriptor可识别干预；386/386全diagnostic通过。

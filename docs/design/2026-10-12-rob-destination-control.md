@@ -2,7 +2,7 @@
 
 ## 本次任务的目的（给人类看）
 
-`docs/reviews/2026-10-12-rob-fusion-groups-results.md` 中ADD NONE64全三个进程在21–35.5cycles/轮间波动，NOP+ADD与双NOP稳定，不能进容量扫描。下一对照只改变ADD的Rd：原X4..X11循环写入与XZR丢弃结果。区分“架构结果目的与本协议的状态变化伴生”与“加NOP前缀才改变状态”，不把结果直接归为PRF或fusion，更不把它当ROP/ROB条目标尺。
+`docs/reviews/2026-10-12-rob-fusion-groups-results.md` 中ADD NONE64全三个进程在21–35.5cycles/轮间波动，NOP+ADD与双NOP稳定，不能进容量扫描。下一对照只改变ADD的Rd：原X4..X11循环写入与XZR丢弃结果。区分“架构结果目的与本协议的状态变化伴生”与“加NOP前缀才改变状态”，不把结果直接归为PRF或fusion，更不把它当ROB条目标尺。
 
 新增 `probes/diagnostic/rob_destination_control.c`，复用 `probes/common/rob_codegen.h` opcode/prologue/纯公共GROUP+ID解码。五pattern=add-live/add-discard/nop-add-live/nop-add-discard/nop-pair。X16=0x1111、X17=0x2222；live目的X(4+j%8)、discard目的XZR。相同prefix对的循环只变ADD Rd5bits；loop外return live为0x3333、discard/双NOP为0。XZR没有架构结果，但实现可能消除或选择另一管线，**不预设它仍消耗相同ROB/ALU/µOP资源**；0x3a/IR只提供观察，不认证µOP=MOP=ROB单位。
 
