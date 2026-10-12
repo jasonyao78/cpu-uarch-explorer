@@ -9,5 +9,5 @@
 **Tech Stack:** C/NDK27.2/API34/Python/adb，primary串行。
 
 - [x] 实际producer缺失RED，shared mapping/plan/consumer canonical身份与未激励反例GREEN；source commit。
-- [ ] 双NDK/actual plan/source/bytecode绑定，新旧observer完整生产链回归；冻结launch后所有前置门过再3进程。
-- [ ] raw独立第二算术及匿名证据完整入库，更新状态/open-items/记忆；performance/steady CONT/HPA仍未认证。
+- [x] 双NDK/actual plan/source/bytecode绑定，新旧observer完整生产链回归；冻结launch后所有前置门过再3进程。
+- [x] raw独立第二算术及匿名证据完整入库，更新状态/open-items/记忆；performance/steady CONT/HPA仍未认证。

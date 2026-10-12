@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "actual_processes": 1,
+  "planned_processes": 3,
+  "negative_captures": 0,
+  "positive_captures": 0,
+  "canonical_alias_pfn_match": true,
+  "no_retry": true,
+  "fds_closed": true,
+  "raw_sha_files": 10,
+  "steady_cont_state": "UNKNOWN",
+  "hpa_state": "UNKNOWN"
+}

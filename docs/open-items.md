@@ -519,3 +519,5 @@
 - **owned leaf能力已验证 / 当前TLB负责人 / 触发=shared-memfd alias与性能观察分离的新协议**：`docs/reviews/2026-10-12-translation-self-leaf-results.md`，source0e8cd63/build49c7123/launchd235ce3，45实际指令、3/3进程正控1/负控0，old/requested PTE PFN匹配两端pagemap，20raw SHA独立复核。COW入口CONT0只在该时点，不回填旧批/稳态状态/HPA；physical PTETABLE PA未直接读到。下一先有限shared-alias触发资格，再定义descriptor cohort新控制，所有测量窗口前卸载observer并考虑缓存/翻译准备效应；物理TLB/ROB目标仍OPEN。
 
 - **ROB退休边界正交原型OPEN / 当前ROB负责人 / 触发=shared leaf有限能力闭环后设计定稿**：`docs/design/2026-10-12-rob-retirement-drain-next.md` 为草案；MRS FPSR/FPCR、next-input重置与原结果捕获隔离。必须实际opcode/decode、IR及两mode参考资格定稿后才48process/384window，不冒充已实现/已冻结，不从新边界加offset拟合384。
+
+- **shared alias leaf触发资格结束NOT_EXCITED / 当前TLB负责人 / 触发=新内核入口或安全只读走表方案**：`docs/reviews/2026-10-12-translation-shared-leaf-results.md`，source2671b5b/buildff87b31/launch8953da2；首进程0capture按合同停止，实际1/计划3，无重试，canonical/alias PFN identity通过，10raw SHA复核。没有leaf读数，不回填CONT=0/HPA，不推翻root与匿名COW实证。为何无触发未唯一归因；下个方案先能力/激励合同，不复跑同页追事件。ROB下一草案独立推进，physical整体OPEN。
