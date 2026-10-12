@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "direct_windows": 495,
+  "raw_pagemap_observations": 532992,
+  "raw_stored_words_decoded": 525312,
+  "full_low_address_words_verified": 175104,
+  "auxiliary_contrasts_exact": true,
+  "all_point_ratios_and_gates_exact": true,
+  "all_signed_differences_and_primary_exact": true,
+  "raw_sha_files": 18
+}
