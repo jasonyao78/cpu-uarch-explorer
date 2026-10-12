@@ -497,3 +497,5 @@
 
 - **同PFN几何有限主判据通过 / 当前TLB负责人 / 触发=descriptor/translation prefetch或pointer识别的下一正交对照**：`docs/reviews/2026-10-12-tlb-shared-alias-results.md`，sourcea32ee8d / final buildd74851d / consumer855350b / launchf5ae99a / result392d097；279目标窗/270门全过，330240原始pagemap位与alias PFN身份独立一致，18rawSHA；spaced四N与random三N六配对差≥.10，GEOMETRY_SENSITIVE_WITH_MATCHED_DATA_PFNS。不同data PFN不是本新协议效应必要条件，不回填旧anonymous归因；pointer数值/完整预取cache流量/descriptor物理布局/CONT仍未分开。16页物理连续对齐条件0/160仅非预注册诊断，不当CONT读数。原“尚未实现”有限同alias设计在本项关闭，physical参数仍OPEN。
 - **下一TLB干预待设计 / 当前TLB负责人 / 触发=ROB目的有限批完成后**：保持同PFN demand轨迹和相同decode loop，以pointer encoding及data-prefetch tap检验pointer识别解释，或可观测descriptor层级干预；先冻结可识别判据，不把无差自动叫无DMP、不用延迟单曲线判条目。current386/386全diagnostic通过，formal接入与main/remote另按既有owner/触发。
+
+- **ROB目的有限批完成 / 当前ROB负责人 / 触发=新的相对单位与锚点长度检验**：`docs/reviews/2026-10-12-rob-destination-control-results.md`，sourcef85e2bb/build-consumer083c386/launchf640160/resultb93a392；192目标窗/102SHA技术与引用资格过，live及XZR裸ADD三个epoch均波动，NOP+ADD两目的均稳；主INCONCLUSIVE。仅改变架构目的不足消波动，不唯一归因PRF/fusion；下一 `docs/design/2026-10-12-rob-retirement-units.md` 先mixed ADD/SUB无结果组资格，过后才比较两chain/相对group模型；physical单位仍未知。398全diagnostic已过，旧not-qualified不晋升。
