@@ -561,3 +561,10 @@
 - **ROB near/far条件issue marker候选草案 / 当前ROB负责人 / 触发=官方ST_SPEC与A/B正控合同冻结、实际N0实现后**：`docs/design/2026-10-13-rob-near-far-marker-draft.md`。8hotLD近tap/8hotST远tap+架构输出，区分未激励/issued/fill/retired；不要求把没预测的M判小ROB，全部raw保留、条件选择偏差/eligible率须报告。未实现/未采样/未冻结，不是容量结论；unit及active constraint继续OPEN，第三方384不作拟合目标。
 
 - **descriptor-bound reach有限scan完成 / 当前TLB负责人 / 后续触发=coalescing/实际table关联/VA-ASID控制新协议**：`docs/reviews/2026-10-13-tlb-observed-reach-scan-results.md`；source7f1c824/build3a4ad87/launchba0ccfd，18fresh52416capt/216PMU/95SHA独立核验，全IR/I门过；N1536/1792几何差复制，实际N1536leafpages9/1536、leaf64Bgroups576/1536，安装关联漂移0。spaced(1024,1536]，packed两个(1792,2048]一个(1536,1792]，整体物理命名不通过，不继续同grid加密。硬件coalescing与PTE.CONT须分开，官方r0p1规格核对不等于target实測独立识别。
+
+
+### 2026-10-13 r0p1规格核验与ROB issue资格（primary）
+
+- **规格核验完成，黑盒组织OPEN**：官方r0p1表6-1+10-32支持L2 2048/256×8，表6-1+10-7支持L1d96全相联。不是全部leaf有效容量，set映射不披露；下一触发为硬件合并激励／描述符占用正交对照。资料 `docs/reviews/2026-10-13-x4-r0p1-source-audit.md`，完整元数据在对应evidence/source.json。
+- **后置L1I文档冲突**：表6-1=128 vs表10-4=48，表10-44 PA字段位宽也冲突；不替参考文档修数。归属资料核验，触发为L1I探测／官方勘误可得；不阻塞当前data TLB与ROB实验。
+- **ROB issue N0（实施中，尚无目标数据）**：`docs/design/2026-10-13-rob-issue-marker.md`，actual producer `probes/diagnostic/rob_issue_marker.c`，consumer `tools/diagnostic/rob_issue_marker_analysis.py`，driver `tools/diagnostic/run_sm8650_rob_issue_marker.py`。6process864窗A/B独立校准near LD_SPEC/far ST_SPEC，自身架构状态证明未退休；N0即使通过也须另冻结allocation/deadline/filler控制，不直接Nscan或拟合384。

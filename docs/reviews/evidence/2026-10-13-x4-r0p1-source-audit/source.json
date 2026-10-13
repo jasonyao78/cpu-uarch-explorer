@@ -1,0 +1,32 @@
+{
+  "url": "https://documentation-service.arm.com/static/6473ef18bae17b773b05d1e8",
+  "document_id": "102484_0001_04_en",
+  "revision": "r0p1",
+  "issue": "04",
+  "pages": 1365,
+  "bytes": 9383340,
+  "sha256": "d978da9c87a4ca267b81000b2f2ca4f82d182f0d4b13189e06e6511ba9492802",
+  "target_midr": "0x410fd821",
+  "source_kind": "official_document_not_target_measurement",
+  "checked_printed_pages": [
+    61,
+    81,
+    82,
+    91,
+    94,
+    95,
+    96,
+    372
+  ],
+  "rendered_and_visually_checked_pages": [
+    61,
+    81,
+    91,
+    94,
+    95,
+    96
+  ],
+  "initial_failed_partial_download_not_evidence": true,
+  "ram_direct_access_EL3_only": true,
+  "physical_target_capacity_independently_certified": false
+}

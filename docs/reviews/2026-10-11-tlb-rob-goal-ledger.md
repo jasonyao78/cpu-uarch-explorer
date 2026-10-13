@@ -59,3 +59,6 @@
 ## 2026-10-13 descriptor绑定的完整reach矩阵
 
 `docs/reviews/2026-10-13-tlb-observed-reach-scan-results.md`：source7f1c824/build3a4ad87/launchba0ccfd，18fresh/52416capt/216窗/95SHA，全IR/I门与floor通过，独立算术精确。主DESCRIPTOR_BOUND_GEOMETRY_DIFFERENCE，N1536两shapewalk差≈1且leaf-table pages9/1536直接观测。spaced三曲线(1024,1536]；packed两(1792,2048]、一(1536,1792]，不能合成统一physical capacity。r0p1官方规格/目标实測独立识别分列；Cortex-X4硬件coalescing位不等于PTE.CONT，当前实測三参数仍0/3。632完整诊断通过549.508秒，后续实际table关联/身份倍增及ROB条件issue资格，不复跑旧grid追数。
+
+
+2026-10-13官方修订匹配更新：`docs/reviews/2026-10-13-x4-r0p1-source-audit.md` 支持规格级L2 2048/256×8、L1d96全相联；L1I128/48文档冲突保留。规格级两个L2参数有依据；目标独立物理识别0/3仍OPEN，set选择与合并／描述符占用需继续区分，ROB不变。

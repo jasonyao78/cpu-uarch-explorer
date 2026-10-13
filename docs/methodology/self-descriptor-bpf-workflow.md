@@ -64,3 +64,6 @@
 ## 可扩展exact-owned登记（2026-10-13）
 
 `docs/reviews/2026-10-13-translation-persistent-read-results.md` 的entry102/return32/136B private map在3process/24node实证。PID常量先过滤、slot16与fault VA匹配后才helper113；root动态偏移限定own pgd，实际字节VM覆盖边界。每次登记必须前次完整C gate成功，sticky error/duplicate不能被reset擦掉；foreign PID只程序不变时测一次、每地址wrongVA仍必测。持有observer期间标记active，全部FD关闭才性能窗，不写per-node fds_closed假证。程序加载次数/孵化次数降低是结构事实，walltime加速需另测；先小N资格才large-N，Linux IPA与HPA边界不变。
+
+
+2026-10-13容量图与官方格式接缝：`docs/reviews/2026-10-13-tlb-observed-reach-scan-results.md` 实际52,416初始安装观察可接216PMU窗，但安装时CONT0不能作测量时硬件TLB合并关闭证明。匹配r0p1核验 `docs/reviews/2026-10-13-x4-r0p1-source-audit.md`：PTE.CONT与IDATA0.coalesced是两层状态；RAM格式揭示候选表示，未给分配条件。Linux childPA≠HPA，observer卸载≠表状态持续不变，RAM_EL3不能由root直接获取。
