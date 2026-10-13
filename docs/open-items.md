@@ -582,3 +582,5 @@
 
 
 2026-10-13dose资格完成：sourcef997cb7/buildc1256db/launchac1903f，actual3fresh192观察36窗20SHA，DOSE_GRAPH_QUALIFIED，两个shape所有18data窗walk0。报告 `docs/reviews/2026-10-13-tlb-descriptor-dose-qualification.md`。下一锁定同binary+资格raw执行27processformal，技术/环境first-stop，不从旧stride3或旧PhaseA填格。
+
+2026-10-13PMU接口前沿：`docs/design/2026-10-13-pmu-user-metadata.md` 第一阶段producer `probes/diagnostic/pmu_user_reader.c` 已交付、2 actual-native测试通过；只读自己的perf metadata，不执行MRS、sysctl0不动。尚无driver／目标数据，须等TLB27process结束并完成build／raw绑定后单独执行。后续direct counter仍需要cap/seq/width/offset与正控，不将metadata当ROB资格。
