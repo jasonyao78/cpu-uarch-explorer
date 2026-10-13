@@ -60,3 +60,7 @@
 ## 先确认地址域（Gunyah目标的实际教训）
 
 `docs/reviews/2026-10-13-gunyah-translation-observability.md` 实际sysfs gunyah/API1/variant81。pagemap PFN与S1 PTE吻合，只认证Linux guest物理/IPA域，不是Stage2 machine HPA；字段名PA和root权限均不能替代域证据。保持原raw/初始安装CONT边界，新证据注明发现时间。没有SPE perf source不等于hardware不支持，日志零匹配不当absence。先合法read-only observability，不随机capability调用或变更hypervisor去救曲线。
+
+## 可扩展exact-owned登记（2026-10-13）
+
+`docs/reviews/2026-10-13-translation-persistent-read-results.md` 的entry102/return32/136B private map在3process/24node实证。PID常量先过滤、slot16与fault VA匹配后才helper113；root动态偏移限定own pgd，实际字节VM覆盖边界。每次登记必须前次完整C gate成功，sticky error/duplicate不能被reset擦掉；foreign PID只程序不变时测一次、每地址wrongVA仍必测。持有observer期间标记active，全部FD关闭才性能窗，不写per-node fds_closed假证。程序加载次数/孵化次数降低是结构事实，walltime加速需另测；先小N资格才large-N，Linux IPA与HPA边界不变。

@@ -1,0 +1,110 @@
+{
+  "captures": 24,
+  "fresh_owner_pids": 3,
+  "registration_transitions_verified": 24,
+  "pagemap_pair_wire_values": 144,
+  "raw_sha256": {
+    "epoch-1-actual-plan.json": "063dbc1974d68883e715fa12855e6ba181b78ada18ae16ef642c0949ca27ff24",
+    "epoch-1-pre-environment.json": "5e55b4cd538f2d9ae7af2da715839729717a813fe67103a37b7815964615cf79",
+    "epoch-2-post-environment.json": "5b8396fa1398fc7761ee2e5c0f67822cc3230a59a4ae66d03b66e276c8ada862",
+    "final-environment.json": "7b751775529e3992a1f3262aa6b262c975b731d7cca427cd670c1e93c5d5d653",
+    "epoch-2.stdout.jsonl": "0ec256acc84882eef5c5c303ca637d8ab655fe098b5091a71e703cfe586a85f0",
+    "epoch-0-post-environment.json": "38a60cb5f16c46a22b7d5e475107d2370dbbedffcaaf0835d18ddc80cb60b6e7",
+    "epoch-0-actual-plan.json": "0c1aba8ba6615d56c71ee0a82cd49939b92e319c2701ed1c16a4ec1acd3c6cc7",
+    "epoch-0-pre-environment.json": "4a27a374d7cc6601a5329a7a545e5a04be16db2743e75e20e80c5968911c5886",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "epoch-1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "initial-environment.json": "b1f0d2b69e8fcc98a36cf60dcdf24010b19045594be85cc5f56f4b2f2693cc86",
+    "consumer.py": "a7ed002238e5ed5bb4e7be0b966309c1a6976361cb1cf01ed9823c59e536e893",
+    "epoch-2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "epoch-1-post-environment.json": "25839fbb2328fad634e2431eb3e598ad4ed1da6fc3378eff068a0f78bc42ab5b",
+    "epoch-2-actual-plan.json": "6c9b3a542d8a6d2b81abd8ffe95d7ede38a3ff12020273fef96f33ce6f8ce60c",
+    "epoch-0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "driver.py": "eef46a52904998ce8fdb8c509c488c326c55c3a01fdc775a613dcd9e73ce44fc",
+    "epoch-0.stdout.jsonl": "ad4893068dab0da56a42453f9c5e671f252451f5f4cd5915d7355e73f185d340",
+    "epoch-2-pre-environment.json": "434682298f5dc26fefb5c09819bc051ecf45410d947baf9fad9f73992c303347",
+    "epoch-1.stdout.jsonl": "728ec3186980da200b261ddb19f1ec4cc999fbafea752dec3d9b0b4820560f85"
+  },
+  "processes": [
+    {
+      "epoch": 0,
+      "captures": 8,
+      "bytecode_instructions": {
+        "entry": 102,
+        "returning": 32
+      },
+      "program_loads": 2,
+      "private_maps": 1,
+      "foreign_child_calls": 1,
+      "registration_chain_exact": true,
+      "leaf_table_pages": 1,
+      "pmd_table_pages": 1,
+      "root_index_cardinality": 1,
+      "initial_installation_cont": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all_FDs_closed": true
+    },
+    {
+      "epoch": 1,
+      "captures": 8,
+      "bytecode_instructions": {
+        "entry": 102,
+        "returning": 32
+      },
+      "program_loads": 2,
+      "private_maps": 1,
+      "foreign_child_calls": 1,
+      "registration_chain_exact": true,
+      "leaf_table_pages": 1,
+      "pmd_table_pages": 1,
+      "root_index_cardinality": 1,
+      "initial_installation_cont": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all_FDs_closed": true
+    },
+    {
+      "epoch": 2,
+      "captures": 8,
+      "bytecode_instructions": {
+        "entry": 102,
+        "returning": 32
+      },
+      "program_loads": 2,
+      "private_maps": 1,
+      "foreign_child_calls": 1,
+      "registration_chain_exact": true,
+      "leaf_table_pages": 1,
+      "pmd_table_pages": 1,
+      "root_index_cardinality": 1,
+      "initial_installation_cont": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all_FDs_closed": true
+    }
+  ],
+  "method": "direct original JSONL integers, separate from typed consumer; immutable dynamic words separately recompiled",
+  "physical_entries_certified": false
+}

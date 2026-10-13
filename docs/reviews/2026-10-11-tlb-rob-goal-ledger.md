@@ -51,3 +51,7 @@
 ## 2026-10-13 own cache marker原理检查
 
 `docs/reviews/2026-10-13-rob-cache-marker-results.md` /launch7a64a80：1536格技术接受、30SHA与cal Type7第二算术精确。六process全部冷热/A-load/B/NOP正负通过，独立阈值2.5/3ticks；M-load hit仅18.75–34.375%，CACHE_MARKER_NOT_QUALIFIED，不扫N。原理缺口缩到错误路径可观测响应，尚不能区分发射与fill/history；physical0/3，绝不拿部分hit报小ROB。
+
+## 2026-10-13 可扩展真实descriptor入口
+
+`docs/reviews/2026-10-13-translation-persistent-read-results.md`，sourcec9a71e2/builda49c2b0/launch6eb6621：3/3 fresh、24/24 captures及20SHA独立核验，entry102/return32及private registeredVA，同PID+exactVA双过滤、dynamic root index、sticky first error/reset actualC gate均过。8节点仅2program/1map/1fork，不把结构加载次数降低写walltime速度。无PMU，physical0/3；后续large-N/VA-ASID倍增与实际table关联另冻，不用LinuxIPA冒充HPA。
