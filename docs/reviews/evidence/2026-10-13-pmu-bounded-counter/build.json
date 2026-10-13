@@ -1,0 +1,28 @@
+{
+  "source_commit": "2479353236e52ca77b89579cf816b01e3e66d1bc",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_sha256": {
+    "probes/diagnostic/pmu_own_counter_bounded.c": "f166791e15f8d1e715407973eb7da03da386d47499029841680c1a5b49edca3c",
+    "probes/diagnostic/pmu_own_counter.c": "2b432b3cc025f6c08142f095c0749f28eb5c180640b3cbc3af0702d57ce4ccca",
+    "tools/diagnostic/pmu_bounded_counter_analysis.py": "0e39c7ae32f6765afaa9b0aebbc2948ce2042867be650678592566963d24f2c8",
+    "tools/diagnostic/run_sm8650_pmu_bounded_counter.py": "2177502eb921b9d1c45cacd85b99df41fa8b71bacf6ddf81fc966c6679c57c93",
+    "docs/design/2026-10-13-pmu-bounded-counter.md": "4b623941bc4754416d3fbcc306e7a1eabd207aba6c394502d553c7a313239c83",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/perf_user_counter.h": "fe05d9ad77f47907b8d6721673ae8f34cacaad0fd266fd10175a6315f3c20c95",
+    "tools/diagnostic/pmu_own_counter_analysis.py": "da2df93c45bf93fd707e824d55eb6d9a838ef3292115cc989fc3567d9e240f9a",
+    "tools/diagnostic/run_sm8650_pmu_own_counter.py": "f34effbf78dbe0a3ed4d6d8c64ce2bc70ff718cca8c96f7463e3bc5b7c8101ab",
+    "tools/diagnostic/perf_user_access_transaction.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
+    "docs/design/2026-10-13-pmu-own-direct-counter.md": "b9962615b396bcd9f387fc56bc1d64e1997c1385c3210ddc5edf70406c63a223",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658"
+  },
+  "binary_sha256": "86f74bc61f206246203d566990ce0cd25d044dcc918de54024b00c380954f920",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 probes/diagnostic/pmu_own_counter_bounded.c -o build/aarch64-linux-android/release/diagnostic/pmu_own_counter_bounded",
+  "two_independent_builds_equal": true,
+  "actual_native_plans": 3,
+  "plan_sha256": "8266eab45a022968d830fcbff7bac442f8736d0ad1d746e729c0f550a98470e3",
+  "actual_ELF_decode_sha256": "e7df055d18953fbb94a693b815118d64f41abcc3135af259f0e30f885e4dcc51",
+  "counter_qualified": false
+}
