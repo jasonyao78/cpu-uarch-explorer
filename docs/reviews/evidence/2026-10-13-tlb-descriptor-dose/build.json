@@ -1,0 +1,32 @@
+{
+  "source_commit": "f997cb7aa0efd5e380499793e99db73d78e5eb8c",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 probes/diagnostic/tlb_descriptor_dose.c -o build/aarch64-linux-android/release/diagnostic/tlb_descriptor_dose",
+  "source_sha256": {
+    "probes/diagnostic/tlb_descriptor_dose.c": "043a1e541d531a9a1be05b53ee33338549d044a34609396992070536211f88a7",
+    "probes/diagnostic/translation_persistent_bpf.h": "7f06c0ba038699c6b2acbab9d10f5cd6c8426ab7e1faf81f63ff570921de9a5b",
+    "probes/diagnostic/translation_persistent_gate.h": "a5901cfb52a25b55b4d11580109fd76f2a1bf88562fd8dfec3638f94d93f8c03",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "tools/diagnostic/tlb_descriptor_dose_analysis.py": "e976cef7dc2aeaf96f00f5f6d26cef32bc69f6d004652bd4b11c27607be0feb3",
+    "tools/diagnostic/tlb_descriptor_dose_raw.py": "83f2b35fad047da4f9303899de7c8dfc33f2f29fc5fbc012c15b1b2e369d57ce",
+    "tools/diagnostic/run_sm8650_tlb_descriptor_dose.py": "6afeef9b20457fd4b407b14d8ff77e647c88639cb7d661cc17f827215cb41eba",
+    "tools/diagnostic/translation_persistent_analysis.py": "a7ed002238e5ed5bb4e7be0b966309c1a6976361cb1cf01ed9823c59e536e893",
+    "tools/diagnostic/translation_install_analysis.py": "2a38987cd6f9ef5bbd9c87af1bdd556215e2a82ca31eec0540f9ca3cc3fa2ce1",
+    "tools/diagnostic/translation_self_analysis.py": "c011d37065068f2487015bc6532dfc18b08b1dcf11bd4aecb22c6fdfc126f0e5",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658"
+  },
+  "binary_sha256": "00955f97ab0541bb557cdfeaa6518fcb43f23c9e1a35ef40775f17d5ed7b2fa4",
+  "actual_plan_sha256": "d4e87f4b3cfec0e42a1d90ecc4870890895751ae6c7075407e6174d3ace1a913",
+  "actual_observer_plan_sha256": "ba511dd1e08ec0cab2fc2f4eb990e11233486d6462742bd1a6e3f77f8170c925",
+  "two_independent_builds_equal": true,
+  "actual_native_layouts": 28,
+  "actual_BPF_instructions": {
+    "entry": 102,
+    "returning": 32
+  },
+  "actual_ELF_kernel_decoded": true,
+  "tests": 9,
+  "hardware_started": false
+}

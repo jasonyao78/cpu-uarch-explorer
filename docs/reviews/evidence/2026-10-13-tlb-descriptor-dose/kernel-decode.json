@@ -1,0 +1,35 @@
+{
+  "decoder": "Capstone 5.0.7",
+  "actual_ELF_symbol": "observed_graph_walk",
+  "symbol_bytes": 44,
+  "body_occurrences": 1,
+  "body_sha256": "36e3f1c9aa8215073dba7045f60620fe0af8f65eea25f9a370164bc4dd6d9b45",
+  "actual_words": [
+    4181721088,
+    2601068544,
+    4043310344,
+    1426063265
+  ],
+  "instructions": [
+    {
+      "offset": 0,
+      "mnemonic": "ldr",
+      "operands": "x0, [x0]"
+    },
+    {
+      "offset": 4,
+      "mnemonic": "madd",
+      "operands": "x0, x0, x9, x10"
+    },
+    {
+      "offset": 8,
+      "mnemonic": "subs",
+      "operands": "x8, x8, #1"
+    },
+    {
+      "offset": 12,
+      "mnemonic": "b.ne",
+      "operands": "loop offset 0"
+    }
+  ]
+}
