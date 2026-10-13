@@ -1,0 +1,42 @@
+{
+  "2": {
+    "probe": "pmu-user-metadata",
+    "version": 1,
+    "events": [
+      17,
+      8,
+      112,
+      113
+    ],
+    "config1": 2,
+    "cpu": 7,
+    "pmu_type": 8,
+    "metadata_only": true,
+    "counter_register_reads": 0,
+    "global_policy_mutation": false,
+    "own_thread_only": true,
+    "pinned_group": true,
+    "exclude_kernel": true,
+    "exclude_hv": true
+  },
+  "3": {
+    "probe": "pmu-user-metadata",
+    "version": 1,
+    "events": [
+      17,
+      8,
+      112,
+      113
+    ],
+    "config1": 3,
+    "cpu": 7,
+    "pmu_type": 8,
+    "metadata_only": true,
+    "counter_register_reads": 0,
+    "global_policy_mutation": false,
+    "own_thread_only": true,
+    "pinned_group": true,
+    "exclude_kernel": true,
+    "exclude_hv": true
+  }
+}

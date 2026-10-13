@@ -1,0 +1,20 @@
+{
+  "source_commit": "3d13bc50b984b5408dd7da20cb11e4b0531f2f7e",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 probes/diagnostic/pmu_user_reader.c -o build/aarch64-linux-android/release/diagnostic/pmu_user_reader",
+  "source_sha256": {
+    "probes/diagnostic/pmu_user_reader.c": "84c7beb3f8ff0d93fa3af1e6507f5c2c22350c9f3fd365d93147b1f128175035",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6"
+  },
+  "binary_sha256": "5a367fcf16974954b488227902ebe05fd34cba6c6493b999c988013458458006",
+  "plan_sha256": "74ee701193938fb1b05ed3bca1077091e7b108bb284dd25c11b33009a105dfdb",
+  "two_independent_builds_equal": true,
+  "actual_native_plans": 2,
+  "counter_register_reads": 0,
+  "global_policy_mutation": false,
+  "metadata_intake_only": true,
+  "tests": 2,
+  "hardware_started": false
+}
