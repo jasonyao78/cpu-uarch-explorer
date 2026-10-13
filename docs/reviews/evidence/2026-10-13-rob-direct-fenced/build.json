@@ -1,0 +1,27 @@
+{
+  "source_commit": "43e1def60eb8a5a4e1f9bc330aeb34d3e8a95aaa",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_sha256": {
+    "probes/diagnostic/rob_direct_fenced_marker.c": "9c2b6bf9941774e4dfc511f3a123b82593d4313e38dadee18f839edfefe7112d",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/perf_user_counter.h": "fe05d9ad77f47907b8d6721673ae8f34cacaad0fd266fd10175a6315f3c20c95",
+    "tools/diagnostic/rob_direct_fenced_analysis.py": "ade4aff48c06db80cfd9f3fdd6690a9344ca864768a21ca7bf8b50f10b185b8a",
+    "tools/diagnostic/rob_fenced_issue_analysis.py": "e92c4bd2dad77c89df474d0a8f7065eb309b9fce2164d8ee2aaed1226f238f22",
+    "tools/diagnostic/pmu_own_counter_analysis.py": "da2df93c45bf93fd707e824d55eb6d9a838ef3292115cc989fc3567d9e240f9a",
+    "tools/diagnostic/run_sm8650_rob_direct_fenced.py": "dce1d389349a1d01387db02d07d698058f7d28c7268f8003ab27f1dfa45bc691",
+    "tools/diagnostic/perf_user_access_transaction.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
+    "docs/design/2026-10-13-rob-direct-fenced-marker.md": "62b9bf130643f3d6aa17c69830263f9a370c1bb1bf84c491bd244069601ad24a",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658"
+  },
+  "binary_sha256": "aa3999573135a6dc7967fef5b2577ef267300d895b632e00cdcbd7f90e715078",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 -Iprobes/common probes/diagnostic/rob_direct_fenced_marker.c -o build/aarch64-linux-android/release/diagnostic/rob_direct_fenced_marker",
+  "two_independent_builds_equal": true,
+  "actual_native_plans": 2,
+  "actual_dynamic_programs": 8,
+  "plan_sha256": "e3ecf3521abaf34e181fcba4d6252d6149fdf301bb25567fedc6e3bb43714bf9",
+  "actual_ELF_decode_sha256": "07dbb389133ee8e5d3322e8a76e7c7d1cc868a0168c043fb2499c7f9bd8c94cf",
+  "marker_qualified": false
+}
