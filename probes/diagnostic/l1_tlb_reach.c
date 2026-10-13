@@ -21,12 +21,18 @@
 #include <fcntl.h>
 #endif
 #define MAX_N 192
-static const unsigned dn[]={32,64,80,88,92,96,100,104,112,128,160,192};
-static const unsigned in[]={32,40,44,48,52,56,64,96,112,120,124,128,132,144,160,192};
+/* Compile-time grid changes are new protocols/binaries, never old raw relabels. */
+#ifndef CPU_UARCH_L1_D_GRID
+#define CPU_UARCH_L1_D_GRID 32,64,80,88,92,96,100,104,112,128,160,192
+#define CPU_UARCH_L1_I_GRID 32,40,44,48,52,56,64,96,112,120,124,128,132,144,160,192
+#define CPU_UARCH_L1_VERSION 1
+#endif
+static const unsigned dn[]={CPU_UARCH_L1_D_GRID};
+static const unsigned in[]={CPU_UARCH_L1_I_GRID};
 
 static int failure(const char *s){printf("{\"type\":\"failure\",\"metrics\":{},\"failure\":{\"reason\":\"%s\",\"errno\":%d},\"fds_closed\":true}\n",s,errno);return 1;}
 static void plan(char mode,unsigned epoch,int qual){
- printf("{\"probe\":\"l1-tlb-reach\",\"version\":1,\"mode\":\"%c\",\"epoch\":%u,\"phase\":\"%s\",\"cpu\":7,\"pmu_type\":8,\"events\":%s,\"nodes\":[",mode,epoch,qual?"qualification":"scan",mode=='i'?"[17,8,2,53,1,34]":"[17,8,5,52,3,1]");
+ printf("{\"probe\":\"l1-tlb-reach\",\"version\":%u,\"mode\":\"%c\",\"epoch\":%u,\"phase\":\"%s\",\"cpu\":7,\"pmu_type\":8,\"events\":%s,\"nodes\":[",CPU_UARCH_L1_VERSION,mode,epoch,qual?"qualification":"scan",mode=='i'?"[17,8,2,53,1,34]":"[17,8,5,52,3,1]");
  const unsigned *ns=mode=='i'?in:dn;unsigned count=qual?1:(unsigned)(mode=='i'?sizeof(in)/sizeof(*in):sizeof(dn)/sizeof(*dn));for(unsigned i=0;i<count;i++)printf("%s%u",i?",":"",ns[i]);
  puts("],\"strides\":[5,17],\"rounds\":3,\"empty_each_side\":3,\"target_hops\":1000000,\"global_policy_mutation\":false,\"backing_pages\":192,\"seed\":137,\"jit_slots_bytes\":[0,16,32,48]}");
 }
