@@ -10,7 +10,7 @@ ROOT=Path(__file__).resolve().parents[3]
 class ObservedReachRaw(unittest.TestCase):
  @classmethod
  def setUpClass(cls):
-  cls.launch='7357be7';cls.blob=staticmethod(lambda rel:subprocess.check_output(['git','show',cls.launch+':'+rel],cwd=ROOT));cls.build=json.loads(cls.blob(model.BUILD));fixture.ObservedReachAnalysis.setUpClass();cls.fixture=fixture.ObservedReachAnalysis()
+  cls.launch='3a4ad87';cls.blob=staticmethod(lambda rel:subprocess.check_output(['git','show',cls.launch+':'+rel],cwd=ROOT));cls.build=json.loads(cls.blob(model.BUILD));fixture.ObservedReachAnalysis.setUpClass();cls.fixture=fixture.ObservedReachAnalysis()
  @classmethod
  def tearDownClass(cls):fixture.ObservedReachAnalysis.tearDownClass()
  def execute(self,root,phase='qualification',denial=False,corrupt=False,prior=None):

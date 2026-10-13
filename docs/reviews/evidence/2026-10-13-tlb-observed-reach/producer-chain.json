@@ -1,0 +1,10 @@
+{
+  "tests": 15,
+  "passed": true,
+  "registered_build_commit": "3a4ad87",
+  "log_sha256": "814031deeeeb997129688a003b8f02a970bdda48b8255f35d628c2bae56bd17f",
+  "actual_C_layouts_and_BPF_to_interpreted_kernel_to_registered_driver_writer_immutable_raw": true,
+  "full_18_process_scan_software_positive": true,
+  "external_kernel_and_PMU_synthetic": true,
+  "hardware_started": false
+}
