@@ -1,0 +1,105 @@
+{
+  "status": "passed",
+  "processes": 3,
+  "fresh_owner_pids": true,
+  "captures": 192,
+  "raw_sha_files": 20,
+  "checks": [
+    {
+      "epoch": 0,
+      "captures": 64,
+      "negative_captures": 0,
+      "pairing_passed": 64,
+      "same_data_pfn_graph": true,
+      "physical_leaf_matches_pagemap": true,
+      "same_mm": true,
+      "root_virtual_lines": 1,
+      "two_level_relations_equal": true,
+      "shapes": [
+        {
+          "shape": 0,
+          "leaf_table_pages": 1,
+          "leaf_entry_lines": 8,
+          "pmd_table_pages": 1,
+          "pmd_entry_lines": 1,
+          "installation_cont_nodes": 0,
+          "graph_closed": true
+        },
+        {
+          "shape": 1,
+          "leaf_table_pages": 32,
+          "leaf_entry_lines": 32,
+          "pmd_table_pages": 1,
+          "pmd_entry_lines": 4,
+          "installation_cont_nodes": 0,
+          "graph_closed": true
+        }
+      ]
+    },
+    {
+      "epoch": 1,
+      "captures": 64,
+      "negative_captures": 0,
+      "pairing_passed": 64,
+      "same_data_pfn_graph": true,
+      "physical_leaf_matches_pagemap": true,
+      "same_mm": true,
+      "root_virtual_lines": 1,
+      "two_level_relations_equal": true,
+      "shapes": [
+        {
+          "shape": 0,
+          "leaf_table_pages": 1,
+          "leaf_entry_lines": 8,
+          "pmd_table_pages": 1,
+          "pmd_entry_lines": 1,
+          "installation_cont_nodes": 0,
+          "graph_closed": true
+        },
+        {
+          "shape": 1,
+          "leaf_table_pages": 32,
+          "leaf_entry_lines": 32,
+          "pmd_table_pages": 1,
+          "pmd_entry_lines": 4,
+          "installation_cont_nodes": 0,
+          "graph_closed": true
+        }
+      ]
+    },
+    {
+      "epoch": 2,
+      "captures": 64,
+      "negative_captures": 0,
+      "pairing_passed": 64,
+      "same_data_pfn_graph": true,
+      "physical_leaf_matches_pagemap": true,
+      "same_mm": true,
+      "root_virtual_lines": 1,
+      "two_level_relations_equal": true,
+      "shapes": [
+        {
+          "shape": 0,
+          "leaf_table_pages": 1,
+          "leaf_entry_lines": 8,
+          "pmd_table_pages": 1,
+          "pmd_entry_lines": 1,
+          "installation_cont_nodes": 0,
+          "graph_closed": true
+        },
+        {
+          "shape": 1,
+          "leaf_table_pages": 32,
+          "leaf_entry_lines": 32,
+          "pmd_table_pages": 1,
+          "pmd_entry_lines": 4,
+          "installation_cont_nodes": 0,
+          "graph_closed": true
+        }
+      ]
+    }
+  ],
+  "physical_capacity_certified": false,
+  "steady_cont_state": "UNKNOWN",
+  "hpa_state": "UNKNOWN"
+}

@@ -535,3 +535,5 @@
 - **ROB anchor顺序有限批结束 / 当前ROB负责人 / 触发=采用interleaved reference的allocation/lifecycle正交新协议**：`docs/reviews/2026-10-13-rob-anchor-order-results.md`，source d1c99ea/build ead5e51/launch9be15af，12进程768窗/54raw SHA、全部controls通过；k32 blocked≈462/interleaved≈433、六process DID≈29，k16≈225基本无差，BLOCKED_ANCHOR_ORDER_DELAY。不同register order贡献成立，不唯一解释scheduler/PRF/ROB，不命名32-entry queue；旧scan/proxy不改。后续计量使用实际qualified/reference，不模型外推，actual units/active constraint仍OPEN。558完整诊断通过。
 
 - **实际TLB descriptor graph连接资格 / 当前TLB负责人 / 触发=实际producer/链/严格raw验证后3进程**：`docs/design/2026-10-13-tlb-descriptor-graph.md`；相同32-data-PFN packed/spaced、192实际capture有限连接，reuse99/32不扩大任意kernel读。直接parent/leaf身份与Linux descriptor line激励才过，后续large-N容量/physical layout干预另注册；本小N不当容量，三个最终参数仍0/3定案。
+
+- **实际descriptor graph连接有限资格完成 / 当前TLB负责人 / 触发=large-N转折与固定VA/data-PFN实际PTE-table-PA关联干预冻结**：`docs/reviews/2026-10-13-tlb-descriptor-graph-results.md`，source73dbc19/buildf7e0d93/launch84b8568，3/3/192capture/20raw SHA；实际leaf table pages1/32、leaf lines8/32、PMD lines1/4，数据PFN同32、同ordinal/order、卸observer后闭环。三最终参数0/3；不得用小N身份叫capacity、用Linux PA叫HPA，下一实际layout激励与control必经，不回填旧数据。

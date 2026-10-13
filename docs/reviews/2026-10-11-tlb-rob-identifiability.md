@@ -133,3 +133,7 @@ source8ecf4b9+9d514b4/build50ee8f8/actual launchafe6bee/resultb930bac；`probes/
 ## 2026-10-13 anchor-order参考残差复核
 
 `docs/reviews/2026-10-13-rob-anchor-order-results.md`，branch codex/sm8650-tlb-hierarchy-r2，source d1c99ea/build ead5e51/launch9be15af。完整12新进程768窗、54raw SHA，全部technical与negative/reference/background门通过，实际同进程同code PFN/slot交换；k32 blocked/interleaved≈462/433、六process DID≈29，k16两layout≈225。主BLOCKED_ANCHOR_ORDER_DELAY，辅助k16 median尺度阴性；原参考残差有register schedule贡献，不认证RS/PRF/ROB/physical allocation，不命名32-entry scheduler或用offset拟合384。433现在仅属新interleaved实测，旧blocked462/所有旧终态不回填。558/558完整诊断回归通过（471.147s）。下一采用更可解释排程的生命周期/单位正交资格另案，先注册不自动N扫；整体physical目标仍OPEN。
+
+## 2026-10-13 实际地址链descriptor身份连接
+
+`docs/reviews/2026-10-13-tlb-descriptor-graph-results.md`：source73dbc19/buildf7e0d93/actual launch84b8568，branch codex/sm8650-tlb-hierarchy-r2；3/3 fresh进程、192/192capture、20raw SHA独立复核。相同32-data-PFN/stored ordinal/order、同4ISA graph kernel，卸载observer后两shape各512load闭环；实际Linux leaf-table-pages packed/spaced1/32、leaf descriptor64B lines8/32、PMD lines1/4，root virtual line1，全部安装CONT0只属时点。可观测layout激励已从VA代理升级直接descriptor身份；不认证HPA/steady状态或小N容量。下一large-N容量转折与固定VA/data-PFN改变PTE物理关联另冻；三个最终参数仍0/3定案。15新测试/46关联通过，本全量回归结果另记。

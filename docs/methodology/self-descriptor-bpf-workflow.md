@@ -50,3 +50,9 @@
 `tools/diagnostic/translation_install_analysis.py` / `tools/diagnostic/translation_install_raw.py` / `tools/diagnostic/run_sm8650_translation_install.py` 强制canonical/alias pagemap稳定、installed PFN匹配、parent类型/索引正确，并核对(PMD pointer page−PGD descriptor child PA)与(PTE pointer page−PMD descriptor child PA)的u64差；只匹配这两条实际关系，不猜direct-map基址。raw从不可变binary source重编动态计划，恶意重新哈希的PFN/父项/索引/type也须拒绝。
 
 `docs/reviews/2026-10-13-translation-installation-read-results.md`：source0fcccb2/buildfc2fdcc/launch81fc4d1，三fresh进程3/3、每进程entry1/return1/负控0，两级关联与leaf PFN通过，20 raw SHA第二算术核对。31关联软件验证；实际安装CONT0三个实例只属首次shared read时点，不回填steady CONT、原TLB数据或HPA。此能力可用于另案绑定同进程性能graph的descriptor身份；计数前卸载observer，观察准备历史要对称控制。实际Linux table child PA观察不等于machine DRAM/EL2 stage2证书，原shared-write NOT_EXCITED仍保留。
+
+## 将观察能力连接到真正地址链（2026-10-13）
+
+`probes/diagnostic/tlb_descriptor_graph.c` 复用exact99/32逐declared node有限观察，独立map/program/event在节点读取后关闭；C实际纯门 `graph_capture_gate` 当场拒绝首次partial/negative污染/word/PFN/层级错误，host动态库攻击该实际函数而非另一份伪门。`tools/diagnostic/descriptor_graph_analysis.py` / `descriptor_graph_raw.py` / `run_sm8650_descriptor_graph.py` 强制64captures与同32数据PFN/ordinal/order，实际机器码LDR/MADD/SUBS/B.NE服务两布局，observer卸载后512loads闭环。初始立即数元数据错误由actual字与binary decode测试发现，不能只查metadata自洽。
+
+`docs/reviews/2026-10-13-tlb-descriptor-graph-results.md` 3/3/192capture证明packed/spaced实际leaf table pages1/32、leaf entry lines8/32、PMD entry lines1/4，而不只VA count；20 raw SHA和独立实际节点算术通过。PGD只比较kernel virtual line，不从两级关系臆推root物理PA；Linux descriptor PA不自动是machine DRAM/HPA。下一扩大N或改变实际PTE物理关联时，仍需新的layout激励/control/PMU门；小N能力闭环不是capacity结论。
