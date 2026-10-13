@@ -1,0 +1,33 @@
+{
+  "source_commit": "cbe1bee860b0ac81ff9de6cc850c5436f0dc7e1f",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_sha256": {
+    "probes/diagnostic/rob_cold_head.c": "54f05b9215444f86932ee2965aa72c1b06e8b6fafc00fc5e0af4963c2368d5e4",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/perf_user_counter.h": "fe05d9ad77f47907b8d6721673ae8f34cacaad0fd266fd10175a6315f3c20c95",
+    "tools/diagnostic/rob_cold_head_analysis.py": "675a4f0ae43eb1c15d7e6549d841e1cf2a1794d613337beda0c41e261f273ebe",
+    "tools/diagnostic/run_sm8650_rob_cold_head.py": "aacec1b76a626d3db35d0b991003fe7446026dbd8a96ed81834375249e1e1480",
+    "tools/diagnostic/owned_roi_packets.py": "71aabc99459b3472bd19a2ec966cc3c19729d19472f2dd08eee4dba891776884",
+    "tools/diagnostic/rob_admission_window_analysis.py": "3948c4c7f7fe1642b6b41aea72eb2d84ca4c83bff523db3c1d08adcca773a13b",
+    "tools/diagnostic/rob_register_fenced_analysis.py": "195ef2db214ce7c45219c93f096365f9360ac656d9d3829bf5ca6b152e2091ad",
+    "tools/diagnostic/rob_fenced_issue_analysis.py": "e92c4bd2dad77c89df474d0a8f7065eb309b9fce2164d8ee2aaed1226f238f22",
+    "tools/diagnostic/rob_direct_fenced_analysis.py": "ade4aff48c06db80cfd9f3fdd6690a9344ca864768a21ca7bf8b50f10b185b8a",
+    "tools/diagnostic/pmu_own_counter_analysis.py": "da2df93c45bf93fd707e824d55eb6d9a838ef3292115cc989fc3567d9e240f9a",
+    "tools/diagnostic/perf_user_access_transaction.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658",
+    "docs/design/2026-10-14-rob-cold-head-qualification.md": "a694f79f8bdc1842b5905bc44a3ab6eab5b20f0b4dc1abf7de5b6c1da8385f87",
+    "docs/design/2026-10-14-bounded-owned-roi-packets.md": "8c28936b9e83547ce246167e82d6c76e289f0e816044581ff638ca792d6ca0ef"
+  },
+  "binary_sha256": "3b7477fdbfefa089c7c7e23bf40483da936a52fa29785cd52fd4294c2ccb71a1",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 -Iprobes/common probes/diagnostic/rob_cold_head.c -o build/aarch64-linux-android/release/diagnostic/rob_cold_head",
+  "two_independent_builds_equal": true,
+  "actual_native_dynamic_plans": 16,
+  "actual_dynamic_programs": 64,
+  "plan_sha256": "810669db83192a9b58d7c0baa2e40b13a15f8d33c4fcdff45a2f344d8bf6dc23",
+  "decode_sha256": "644c2a200c652d20746083979201a54c9b28c0636483ac0ae71f34febdd7a79d",
+  "qualification_only": true,
+  "physical_capacity_certified": false
+}
