@@ -1,0 +1,482 @@
+{
+  "i:0:qualification": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "i",
+    "epoch": 0,
+    "phase": "qualification",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      2,
+      53,
+      1,
+      34
+    ],
+    "nodes": [
+      32
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  },
+  "i:0:scan": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "i",
+    "epoch": 0,
+    "phase": "scan",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      2,
+      53,
+      1,
+      34
+    ],
+    "nodes": [
+      32,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      56
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  },
+  "i:1:qualification": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "i",
+    "epoch": 1,
+    "phase": "qualification",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      2,
+      53,
+      1,
+      34
+    ],
+    "nodes": [
+      32
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  },
+  "i:1:scan": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "i",
+    "epoch": 1,
+    "phase": "scan",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      2,
+      53,
+      1,
+      34
+    ],
+    "nodes": [
+      32,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      56
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  },
+  "i:2:qualification": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "i",
+    "epoch": 2,
+    "phase": "qualification",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      2,
+      53,
+      1,
+      34
+    ],
+    "nodes": [
+      32
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  },
+  "i:2:scan": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "i",
+    "epoch": 2,
+    "phase": "scan",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      2,
+      53,
+      1,
+      34
+    ],
+    "nodes": [
+      32,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      56
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  },
+  "d:0:qualification": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "d",
+    "epoch": 0,
+    "phase": "qualification",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      5,
+      52,
+      3,
+      1
+    ],
+    "nodes": [
+      32
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  },
+  "d:0:scan": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "d",
+    "epoch": 0,
+    "phase": "scan",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      5,
+      52,
+      3,
+      1
+    ],
+    "nodes": [
+      32,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      104
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  },
+  "d:1:qualification": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "d",
+    "epoch": 1,
+    "phase": "qualification",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      5,
+      52,
+      3,
+      1
+    ],
+    "nodes": [
+      32
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  },
+  "d:1:scan": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "d",
+    "epoch": 1,
+    "phase": "scan",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      5,
+      52,
+      3,
+      1
+    ],
+    "nodes": [
+      32,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      104
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  },
+  "d:2:qualification": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "d",
+    "epoch": 2,
+    "phase": "qualification",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      5,
+      52,
+      3,
+      1
+    ],
+    "nodes": [
+      32
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  },
+  "d:2:scan": {
+    "probe": "l1-tlb-reach",
+    "version": 2,
+    "mode": "d",
+    "epoch": 2,
+    "phase": "scan",
+    "cpu": 7,
+    "pmu_type": 8,
+    "events": [
+      17,
+      8,
+      5,
+      52,
+      3,
+      1
+    ],
+    "nodes": [
+      32,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      104
+    ],
+    "strides": [
+      5,
+      17
+    ],
+    "rounds": 3,
+    "empty_each_side": 3,
+    "target_hops": 1000000,
+    "global_policy_mutation": false,
+    "backing_pages": 192,
+    "seed": 137,
+    "jit_slots_bytes": [
+      0,
+      16,
+      32,
+      48
+    ]
+  }
+}

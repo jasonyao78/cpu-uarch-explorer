@@ -1,0 +1,27 @@
+{
+  "source_commit": "721539c33454cab5353442e9c8848caef3fad2b0",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "binary_sha256": "7d8a80edba6423661ad72f7fb2e87674d5d66137617a4bca2f1726e5dfbcf8c0",
+  "source_sha256": {
+    "probes/diagnostic/l1_tlb_fine.c": "b97476ed1d7d096ad6141f56772d13227e61c53e52ee5baa4feaea50d8b0f8ee",
+    "probes/diagnostic/l1_tlb_reach.c": "9cae495efafd486f3930c3171a75de93391aad90fe8fd5cd5e095fd8642329d5",
+    "tools/diagnostic/l1_tlb_fine_analysis.py": "6255fab748c16b89bc3f9951778594584ff59da4e03ec7285be1d875e035c270",
+    "tools/diagnostic/run_sm8650_l1_tlb_fine.py": "7a3812eb76e38c2521953696937f65d1bc0b7c885f11c8d2b4745a9ca689e7da",
+    "docs/design/2026-10-13-l1-tlb-fine.md": "468ae595625ef200c6bc9cb21338570169a03576bdacfa8407620bc2576369c7",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "tools/diagnostic/l1_tlb_reach_analysis.py": "badbd4736f64007d7327d3e52e476350a64fc4757d3d64f8c385b320d45920dd",
+    "tools/diagnostic/run_sm8650_l1_tlb_reach.py": "e2f0ed0985371ffd4e193de3e92272a2398058546d3ed22a5b074d4d0edf050d",
+    "tools/diagnostic/run_sm8650_pmu_enabled_metadata.py": "85d23de6dbd4e6d7c8637f14171d77c0859cd12ddd15694be707c597bbd50578",
+    "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
+    "tools/diagnostic/perf_user_access_transaction.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658"
+  },
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 probes/diagnostic/l1_tlb_fine.c -o build/aarch64-linux-android/release/diagnostic/l1_tlb_fine",
+  "two_independent_builds_equal": true,
+  "actual_plans": 12,
+  "actual_ELF_body_decoded": true,
+  "plan_sha256": "f4ac59f14b3050dac195f7e623ab6a6764aad2341a51586a2497c85dd7615a7a",
+  "decode_sha256": "468e8eff6f4cc3e2defee2ef45e447d1b08d78070bd066367dd0c4484260eb1b"
+}
