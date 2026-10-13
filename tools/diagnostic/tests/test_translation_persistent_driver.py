@@ -12,7 +12,7 @@ class PersistentDriver(unittest.TestCase):
  def setUpClass(cls):
   assert (ROOT/'tools/diagnostic/translation_persistent_raw.py').exists(),'registered self-read raw reader missing'
   from tools.diagnostic import translation_persistent_raw
-  cls.reader=translation_persistent_raw;cls.launch='7658e4f';cls.blob=staticmethod(lambda rel:subprocess.check_output(['git','show',cls.launch+':'+rel],cwd=ROOT));cls.build=json.loads(cls.blob(model.BUILD));cls.plan=json.loads(cls.blob(model.PLAN));fixture.PersistentAnalysis.setUpClass();cls.fixture=fixture.PersistentAnalysis()
+  cls.reader=translation_persistent_raw;cls.launch='a49c2b0';cls.blob=staticmethod(lambda rel:subprocess.check_output(['git','show',cls.launch+':'+rel],cwd=ROOT));cls.build=json.loads(cls.blob(model.BUILD));cls.plan=json.loads(cls.blob(model.PLAN));fixture.PersistentAnalysis.setUpClass();cls.fixture=fixture.PersistentAnalysis()
  @classmethod
  def tearDownClass(cls):fixture.PersistentAnalysis.tearDownClass()
  def execute(self,root,denial=False,corrupt=False,not_excited=False):

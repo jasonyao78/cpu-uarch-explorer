@@ -1,0 +1,9 @@
+{
+  "associated_tests": 23,
+  "passed": true,
+  "registered_build_commit": "a49c2b0",
+  "actual_emitted_BPF_to_independent_VM_to_driver_writer_immutable_raw": true,
+  "synthetic_kernel_not_device_measurement": true,
+  "log_sha256": "fe0fd45545c773d87609a9a61798e5a1e2abc647529cb95e7b0f5e09af7b2675",
+  "hardware_started": false
+}
