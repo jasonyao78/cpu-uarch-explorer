@@ -1,0 +1,92 @@
+{
+  "source_head": "8bf1f8e92dce4064c05a7000187e9ab25e48461a",
+  "binary_source_head": "3d13bc50b984b5408dd7da20cb11e4b0531f2f7e",
+  "binary_sha256": "5a367fcf16974954b488227902ebe05fd34cba6c6493b999c988013458458006",
+  "raw_directory": "20261013T123432Z-pmu-enabled-metadata",
+  "raw_sha256": {
+    "consumer.py": "f0c9101fc94de66cc0847cba1b03c824841956b814c8222e93cd30a347e12608",
+    "driver.py": "85d23de6dbd4e6d7c8637f14171d77c0859cd12ddd15694be707c597bbd50578",
+    "e0-f3-post-environment.json": "0eb986cf75cbfb674dc5f8a3a631511ec3361a94130902eb69cd88ed3c674638",
+    "e0-f3-pre-environment.json": "e152d2c1f16d53599b291a7390b4c262c97bb3e65164e20cb438dce386466827",
+    "e0-f3.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e0-f3.stdout.jsonl": "d8acfbdbe4ae65a1ce7003bc08e4631349a0784a4112f454e618e2440a9a894b",
+    "e1-f3-post-environment.json": "28a6588697fe1331e2f48718893bc80db222aeee954b55c69fd9dc75754791fc",
+    "e1-f3-pre-environment.json": "ead8b136d5e85854999616905b9f0eea515b7e9c31df115ee95f01c8969d1ddc",
+    "e1-f3.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-f3.stdout.jsonl": "6c692908c02a9ad16633807f24e9d61367413aab90f28d2a4d696cee0869d269",
+    "e2-f3-post-environment.json": "cdbfb079380f26cc458e774056e696510876a207707c5818df5045caca75361b",
+    "e2-f3-pre-environment.json": "77e9c57a5b340d137fdf57bc7da6d0eb8ad08cc8a71c436a512ef650a53ffc7b",
+    "e2-f3.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-f3.stdout.jsonl": "85e5fb79ead03401a01f62fe0c13ee93c70a481753de27141c5b914629d4dd64",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "final-environment.json": "8bb10251be4a9a2c24bab59d644aba892b3bc06691977c58c5a0fccb6ec0f442",
+    "initial-environment.json": "fb7f6cb0b24b9e511c0a94e0da43016ccd56e5fc1c5503309311f0de41a6a4c5",
+    "manifest.json": "1068cd9ed55e3600049ccc93115f2a866ac9198b4298ba0a2417614cfd8e7184",
+    "transaction-helper.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec"
+  },
+  "journal_sha256": "025ef486aefc1db97a53da11c3cf59ad3f970bbf7b976c36bb4a340a8c869383",
+  "transaction": {
+    "baseline": 0,
+    "applied": 1,
+    "restored": 0,
+    "state": "restored",
+    "apply_returncode": 0,
+    "restore_returncode": 0
+  },
+  "parent_global_policy_mutation": true,
+  "producer_register_reads": 0,
+  "counter_read_qualified": false,
+  "processes": [
+    {
+      "name": "e0-f3",
+      "indices": [
+        32,
+        3,
+        4,
+        5
+      ],
+      "widths": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "metadata_prerequisites_observed": true,
+      "counter_read_qualified": false
+    },
+    {
+      "name": "e1-f3",
+      "indices": [
+        32,
+        3,
+        4,
+        5
+      ],
+      "widths": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "metadata_prerequisites_observed": true,
+      "counter_read_qualified": false
+    },
+    {
+      "name": "e2-f3",
+      "indices": [
+        32,
+        3,
+        4,
+        5
+      ],
+      "widths": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "metadata_prerequisites_observed": true,
+      "counter_read_qualified": false
+    }
+  ]
+}
