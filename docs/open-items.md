@@ -595,3 +595,5 @@
 
 
 2026-10-13enabled metadata完成：source/launched8bf1f8e，3fresh metadata prerequisites通过index[32,3,4,5]/width64/captrue/seqstable，host注册sysctl0→1→0已验证closed/restored（无MRS），报告 `docs/reviews/2026-10-13-pmu-enabled-metadata-results.md`。必须在每次新上板前检查自己perf-user-access-transactions全restored，snapshot index不复用；下一实际own counter读资格需current metadata/seqlock/offset/wrap/actual positive，物理ROB allocation未知。TLB下一same mappings in-page offset同6ISA与actualPT关联变动，不能再只扫N/PT总量。
+
+2026-10-13下个TLB控制已落草案 `docs/design/2026-10-13-tlb-fixed-map-offset-draft.md`：same-map三geometry×in-page offset同6ISA，包含do_set_pte请求必须page-base的接口约束。尚无代码／判据冻结，不采样；actual PT关联干预与mm/ASID约束仍独立OPEN。
