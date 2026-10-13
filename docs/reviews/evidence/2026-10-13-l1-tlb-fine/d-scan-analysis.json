@@ -1,0 +1,1387 @@
+{
+  "mode": "d",
+  "status": "L1_SCAN_COMPLETE",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_head": "bfe592fe0a6b97c7ffabc69dc5722c5e3fbcf116",
+  "binary_source_head": "721539c33454cab5353442e9c8848caef3fad2b0",
+  "binary_sha256": "7d8a80edba6423661ad72f7fb2e87674d5d66137617a4bca2f1726e5dfbcf8c0",
+  "raw_directory": "data/private/20261013T141326Z-l1-d-tlb-scan",
+  "raw_sha256": {
+    "plan.json": "f4ac59f14b3050dac195f7e623ab6a6764aad2341a51586a2497c85dd7615a7a",
+    "e1-pre-environment.json": "2a4c5456a908e983b74110e827527335a0b12fcc051a843a080292638a1e942a",
+    "e2.stdout.jsonl": "a8ef0903336b4bda52179d8ed0597eb4c41358072c30f98584c69b495121520e",
+    "e0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-analysis.json": "fa758ad78e4a79c6511580169f6b427509bddaadd51f26f7531d81ddb8f91581",
+    "e1-post-environment.json": "92f9310bdee05d9f4902ec2bc2511db5b64f9e63702090e7a45a33b7c8715c0c",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "e2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-analysis.json": "dee2ec644a3068cc93474e3227878cb86d2c5eb1362a222d1b7f6e7c8c9ca46c",
+    "e0-pre-environment.json": "30fa322599bac83ed91ea60027cdce9b3ff3fdc359f4dfeb8cdcf3953e559261",
+    "initial-environment.json": "6cea53797c8eb568d9865b5c1cbdfce56cea57218e4b0b89143b04e9423339ec",
+    "e0-analysis.json": "71bf7055ca677e948409a35e3f6df97244d78496f0f81657dbedcb1c23dc52ac",
+    "consumer.py": "6255fab748c16b89bc3f9951778594584ff59da4e03ec7285be1d875e035c270",
+    "e1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "manifest.json": "4b42f1b0d57e73c678975f39fde2b80266238eee5e64315190d007540957f154",
+    "e0.stdout.jsonl": "549245c5a50006c1edf378b0f05faa5342d5f4344cb01fd62c6f055f04bba4a7",
+    "e2-pre-environment.json": "69edc3e410dbfb88853048dd1a003c3551828080750d05f7c651da1c4a167958",
+    "e2-post-environment.json": "8875b4fee7014bb67ddd764825a7337542d9aaefd85398e91135ad0da59ad75a",
+    "driver.py": "7a3812eb76e38c2521953696937f65d1bc0b7c885f11c8d2b4745a9ca689e7da",
+    "e1.stdout.jsonl": "93cccbd7d6cea5ce9ff311bafdf026828a3f338d520f7a09a392aa0a861391f0",
+    "e0-post-environment.json": "10862413f15364c2a25b825e6d2cd9f009b2298b6098db602ffda434ee6185da",
+    "build.json": "29474f77fa82666deaf65022435592a243fbf65f78eda37bdb2ebf49ad6c15c7",
+    "protocol.md": "468ae595625ef200c6bc9cb21338570169a03576bdacfa8407620bc2576369c7"
+  },
+  "raw_inventory_sha256": "de2cbca433214728ba26d593ddfcb532b7fb1aa33d97a99f717510f613feecad",
+  "processes": 3,
+  "full_windows": 486,
+  "curves": [
+    {
+      "epoch": 0,
+      "role": 0,
+      "stride": 5,
+      "offset": "fixed",
+      "onset": {
+        "status": "ambiguous",
+        "interval": null
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            6.6e-05,
+            0.00012
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9429711666666666,
+          "aux_max": 3.85e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            0.0002890080922265823,
+            0.0005060141683967151
+          ],
+          "walk_max": 2.000056001568044e-06,
+          "cache_max": 0.8869401676580277,
+          "aux_max": 2.466735735267254e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            0.0002920087602628079,
+            0.00042001260037801135
+          ],
+          "walk_max": 2.000060001800054e-06,
+          "cache_max": 0.9148317782866819,
+          "aux_max": 2.550076502295069e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            0.0012950828853046596,
+            0.0014850950460829494
+          ],
+          "walk_max": 1.0000640040962622e-06,
+          "cache_max": 0.8830570156490015,
+          "aux_max": 1.8334506741764806e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            0.15863228307164293,
+            0.19373423082423225
+          ],
+          "walk_max": 1.0000270007290197e-06,
+          "cache_max": 0.8448113099053675,
+          "aux_max": 3.133417935617595e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.14864518916151329,
+            0.15420723365786926
+          ],
+          "walk_max": 1.0000080000640005e-06,
+          "cache_max": 0.855530177574754,
+          "aux_max": 2.0666832001322677e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            0.18287318287318288,
+            0.2063922063922064
+          ],
+          "walk_max": 1.000001000001e-06,
+          "cache_max": 0.8936052269385603,
+          "aux_max": 2.6666693333360002e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            0.20362383333333334,
+            0.21877283333333333
+          ],
+          "walk_max": 1e-06,
+          "cache_max": 0.8592021666666666,
+          "aux_max": 4.2833333333333335e-05
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            0.36328053122124887,
+            0.3947807912316493
+          ],
+          "walk_max": 2.000080003200128e-06,
+          "cache_max": 0.8252661773137592,
+          "aux_max": 5.183540674960332e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": false,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    },
+    {
+      "epoch": 0,
+      "role": 1,
+      "stride": 5,
+      "offset": "rotating",
+      "onset": {
+        "status": "localized",
+        "interval": [
+          96,
+          97
+        ]
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            6.6e-05,
+            0.000112
+          ],
+          "walk_max": 0.0,
+          "cache_max": 5.516666666666666e-05,
+          "aux_max": 1.55e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            0.00018900529214818014,
+            0.00031700887624853496
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.0001953388028198123,
+          "aux_max": 2.466735735267254e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            9.500285008550257e-05,
+            0.00032200966028980867
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00013633742345603702,
+          "aux_max": 1.0500315009450283e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            0.00023101478494623657,
+            0.0003480222734254992
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00018251168074756786,
+          "aux_max": 2.3334826762246115e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            0.5001435038746046,
+            0.7694677756299421
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.0001575042526148206,
+          "aux_max": 1.8333828346698694e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.6643233145865167,
+            0.9999969999759998
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00020933500801339745,
+          "aux_max": 2.366685600151468e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            0.7201167201167201,
+            1.000005000005
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.000195333528666862,
+          "aux_max": 4.3666710333376997e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            0.5554968333333333,
+            1.0000018333333334
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00021716666666666667,
+          "aux_max": 2.1833333333333333e-05
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            0.999994999799992,
+            1.0
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00022917583370001465,
+          "aux_max": 2.6834406709601718e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": true,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    },
+    {
+      "epoch": 0,
+      "role": 2,
+      "stride": 17,
+      "offset": "fixed",
+      "onset": {
+        "status": "localized",
+        "interval": [
+          96,
+          97
+        ]
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            6.6e-05,
+            6.6e-05
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.6981991666666666,
+          "aux_max": 1.95e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            0.0002090058521638606,
+            0.0003920109763073366
+          ],
+          "walk_max": 2.000056001568044e-06,
+          "cache_max": 0.9990553068819261,
+          "aux_max": 2.466735735267254e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            0.00028700861025830775,
+            0.0004140124203726112
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9909030604251461,
+          "aux_max": 2.4500735022050663e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            0.00029001856118791603,
+            0.00048503104198668716
+          ],
+          "walk_max": 1.0000640040962622e-06,
+          "cache_max": 0.99715331781234,
+          "aux_max": 3.333546680320874e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            0.6279729552697922,
+            0.7185163999427985
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9952403714900302,
+          "aux_max": 2.633404435253085e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.7393139145113161,
+            0.9777018216145729
+          ],
+          "walk_max": 1.0000080000640005e-06,
+          "cache_max": 0.9961833027997558,
+          "aux_max": 3.6666960002346685e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            0.6962886962886963,
+            0.9925089925089925
+          ],
+          "walk_max": 2.000002000002e-06,
+          "cache_max": 0.9931863265196599,
+          "aux_max": 3.3666700333366995e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            0.9391098333333334,
+            0.9849728333333334
+          ],
+          "walk_max": 1e-06,
+          "cache_max": 0.9979681666666667,
+          "aux_max": 2.6833333333333333e-05
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            0.9998689947597904,
+            0.9999539981599264
+          ],
+          "walk_max": 1.000040001600064e-06,
+          "cache_max": 0.9966200314679253,
+          "aux_max": 2.783444671120178e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": false,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    },
+    {
+      "epoch": 0,
+      "role": 3,
+      "stride": 17,
+      "offset": "rotating",
+      "onset": {
+        "status": "localized",
+        "interval": [
+          96,
+          97
+        ]
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            6.6e-05,
+            9e-05
+          ],
+          "walk_max": 0.0,
+          "cache_max": 6.616666666666667e-05,
+          "aux_max": 3.05e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            9.700271607605013e-05,
+            0.0002830079242218782
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00015733773879001946,
+          "aux_max": 2.6667413354240587e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            0.00019100573017190515,
+            0.0002850085502565077
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00018933901350373845,
+          "aux_max": 2.4500735022050663e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            9.700620839733743e-05,
+            0.00023601510496671786
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00013150841653865848,
+          "aux_max": 2.433489076634238e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            0.5932260171024618,
+            1.0000030000810023
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00019550527864252334,
+          "aux_max": 4.633458436711125e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.8057394459155673,
+            0.999968999751998
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00015033453600962141,
+          "aux_max": 1.866681600119468e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            1.000001000001,
+            1.000002000002
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.000140333473666807,
+          "aux_max": 1.666668333335e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            0.9999988333333334,
+            1.0000008333333334
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00013816666666666665,
+          "aux_max": 9.833333333333333e-06
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            0.9999989999599984,
+            1.0000020000800032
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.0002201754736856141,
+          "aux_max": 2.9834526714401907e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": true,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    },
+    {
+      "epoch": 1,
+      "role": 0,
+      "stride": 5,
+      "offset": "fixed",
+      "onset": {
+        "status": "localized",
+        "interval": [
+          96,
+          97
+        ]
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            3.5e-05,
+            6.1e-05
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.674765,
+          "aux_max": 2.0666666666666666e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            0.00028100786822031016,
+            0.0003950110603096887
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9997044917257684,
+          "aux_max": 5.083475670652112e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            0.00022100663019890596,
+            0.0004150124503735112
+          ],
+          "walk_max": 1.000030000900027e-06,
+          "cache_max": 0.9959472117496858,
+          "aux_max": 2.0167271684817213e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            0.00019501248079877113,
+            0.0003920250896057348
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9995824732782899,
+          "aux_max": 1.9834602747909198e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            0.3724158885623245,
+            0.716249172060979
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9981922845250155,
+          "aux_max": 5.1668061704332684e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.6879855038840311,
+            0.957295658365267
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9996064968519748,
+          "aux_max": 1.950015600124801e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            0.9925179925179926,
+            0.9931889931889932
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.996276329609663,
+          "aux_max": 2.51666918333585e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            0.69584,
+            0.754011
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9997245,
+          "aux_max": 2.25e-05
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            0.9999959998399937,
+            1.0000020000800032
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9990822966251984,
+          "aux_max": 2.5834366708001652e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": false,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    },
+    {
+      "epoch": 1,
+      "role": 1,
+      "stride": 5,
+      "offset": "rotating",
+      "onset": {
+        "status": "localized",
+        "interval": [
+          96,
+          97
+        ]
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            9.5e-05,
+            9.6e-05
+          ],
+          "walk_max": 0.0,
+          "cache_max": 6.3e-05,
+          "aux_max": 1.6666666666666667e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            9.600268807526611e-05,
+            0.00023000644018032504
+          ],
+          "walk_max": 1.000028000784022e-06,
+          "cache_max": 0.00014250399011172312,
+          "aux_max": 2.183394468378448e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            0.00019200576017280519,
+            0.00028700861025830775
+          ],
+          "walk_max": 1.000030000900027e-06,
+          "cache_max": 0.0002063395235190389,
+          "aux_max": 1.7167181682117132e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            0.00019401241679467486,
+            0.00029001856118791603
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00016651065668202766,
+          "aux_max": 2.583498677248677e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            1.0000018333828347,
+            1.0000028334098354
+          ],
+          "walk_max": 2.0000540014580394e-06,
+          "cache_max": 0.00021533914749031558,
+          "aux_max": 2.2667278683191116e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.9999989999919999,
+            1.0000080000640006
+          ],
+          "walk_max": 1.0000080000640005e-06,
+          "cache_max": 0.0001985015880127041,
+          "aux_max": 2.150017200137601e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            1.000002000002,
+            1.000003000003
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00022633355966689302,
+          "aux_max": 2.01666868333535e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            1.000003,
+            1.000005
+          ],
+          "walk_max": 1e-06,
+          "cache_max": 0.0002105,
+          "aux_max": 2.85e-05
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            1.0000020000800032,
+            1.0000060002400095
+          ],
+          "walk_max": 1.000040001600064e-06,
+          "cache_max": 0.00019934130698561278,
+          "aux_max": 3.1834606717602035e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": true,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    },
+    {
+      "epoch": 1,
+      "role": 2,
+      "stride": 17,
+      "offset": "fixed",
+      "onset": {
+        "status": "localized",
+        "interval": [
+          96,
+          97
+        ]
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            3.3e-05,
+            6.5e-05
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.5431,
+          "aux_max": 1.3666666666666667e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            0.00030100842823599063,
+            0.0004000112003136088
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9982214502006056,
+          "aux_max": 2.0833916683000458e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            0.00028600858025740775,
+            0.0004780143404302129
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9912740715554801,
+          "aux_max": 5.1168201712718044e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            0.000225014400921659,
+            0.0002960189452124936
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9980623759920635,
+          "aux_max": 1.9834602747909198e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            0.5023793975770678,
+            0.9163815756358755
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9950511997157256,
+          "aux_max": 4.666792670068758e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.9558826470611765,
+            0.9890619124953
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9985284882279059,
+          "aux_max": 2.150017200137601e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            0.8167208167208168,
+            0.9922459922459922
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9951453284786619,
+          "aux_max": 2.61666928333595e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            0.801267,
+            0.999918
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9992595,
+          "aux_max": 5.15e-05
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            0.9997819912796512,
+            0.9998119924796992
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9928200461351788,
+          "aux_max": 5.5835566756003575e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": false,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    },
+    {
+      "epoch": 1,
+      "role": 3,
+      "stride": 17,
+      "offset": "rotating",
+      "onset": {
+        "status": "localized",
+        "interval": [
+          96,
+          97
+        ]
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            9.8e-05,
+            9.8e-05
+          ],
+          "walk_max": 0.0,
+          "cache_max": 7e-05,
+          "aux_max": 2.1666666666666667e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            0.00019000532014896418,
+            0.00028400795222266223
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.0001455040741140752,
+          "aux_max": 3.283425269240872e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            9.200276008280249e-05,
+            0.00019200576017280519
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00013333733345333694,
+          "aux_max": 1.6167151681217106e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            0.00022801459293394778,
+            0.00029001856118791603
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00020151289682539681,
+          "aux_max": 1.9834602747909198e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            0.9999708325458121,
+            1.0000028334098354
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00022233933649541871,
+          "aux_max": 2.9667467688294253e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.8494737957903663,
+            1.000003000024
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00014050112400899208,
+          "aux_max": 3.850030800246402e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            0.7678387678387678,
+            1.000004000004
+          ],
+          "walk_max": 2.000002000002e-06,
+          "cache_max": 0.000180333513666847,
+          "aux_max": 5.31667198333865e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            0.999938,
+            1.000002
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.0002115,
+          "aux_max": 3.45e-05
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            0.5952058082323293,
+            1.0000030001200049
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.0001623398269264104,
+          "aux_max": 4.183500673360268e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": true,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    },
+    {
+      "epoch": 2,
+      "role": 0,
+      "stride": 5,
+      "offset": "fixed",
+      "onset": {
+        "status": "localized",
+        "interval": [
+          96,
+          97
+        ]
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            6.7e-05,
+            0.00013
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.6718198333333334,
+          "aux_max": 4.4666666666666664e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            0.00021100590816542863,
+            0.00039801114431204076
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.8907124399483185,
+          "aux_max": 2.000056001568044e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            0.00028700861025830775,
+            0.0003820114603438103
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.8969525752439239,
+          "aux_max": 4.633472337503459e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            0.00029001856118791603,
+            0.0003860247055811572
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.7908991175435228,
+          "aux_max": 1.8667861409796896e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            0.15706824084250276,
+            0.22942419445325024
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.8271458329374893,
+          "aux_max": 4.666792670068758e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.13495307962463698,
+            0.14617816942535541
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.8299951399611197,
+          "aux_max": 3.833364000245336e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            0.17329217329217328,
+            0.17361517361517362
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.8645413645413645,
+          "aux_max": 4.4666711333378e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            0.207005,
+            0.215216
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.8380625,
+          "aux_max": 4.55e-05
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            0.37263390535621427,
+            0.41267550702028083
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.8263105524220968,
+          "aux_max": 2.3834286704801524e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": false,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    },
+    {
+      "epoch": 2,
+      "role": 1,
+      "stride": 5,
+      "offset": "rotating",
+      "onset": {
+        "status": "localized",
+        "interval": [
+          96,
+          97
+        ]
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            3.1e-05,
+            7.8e-05
+          ],
+          "walk_max": 0.0,
+          "cache_max": 4.683333333333334e-05,
+          "aux_max": 1.4666666666666668e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            0.00018900529214818014,
+            0.00031700887624853496
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00018050505414151597,
+          "aux_max": 1.7000476013328374e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            0.00019100573017190515,
+            0.00028800864025920776
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00015867142680947094,
+          "aux_max": 1.73338533489338e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            0.00011300723246287763,
+            0.0002300147209421403
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00014450924859190988,
+          "aux_max": 1.666773340160437e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            0.761160551334886,
+            0.9999049974349308
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.0001725046576257559,
+          "aux_max": 1.9667197681004056e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.8588848710789686,
+            0.9600896807174457
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00023250186001488011,
+          "aux_max": 2.6333544001685346e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            0.563003563003563,
+            1.000004000004
+          ],
+          "walk_max": 1.000001000001e-06,
+          "cache_max": 0.0002005002005002005,
+          "aux_max": 5.2666719333385995e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            0.981898,
+            0.999986
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.0001975,
+          "aux_max": 4.35e-05
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            0.5978129125165007,
+            1.0
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00019650786031441257,
+          "aux_max": 1.6834006693601075e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": true,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    },
+    {
+      "epoch": 2,
+      "role": 2,
+      "stride": 17,
+      "offset": "fixed",
+      "onset": {
+        "status": "localized",
+        "interval": [
+          96,
+          97
+        ]
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            6.6e-05,
+            0.000129
+          ],
+          "walk_max": 1e-06,
+          "cache_max": 0.6784558333333334,
+          "aux_max": 2.0666666666666666e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            0.00019000532014896418,
+            0.00028400795222266223
+          ],
+          "walk_max": 3.000084002352066e-06,
+          "cache_max": 0.9984394563047765,
+          "aux_max": 1.8000504014112395e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            0.0002260067802034061,
+            0.0005080152404572137
+          ],
+          "walk_max": 3.000090002700081e-06,
+          "cache_max": 0.9914364097589594,
+          "aux_max": 2.433406335523399e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            0.00029001856118791603,
+            0.0004180267537122376
+          ],
+          "walk_max": 3.0001920122887865e-06,
+          "cache_max": 0.9985014040898618,
+          "aux_max": 2.3668181430278205e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            0.7065250761770567,
+            0.8772206849584939
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.9937253305839258,
+          "aux_max": 2.0667224681733075e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.5806446451571613,
+            0.9888209105672845
+          ],
+          "walk_max": 1.0000080000640005e-06,
+          "cache_max": 0.9964864718917751,
+          "aux_max": 5.9333808003797363e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            0.9888299888299888,
+            0.9930529930529931
+          ],
+          "walk_max": 2.000002000002e-06,
+          "cache_max": 0.990976490976491,
+          "aux_max": 1.8666685333352003e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            0.708246,
+            0.999877
+          ],
+          "walk_max": 1e-06,
+          "cache_max": 0.9988375,
+          "aux_max": 2.15e-05
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            0.9992229689187567,
+            0.9995579823192928
+          ],
+          "walk_max": 2.000080003200128e-06,
+          "cache_max": 0.9866209648385935,
+          "aux_max": 4.6835206741603e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": false,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    },
+    {
+      "epoch": 2,
+      "role": 3,
+      "stride": 17,
+      "offset": "rotating",
+      "onset": {
+        "status": "localized",
+        "interval": [
+          96,
+          97
+        ]
+      },
+      "residual": [
+        {
+          "nodes": 32,
+          "refill_range": [
+            3.2e-05,
+            3.4e-05
+          ],
+          "walk_max": 1e-06,
+          "cache_max": 4.0833333333333334e-05,
+          "aux_max": 1.6666666666666667e-05
+        },
+        {
+          "nodes": 94,
+          "refill_range": [
+            9.800274407683415e-05,
+            0.00028400795222266223
+          ],
+          "walk_max": 1.000028000784022e-06,
+          "cache_max": 0.00017150480213445977,
+          "aux_max": 3.600100802822479e-05
+        },
+        {
+          "nodes": 95,
+          "refill_range": [
+            0.00019300579017370522,
+            0.00032100963028890866
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.000198672626845472,
+          "aux_max": 1.9333913350733853e-05
+        },
+        {
+          "nodes": 96,
+          "refill_range": [
+            9.700620839733743e-05,
+            0.0002300147209421403
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00017351110471070148,
+          "aux_max": 2.566830943847073e-05
+        },
+        {
+          "nodes": 97,
+          "refill_range": [
+            0.8549110825992302,
+            0.9999979999459986
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00020650557565054256,
+          "aux_max": 4.366784569850052e-05
+        },
+        {
+          "nodes": 98,
+          "refill_range": [
+            0.999938999511996,
+            1.000001000008
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00016050128401027207,
+          "aux_max": 1.9333488001237343e-05
+        },
+        {
+          "nodes": 99,
+          "refill_range": [
+            0.999998999999,
+            1.000003000003
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.0001845001845001845,
+          "aux_max": 2.3666690333357e-05
+        },
+        {
+          "nodes": 100,
+          "refill_range": [
+            1.000001,
+            1.000002
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.0001835,
+          "aux_max": 3.45e-05
+        },
+        {
+          "nodes": 104,
+          "refill_range": [
+            0.9999979999199968,
+            1.0000040001600063
+          ],
+          "walk_max": 0.0,
+          "cache_max": 0.00019450778031121244,
+          "aux_max": 2.9834526714401907e-05
+        }
+      ],
+      "walk_gate": true,
+      "cache_gate": true,
+      "aux_gate": true,
+      "fine_floor": {
+        "below": 0.001,
+        "above": 0.005
+      }
+    }
+  ],
+  "physical_capacity_certified": false,
+  "independent": {
+    "original_windows_recomputed": 486,
+    "max_arithmetic_error": 0,
+    "actual_code_words_checked": false,
+    "own_backing_pages": 192
+  }
+}

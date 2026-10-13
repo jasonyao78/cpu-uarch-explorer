@@ -597,3 +597,10 @@
 2026-10-13enabled metadata完成：source/launched8bf1f8e，3fresh metadata prerequisites通过index[32,3,4,5]/width64/captrue/seqstable，host注册sysctl0→1→0已验证closed/restored（无MRS），报告 `docs/reviews/2026-10-13-pmu-enabled-metadata-results.md`。必须在每次新上板前检查自己perf-user-access-transactions全restored，snapshot index不复用；下一实际own counter读资格需current metadata/seqlock/offset/wrap/actual positive，物理ROB allocation未知。TLB下一same mappings in-page offset同6ISA与actualPT关联变动，不能再只扫N/PT总量。
 
 2026-10-13下个TLB控制已落草案 `docs/design/2026-10-13-tlb-fixed-map-offset-draft.md`：same-map三geometry×in-page offset同6ISA，包含do_set_pte请求必须page-base的接口约束。尚无代码／判据冻结，不采样；actual PT关联干预与mm/ASID约束仍独立OPEN。
+
+
+### 2026-10-13 一级i/d独立容量更新（primary）
+
+当前4KiB single-thread L1目标已完成相邻转折：i48→49、d96→97，各六cache-control primary曲线复制，粗/细/资格合计2700窗。官方fully-assoc及共享L2 2048/256×8分列确认；L1其他page-size/ASID/I-D跨干扰及replace-policy未做，归当前TLB负责人，触发=本机4KiB容量报告完成后冻结另案。完整selector/HPA/稳态coalescing、L2 effective leaf独立辨识仍OPEN，不为官方数回救旧混合reach。报告 `docs/reviews/2026-10-13-sm8650-tlb-hierarchy-findings.md` 与两fine scan report，source721539c/builda32587f；旧0/3仅旧L2+ROB独立识别项，不是新明确L1目标的总进度。
+
+ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身份过，E2第二窗metadata-changed而whole not-qualified，global perf profile恢复0。失效窗口缺原metadata细节登记为数据缺口，不猜具体调度根因。报告 `docs/reviews/2026-10-13-pmu-own-counter-results.md`。新固定72attempt协议 `docs/design/2026-10-13-pmu-bounded-counter.md` 已注册/构建，最大1invalid/process、每role≥7/8、原正控不改；先qualification，再另冻short ROI/supply/units，physical ROB仍OPEN，不复跑v1追门。
