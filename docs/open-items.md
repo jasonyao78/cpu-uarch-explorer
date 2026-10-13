@@ -571,3 +571,6 @@
 
 
 2026-10-13ROB issue N0终态：source401086c/build8f2aed8/launchb28f7f6，实际6process864窗/30SHA完整。A LD_SPEC/ST_SPEC正控约8，B架构绕过仍有推测信号，A/B分位重叠、所有threshold=None；ISSUE_MARKER_NOT_QUALIFIED，I增量门4/6失败。报告 `docs/reviews/2026-10-13-rob-issue-marker-results.md`，本有限协议结束，不Nscan／改门。下一触发：另冻同错路pre/post SB结构性阴性；allocation/deadline/supply仍OPEN。
+
+
+2026-10-13SB结构资格终态：source4d3964d/builda1e6e10/launch9debbfb，实际6process1536窗/30SHA；chain16三个process全门通过，chain32 far gap2<4、threshold=None，全协议FENCED_ISSUE_MARKER_NOT_QUALIFIED，不能挑K救门。报告 `docs/reviews/2026-10-13-rob-fenced-issue-results.md`。消费缺陷f2f4f12把far未定义率改None，12测试通过，无门改变。后续归属ROB观测：先qualify direct perf mmap/seqlock或批量窗口信号放大；目标只读perf_user_access=0，未更改；任何临时sysctl需要新注册恢复事务，不暗改。物理MCQ单位与capacity仍OPEN。

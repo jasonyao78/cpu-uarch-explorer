@@ -26,3 +26,6 @@
 
 
 2026-10-13发射观察阴性：`docs/reviews/2026-10-13-rob-issue-marker-results.md` 实证训练为taken且架构绕过，仍LD_SPEC/ST_SPEC有8级推测响应；“不退休”和“不发射”不能合并。语义正控成功不保证negative有效；A/B阈值重叠须None及NOT_QUALIFIED，不能令0 eligible冒称0 issue。下一结构性阴性先以pre-tap SB与post-tap SB同错路对照另冻结；独立校准，原计数包络和失败gate保留。
+
+
+2026-10-13SB结构阴性事实：`docs/reviews/2026-10-13-rob-fenced-issue-results.md` chain16三fresh通过、整体k32远阈值失败；支持pre/post-SB结构干预，不是整资格／capacity通过。当前f2f4f12金样新增“near可算+far不可算→far conditional rate必须None”；guard不只拦TypeError，还必须拦0等伪数值。短窗端点噪声须先换观测方式／放大真实信号，不能改分位门追通过。
