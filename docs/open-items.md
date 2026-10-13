@@ -553,3 +553,5 @@
 - **TLB persistent observer有限能力完成 / 当前TLB负责人 / 触发=large-N graph和VA/ASID身份倍增对照冻结**：`docs/reviews/2026-10-13-translation-persistent-read-results.md`，sourcec9a71e2/builda49c2b0/launch6eb6621；3/3 fresh、24/24capture、20raw SHA及registration边独立核验。entry102/return32，2program/1map/1fork服务8nodes，全部FD回收；same PID程序仅private requestVA输入更新，sticky error不能reset。无PMU/容量，machine HPA/steady CONT未知，physical0/3；下一直接large-N身份+固定VA/dataPFN真实PTE关联，ASID复用控制须扣清context/intermediate解释，不简单乘2报2048。
 
 - **TLB VA/ASID身份倍增鉴别草案 / 当前TLB负责人 / 触发=large-N descriptor-PMU与table关联先闭环后冻结**：`docs/design/2026-10-13-tlb-translation-identity-multiplicity.md`。同N-data-IPA的A单alias/B双VA/C双context对照，first-vs-second pass避免本地prewarm消掉跨context容量；context/TLBI/ASID观测及intermediate表变化是必测残余。未实现/未采样，不简单2N报物理2048。当前三物理参数0/3。
+
+- **descriptor-bound reach协议冻结 / 当前TLB负责人 / 触发=actual code/双NDK/生产链后N0，资格后scan**：`docs/design/2026-10-13-tlb-observed-reach.md`；改用3/515page奇步长完整覆盖256候选bin（旧32图2page只128bin不能直接容量用），samePFN/ordinal/order与真实PTE绑定，observer卸载后6PMU。N0三N32/36窗先过，才18fresh216窗有限scan。真实table关联/VA-ASID对照另冻，physical命名仍未认证。
