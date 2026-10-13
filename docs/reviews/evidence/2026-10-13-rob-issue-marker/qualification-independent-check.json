@@ -1,0 +1,100 @@
+{
+  "mode": "rob-issue-marker",
+  "raw_directory": "20261013T094844Z-rob-issue-marker-qualification",
+  "source_head": "b28f7f672c6087d0b08f06c8e4328851ea328c29",
+  "binary_source_head": "401086cb880216869f81c1e0c5785060dd038fbd",
+  "binary_sha256": "17afa2a459877a05e90271c13a382d05c32811d257318b5a2939fe87f813c36f",
+  "raw_sha256": {
+    "consumer.py": "7e01f521c773e12dd2a1b95079bd597864dd2fc5897ee5998ce892b3d2e847e9",
+    "driver.py": "35330c8ab2def38c36e0b3e8b37d811c1d908a73077fbdade8f8d97e64065787",
+    "e0-k16-post-environment.json": "fc0ad0a381e268c4257bc02d3473743e08b2e0db5d4b203a797e724ee5df4733",
+    "e0-k16-pre-environment.json": "3190a9215fb189ef87d41253b192e7a0815b59d8aa2346cd9d44e26edcd02a32",
+    "e0-k16.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e0-k16.stdout.jsonl": "359da593e0b1a54f2e5857e1466d34a5c8cb0bc887f400210a47efdf23831b5c",
+    "e0-k32-post-environment.json": "0159c7291885c7cf7106a92d3310b3ea9d1a54d19af411d0220ee182bb0cf5fc",
+    "e0-k32-pre-environment.json": "b6c00ec37351a33d8208f83d39998c39463960de8a29c755f68c477156d44fc3",
+    "e0-k32.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e0-k32.stdout.jsonl": "78a505d6c39dc745d4b0751c9b035989544383ed8bb12615039743cd2a7f41fc",
+    "e1-k16-post-environment.json": "ff9a0703461cf4e9229e3d562c96d288e5ab8a023f99d18b94bcde27613925d3",
+    "e1-k16-pre-environment.json": "4f94f56a069905735b2faa2bcc2da4a2ddb81fb16cacf716818e7908bbac8831",
+    "e1-k16.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-k16.stdout.jsonl": "bb97994fdb6823e3d41fb1d233484535aa5c034de569a9645b91e9f49ef8565a",
+    "e1-k32-post-environment.json": "3bc273da345985eb3eb0df9328ca7cd0040f435375d6780e89f876cab494e11c",
+    "e1-k32-pre-environment.json": "6476ae91d589e3f8f30b4421095cca9279da0be467e30b1363457d82620b0b0f",
+    "e1-k32.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-k32.stdout.jsonl": "f8bd2f3b932cf0f4286b01df514c7e91f8a8db0f3354ed147d25e0d1ed37274d",
+    "e2-k16-post-environment.json": "7121d6d8fa62f333dc975cadf8a6cd97823284db10bd793845b8b9a2340c39e4",
+    "e2-k16-pre-environment.json": "1dabe416365865e132a9f783d42194cb0fbe882039516c71180d346cac1fcd97",
+    "e2-k16.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-k16.stdout.jsonl": "74161d22c9a84d75fa6e6dec48389b8fa00239ef0a72f3f23ab4c79e91b0e584",
+    "e2-k32-post-environment.json": "fed87f26dfeaee85aedbb2001ead53a7e11c70225e76c797c724d80f85d59033",
+    "e2-k32-pre-environment.json": "dcbc95398c5aea39a5234a052ce4d6dc849a6f81022a7244db0e334882281534",
+    "e2-k32.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-k32.stdout.jsonl": "b2187e4e76711ac358d0ec6386507d874603a7d113b62642a33a4532943cd801",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "final-environment.json": "02d1af0c02cdd5e810fe503d83f8cec63daf7c239bb8b5b7bb7057705e2d36e7",
+    "initial-environment.json": "fafb325812c16139478a73914b3366e491b90e1a86b8d02ae1d4b850bd075875",
+    "manifest.json": "dcb3c19484ee7aeafe34e74a3e88a28bf608fc2e9edf99ea653f3ac3e30ccd2c"
+  },
+  "windows": 864,
+  "processes": [
+    {
+      "process": "e0-k16",
+      "windows": 144,
+      "architectural_results": 144,
+      "independently_recomputed_pair_deltas": 432,
+      "near_bypass_nonzero_trials": 17,
+      "far_bypass_nonzero_trials": 17,
+      "thresholds_not_identifiable": true
+    },
+    {
+      "process": "e0-k32",
+      "windows": 144,
+      "architectural_results": 144,
+      "independently_recomputed_pair_deltas": 432,
+      "near_bypass_nonzero_trials": 15,
+      "far_bypass_nonzero_trials": 15,
+      "thresholds_not_identifiable": true
+    },
+    {
+      "process": "e1-k32",
+      "windows": 144,
+      "architectural_results": 144,
+      "independently_recomputed_pair_deltas": 432,
+      "near_bypass_nonzero_trials": 13,
+      "far_bypass_nonzero_trials": 13,
+      "thresholds_not_identifiable": true
+    },
+    {
+      "process": "e1-k16",
+      "windows": 144,
+      "architectural_results": 144,
+      "independently_recomputed_pair_deltas": 432,
+      "near_bypass_nonzero_trials": 6,
+      "far_bypass_nonzero_trials": 6,
+      "thresholds_not_identifiable": true
+    },
+    {
+      "process": "e2-k16",
+      "windows": 144,
+      "architectural_results": 144,
+      "independently_recomputed_pair_deltas": 432,
+      "near_bypass_nonzero_trials": 16,
+      "far_bypass_nonzero_trials": 16,
+      "thresholds_not_identifiable": true
+    },
+    {
+      "process": "e2-k32",
+      "windows": 144,
+      "architectural_results": 144,
+      "independently_recomputed_pair_deltas": 432,
+      "near_bypass_nonzero_trials": 9,
+      "far_bypass_nonzero_trials": 9,
+      "thresholds_not_identifiable": true
+    }
+  ],
+  "independent_original_JSONL_deltas": true,
+  "architectural_results_all_verified": true,
+  "status": "ISSUE_MARKER_NOT_QUALIFIED",
+  "not_architecturally_retired_not_equal_to_not_speculatively_executed": true
+}

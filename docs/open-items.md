@@ -568,3 +568,6 @@
 - **规格核验完成，黑盒组织OPEN**：官方r0p1表6-1+10-32支持L2 2048/256×8，表6-1+10-7支持L1d96全相联。不是全部leaf有效容量，set映射不披露；下一触发为硬件合并激励／描述符占用正交对照。资料 `docs/reviews/2026-10-13-x4-r0p1-source-audit.md`，完整元数据在对应evidence/source.json。
 - **后置L1I文档冲突**：表6-1=128 vs表10-4=48，表10-44 PA字段位宽也冲突；不替参考文档修数。归属资料核验，触发为L1I探测／官方勘误可得；不阻塞当前data TLB与ROB实验。
 - **ROB issue N0（实施中，尚无目标数据）**：`docs/design/2026-10-13-rob-issue-marker.md`，actual producer `probes/diagnostic/rob_issue_marker.c`，consumer `tools/diagnostic/rob_issue_marker_analysis.py`，driver `tools/diagnostic/run_sm8650_rob_issue_marker.py`。6process864窗A/B独立校准near LD_SPEC/far ST_SPEC，自身架构状态证明未退休；N0即使通过也须另冻结allocation/deadline/filler控制，不直接Nscan或拟合384。
+
+
+2026-10-13ROB issue N0终态：source401086c/build8f2aed8/launchb28f7f6，实际6process864窗/30SHA完整。A LD_SPEC/ST_SPEC正控约8，B架构绕过仍有推测信号，A/B分位重叠、所有threshold=None；ISSUE_MARKER_NOT_QUALIFIED，I增量门4/6失败。报告 `docs/reviews/2026-10-13-rob-issue-marker-results.md`，本有限协议结束，不Nscan／改门。下一触发：另冻同错路pre/post SB结构性阴性；allocation/deadline/supply仍OPEN。
