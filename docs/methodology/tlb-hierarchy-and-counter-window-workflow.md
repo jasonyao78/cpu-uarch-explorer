@@ -18,3 +18,11 @@
 2026-10-14实测补充：register-only实际1536 A8/Mpre0全门通过（3b888d4），before/after值一直留GPR并在两端SB防OOO跨边界，元数据/写回/ABI加载在区间外；仅程序顺序不能证明observer访存在区间外。同PCwarm替换observer words为NOP避免未验证MRS。dynamic plans必须由当前ownFD metadata、原native recipe与actual全部word共用绑定。
 
 单位反例58b7128：NOP/zero/sink/live逻辑OP/DP都perISA+1，不能依据OP_RETIRED名称认证fusion后slot或执行资源；完整失败保留。微op数、issued-operation、有效在飞窗口、物理ROB entries分别命名。pureunit计时应另加workload完成边界，不能把afterMRS程序顺序当作所有老操作已完成；后续资源竞争需可观察最终checksum和对应供给反证。
+
+## 最终热链与内核往返（2026-10-14 实测）
+
+同VA warm-image不足以保证正式长JIT代码热：最后RW→RX之后要重新预热实际配方。v1供给门失败，v2 current-binding warm把refill降低但仍约2；v3把perf FD read和sched_getcpu移出4warm+1formal后，十个完整配置正式refill中位0（`docs/reviews/2026-10-14-rob-filler-resource-batch-results.md`）。warm0仍冷、后面为热，所有旧失败保留；这是观察器/内核往返干扰控制的实测证据，不自动认证ALU端口或ROB条目。
+
+正确包络：一个GROUP+ID的真实绝对FD before/after包含5个独立direct ROI；每call都有当前own metadata、index/width/seqlock/offset/SIGILL检查，不能用外层binding替代内层。五者共享FD绝对值与enabled/running包络时间，direct delta每call独立算，所有before≤after均被绝对FD包围；原始trace和ordinal必须齐备。打印、代码权限/字修改及所有系统调用都在热链外。时间标签不得称每call独立FD时长。
+
+首技术失败协议使v3在第11进程ROI-metadata-changed停止，10/16完整不能报16/16。下一版本可预注册小额技术invalid预算（仅明确metadata失效、不按指标筛选、固定ordinal/无retry/无补样、部分配对须显式覆盖）；这不能回救原批或把拒绝值填0。实现需在真实producer→raw→criterion对丢失/冲突/乱序进行反例，未完成前不启动admission长矩阵。

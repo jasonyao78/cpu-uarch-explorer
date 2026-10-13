@@ -1,0 +1,30 @@
+{
+  "source_commit": "3ee9fc87c0ca4241c80aa6925910b665b3078371",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_sha256": {
+    "probes/diagnostic/rob_admission_window.c": "aa47cdef0d63351d226a7e23e80dee8c4143ab2f742006684fe9825744224185",
+    "tools/diagnostic/rob_register_fenced_analysis.py": "195ef2db214ce7c45219c93f096365f9360ac656d9d3829bf5ca6b152e2091ad",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/perf_user_counter.h": "fe05d9ad77f47907b8d6721673ae8f34cacaad0fd266fd10175a6315f3c20c95",
+    "tools/diagnostic/rob_admission_window_analysis.py": "560f41a50a1c20f5004e1c9342abf2da37a079195e4c2329d35779ba20e4d37f",
+    "tools/diagnostic/rob_fenced_issue_analysis.py": "e92c4bd2dad77c89df474d0a8f7065eb309b9fce2164d8ee2aaed1226f238f22",
+    "tools/diagnostic/rob_direct_fenced_analysis.py": "ade4aff48c06db80cfd9f3fdd6690a9344ca864768a21ca7bf8b50f10b185b8a",
+    "tools/diagnostic/pmu_own_counter_analysis.py": "da2df93c45bf93fd707e824d55eb6d9a838ef3292115cc989fc3567d9e240f9a",
+    "tools/diagnostic/run_sm8650_rob_admission_window.py": "35dc5aa9e33902193f707f16dd3ce5475cae77bd025037c69359e88803c69050",
+    "tools/diagnostic/perf_user_access_transaction.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
+    "docs/design/2026-10-14-rob-admission-window.md": "30c649bfbd6bb421e53f2cf40464143e0b120f812ab30e72c4a66be7dc32e1dd",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658"
+  },
+  "binary_sha256": "b84df1631f2862c1fcb3cb04c0cf01ef5554bf0817ad221643f62e5696503b29",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 -Iprobes/common probes/diagnostic/rob_admission_window.c -o build/aarch64-linux-android/release/diagnostic/rob_admission_window",
+  "two_independent_builds_equal": true,
+  "actual_native_dynamic_plans": 84,
+  "actual_dynamic_programs": 336,
+  "plan_sha256": "ec449d698e91ceeb48d5f57e1219c2536ccddc39a3d9f8cfd7472db6e0df88a5",
+  "dynamic_plan_sha256": "9bbfb15de6ce785670a57f427f8d896d071a8bae173874e1005d9a299ee45220",
+  "decode_sha256": "7ab2f25165fe46016ba7666e700a5fc4fa4803ed52e8344a82428ecf76b7ccfb",
+  "allocation_qualified": false
+}
