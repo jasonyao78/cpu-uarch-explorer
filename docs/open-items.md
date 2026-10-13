@@ -543,3 +543,5 @@
 - **ROB retirement-blocked speculative marker N0 OPEN / 当前ROB负责人 / 触发=source/plan/七PMU/typed raw链通过后6进程**：`docs/design/2026-10-13-rob-speculative-marker.md`；延迟CBZ/三history/marker LDR vsNOP/SB隔离后续，6fresh648window有限。先A/B/M执行与退休计数资格，不认证单位或物理ROB，资格前不N扫；与TLB Gunyah域/large-N正交推进。
 
 - **ROB单marker N0有限批结束not-qualified / 当前ROB负责人 / 触发=own cache-footprint与架构marker新资格协议**：`docs/reviews/2026-10-13-rob-speculative-marker-results.md`；actual launchb8ef9c4，6进程648窗技术接受，30raw SHA独立复核；0x06全部0（官方PMCEID6未实现，设计预审漏项）、648取指原门失败、direction4/6。原门/旧终态不改，无N扫描；下一自有冷热marker不依赖0x06，先能力与阴阳控制，physical单位/容量仍OPEN。
+
+- **ROB自有cache marker N0已冻结 / 当前ROB负责人 / 触发=actual code/typed原值/两NDK/生产链后6进程**：`docs/design/2026-10-13-rob-cache-marker.md`；独立own冷热校准、A/B/M+架构marker，1536格有限，避开无效0x06。不认证entry单位，资格失败不扫N，旧PMU门不改。TLB large-N descriptor干预独立OPEN。
