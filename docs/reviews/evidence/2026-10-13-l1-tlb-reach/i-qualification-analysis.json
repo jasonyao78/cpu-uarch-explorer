@@ -1,0 +1,101 @@
+{
+  "mode": "i",
+  "status": "L1_QUALIFIED",
+  "source_head": "21608f5368d59530af6cb589a4a1ecf75ecb9ac1",
+  "binary_source_head": "cd39b1e74d9b0aa3b25020f82bff7f58c79b2add",
+  "binary_sha256": "6f657fa1bc848061a44a46490561f8fac4359b4a2ba06bdea33c43d0f7edd328",
+  "raw_directory": "data/private/20261013T134045Z-l1-i-tlb-qualification",
+  "raw_sha256": {
+    "plan.json": "0bcdb4503b50630f2e1489c69a550d78cb34d635d019d8e8a73fe7fc545e93cf",
+    "e1-pre-environment.json": "5508b3003146d1713da95a1a918a644c435c6e8be57f5feaab07c3d22c51e91a",
+    "e2.stdout.jsonl": "d6dda26ebcf85674d83bd6813b5bf485793cfdcef4674ba9652769ac92613538",
+    "e0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-analysis.json": "07a7e88b2c2c055015af6ec1bbed57c76b7f103bbc7c5f8e388360ecd251c716",
+    "e1-post-environment.json": "569ac7d9b790b7b697ceb0819579f251543800a60917b8917c27b5ec5614e9ac",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "e2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-analysis.json": "60bc0c8f1e6b38b8dddb7ff616283de36d93810d0c730063b04c657c2ae41285",
+    "e0-pre-environment.json": "977baa1c62d0d51ec9bf6c29c324386e8f6c1865ffb80c418d3b9ae6c92ea3a4",
+    "initial-environment.json": "41ec1f527c4e64c5dcfa2183b3972467177c45e8666d9ee3497405352ab9ebe1",
+    "e0-analysis.json": "60fea82ac87cf34ebdb61bace8091619ff1c8a2ade3dee2573e816acc8907b1c",
+    "consumer.py": "badbd4736f64007d7327d3e52e476350a64fc4757d3d64f8c385b320d45920dd",
+    "e1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "manifest.json": "825fd86d7c45f981d7b5cfffac8cf0ace8a34b8fce8b5112004096c379da60ee",
+    "e0.stdout.jsonl": "6b9387d55cabe237a7a32275741f31287e9dcd91e54be4dff3d088ec253eb684",
+    "e2-pre-environment.json": "0eb640e2c0e06fc582b7df26dd667f1841e601083e685f765bdeb959fdb2707d",
+    "e2-post-environment.json": "9c510234eb72d0c8c47e2d79b4a913ab6fe45720e4a17f3011d27191cf53158a",
+    "driver.py": "e2f0ed0985371ffd4e193de3e92272a2398058546d3ed22a5b074d4d0edf050d",
+    "e1.stdout.jsonl": "0b08a768729b71178584a942bf7a1822d1593699aa4e4617e141d59586d8681f",
+    "e0-post-environment.json": "8fcee0994d1baa56f59e6e0be395c42661982b8e1b17bb807a83a1881072726d",
+    "build.json": "76e4b6096b96952ad97865da9e5d6fec2d7d0b81b8b93e2afcf88e52396aef13",
+    "protocol.md": "325d27bffcf385e957fa52ffa5ba74659ef58596ae0158067950f114725c8f7c"
+  },
+  "raw_inventory_sha256": "feb3e3d940f9751886096ae5ffdb193cc3726a1f50de5cbf1282c7d4ea279aa9",
+  "processes": [
+    {
+      "epoch": 0,
+      "windows": 18,
+      "refill_range": [
+        2.3166666666666666e-05,
+        0.00010216666666666667
+      ],
+      "walk_range": [
+        0.0,
+        2e-06
+      ],
+      "cache_range": [
+        7.333333333333333e-06,
+        1.0001173333333333
+      ],
+      "IR_range": [
+        1.062505,
+        1.062505
+      ],
+      "actual_PFNs_unique": 192
+    },
+    {
+      "epoch": 1,
+      "windows": 18,
+      "refill_range": [
+        2.25e-05,
+        7.45e-05
+      ],
+      "walk_range": [
+        0.0,
+        2e-06
+      ],
+      "cache_range": [
+        3.5e-06,
+        1.0000615
+      ],
+      "IR_range": [
+        1.062505,
+        1.062505
+      ],
+      "actual_PFNs_unique": 192
+    },
+    {
+      "epoch": 2,
+      "windows": 18,
+      "refill_range": [
+        2.566666666666667e-05,
+        7.166666666666667e-05
+      ],
+      "walk_range": [
+        0.0,
+        1e-06
+      ],
+      "cache_range": [
+        1.4666666666666666e-05,
+        1.0000646666666666
+      ],
+      "IR_range": [
+        1.062505,
+        1.062505
+      ],
+      "actual_PFNs_unique": 192
+    }
+  ],
+  "full_windows": 54,
+  "physical_capacity_certified": false
+}
