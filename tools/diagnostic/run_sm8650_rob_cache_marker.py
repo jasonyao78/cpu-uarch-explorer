@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test own-line footprint and architectural marker N0 on one owned SM8650; no environment mutation.
 
-Purpose/finite protocol: docs/design/2026-10-13-rob-speculative-marker.md. Reuses
+Purpose/finite protocol: docs/design/2026-10-13-rob-cache-marker.md. Reuses
 validated environment and deployment primitives; the raw program/schedule consumer is
 mandatory before advancing. Partial attempts are retained, never patched.
 """
