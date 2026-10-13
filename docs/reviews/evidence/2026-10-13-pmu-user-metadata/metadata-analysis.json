@@ -1,0 +1,58 @@
+{
+  "source_head": "a731636b708764e717ba6efdfcb230426c7b13b0",
+  "binary_source_head": "3d13bc50b984b5408dd7da20cb11e4b0531f2f7e",
+  "binary_sha256": "5a367fcf16974954b488227902ebe05fd34cba6c6493b999c988013458458006",
+  "raw_directory": "20261013T115207Z-pmu-user-metadata-metadata",
+  "raw_sha256": {
+    "consumer.py": "f0c9101fc94de66cc0847cba1b03c824841956b814c8222e93cd30a347e12608",
+    "driver.py": "a4560f81275024bf7c5c9685e53458b3d1721abaffc6446a93d17fe617eea9fa",
+    "e0-f2-post-environment.json": "ab6afc2ad0b24022fa8c3413907a100a2dc00051c4851a899eccacffd8ad2269",
+    "e0-f2-pre-environment.json": "26e2e0b3341945f77189fc5d039bcd000f9ec9a4d94c7785198fc9436c076b5d",
+    "e0-f2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e0-f2.stdout.jsonl": "6fca635ad2dbeffba583fb58d61bcde8df683dff04df47373efb267a23ed4f15",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "final-environment.json": "aac325e61550b131b11086f080b12065d86e1e238ae2eb942418ae0d1786152e",
+    "initial-environment.json": "e4c48615a20ce48d6d4dbcda3d760c793d3df963421bc0a5a586496cea788d7c",
+    "manifest.json": "97254742f2dd8d841986dc38e27c450ac0e9c837e431e3d54f15df96be9b007f"
+  },
+  "status": "access-disabled",
+  "processes": 1,
+  "policy": 0,
+  "events": [
+    {
+      "event": 17,
+      "index": 0,
+      "pmc_width": 32,
+      "cap_user_rdpmc": true,
+      "sequence_before": 6,
+      "sequence_after": 6
+    },
+    {
+      "event": 8,
+      "index": 0,
+      "pmc_width": 32,
+      "cap_user_rdpmc": true,
+      "sequence_before": 6,
+      "sequence_after": 6
+    },
+    {
+      "event": 112,
+      "index": 0,
+      "pmc_width": 32,
+      "cap_user_rdpmc": true,
+      "sequence_before": 6,
+      "sequence_after": 6
+    },
+    {
+      "event": 113,
+      "index": 0,
+      "pmc_width": 32,
+      "cap_user_rdpmc": true,
+      "sequence_before": 6,
+      "sequence_after": 6
+    }
+  ],
+  "counter_read_qualified": false,
+  "global_policy_mutation": false,
+  "actual_counter_register_reads": 0
+}

@@ -29,3 +29,6 @@
 
 
 2026-10-13SB结构阴性事实：`docs/reviews/2026-10-13-rob-fenced-issue-results.md` chain16三fresh通过、整体k32远阈值失败；支持pre/post-SB结构干预，不是整资格／capacity通过。当前f2f4f12金样新增“near可算+far不可算→far conditional rate必须None”；guard不只拦TypeError，还必须拦0等伪数值。短窗端点噪声须先换观测方式／放大真实信号，不能改分位门追通过。
+
+
+2026-10-13own perf metadata实证 `docs/reviews/2026-10-13-pmu-user-metadata-results.md`：cap_user_rdpmc=true但index0、policy0，不可直接MRS。访问资格需policy+实际own index/width+seqlock/offset/wrap+正控全部成立；root/open成功/cap位均不能替代。新临时profile必须另冻恢复事务，原基线和未知状态保存，不猜counter号码，metadata snapshot不复用给后续进程。

@@ -28,3 +28,8 @@ class MetadataAnalysis(unittest.TestCase):
  def test_actual_host_first_failure_and_kernel_policy_denial_named(self):
   p=subprocess.run([str(producer.UserMetadata.bin),'--run','--config1','2'],text=True,capture_output=True);v=[json.loads(l) for l in p.stdout.splitlines()];self.assertEqual(m.audit_process(v,m.conditions()[0],self.plan)['status'],'TECHNICAL_FAILURE')
   v=[self.plan['2'],dict(type='policy',perf_user_access=0,read_only=True),dict(type='failure',metrics={},failure=dict(reason='perf-open-user-config',errno=13),fds_closed=True,global_policy_mutation=False,counter_register_reads=0)];a=m.audit_process(v,m.conditions()[0],self.plan);self.assertEqual((a['status'],a['policy']),('CAPABILITY_UNAVAILABLE',0));self.assertFalse(a['counter_read_qualified'])
+
+ def test_real_cap_true_zero_index_with_disabled_policy_never_reads(self):
+  v=self.records()
+  for e in v[2]['events']:e['cap_user_rdpmc']=True;e['index']=0;e['sequence_before']=e['sequence_after']=6
+  a=m.audit_process(v,m.conditions()[0],self.plan);self.assertEqual(a['status'],'ACCESS_DISABLED');self.assertFalse(a['counter_read_qualified'])

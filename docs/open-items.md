@@ -587,3 +587,6 @@
 
 
 2026-10-13dose formal终态：sourcef997cb7/buildc1256db/launch883fc08，27fresh64,896安装观察324窗140SHA+资格20，全部技术／baseline／同stride negative门过。SIMPLE_BUDGET_NOT_REPLICATED：pred169→173，actualE0(67,131]、E1ambiguous、E2(131,169]；同PT393/N1536差异跨process仍混有data/tablePFN，不能唯一归因PA。报告 `docs/reviews/2026-10-13-tlb-descriptor-dose-results.md`。有限协议结束；下一same-VA/PFN actualPT关联与same-map in-page offset6ISA对照分别新冻，不加密旧grid拟合或改门。674/674全diagnostic592.004s sourceac1903f，不含PMUmetadata随后模块。
+
+
+2026-10-13metadata第一步完成：source3d13bc5/consumer a298e36/buildccece66/launcha731636，actual1process10rawSHA，sysctl0、4event captrue/index0/width32/seq6，ACCESS_DISABLED首停，无MRS或policy写。报告 `docs/reviews/2026-10-13-pmu-user-metadata-results.md`。下一新冻结temporary0→1→finally0恢复事务，先自己的metadata合法index/width再actualcounter read正控；cap位单独不资格，物理ROB单位仍OPEN。
