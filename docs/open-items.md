@@ -607,3 +607,10 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 
 
 2026-10-13 ROB counter有限资格更新：新bounded source2479353/build+actual launch014f981，3/3fresh72/72有效、0invalid、原8192±82/absoluteFD/metadata门全过，profile0→1→0/restored。报告 `docs/reviews/2026-10-13-pmu-bounded-counter-results.md`（2ac8d40）；v1失败不重判。708diagnostic通过618.542s覆盖至该代码，后续 `docs/design/2026-10-13-rob-direct-fenced-marker.md` / `probes/diagnostic/rob_direct_fenced_marker.c` / `tools/diagnostic/rob_direct_fenced_analysis.py` 六事件short ROI新资格source43e1def/build231123f另作，未宣称物理ROB。workflow `docs/methodology/tlb-hierarchy-and-counter-window-workflow.md`。
+
+
+### 2026-10-14 register-only突破与单位反例（primary）
+
+- register-only sixevent短ROI有限资格完成：source933776f/build+actual launchf8cabd9、1536原窗全门通过，Apre/Apost=8、Mpre=0、far|near1，eligible37.5%–78.125%。报告 `docs/reviews/2026-10-14-rob-register-fenced-results.md`（3b888d4）。observer保存值在GPR、两端SB、元数据在ROI外，原body/warm同PC；旧CROI1536失败不回救。**发射≠allocation**，physicalROBOPEN。
+- unit有限批完成反例：source43b1a53/build+launch4331ac6、1536完整、四roleN16→32的IR/OPret/OPspec/DP全部+16，sink−NOP DP=0，预注册SINK_UNIT_NOT_QUALIFIED。报告 `docs/reviews/2026-10-14-rob-sink-unit-results.md`（58b7128）。不按逻辑OP统计换ROB slot，不为失败给N扫描放行。所有profile0/restored。
+- 后续归当前ROB负责人，触发=可观察依赖链资源竞争/packing新协议冻结与端点完成边界合格；冷load/独立deadline/PRF/supply对照继续，未冻结/未采样。不以当前purebodycycle作ALU端口结论。当前线程持续Goalactive，科学反例不替整个容量目标完成；无newthread/automation/subagent/main/remote。

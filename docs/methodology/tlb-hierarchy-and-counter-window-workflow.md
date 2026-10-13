@@ -13,3 +13,8 @@
 7. 长8192 knownwork不等于8marker短ROI精度，4event不等于6event能力；下一短ROI先自己的metadata和marker阴阳控制，再filler/单位/供给/生命周期。组件资格不代替ROB容量；旧384图示或g+chain proxy不晋升。
 
 每批source/build/launch/raw SHA分列、actual生成word/IR/producer→consumer→criterion连通、原失败/被拒trace保留。复核直接用原JSONL第二算术，公开只匿名计数，不把PFN/offset/kernel地址/serial入Git。局部loop同时比较native plan和实际ELF decode，宏变体保留默认合同。全回归必须给真实范围/测试数；新加probe不能蹭此前708通过。
+
+
+2026-10-14实测补充：register-only实际1536 A8/Mpre0全门通过（3b888d4），before/after值一直留GPR并在两端SB防OOO跨边界，元数据/写回/ABI加载在区间外；仅程序顺序不能证明observer访存在区间外。同PCwarm替换observer words为NOP避免未验证MRS。dynamic plans必须由当前ownFD metadata、原native recipe与actual全部word共用绑定。
+
+单位反例58b7128：NOP/zero/sink/live逻辑OP/DP都perISA+1，不能依据OP_RETIRED名称认证fusion后slot或执行资源；完整失败保留。微op数、issued-operation、有效在飞窗口、物理ROB entries分别命名。pureunit计时应另加workload完成边界，不能把afterMRS程序顺序当作所有老操作已完成；后续资源竞争需可观察最终checksum和对应供给反证。

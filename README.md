@@ -1,15 +1,15 @@
 # cpu-uarch-explorer
 
-**当前 SM8650 TLB/ROB 状态（2026-10-13，r2）**：primary独占设备，m0b已集成结束使命。
+**当前 SM8650 TLB/ROB 状态（2026-10-14，r2）**：primary独占设备，m0b已集成结束使命。
 
 | 目标 | 当前依据 |
 |---|---|
 | L1 iTLB | 4KiB实测 **48→49** 相邻转折，六缓存/分支控制曲线复制；官方128/48冲突保留 |
 | L1 dTLB | 4KiB实测 **96→97**，六缓存控制曲线复制，支持官方96 |
 | 共享L2 TLB | 匹配r0p1官方 **2048 entries、256 sets × 8 ways**；有效leaf容量与精确set selector独立黑盒尚OPEN |
-| ROB | 物理entries尚OPEN；旧g+chain窗口代理/第三方384未晋升。直接counter v1失败保留；新固定72窗长正控全过、0invalid，profile恢复0；short ROI六事件资格另推进 |
+| ROB | 物理entries尚OPEN；旧g+chain窗口代理/第三方384未晋升。register-only短ROI **1536/1536资格通过**，A8/Mpre0、far|near1；单位对照OP/DP不能区分NOP/zero/sink分配，物理ROB仍OPEN，所有profile恢复0 |
 
-[层次/容量结论与2700窗证据](docs/reviews/2026-10-13-sm8650-tlb-hierarchy-findings.md)、[目标账本](docs/reviews/2026-10-11-tlb-rob-goal-ledger.md)、[资料核验](docs/reviews/2026-10-13-x4-r0p1-source-audit.md)、[L2 descriptor dose反例](docs/reviews/2026-10-13-tlb-descriptor-dose-results.md)、[自有direct counter资格](docs/reviews/2026-10-13-pmu-own-counter-results.md)。有限实验完成不等于全部物理机制已识别；main/remote未动作，后置项在 `docs/open-items.md`。完整diagnostic708/708（618.542s）覆盖至bounded counter代码；后加direct fenced两项局部测试通过，目标板资格运行中。formal paths未改未重跑。
+[层次/容量结论与2700窗证据](docs/reviews/2026-10-13-sm8650-tlb-hierarchy-findings.md)、[目标账本](docs/reviews/2026-10-11-tlb-rob-goal-ledger.md)、[资料核验](docs/reviews/2026-10-13-x4-r0p1-source-audit.md)、[L2 descriptor dose反例](docs/reviews/2026-10-13-tlb-descriptor-dose-results.md)、[寄存器发射资格](docs/reviews/2026-10-14-rob-register-fenced-results.md)、[单位反例](docs/reviews/2026-10-14-rob-sink-unit-results.md)。有限实验完成不等于全部物理机制已识别；main/remote未动作，后置项在 `docs/open-items.md`。完整diagnostic708/708（618.542s）覆盖至bounded counter代码；后加direct/register/unit七项局部测试通过；最新整树回归运行中。formal paths未改未重跑。
 
 跨 ISA、跨 OS 的 CPU 微架构探索平台：真实设备微架构探测 → 统一实验协议与数据模型 → gem5 O3 建模与实机校准 → 综合 Benchmark 验证 → ARM / x86 / RISC-V 对比。
 
