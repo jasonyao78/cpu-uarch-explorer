@@ -557,3 +557,5 @@
 - **descriptor-bound reach协议冻结 / 当前TLB负责人 / 触发=actual code/双NDK/生产链后N0，资格后scan**：`docs/design/2026-10-13-tlb-observed-reach.md`；改用3/515page奇步长完整覆盖256候选bin（旧32图2page只128bin不能直接容量用），samePFN/ordinal/order与真实PTE绑定，observer卸载后6PMU。N0三N32/36窗先过，才18fresh216窗有限scan。真实table关联/VA-ASID对照另冻，physical命名仍未认证。
 
 - **descriptor-bound reach N0通过 / 当前TLB负责人 / 触发=同binary及锁定资格raw后18process216window**：`docs/reviews/2026-10-13-tlb-observed-reach-qualification.md`，source7f1c824/build3a4ad87/launchc9e5231；3fresh192capt/36PMU/20SHA，walk全部0/IR/I门过；实际leafpages1/32、leaf64Bgroups12/32。N32辅助cachetap差不作主结论，same demandPA不等于全部cache活动；steady表/HPA未知，scan不命名physical2048/8ways。
+
+- **ROB near/far条件issue marker候选草案 / 当前ROB负责人 / 触发=官方ST_SPEC与A/B正控合同冻结、实际N0实现后**：`docs/design/2026-10-13-rob-near-far-marker-draft.md`。8hotLD近tap/8hotST远tap+架构输出，区分未激励/issued/fill/retired；不要求把没预测的M判小ROB，全部raw保留、条件选择偏差/eligible率须报告。未实现/未采样/未冻结，不是容量结论；unit及active constraint继续OPEN，第三方384不作拟合目标。
