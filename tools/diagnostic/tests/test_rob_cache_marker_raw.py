@@ -13,7 +13,7 @@ ROOT=Path(__file__).resolve().parents[3]
 class CacheMarkerRaw(unittest.TestCase):
  @classmethod
  def setUpClass(cls):
-  cls.launch=subprocess.check_output(['git','rev-parse','f479b53'],cwd=ROOT,text=True).strip()
+  cls.launch=subprocess.check_output(['git','rev-parse','9dfbd64'],cwd=ROOT,text=True).strip()
   cls.blob=staticmethod(lambda rel:subprocess.check_output(['git','show',cls.launch+':'+rel],cwd=ROOT))
   cls.build=json.loads(cls.blob(model.BUILD));cls.plan=json.loads(cls.blob(model.PLAN))
   fixture.CacheMarkerAnalysis.setUpClass();cls.actual=fixture.CacheMarkerAnalysis();cls.rows={row['condition']:row for row in cls.actual.rows()};model.validate_plan(cls.plan)

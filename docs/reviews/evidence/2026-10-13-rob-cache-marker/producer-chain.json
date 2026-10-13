@@ -1,0 +1,9 @@
+{
+  "tests": 13,
+  "passed": true,
+  "registered_build_commit": "9dfbd64",
+  "log_sha256": "22d5ead3661856c5a68290bc0a9afc6472d16165c52b8a5142b79ae9b527870a",
+  "actual_C_plan_to_registered_driver_writer_immutable_raw": true,
+  "timer_fixture_synthetic": true,
+  "hardware_started": false
+}
