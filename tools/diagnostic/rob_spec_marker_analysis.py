@@ -61,7 +61,7 @@ def audit_raw(path):
  _require(m.get('qualification_input') is None,'marker cannot borrow earlier qualification')
  with tempfile.TemporaryDirectory() as td0:
   td=Path(td0)
-  for file in ('probes/diagnostic/rob_speculative_marker.c','probes/common/rob_codegen.h','probes/common/perf_group_read.h'):
+  for file in ('probes/diagnostic/rob_speculative_marker.c','probes/common/perf_group_read.h'):
    target=td/file;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(blob(m['binary_source_head'],file))
   host=td/'producer';subprocess.run(['clang','-std=c11','-O2','-Wall','-Wextra','-Werror','-I'+str(td/'probes/common'),str(td/'probes/diagnostic/rob_speculative_marker.c'),'-o',str(host)],check=True,capture_output=True)
   for k in (16,32):
