@@ -1,0 +1,71 @@
+{
+  "0": {
+    "probe": "pmu-own-counter",
+    "version": 1,
+    "epoch": 0,
+    "events": [
+      17,
+      8,
+      112,
+      113
+    ],
+    "config1": 3,
+    "iterations": 8192,
+    "rounds": 8,
+    "roles": [
+      "nop",
+      "load",
+      "store"
+    ],
+    "cpu": 7,
+    "pmu_type": 8,
+    "owned_direct_read": true,
+    "global_policy_mutation": false
+  },
+  "1": {
+    "probe": "pmu-own-counter",
+    "version": 1,
+    "epoch": 1,
+    "events": [
+      17,
+      8,
+      112,
+      113
+    ],
+    "config1": 3,
+    "iterations": 8192,
+    "rounds": 8,
+    "roles": [
+      "nop",
+      "load",
+      "store"
+    ],
+    "cpu": 7,
+    "pmu_type": 8,
+    "owned_direct_read": true,
+    "global_policy_mutation": false
+  },
+  "2": {
+    "probe": "pmu-own-counter",
+    "version": 1,
+    "epoch": 2,
+    "events": [
+      17,
+      8,
+      112,
+      113
+    ],
+    "config1": 3,
+    "iterations": 8192,
+    "rounds": 8,
+    "roles": [
+      "nop",
+      "load",
+      "store"
+    ],
+    "cpu": 7,
+    "pmu_type": 8,
+    "owned_direct_read": true,
+    "global_policy_mutation": false
+  }
+}

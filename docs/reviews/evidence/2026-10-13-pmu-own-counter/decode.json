@@ -1,0 +1,72 @@
+{
+  "actual_ELF": true,
+  "decoder": "Capstone 5.0.7",
+  "body": {
+    "nop_work": [
+      {
+        "word": 3573751839,
+        "mnemonic": "nop",
+        "operands": ""
+      },
+      {
+        "word": 4043310344,
+        "mnemonic": "subs",
+        "operands": "x8, x8, #1"
+      },
+      {
+        "word": 1426063297,
+        "mnemonic": "b.ne",
+        "operands": "loop offset0"
+      }
+    ],
+    "load_work": [
+      {
+        "word": 4181721119,
+        "mnemonic": "ldr",
+        "operands": "xzr, [x0]"
+      },
+      {
+        "word": 4043310344,
+        "mnemonic": "subs",
+        "operands": "x8, x8, #1"
+      },
+      {
+        "word": 1426063297,
+        "mnemonic": "b.ne",
+        "operands": "loop offset0"
+      }
+    ],
+    "store_work": [
+      {
+        "word": 4177526792,
+        "mnemonic": "str",
+        "operands": "x8, [x0]"
+      },
+      {
+        "word": 4043310377,
+        "mnemonic": "subs",
+        "operands": "x9, x9, #1"
+      },
+      {
+        "word": 1426063297,
+        "mnemonic": "b.ne",
+        "operands": "loop offset0"
+      }
+    ]
+  },
+  "own_reader_registers": [
+    {
+      "mnemonic": "mrs",
+      "operands": "x10, pmccntr_el0"
+    },
+    {
+      "mnemonic": "msr",
+      "operands": "pmselr_el0, x8"
+    },
+    {
+      "mnemonic": "mrs",
+      "operands": "x10, pmxevcntr_el0"
+    }
+  ],
+  "control_writes": false
+}

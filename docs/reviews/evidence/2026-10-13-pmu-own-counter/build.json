@@ -1,0 +1,24 @@
+{
+  "source_commit": "2634f1ef2b1612e78d9b97987a25e633ca3ce0b9",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_sha256": {
+    "probes/diagnostic/pmu_own_counter.c": "6ae84089877fb082777707a3af7947cf8e88dbc51eb997c22335d406faf65813",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/perf_user_counter.h": "fe05d9ad77f47907b8d6721673ae8f34cacaad0fd266fd10175a6315f3c20c95",
+    "tools/diagnostic/pmu_own_counter_analysis.py": "a1dc0a4a1a0562c9f9046279871ad3d7f568acdca9a252611294162f16224b7d",
+    "tools/diagnostic/run_sm8650_pmu_own_counter.py": "342bd6c202e5e1816cb34ac87781c0fe45b5352bcfb5ca544aec37097c5314ee",
+    "tools/diagnostic/perf_user_access_transaction.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
+    "docs/design/2026-10-13-pmu-own-direct-counter.md": "b9962615b396bcd9f387fc56bc1d64e1997c1385c3210ddc5edf70406c63a223",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658"
+  },
+  "binary_sha256": "c2b1a4ffffb197a8f6967152970aa337b298de11d8465b6a5b107bfed4a5177b",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 probes/diagnostic/pmu_own_counter.c -o build/aarch64-linux-android/release/diagnostic/pmu_own_counter",
+  "two_independent_builds_equal": true,
+  "actual_native_plans": 3,
+  "plan_sha256": "db34a51ec0a865a854b2c142eb64f011172e31ef0de67eaa898d2a94f2aaed97",
+  "actual_ELF_decode_sha256": "d7ee91cb1ef1e56cfa7cd5c3be856b4d19188514f254ea6da612c6f1a4479b8f",
+  "counter_qualified": false
+}
