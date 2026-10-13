@@ -1,0 +1,13 @@
+{
+  "source": "ac1903f0e3debd456de30799ce99c3c971bc91b3",
+  "tests": 674,
+  "seconds": 592.004,
+  "exit_code": 0,
+  "log_path": "/tmp/diagnostic-20261013-dose-fenced-final.log",
+  "log_sha256": "d76b078c0b83af1fa6ac22b6a867dda1573dd0d5c89ebacad130a8baed1a49e3",
+  "command": ".venv/bin/python -m unittest discover -s tools/diagnostic/tests",
+  "includes_fenced_issue_unknown_fix": true,
+  "includes_descriptor_dose": true,
+  "excludes_later_pmu_metadata_producer": true,
+  "formal_runner_analysis_ctest_not_rerun": true
+}

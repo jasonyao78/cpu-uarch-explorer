@@ -584,3 +584,6 @@
 2026-10-13dose资格完成：sourcef997cb7/buildc1256db/launchac1903f，actual3fresh192观察36窗20SHA，DOSE_GRAPH_QUALIFIED，两个shape所有18data窗walk0。报告 `docs/reviews/2026-10-13-tlb-descriptor-dose-qualification.md`。下一锁定同binary+资格raw执行27processformal，技术/环境first-stop，不从旧stride3或旧PhaseA填格。
 
 2026-10-13PMU接口前沿：`docs/design/2026-10-13-pmu-user-metadata.md` 第一阶段producer `probes/diagnostic/pmu_user_reader.c` 已交付、2 actual-native测试通过；只读自己的perf metadata，不执行MRS、sysctl0不动。尚无driver／目标数据，须等TLB27process结束并完成build／raw绑定后单独执行。后续direct counter仍需要cap/seq/width/offset与正控，不将metadata当ROB资格。
+
+
+2026-10-13dose formal终态：sourcef997cb7/buildc1256db/launch883fc08，27fresh64,896安装观察324窗140SHA+资格20，全部技术／baseline／同stride negative门过。SIMPLE_BUDGET_NOT_REPLICATED：pred169→173，actualE0(67,131]、E1ambiguous、E2(131,169]；同PT393/N1536差异跨process仍混有data/tablePFN，不能唯一归因PA。报告 `docs/reviews/2026-10-13-tlb-descriptor-dose-results.md`。有限协议结束；下一same-VA/PFN actualPT关联与same-map in-page offset6ISA对照分别新冻，不加密旧grid拟合或改门。674/674全diagnostic592.004s sourceac1903f，不含PMUmetadata随后模块。
