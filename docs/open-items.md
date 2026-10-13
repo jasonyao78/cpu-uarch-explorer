@@ -590,3 +590,5 @@
 
 
 2026-10-13metadata第一步完成：source3d13bc5/consumer a298e36/buildccece66/launcha731636，actual1process10rawSHA，sysctl0、4event captrue/index0/width32/seq6，ACCESS_DISABLED首停，无MRS或policy写。报告 `docs/reviews/2026-10-13-pmu-user-metadata-results.md`。下一新冻结temporary0→1→finally0恢复事务，先自己的metadata合法index/width再actualcounter read正控；cap位单独不资格，物理ROB单位仍OPEN。
+
+2026-10-13临时metadata profile：`docs/design/2026-10-13-pmu-enabled-metadata.md`、controller `tools/diagnostic/run_sm8650_pmu_enabled_metadata.py`、durable恢复 `perf_user_access_transaction.py` 已实现，7项异常与controller端到端测试通过。下一只做0→1→0 metadata合法index/width64观察，仍无MRS，profile回归／source与restore-failed持久化先交付。所有新上板前必须核对 `data/private/perf-user-access-transactions/*.json` 全restored。
