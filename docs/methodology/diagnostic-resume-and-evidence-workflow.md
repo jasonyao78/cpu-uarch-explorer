@@ -17,3 +17,7 @@
 ## 已实证的reference残差攻击方法（2026-10-13）
 
 `docs/design/2026-10-13-rob-anchor-order.md` / `docs/reviews/2026-10-13-rob-anchor-order-results.md` 用同进程同code PFN、交换slot、同opcode histogram/输入/result/prefix/tail，只更换两条独立FSQRT链的register schedule；NONE/SERIAL两个layout逐字同码作阴性。12新进程768窗/54SHA全部controls过，k32 blocked/interleaved462/433、DID≈29跨六process复制，k16≈225无同类变化。这样把被模型外推隐藏的reference启动/排程贡献变成可证伪干预。不能由该差唯一推32-entry scheduler或ROB容量；旧433外推不能反过来说“模型从开始就被验证”。更换anchor reference需另案绑定新producer/plan/qualification，不回填旧scan。
+
+## 事件能力与小信号包络（2026-10-13）
+
+事件准入需先查具体core/revision实现表/PMCEID，再做真实架构正控；raw perf open+ID+无MUX只认证采集，不认证事件存在。`docs/reviews/2026-10-13-rob-speculative-marker-results.md` 的0x06是实证反例。单指令差分时统计粒度必须覆盖实际wrapper/供给背景；不能把每窗cache refill自动归到JIT，更不能在看到原门失败后扩大门。新观测原则应另冻，例如own cache state+架构原结果，不依赖缺失的退休tap。

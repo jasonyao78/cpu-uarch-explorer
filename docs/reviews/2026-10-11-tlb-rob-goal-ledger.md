@@ -43,3 +43,7 @@
 ## 2026-10-13 实际地址链descriptor身份连接
 
 `docs/reviews/2026-10-13-tlb-descriptor-graph-results.md`：source73dbc19/buildf7e0d93/actual launch84b8568，branch codex/sm8650-tlb-hierarchy-r2；3/3 fresh进程、192/192capture、20raw SHA独立复核。相同32-data-PFN/stored ordinal/order、同4ISA graph kernel，卸载observer后两shape各512load闭环；实际Linux leaf-table-pages packed/spaced1/32、leaf descriptor64B lines8/32、PMD lines1/4，root virtual line1，全部安装CONT0只属时点。可观测layout激励已从VA代理升级直接descriptor身份；不认证HPA/steady状态或小N容量。下一large-N容量转折与固定VA/data-PFN改变PTE物理关联另冻；三个最终参数仍0/3定案。15新测试/46关联通过，本全量回归结果另记。
+
+## 2026-10-13 退休阻塞marker资格
+
+`docs/reviews/2026-10-13-rob-speculative-marker-results.md`：6fresh/648窗技术通过、七PMU无MUX；科学MARKER_NOT_QUALIFIED，0x06所有窗0、原取指门648失败、direction4/6，30SHA独立复核。不扫N、不改旧门，下一own cache-footprint/架构marker不同观测原理先资格。三个物理目标仍0/3，软件完成数量不能替代识别证据。

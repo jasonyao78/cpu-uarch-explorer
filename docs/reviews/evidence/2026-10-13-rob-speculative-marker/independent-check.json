@@ -1,0 +1,276 @@
+{
+  "raw_sha256": {
+    "consumer.py": "acebbe151c2a9dd75278c4a8593b0d7be3ac798f86c8b8b5eb58808e6231275f",
+    "driver.py": "1246967c015b2369d7da5c6ccc1668c4447a86159d17e94467ccedaef98eccee",
+    "e0-k16-post-environment.json": "a155c3396690b988a4387b583e44684d44092328c305e5f024498b3e213cc767",
+    "e0-k16-pre-environment.json": "6e54b5a2c3292b0f4cb6e3f828d9ee4be00449d201ab2022f4661fae8c46ae1f",
+    "e0-k16.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e0-k16.stdout.jsonl": "4ce78e1d0ef83005509d8862ef1fa27b80b595e46f302818008a17a22748295b",
+    "e0-k32-post-environment.json": "233dbd8bb4949a5e3b62fdb801ac5617bfbef3ae86840ef5ddd7aa70e421c2cc",
+    "e0-k32-pre-environment.json": "3d8d27ecef684f0fa3fd30cc09f27eda78413308282c0298d348230bfee3f8a2",
+    "e0-k32.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e0-k32.stdout.jsonl": "2d38bdf0a824c87fe107b893bec2f668db8922f33941d5ecde046beca138298d",
+    "e1-k16-post-environment.json": "5a4c654f7a40030a52ba67c7593128d65b6f9bd6829ccecb46af39da2ec85d84",
+    "e1-k16-pre-environment.json": "26cb1b6fceaeef15992884f180f164592d60f6c13426e528eb5a3ce590833bef",
+    "e1-k16.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-k16.stdout.jsonl": "bdb1c5346925b59f3b3b02e14dac3d13d9009c8cf5188a6b9149a007aba5c3d9",
+    "e1-k32-post-environment.json": "32ee30b1dfbc584da72056c41a3a166be206846e9c283e4bd46e78c4d483d1a6",
+    "e1-k32-pre-environment.json": "7f679f78eb6eaa624043d06009cad1c8bffb6d77d973003a8bb928081d4e2f44",
+    "e1-k32.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-k32.stdout.jsonl": "e6f928496912f05a740c5302f1c642218d1178dc4d1984521de5c635ad8233a2",
+    "e2-k16-post-environment.json": "03421b100985d86dd41fa7a9255ffab176c16cd16f6deee66626e2815423316d",
+    "e2-k16-pre-environment.json": "d44cc40d1b0dcf23a0bc12e0c4a66b276c46200cdd23b56cb08c8670183bf820",
+    "e2-k16.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-k16.stdout.jsonl": "4dbcd339e23b9c78d1a3b2c8ec1ff26868ecd351ececef531af3ecc57c6df3e6",
+    "e2-k32-post-environment.json": "1e2bfb81991b027727f3e5bebd209669e4f4dce79b0d29046205522529aa983e",
+    "e2-k32-pre-environment.json": "75cb551e8219a7fe2f54b5db0ac73d0266d7fa83b8e571a1468aa57a360bccdc",
+    "e2-k32.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-k32.stdout.jsonl": "0203eb84a08caaa8879511dbfb2a8eea61bf4817b7a2c0ff3f65291cb7c0273c",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "final-environment.json": "cc1dfe09c1c19bbf4bb8d9ae267cdefa07fa9ce2e460406b86c325240dbe8aac",
+    "initial-environment.json": "3927b59f8488e806de249b078a418ac5edcd35388f4c93a6629d07ed534286b7",
+    "manifest.json": "8a6c9035a2a931388f5d610dfaf65882ff44d7dbcdb81d7ab6e11d46d9b6bebe"
+  },
+  "windows": 648,
+  "independent_signed_deltas_exact": true,
+  "all_648_ld_retired_zero": true,
+  "icache_failed_windows": 648,
+  "processes": [
+    {
+      "process": "e0-k16",
+      "means": {
+        "architect": {
+          "0x11": -0.5555555555555556,
+          "0x8": 0.0,
+          "0x70": 0.5555555555555556,
+          "0x6": 0.0,
+          "0x22": 0.0,
+          "0x3b": -4.222222222222222,
+          "0x1": 0.2777777777777778
+        },
+        "bypass": {
+          "0x11": -8.555555555555555,
+          "0x8": 0.0,
+          "0x70": -0.1111111111111111,
+          "0x6": 0.0,
+          "0x22": -0.5,
+          "0x3b": -3.111111111111111,
+          "0x1": 0.05555555555555555
+        },
+        "speculate": {
+          "0x11": -5.0,
+          "0x8": 0.0,
+          "0x70": 0.6666666666666666,
+          "0x6": 0.0,
+          "0x22": 0.0,
+          "0x3b": -3.1666666666666665,
+          "0x1": 0.0
+        }
+      },
+      "all_ld_retired_zero": true,
+      "icache_refill_range": [
+        2,
+        10
+      ],
+      "icache_failed_windows": 108
+    },
+    {
+      "process": "e0-k32",
+      "means": {
+        "architect": {
+          "0x11": 0.7222222222222222,
+          "0x8": 0.0,
+          "0x70": 1.0,
+          "0x6": 0.0,
+          "0x22": 0.0,
+          "0x3b": 0.0,
+          "0x1": 0.3333333333333333
+        },
+        "bypass": {
+          "0x11": -2.5555555555555554,
+          "0x8": 0.0,
+          "0x70": 0.05555555555555555,
+          "0x6": 0.0,
+          "0x22": -0.16666666666666666,
+          "0x3b": -0.3333333333333333,
+          "0x1": -0.7222222222222222
+        },
+        "speculate": {
+          "0x11": -0.6111111111111112,
+          "0x8": 0.0,
+          "0x70": 1.0,
+          "0x6": 0.0,
+          "0x22": 0.0,
+          "0x3b": 0.0,
+          "0x1": 0.3888888888888889
+        }
+      },
+      "all_ld_retired_zero": true,
+      "icache_refill_range": [
+        2,
+        8
+      ],
+      "icache_failed_windows": 108
+    },
+    {
+      "process": "e1-k32",
+      "means": {
+        "architect": {
+          "0x11": -0.7777777777777778,
+          "0x8": 0.0,
+          "0x70": 0.7777777777777778,
+          "0x6": 0.0,
+          "0x22": 0.05555555555555555,
+          "0x3b": -2.0,
+          "0x1": 0.3333333333333333
+        },
+        "bypass": {
+          "0x11": -1.3888888888888888,
+          "0x8": 0.0,
+          "0x70": 0.1111111111111111,
+          "0x6": 0.0,
+          "0x22": -0.1111111111111111,
+          "0x3b": 0.8333333333333334,
+          "0x1": 0.0
+        },
+        "speculate": {
+          "0x11": -1.6111111111111112,
+          "0x8": 0.0,
+          "0x70": 0.6666666666666666,
+          "0x6": 0.0,
+          "0x22": 0.0,
+          "0x3b": -3.1666666666666665,
+          "0x1": 0.1111111111111111
+        }
+      },
+      "all_ld_retired_zero": true,
+      "icache_refill_range": [
+        3,
+        6
+      ],
+      "icache_failed_windows": 108
+    },
+    {
+      "process": "e1-k16",
+      "means": {
+        "architect": {
+          "0x11": 0.7222222222222222,
+          "0x8": 0.0,
+          "0x70": 0.7777777777777778,
+          "0x6": 0.0,
+          "0x22": 0.16666666666666666,
+          "0x3b": -1.7777777777777777,
+          "0x1": -1.2222222222222223
+        },
+        "bypass": {
+          "0x11": -1.4444444444444444,
+          "0x8": 0.0,
+          "0x70": 0.1111111111111111,
+          "0x6": 0.0,
+          "0x22": 0.0,
+          "0x3b": 1.0555555555555556,
+          "0x1": 0.6111111111111112
+        },
+        "speculate": {
+          "0x11": 7.055555555555555,
+          "0x8": 0.0,
+          "0x70": 1.1111111111111112,
+          "0x6": 0.0,
+          "0x22": 0.16666666666666666,
+          "0x3b": 2.388888888888889,
+          "0x1": -0.7222222222222222
+        }
+      },
+      "all_ld_retired_zero": true,
+      "icache_refill_range": [
+        2,
+        10
+      ],
+      "icache_failed_windows": 108
+    },
+    {
+      "process": "e2-k16",
+      "means": {
+        "architect": {
+          "0x11": 1.0555555555555556,
+          "0x8": 0.0,
+          "0x70": 0.8888888888888888,
+          "0x6": 0.0,
+          "0x22": 0.16666666666666666,
+          "0x3b": -0.7222222222222222,
+          "0x1": 0.0
+        },
+        "bypass": {
+          "0x11": -4.055555555555555,
+          "0x8": 0.0,
+          "0x70": -0.3333333333333333,
+          "0x6": 0.0,
+          "0x22": 0.0,
+          "0x3b": -3.1666666666666665,
+          "0x1": 0.0
+        },
+        "speculate": {
+          "0x11": 3.9444444444444446,
+          "0x8": 0.0,
+          "0x70": 1.0,
+          "0x6": 0.0,
+          "0x22": 0.1111111111111111,
+          "0x3b": 1.3888888888888888,
+          "0x1": 0.1111111111111111
+        }
+      },
+      "all_ld_retired_zero": true,
+      "icache_refill_range": [
+        2,
+        4
+      ],
+      "icache_failed_windows": 108
+    },
+    {
+      "process": "e2-k32",
+      "means": {
+        "architect": {
+          "0x11": -1.6111111111111112,
+          "0x8": 0.0,
+          "0x70": 0.7777777777777778,
+          "0x6": 0.0,
+          "0x22": 0.0,
+          "0x3b": -2.111111111111111,
+          "0x1": -0.3888888888888889
+        },
+        "bypass": {
+          "0x11": -0.1111111111111111,
+          "0x8": 0.0,
+          "0x70": 0.3333333333333333,
+          "0x6": 0.0,
+          "0x22": -0.5,
+          "0x3b": 1.1111111111111112,
+          "0x1": 0.6666666666666666
+        },
+        "speculate": {
+          "0x11": -0.4444444444444444,
+          "0x8": 0.0,
+          "0x70": 0.8888888888888888,
+          "0x6": 0.0,
+          "0x22": 0.0,
+          "0x3b": -1.0555555555555556,
+          "0x1": -0.2777777777777778
+        }
+      },
+      "all_ld_retired_zero": true,
+      "icache_refill_range": [
+        2,
+        8
+      ],
+      "icache_failed_windows": 108
+    }
+  ],
+  "source_head": "b8ef9c4fc1592b20322e984134e9e120ee4f490c",
+  "binary_source_head": "973baf40f5d49aa7658e7e3ec0097efa0a2fe25b",
+  "binary_sha256": "8297d72672cf48133d50f439e5963b9b374a244496fd85e517dcce3e06ae7b30",
+  "max_cpu_c_range": [
+    38.8,
+    45.5
+  ],
+  "method": "direct JSONL integer differences; separate from consumer statistic implementation"
+}
