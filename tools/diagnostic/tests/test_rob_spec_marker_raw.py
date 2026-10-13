@@ -13,7 +13,7 @@ ROOT=Path(__file__).resolve().parents[3]
 class MarkerRaw(unittest.TestCase):
  @classmethod
  def setUpClass(cls):
-  cls.launch=subprocess.check_output(['git','rev-parse','e4d4095'],cwd=ROOT,text=True).strip()
+  cls.launch=subprocess.check_output(['git','rev-parse','937f007'],cwd=ROOT,text=True).strip()
   cls.blob=staticmethod(lambda rel:subprocess.check_output(['git','show',cls.launch+':'+rel],cwd=ROOT))
   cls.build=json.loads(cls.blob(model.BUILD));cls.plan=json.loads(cls.blob(model.PLAN))
   fixture.SpecMarkerAnalysis.setUpClass();cls.actual=fixture.SpecMarkerAnalysis();cls.rows={row['condition']:row for row in cls.actual.rows()};model.validate_plan(cls.plan)

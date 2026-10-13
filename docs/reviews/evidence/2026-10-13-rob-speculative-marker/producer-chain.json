@@ -1,0 +1,10 @@
+{
+  "tests": 15,
+  "passed": true,
+  "log_sha256": "c0e3ae5aec575484dbb5b242edfbe0e5dcbeab3aef2c8ab746730ea1357b60c2",
+  "registered_driver_build_commit": "937f007",
+  "external_PMU_is_synthetic": true,
+  "actual_C_plans": true,
+  "raw_counterexample_kinds": 26,
+  "hardware_started": false
+}
