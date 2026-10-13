@@ -47,3 +47,7 @@
 ## 2026-10-13 退休阻塞marker资格
 
 `docs/reviews/2026-10-13-rob-speculative-marker-results.md`：6fresh/648窗技术通过、七PMU无MUX；科学MARKER_NOT_QUALIFIED，0x06所有窗0、原取指门648失败、direction4/6，30SHA独立复核。不扫N、不改旧门，下一own cache-footprint/架构marker不同观测原理先资格。三个物理目标仍0/3，软件完成数量不能替代识别证据。
+
+## 2026-10-13 own cache marker原理检查
+
+`docs/reviews/2026-10-13-rob-cache-marker-results.md` /launch7a64a80：1536格技术接受、30SHA与cal Type7第二算术精确。六process全部冷热/A-load/B/NOP正负通过，独立阈值2.5/3ticks；M-load hit仅18.75–34.375%，CACHE_MARKER_NOT_QUALIFIED，不扫N。原理缺口缩到错误路径可观测响应，尚不能区分发射与fill/history；physical0/3，绝不拿部分hit报小ROB。

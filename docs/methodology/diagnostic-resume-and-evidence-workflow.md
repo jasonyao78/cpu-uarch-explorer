@@ -21,3 +21,5 @@
 ## 事件能力与小信号包络（2026-10-13）
 
 事件准入需先查具体core/revision实现表/PMCEID，再做真实架构正控；raw perf open+ID+无MUX只认证采集，不认证事件存在。`docs/reviews/2026-10-13-rob-speculative-marker-results.md` 的0x06是实证反例。单指令差分时统计粒度必须覆盖实际wrapper/供给背景；不能把每窗cache refill自动归到JIT，更不能在看到原门失败后扩大门。新观测原则应另冻，例如own cache state+架构原结果，不依赖缺失的退休tap。
+
+自有cache状态资格进一步见 `docs/reviews/2026-10-13-rob-cache-marker-results.md`：独立冷热cal与架构正负均合格仍不保证错误路径footprint可用。分别跟踪issued、fill-completed、architecturally-retired三个事实；计时miss不能自动判未发射或未分配。保留未通过.90门及全部原值；更换原理/干预须另注册。

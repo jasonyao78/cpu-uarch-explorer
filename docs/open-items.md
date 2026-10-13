@@ -545,3 +545,5 @@
 - **ROB单marker N0有限批结束not-qualified / 当前ROB负责人 / 触发=own cache-footprint与架构marker新资格协议**：`docs/reviews/2026-10-13-rob-speculative-marker-results.md`；actual launchb8ef9c4，6进程648窗技术接受，30raw SHA独立复核；0x06全部0（官方PMCEID6未实现，设计预审漏项）、648取指原门失败、direction4/6。原门/旧终态不改，无N扫描；下一自有冷热marker不依赖0x06，先能力与阴阳控制，physical单位/容量仍OPEN。
 
 - **ROB自有cache marker N0已冻结 / 当前ROB负责人 / 触发=actual code/typed原值/两NDK/生产链后6进程**：`docs/design/2026-10-13-rob-cache-marker.md`；独立own冷热校准、A/B/M+架构marker，1536格有限，避开无效0x06。不认证entry单位，资格失败不扫N，旧PMU门不改。TLB large-N descriptor干预独立OPEN。
+
+- **ROB自有cache marker N0有限批结束not-qualified / 当前ROB负责人 / 触发=独立issued/load-completion/history控制协议**：`docs/reviews/2026-10-13-rob-cache-marker-results.md`，sourceb9cf58a/build9dfbd64/launch7a64a80，6fresh1536格、30raw SHA；冷热/A/B/NOP八门全过，M hit18.75–34.375%失败.90门。阈值只独立cal得到2.5/3ticks；architectural marker M0/A常量精确。无hit不等于未发射/分配，禁止N扫/降门；下一支持LD_SPEC多marker放大或completion/history正交资格，TLB大N真实descriptor关联优先，physical0/3。
