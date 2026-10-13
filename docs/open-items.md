@@ -639,3 +639,8 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 
 - `docs/reviews/2026-10-14-rob-admission-window-results.md`：sourcec046ed7/build+launch0ae447c，raw20261013T185437Z，84/21504正式+86016warm、invalid0、两epoch×两deadline三filler全部响应范围重复，三个strict供给失败不删除。整体为探索matrix-complete，物理ROB尚未定案；所有PMU恢复0。触发：独立cold-head_N0后按实测冻结必要精扫/packing/PRF对照。
 - 独立cold-head已在原矩阵恢复后开始（source3aefd28/build+actual launch6c0888c，raw20261013T192211Z-rob-cold-head）：16配置/4096attempt冻结、two palettes/hot-cold/head1-2，当前根Agent独占执行中。中途不启动别的设备任务，不恢复正在执行的自有PMU事务；结束后finally/readback恢复。
+
+### 2026-10-14 cold-head首次资格终态与后续（primary）
+
+- `docs/reviews/2026-10-14-rob-cold-head-results.md`：source3aefd28/build+launch6c0888c，4096正式/16384warm、invalid0，长延迟、四cold issue的marker/strict I-cache全通过；若干cache/taps的L1D/L2D剂量门失败，原COLD_HEAD_NOT_QUALIFIED保持。所有13个PMU事务已恢复0，设备idle。
+- 下一冻结 `docs/design/2026-10-14-rob-cold-head-interleaved.md`：16process×512state交错、sameVA/PFN/context hot-cold、head offset0/1024，1024预先指定primary，0作为缓存交互对照。新producer/consumer/controller路径已登记本协议，尚未实现；触发：实际native512身份/地址链/packet parser256兼容与source/build审核后上板，禁止旧模型失败回救或先无控制拟合物理384。

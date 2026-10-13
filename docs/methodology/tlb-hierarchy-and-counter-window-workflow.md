@@ -28,3 +28,5 @@
 首技术失败协议使v3在第11进程ROI-metadata-changed停止，10/16完整不能报16/16。下一版本可预注册小额技术invalid预算（仅明确metadata失效、不按指标筛选、固定ordinal/无retry/无补样、部分配对须显式覆盖）；这不能回救原批或把拒绝值填0。实现需在真实producer→raw→criterion对丢失/冲突/乱序进行反例，未完成前不启动admission长矩阵。
 
 有限metadata新采样（`docs/reviews/2026-10-14-rob-filler-resource-bounded-results.md`）16fresh4096正式/16384warm、invalid0、原资源/供给门通过。旧首停失败不重新命名。固定ordinal只允许真实ROI-metadata-changed≤1/256，partial warm与rejected原字均保留；其它错误仍停；统计用共同有效trial≥31/32及真实trial标签，禁止数组重编号把near/far条件错接。新 `tools/diagnostic/owned_roi_packets.py` 在真实native计划身份上拒绝缺失/重复/冲突、接受记录置换不改变结果。
+
+最老cold-head反例（`docs/reviews/2026-10-14-rob-cold-head-results.md`）：marker/供给/long excitation已正，但整个带标记窗口的L1D差不一定等于head数；near/out/metadata cache交互及fresh-process物理布局可以进入差分。采用同进程/sameVA-PFN-counter的hot/cold交错，state必须进入身份键；页内offset隔离是独立预注册控制，不能把总refill唯一归属某个PC。完整硬件positive与模型资格failure要分别命名，不能一个失败让另一事实变0。
