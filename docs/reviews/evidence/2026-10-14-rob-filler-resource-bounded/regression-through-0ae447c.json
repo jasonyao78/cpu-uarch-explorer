@@ -1,0 +1,10 @@
+{
+  "tests": 727,
+  "seconds": 623.629,
+  "status": "OK",
+  "log_sha256": "f59da4d3dcb8b44d01e24a584cd352912463527f7ab6909346ea23f6a7cede58",
+  "coverage_limit": "full discovered suite through bounded packet and admission v1.3; cold-head2 tests added after discovery and separately passed",
+  "cold_head_targeted_tests": 2,
+  "formal_paths_changed": false,
+  "formal_tests_rerun": false
+}

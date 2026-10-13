@@ -627,3 +627,10 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 - source dc58c16 / build+actual launch27d4793，`probes/diagnostic/rob_filler_resource_bounded.c` / `tools/diagnostic/owned_roi_packets.py`，16fresh4096正式+16384当前warm全完成、invalid0、原IR/供给/资源门全过，报告 `docs/reviews/2026-10-14-rob-filler-resource-bounded-results.md`；旧失效批不重评分。不认证ALU唯一瓶颈/µop单位/ROBentries。
 - `probes/diagnostic/rob_admission_window.c` 已按有限packet和12个N0上游门接线：源码 dc58c16（实际build source27d4793）、launch a1b4916、binary21c6c418…；private raw20261013T184409Z-rob-admission-window，根Agent独占执行中。触发：12N0全资格才72扫描，完整报告所有计数/invalid/供给失败/删失，不借成功资源差跳过容量归因控制。
 - 独立最老cold load：`docs/design/2026-10-14-rob-cold-head-qualification.md` 已冻结（0d41cd6），`probes/diagnostic/rob_cold_head.c` / `tools/diagnostic/rob_cold_head_analysis.py` / `tools/diagnostic/run_sm8650_rob_cold_head.py` 尚未实现。触发：窗口矩阵期间完成软件，独占串行N0资格后另冻gap，head1/2对照取代允许FP链退休的解释。
+
+### 2026-10-14 N0探索分层与cold-head实现（primary）
+
+- admission v1.2第7个N0因SUPPLY_NOT_QUALIFIED停止，1792正式/7168warm、invalid0、markers/IR/eligible22/far|near1，报告 `docs/reviews/2026-10-14-rob-admission-n0-stop.md`；旧失败不晋升。
+- v1.3采集权限与容量推断分离（c046ed7/source，0ae447c/build+launch），`docs/design/2026-10-14-rob-admission-window.md`：12个N0 marker-observable全部通过，新raw20261013T185437Z-rob-admission-window正执行72个gap探索点，strict supply/classification保留，observed response bracket不认证物理ROB；触发：全84完整后两epoch/两deadline/三filler对账，不强拟合384。
+- cold-head软件已完成：`probes/diagnostic/rob_cold_head.c` / `tools/diagnostic/rob_cold_head_analysis.py` / `tools/diagnostic/run_sm8650_rob_cold_head.py` source cbe1bee，binary3b7477fd…，16native plans/64真实程序、私有head依赖/无FP/常量/CBNZ/ABI及NDK双构建通过，build e929192；尚未上板。触发：当前矩阵终态与PMU事务恢复后串行N0，禁止并行手机操作。
+- 整树diagnostic727/727、623.629s（through0ae447c）；cold-head新增2项另过；本轮formal paths未改，不冒称正式全量回归。最新完整性/供给/物理容量三个层级分别命名。
