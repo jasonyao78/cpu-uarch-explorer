@@ -634,3 +634,8 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 - v1.3采集权限与容量推断分离（c046ed7/source，0ae447c/build+launch），`docs/design/2026-10-14-rob-admission-window.md`：12个N0 marker-observable全部通过，新raw20261013T185437Z-rob-admission-window正执行72个gap探索点，strict supply/classification保留，observed response bracket不认证物理ROB；触发：全84完整后两epoch/两deadline/三filler对账，不强拟合384。
 - cold-head软件已完成：`probes/diagnostic/rob_cold_head.c` / `tools/diagnostic/rob_cold_head_analysis.py` / `tools/diagnostic/run_sm8650_rob_cold_head.py` source cbe1bee，binary3b7477fd…，16native plans/64真实程序、私有head依赖/无FP/常量/CBNZ/ABI及NDK双构建通过，build e929192；尚未上板。触发：当前矩阵终态与PMU事务恢复后串行N0，禁止并行手机操作。
 - 整树diagnostic727/727、623.629s（through0ae447c）；cold-head新增2项另过；本轮formal paths未改，不冒称正式全量回归。最新完整性/供给/物理容量三个层级分别命名。
+
+### 2026-10-14 完整粗窗口结束（primary）
+
+- `docs/reviews/2026-10-14-rob-admission-window-results.md`：sourcec046ed7/build+launch0ae447c，raw20261013T185437Z，84/21504正式+86016warm、invalid0、两epoch×两deadline三filler全部响应范围重复，三个strict供给失败不删除。整体为探索matrix-complete，物理ROB尚未定案；所有PMU恢复0。触发：独立cold-head_N0后按实测冻结必要精扫/packing/PRF对照。
+- 独立cold-head已在原矩阵恢复后开始（source3aefd28/build+actual launch6c0888c，raw20261013T192211Z-rob-cold-head）：16配置/4096attempt冻结、two palettes/hot-cold/head1-2，当前根Agent独占执行中。中途不启动别的设备任务，不恢复正在执行的自有PMU事务；结束后finally/readback恢复。

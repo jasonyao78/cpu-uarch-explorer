@@ -79,3 +79,10 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 - register-only sixevent短ROI有限资格完成：source933776f/build+actual launchf8cabd9、1536原窗全门通过，Apre/Apost=8、Mpre=0、far|near1，eligible37.5%–78.125%。报告 `docs/reviews/2026-10-14-rob-register-fenced-results.md`（3b888d4）。observer保存值在GPR、两端SB、元数据在ROI外，原body/warm同PC；旧CROI1536失败不回救。**发射≠allocation**，physicalROBOPEN。
 - unit有限批完成反例：source43b1a53/build+launch4331ac6、1536完整、四roleN16→32的IR/OPret/OPspec/DP全部+16，sink−NOP DP=0，预注册SINK_UNIT_NOT_QUALIFIED。报告 `docs/reviews/2026-10-14-rob-sink-unit-results.md`（58b7128）。不按逻辑OP统计换ROB slot，不为失败给N扫描放行。所有profile0/restored。
 - 后续归当前ROB负责人，触发=可观察依赖链资源竞争/packing新协议冻结与端点完成边界合格；冷load/独立deadline/PRF/supply对照继续，未冻结/未采样。不以当前purebodycycle作ALU端口结论。当前线程持续Goalactive，科学反例不替整个容量目标完成；无newthread/automation/subagent/main/remote。
+
+### 2026-10-14 最新容量解释进展（primary）
+
+- 完整资源复核 `docs/reviews/2026-10-14-rob-filler-resource-bounded-results.md`（a04fdf9）：16fresh4096正式/16384warm、invalid0、checksum/IR/供给/高剂量周期资源差全过；只认证资源响应，不认证ALU唯一瓶颈或allocation单位。
+- 完整粗窗口 `docs/reviews/2026-10-14-rob-admission-window-results.md`：84配置/21504正式/86016warm、invalid0，所有源/构建/launch/raw SHA与FD/hardware重算；两epoch×两FP链下sink[128,256]、zero[256,384]、nop[640,768]响应一致。strict供给3点失败，3条curve INCOMPUTABLE；观察范围与物理容量分列。
+- 原严格N0批 `docs/reviews/2026-10-14-rob-admission-n0-stop.md` 保持失败；新的v1.3放行是探索采集权限，非旧供给门或物理命名通过。完整粗矩阵已恢复0，`probes/diagnostic/rob_cold_head.c` / `docs/design/2026-10-14-rob-cold-head-qualification.md` head1/2、两palette、冷热独立N0正在串行执行（source3aefd28/build6c0888c）。它移除FP可逐条退休的混淆，尚未报告capacity。
+- 距目标：一级4KiB i48/d96已实测，共享L2官方2048/256×8已匹配核验；精确有效leaf/selector仍OPEN。ROB已有可信marker、资源正对照、重复packing/deadline粗范围，现在主工作为独立oldest-load生命周期控制及必要精扫；不按测试数计算完成百分比。
