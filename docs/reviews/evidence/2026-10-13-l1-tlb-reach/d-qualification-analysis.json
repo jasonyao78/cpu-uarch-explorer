@@ -1,0 +1,101 @@
+{
+  "mode": "d",
+  "status": "L1_QUALIFIED",
+  "source_head": "96c2873a8dd781fa08abc44988172530f34ee809",
+  "binary_source_head": "cd39b1e74d9b0aa3b25020f82bff7f58c79b2add",
+  "binary_sha256": "6f657fa1bc848061a44a46490561f8fac4359b4a2ba06bdea33c43d0f7edd328",
+  "raw_directory": "data/private/20261013T133628Z-l1-d-tlb-qualification",
+  "raw_sha256": {
+    "plan.json": "0bcdb4503b50630f2e1489c69a550d78cb34d635d019d8e8a73fe7fc545e93cf",
+    "e1-pre-environment.json": "04376083f6fce6d62652297fe1e04252a6905caead61b13e6f88ee75e175cd96",
+    "e2.stdout.jsonl": "57b8c5773fd448eddab35f552544af2966ee1a96fc8ac5740a44cf0ee388dc6a",
+    "e0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-analysis.json": "6121832e679abe1af8fa41817aa169245f9f51962be290fa921151ae0d35c9e0",
+    "e1-post-environment.json": "df7f7fba3e0cdd034f73e84fa2d15db86b668af2e88bcc263ff9e5e9760c37f3",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "e2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-analysis.json": "2c986fc708fb01130e0096268e761955aed80ed7a70672d42e6e7fba22f481e6",
+    "e0-pre-environment.json": "b4610c4c09935fabfe9b9be26d14d4fd3696c9f135e19f98a902fd1772377a0a",
+    "initial-environment.json": "699b766a615a9c986e7d4394193d284e80c330d79349b71d7bf886b2a4e7d281",
+    "e0-analysis.json": "a1031f5590af4774bb3a5d249f2e6e7064095e6abe4ecded12121d27758827e2",
+    "consumer.py": "badbd4736f64007d7327d3e52e476350a64fc4757d3d64f8c385b320d45920dd",
+    "e1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "manifest.json": "46a20f6645db92ef88e7935fd9cccffacd4467b9099d4722a749daee868295dc",
+    "e0.stdout.jsonl": "8d013600041bcccbe9076dd8da9e6e6401c1b952c4c211765e1fc363ca5b74d1",
+    "e2-pre-environment.json": "741fe07837c5d87b4f75ec9c0934ebd5b6ef852b06c8ca9ed35b4937ef36a9e4",
+    "e2-post-environment.json": "cc816d0d0427a29c8dec2648d41fbba04880980994fc7169fc9a53f0795b0b3d",
+    "driver.py": "e2f0ed0985371ffd4e193de3e92272a2398058546d3ed22a5b074d4d0edf050d",
+    "e1.stdout.jsonl": "4400237b7b63bf8ee080ac1d9472b40797dc469167180b003ca11f71e23b9b21",
+    "e0-post-environment.json": "0f1058ce736dcb97da90c56d14a62263f1ffc643bd4f56080617e3a274e3be8c",
+    "build.json": "76e4b6096b96952ad97865da9e5d6fec2d7d0b81b8b93e2afcf88e52396aef13",
+    "protocol.md": "325d27bffcf385e957fa52ffa5ba74659ef58596ae0158067950f114725c8f7c"
+  },
+  "raw_inventory_sha256": "a87c2483d93f34c215ed0fad5e3e56b26035402b68e7e7fc0b0274f9ccfbef60",
+  "processes": [
+    {
+      "epoch": 0,
+      "windows": 18,
+      "refill_range": [
+        3.3e-05,
+        9.8e-05
+      ],
+      "walk_range": [
+        0.0,
+        0.0
+      ],
+      "cache_range": [
+        3.4666666666666665e-05,
+        0.9956306666666667
+      ],
+      "IR_range": [
+        6.000022,
+        6.000022
+      ],
+      "actual_PFNs_unique": 192
+    },
+    {
+      "epoch": 1,
+      "windows": 18,
+      "refill_range": [
+        3.4e-05,
+        9.8e-05
+      ],
+      "walk_range": [
+        0.0,
+        3e-06
+      ],
+      "cache_range": [
+        3.05e-05,
+        0.6326615
+      ],
+      "IR_range": [
+        6.000022,
+        6.000022
+      ],
+      "actual_PFNs_unique": 192
+    },
+    {
+      "epoch": 2,
+      "windows": 18,
+      "refill_range": [
+        0.0,
+        0.00013
+      ],
+      "walk_range": [
+        0.0,
+        0.0
+      ],
+      "cache_range": [
+        3.35e-05,
+        0.6729915
+      ],
+      "IR_range": [
+        6.000022,
+        6.000022
+      ],
+      "actual_PFNs_unique": 192
+    }
+  ],
+  "full_windows": 54,
+  "physical_capacity_certified": false
+}
