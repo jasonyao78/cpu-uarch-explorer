@@ -26,6 +26,9 @@ def interpret(program,syscall_id=172,pid=12345,fail_read=0,task_pid=12345,map_pr
         elif code==0xb7:regs[dst]=imm&0xffffffffffffffff
         elif code==0x07:regs[dst]=(regs[dst]+imm)&0xffffffffffffffff
         elif code==0x77:regs[dst]>>=imm
+        elif code==0x67:regs[dst]=(regs[dst]<<imm)&0xffffffffffffffff
+        elif code==0x57:regs[dst]&=imm&0xffffffffffffffff
+        elif code==0x0f:regs[dst]=(regs[dst]+regs[src])&0xffffffffffffffff
         elif code in (0x79,0x61):regs[dst]=load(regs[src]+off,8 if code==0x79 else 4)
         elif code in (0x7b,0x63):store(regs[dst]+off,regs[src],8 if code==0x7b else 4)
         elif code in (0x7a,0x62):store(regs[dst]+off,imm,8 if code==0x7a else 4)
