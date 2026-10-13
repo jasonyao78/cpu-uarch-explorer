@@ -1,0 +1,179 @@
+{
+  "raw_sha256": {
+    "consumer.py": "b16a8a252c229669c30fdacb1c139cb90831b79b314cfec80f8f259090c6970c",
+    "driver.py": "69f9affee371df07b66785945fea09b89837d8ff9ac7c7edab7a78aea185e765",
+    "e0-n32-r0-actual-plan.json": "3e5ebf6c57939d81b213e2af17a219f1e68a16491a3729a10c701bb411e9a586",
+    "e0-n32-r0-post-environment.json": "879036a74aeceeadf052868bef9ac9c7f00e1ad110f88ea9b0c94da5fd2737df",
+    "e0-n32-r0-pre-environment.json": "22dbd09689957c61b9809f48dacf12f7e0ca2dec73809ad73a4bc4b477badb44",
+    "e0-n32-r0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e0-n32-r0.stdout.jsonl": "02fa1f43ad6288ca3ebaab265047005f86d2eacbd3297eb67b4b63e267ca7027",
+    "e1-n32-r1-actual-plan.json": "b2f785a001e5e7c754d8c42d2f433a3d426003c9c37e222dd6c55a2fff8690c6",
+    "e1-n32-r1-post-environment.json": "71d48365c236b6f116ecfef30602308d98c98c56a62ffc1e9eb0326f91d411cb",
+    "e1-n32-r1-pre-environment.json": "fcdb21c3816636d43b1d3d3e8969acd71b7673b9121f3b496353982a196d4cb8",
+    "e1-n32-r1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-n32-r1.stdout.jsonl": "413acddb38640b3acd282b692958955eff46835e415541d8c8d0cb27f4ac309f",
+    "e2-n32-r0-actual-plan.json": "9eba1314b5ea3c6a3e3ed81ce7400f7e88ea85556a693725e307bed3edbb5f14",
+    "e2-n32-r0-post-environment.json": "ec46b21090e85a0de5bea577b7d1b1154aae30006957accb3e213974d5f42ba7",
+    "e2-n32-r0-pre-environment.json": "955a4c05c54acdae56435e8841034fa39b3ecd376d3fbaa332594ebc6d251732",
+    "e2-n32-r0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-n32-r0.stdout.jsonl": "6b2ca64cee918f609fa98d73beefe1baf2c537fb2423ffcafcc82c0760f21450",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "final-environment.json": "2f13f150c8fc838566809922e86e07e3852a5d4cbd496d82f8d9226639cb4bdf",
+    "initial-environment.json": "d619f7ad0874b172eb237e92573894ed82b687264a417519debf70933c3d1ffe"
+  },
+  "windows": 36,
+  "captures": 192,
+  "independent_integer_rates_exact": true,
+  "processes": [
+    {
+      "process": "e0-n32-r0",
+      "captures": 64,
+      "registered_transition_chain_exact": true,
+      "points": [
+        {
+          "shape": 0,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "raw_IR": [
+            4194375,
+            4194375,
+            4194375
+          ],
+          "raw_L1I_refill": [
+            36,
+            25,
+            14
+          ]
+        },
+        {
+          "shape": 1,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "raw_IR": [
+            4194375,
+            4194375,
+            4194375
+          ],
+          "raw_L1I_refill": [
+            38,
+            12,
+            24
+          ]
+        }
+      ],
+      "auxiliary_L1D_refill_difference": [
+        0.11945724487304688,
+        0.1195230484008789,
+        0.059413909912109375
+      ]
+    },
+    {
+      "process": "e1-n32-r1",
+      "captures": 64,
+      "registered_transition_chain_exact": true,
+      "points": [
+        {
+          "shape": 0,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "raw_IR": [
+            4194375,
+            4194375,
+            4194375
+          ],
+          "raw_L1I_refill": [
+            15,
+            18,
+            26
+          ]
+        },
+        {
+          "shape": 1,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "raw_IR": [
+            4194375,
+            4194375,
+            4194375
+          ],
+          "raw_L1I_refill": [
+            19,
+            30,
+            31
+          ]
+        }
+      ],
+      "auxiliary_L1D_refill_difference": [
+        0.05761241912841797,
+        0.0626077651977539,
+        0.058073997497558594
+      ]
+    },
+    {
+      "process": "e2-n32-r0",
+      "captures": 64,
+      "registered_transition_chain_exact": true,
+      "points": [
+        {
+          "shape": 0,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "raw_IR": [
+            4194375,
+            4194375,
+            4194375
+          ],
+          "raw_L1I_refill": [
+            25,
+            19,
+            33
+          ]
+        },
+        {
+          "shape": 1,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "raw_IR": [
+            4194375,
+            4194375,
+            4194375
+          ],
+          "raw_L1I_refill": [
+            15,
+            24,
+            28
+          ]
+        }
+      ],
+      "auxiliary_L1D_refill_difference": [
+        0.05997657775878906,
+        0.06065082550048828,
+        0.08659648895263672
+      ]
+    }
+  ],
+  "launch": "c9e52315cdf6ebbe02cff28d5fa6566cc49385b6",
+  "binary_sha256": "63df10356c1818cd6190b5dbf4e24e080c6a77ae5735dfc072b0540eb90ea547",
+  "max_cpu_c_range": [
+    39.3,
+    41.1
+  ]
+}

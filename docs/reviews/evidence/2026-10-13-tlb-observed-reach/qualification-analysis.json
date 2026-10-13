@@ -1,0 +1,586 @@
+{
+  "mode": "tlb-observed-reach",
+  "phase": "qualification",
+  "windows": 36,
+  "processes": [
+    {
+      "process": "e0-n32-r0",
+      "nodes": 32,
+      "reverse": false,
+      "gates": {
+        "retired_IR": true,
+        "instruction_background": true
+      },
+      "background_mean": [
+        73.16666666666667,
+        59,
+        0,
+        0,
+        0,
+        2.6666666666666665
+      ],
+      "curves": [
+        {
+          "shape": 0,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              11.405627091725668,
+              11.40260394414266,
+              11.399822076161703
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              9.5367431640625e-05,
+              3.4332275390625e-05,
+              3.528594970703125e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.8642416000366211,
+              0.8643913269042969,
+              0.8640165328979492
+            ],
+            "0x1": [
+              3.1789143880208336e-05,
+              2.1298726399739582e-05,
+              1.0808308919270834e-05
+            ]
+          }
+        },
+        {
+          "shape": 1,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              11.91395934422811,
+              11.915256341298422,
+              11.584788163503012
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              6.4849853515625e-05,
+              3.4332275390625e-05,
+              3.4332275390625e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.983698844909668,
+              0.9839143753051758,
+              0.9234304428100586
+            ],
+            "0x1": [
+              3.3696492513020836e-05,
+              8.900960286458334e-06,
+              2.0345052083333332e-05
+            ]
+          }
+        }
+      ],
+      "spaced_minus_packed": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "descriptor_shapes": [
+        {
+          "shape": 0,
+          "leaf_table_pages": 1,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 12,
+          "linux_pmd_64B_groups": 1,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "shape": 1,
+          "leaf_table_pages": 32,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 32,
+          "linux_pmd_64B_groups": 4,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "process": "e1-n32-r1",
+      "nodes": 32,
+      "reverse": true,
+      "gates": {
+        "retired_IR": true,
+        "instruction_background": true
+      },
+      "background_mean": [
+        71.66666666666667,
+        59,
+        0,
+        0,
+        0,
+        2
+      ],
+      "curves": [
+        {
+          "shape": 0,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              11.430296262105307,
+              11.432942708333334,
+              11.42802651723226
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              3.4332275390625e-05,
+              3.4332275390625e-05,
+              6.4849853515625e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.8678922653198242,
+              0.8676891326904297,
+              0.8677291870117188
+            ],
+            "0x1": [
+              1.239776611328125e-05,
+              1.52587890625e-05,
+              2.288818359375e-05
+            ]
+          }
+        },
+        {
+          "shape": 1,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              11.595254262288412,
+              11.599284489949545,
+              11.607717831929525
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              3.4332275390625e-05,
+              9.5367431640625e-05,
+              6.4849853515625e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.9255046844482422,
+              0.9302968978881836,
+              0.9258031845092773
+            ],
+            "0x1": [
+              1.621246337890625e-05,
+              2.6702880859375e-05,
+              2.765655517578125e-05
+            ]
+          }
+        }
+      ],
+      "spaced_minus_packed": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "descriptor_shapes": [
+        {
+          "shape": 0,
+          "leaf_table_pages": 1,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 12,
+          "linux_pmd_64B_groups": 1,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "shape": 1,
+          "leaf_table_pages": 32,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 32,
+          "linux_pmd_64B_groups": 4,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "process": "e2-n32-r0",
+      "nodes": 32,
+      "reverse": false,
+      "gates": {
+        "retired_IR": true,
+        "instruction_background": true
+      },
+      "background_mean": [
+        69.66666666666667,
+        59,
+        0,
+        0,
+        0,
+        2.6666666666666665
+      ],
+      "curves": [
+        {
+          "shape": 0,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              11.40750535329183,
+              11.406925519307455,
+              11.407655080159506
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              3.4332275390625e-05,
+              9.441375732421875e-05,
+              6.4849853515625e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.8640022277832031,
+              0.8638086318969727,
+              0.8639602661132812
+            ],
+            "0x1": [
+              2.1298726399739582e-05,
+              1.5576680501302082e-05,
+              2.8928120930989582e-05
+            ]
+          }
+        },
+        {
+          "shape": 1,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              11.580532391866049,
+              11.590104420979818,
+              11.724360783894857
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              3.4332275390625e-05,
+              3.4332275390625e-05,
+              6.4849853515625e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.9239788055419922,
+              0.9244594573974609,
+              0.950556755065918
+            ],
+            "0x1": [
+              1.1761983235677084e-05,
+              2.0345052083333332e-05,
+              2.4159749348958332e-05
+            ]
+          }
+        }
+      ],
+      "spaced_minus_packed": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "descriptor_shapes": [
+        {
+          "shape": 0,
+          "leaf_table_pages": 1,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 12,
+          "linux_pmd_64B_groups": 1,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "shape": 1,
+          "leaf_table_pages": 32,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 32,
+          "linux_pmd_64B_groups": 4,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        }
+      ],
+      "qualified": true
+    }
+  ],
+  "floor_negative": true,
+  "physical_capacity_certified": false,
+  "physical_ways_certified": false,
+  "hpa_state": "UNKNOWN",
+  "steady_cont_state": "UNKNOWN",
+  "status": "OBSERVED_GRAPH_QUALIFIED"
+}

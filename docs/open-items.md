@@ -555,3 +555,5 @@
 - **TLB VA/ASID身份倍增鉴别草案 / 当前TLB负责人 / 触发=large-N descriptor-PMU与table关联先闭环后冻结**：`docs/design/2026-10-13-tlb-translation-identity-multiplicity.md`。同N-data-IPA的A单alias/B双VA/C双context对照，first-vs-second pass避免本地prewarm消掉跨context容量；context/TLBI/ASID观测及intermediate表变化是必测残余。未实现/未采样，不简单2N报物理2048。当前三物理参数0/3。
 
 - **descriptor-bound reach协议冻结 / 当前TLB负责人 / 触发=actual code/双NDK/生产链后N0，资格后scan**：`docs/design/2026-10-13-tlb-observed-reach.md`；改用3/515page奇步长完整覆盖256候选bin（旧32图2page只128bin不能直接容量用），samePFN/ordinal/order与真实PTE绑定，observer卸载后6PMU。N0三N32/36窗先过，才18fresh216窗有限scan。真实table关联/VA-ASID对照另冻，physical命名仍未认证。
+
+- **descriptor-bound reach N0通过 / 当前TLB负责人 / 触发=同binary及锁定资格raw后18process216window**：`docs/reviews/2026-10-13-tlb-observed-reach-qualification.md`，source7f1c824/build3a4ad87/launchc9e5231；3fresh192capt/36PMU/20SHA，walk全部0/IR/I门过；实际leafpages1/32、leaf64Bgroups12/32。N32辅助cachetap差不作主结论，same demandPA不等于全部cache活动；steady表/HPA未知，scan不命名physical2048/8ways。
