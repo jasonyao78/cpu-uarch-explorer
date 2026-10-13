@@ -551,3 +551,5 @@
 - **TLB persistent exact-owned observer有限能力冻结 / 当前TLB负责人 / 触发=actual bytes/VM/双NDK/typed生产链后3进程**：`docs/design/2026-10-13-translation-persistent-read.md`，private requestVA map替代重复attach/fork，PID常量、VA匹配后才helper113，动态root index只own pgd。先24节点有限能力，不计capacity；large-N graph/PA关联及machine HPA仍OPEN，旧64capture程序/终态不改。
 
 - **TLB persistent observer有限能力完成 / 当前TLB负责人 / 触发=large-N graph和VA/ASID身份倍增对照冻结**：`docs/reviews/2026-10-13-translation-persistent-read-results.md`，sourcec9a71e2/builda49c2b0/launch6eb6621；3/3 fresh、24/24capture、20raw SHA及registration边独立核验。entry102/return32，2program/1map/1fork服务8nodes，全部FD回收；same PID程序仅private requestVA输入更新，sticky error不能reset。无PMU/容量，machine HPA/steady CONT未知，physical0/3；下一直接large-N身份+固定VA/dataPFN真实PTE关联，ASID复用控制须扣清context/intermediate解释，不简单乘2报2048。
+
+- **TLB VA/ASID身份倍增鉴别草案 / 当前TLB负责人 / 触发=large-N descriptor-PMU与table关联先闭环后冻结**：`docs/design/2026-10-13-tlb-translation-identity-multiplicity.md`。同N-data-IPA的A单alias/B双VA/C双context对照，first-vs-second pass避免本地prewarm消掉跨context容量；context/TLBI/ASID观测及intermediate表变化是必测残余。未实现/未采样，不简单2N报物理2048。当前三物理参数0/3。
