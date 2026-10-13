@@ -26,3 +26,5 @@
 ## 源码与提交谱系
 
 branch `codex/sm8650-tlb-hierarchy-r2`；C/consumer/driver source `401086c`；build `8f2aed8`；实际launch `b28f7f672c6087d0b08f06c8e4328851ea328c29`；二进制SHA `17afa2a459877a05e90271c13a382d05c32811d257318b5a2939fe87f813c36f`。NDK27.2/API34/O2/static双构建相同、两个实际C计划、四套Capstone解码，15生产链测试全部通过（counter软件夹具，不冒称上板）；组件 `probes/diagnostic/rob_issue_marker.c`、`tools/diagnostic/rob_issue_marker_analysis.py`、`run_sm8650_rob_issue_marker.py`。private `data/private/20261013T094844Z-rob-issue-marker-qualification`；CPU端点温度[39.3, 41.9]°C，环境/计数技术门完整；未改全局环境，无journal。完整diagnostic回归尚运行，另交证据后才报告通过。
+
+完整diagnostic回归终态：647/647通过579.112秒，源码b28f7f6；记录 `docs/reviews/evidence/2026-10-13-rob-issue-marker/regression.json`，不包括随后新增SB对照模块。早先错误-t发现入口未执行测试，不算回归失败或通过。formal runner/analysis/CTest路径未改，本轮未重跑。

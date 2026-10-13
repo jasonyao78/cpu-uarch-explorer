@@ -30,3 +30,8 @@ branch `codex/sm8650-tlb-hierarchy-r2`；source7f1c824（C f9c9e1b/consumer b45d
 两NDK27.2/API34/O2/static字节一致、12actual C layouts及真实ELF 4ISA loop独立解码；15生产链测试含完整scan软件正例/transport坏帧/重hash/错PID/PFN/request/source/资格绑定/删失；完整diagnostic632/632通过549.508s（source c9e5231），formal paths未改、不冒称本轮重跑。private `data/private/20261013T075243Z-tlb-observed-reach-scan`，public `docs/reviews/evidence/2026-10-13-tlb-observed-reach/scan-analysis.json` / `scan-independent-check.json` / `scan-windows.csv`。52416个安装CONT全部0只该时点；端点CPU[38.4, 41.9]°C，无环境事务或全局设置写，不认证窗内恒频。
 
 本有限协议结束。下一优先严格区分硬件coalescing/PTE.CONT、固定VA/dataPFN实际table关联、同IPA的VA/ASID身份倍增（`docs/design/2026-10-13-tlb-translation-identity-multiplicity.md` 尚草案）；不能继续同grid加密追某个数字。ROB仍需独立issued/retired/单位和activeconstraint，`docs/design/2026-10-13-rob-near-far-marker-draft.md` 尚草案。三最终参数的目标实測独立识别0/3，官方规格确认与实測独立识别分列；main/远端未集成。
+
+
+## r0p1格式启发的事后辅助检查（不是冻结主判据）
+
+以原始selected VA>>14分组，要求同组两个已选leaf的Linux PFN>>2相等，仅标记Linux-PA-compatible候选，绝不当实际hardware coalesced位。完整18process来源manifest/hash和匿名计数 `docs/reviews/evidence/2026-10-13-tlb-observed-reach/linux-pa-coalescing-candidates.json`。N1536 packed有384个双选leaf的VA quartet，其中Linux PA兼容分别9/3/2（E0/1/2）；N1792为0/2/3。spaced每quartet只有一个选leaf。**已观察到的Linux PA自然连续性不能单独解释约1的walk差**；但Gunyah的IPA→HPA未知，不能把这个条件检查升级为所有hardware coalescing排除。可能还有未选leaf预取／部分有效条目，不据此反推物理entries。规格核验 `docs/reviews/2026-10-13-x4-r0p1-source-audit.md`，下一描述符占用剂量对照另冻结。

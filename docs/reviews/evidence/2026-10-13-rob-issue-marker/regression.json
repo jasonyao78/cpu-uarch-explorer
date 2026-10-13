@@ -1,0 +1,11 @@
+{
+  "source": "b28f7f672c6087d0b08f06c8e4328851ea328c29",
+  "tests": 647,
+  "seconds": 579.112,
+  "exit_code": 0,
+  "log_sha256": "358c1c673d6d9841fd842fb536ffe711ac31dfe95313ce33143dedff5ea67528",
+  "log_path": "/tmp/diagnostic-20261013-issue-marker-final.log",
+  "command": ".venv/bin/python -m unittest discover -s tools/diagnostic/tests",
+  "new_SB_fenced_module_not_in_this_run": true,
+  "first_failed_discovery_t_option_ran_zero_tests": true
+}

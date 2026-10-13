@@ -1,0 +1,368 @@
+{
+  "raw_manifest_sha256": "d903968cc35323cfa892ad5387b0953ac714d1dfd8fdd6e275c0eb05f64d19b3",
+  "measurement": false,
+  "initial_linux_PA_only": true,
+  "HPA_UNKNOWN": true,
+  "processes": [
+    {
+      "process": "e0-n32-r0",
+      "nodes": 32,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 24,
+          "multi_selected_groups": 8,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 32,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e0-n1024-r0",
+      "nodes": 1024,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 768,
+          "multi_selected_groups": 256,
+          "linux_PA_16KiB_compatible_multi_groups": 9,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 1024,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e0-n1536-r0",
+      "nodes": 1536,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1152,
+          "multi_selected_groups": 384,
+          "linux_PA_16KiB_compatible_multi_groups": 9,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 1536,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e0-n1792-r0",
+      "nodes": 1792,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1344,
+          "multi_selected_groups": 448,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 1792,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e0-n2048-r0",
+      "nodes": 2048,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1536,
+          "multi_selected_groups": 512,
+          "linux_PA_16KiB_compatible_multi_groups": 2,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 2048,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e0-n2304-r0",
+      "nodes": 2304,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1728,
+          "multi_selected_groups": 576,
+          "linux_PA_16KiB_compatible_multi_groups": 173,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 2304,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e1-n2304-r1",
+      "nodes": 2304,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1728,
+          "multi_selected_groups": 576,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 2304,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e1-n2048-r1",
+      "nodes": 2048,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1536,
+          "multi_selected_groups": 512,
+          "linux_PA_16KiB_compatible_multi_groups": 1,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 2048,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e1-n1792-r1",
+      "nodes": 1792,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1344,
+          "multi_selected_groups": 448,
+          "linux_PA_16KiB_compatible_multi_groups": 2,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 1792,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e1-n1536-r1",
+      "nodes": 1536,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1152,
+          "multi_selected_groups": 384,
+          "linux_PA_16KiB_compatible_multi_groups": 3,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 1536,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e1-n1024-r1",
+      "nodes": 1024,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 768,
+          "multi_selected_groups": 256,
+          "linux_PA_16KiB_compatible_multi_groups": 4,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 1024,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e1-n32-r1",
+      "nodes": 32,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 24,
+          "multi_selected_groups": 8,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 32,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e2-n32-r0",
+      "nodes": 32,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 24,
+          "multi_selected_groups": 8,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 32,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e2-n1024-r0",
+      "nodes": 1024,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 768,
+          "multi_selected_groups": 256,
+          "linux_PA_16KiB_compatible_multi_groups": 1,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 1024,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e2-n1536-r0",
+      "nodes": 1536,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1152,
+          "multi_selected_groups": 384,
+          "linux_PA_16KiB_compatible_multi_groups": 2,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 1536,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e2-n1792-r0",
+      "nodes": 1792,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1344,
+          "multi_selected_groups": 448,
+          "linux_PA_16KiB_compatible_multi_groups": 3,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 1792,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e2-n2048-r0",
+      "nodes": 2048,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1536,
+          "multi_selected_groups": 512,
+          "linux_PA_16KiB_compatible_multi_groups": 4,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 2048,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    },
+    {
+      "process": "e2-n2304-r0",
+      "nodes": 2304,
+      "shapes": [
+        {
+          "shape": 0,
+          "virtual_16KiB_groups": 1728,
+          "multi_selected_groups": 576,
+          "linux_PA_16KiB_compatible_multi_groups": 22,
+          "largest_selected_group": 2
+        },
+        {
+          "shape": 1,
+          "virtual_16KiB_groups": 2304,
+          "multi_selected_groups": 0,
+          "linux_PA_16KiB_compatible_multi_groups": 0,
+          "largest_selected_group": 1
+        }
+      ]
+    }
+  ]
+}
