@@ -1,0 +1,117 @@
+{
+  "status": "OWN_DIRECT_COUNTER_NOT_QUALIFIED",
+  "source_head": "b4401db23f6253b2aa12bb25330b7793ce3558fd",
+  "binary_source_head": "2634f1ef2b1612e78d9b97987a25e633ca3ce0b9",
+  "binary_sha256": "c2b1a4ffffb197a8f6967152970aa337b298de11d8465b6a5b107bfed4a5177b",
+  "processes": [
+    {
+      "epoch": 0,
+      "exit_code": 0,
+      "accepted_emitted_windows": 24,
+      "classification": {
+        "status": "OWN_DIRECT_COUNTER_QUALIFIED",
+        "checks": {
+          "load_signal": true,
+          "store_signal": true,
+          "load_cross": true,
+          "store_cross": true,
+          "load_IR": true,
+          "store_IR": true
+        },
+        "load_minus_nop": [
+          -443.5,
+          0.0,
+          8205.5,
+          5.0
+        ],
+        "store_minus_nop": [
+          -471.0,
+          1.0,
+          5.0,
+          8198.0
+        ],
+        "physical_capacity_certified": false,
+        "short_window_precision_certified": false
+      }
+    },
+    {
+      "epoch": 1,
+      "exit_code": 0,
+      "accepted_emitted_windows": 24,
+      "classification": {
+        "status": "OWN_DIRECT_COUNTER_QUALIFIED",
+        "checks": {
+          "load_signal": true,
+          "store_signal": true,
+          "load_cross": true,
+          "store_cross": true,
+          "load_IR": true,
+          "store_IR": true
+        },
+        "load_minus_nop": [
+          2.0,
+          0.0,
+          8198.0,
+          0.0
+        ],
+        "store_minus_nop": [
+          2.0,
+          1.0,
+          11.0,
+          8198.5
+        ],
+        "physical_capacity_certified": false,
+        "short_window_precision_certified": false
+      }
+    },
+    {
+      "epoch": 2,
+      "exit_code": 1,
+      "accepted_emitted_windows": 1,
+      "classification": {
+        "status": "OWN_DIRECT_COUNTER_NOT_QUALIFIED",
+        "failure": {
+          "reason": "metadata-changed",
+          "errno": 0
+        },
+        "physical_capacity_certified": false
+      }
+    }
+  ],
+  "accepted_emitted_windows": 49,
+  "raw_sha256": {
+    "final-environment.json": "09161550051266b544311fc48b415a6c49d2e0ea30c6d082bc0910c1e17357bd",
+    "e1-pre-environment.json": "189a141b5097c91a04329f8563aa64e4722ac899d7fb8f0f5cf2ec0ea40b8e2f",
+    "e2.stdout.jsonl": "17a6859fc2ad63d7a6a5cda63b2606851a7184ce507e1e0987a4addf5d903b17",
+    "e0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-analysis.json": "fd9c8863a094630eeff31071e4e5b975324c1914a766976f5f4fdd02e4bec133",
+    "e1-post-environment.json": "5115902726670113f0962375162309b40ece1371101e1cd02d2c0b744989b58a",
+    "transaction-helper.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "e2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-analysis.json": "4ed7af95aada32fc8ae33510ec03ee481d6779cf7ed86fc76d568019d15c254b",
+    "e0-pre-environment.json": "3902be8e456c0701658e8534b3e5ca6431ee201c1ea4294e4be3d6ed49422253",
+    "initial-environment.json": "57527c1b6e303c52434507d8f1fab40ffb60fb2f40974e1973c5b06baf10deb4",
+    "e0-analysis.json": "70a6dc34382d129de1cb9653e866736825a0314f782359f56ad8679211e9111f",
+    "consumer.py": "a1dc0a4a1a0562c9f9046279871ad3d7f568acdca9a252611294162f16224b7d",
+    "e1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "manifest.json": "24d51dd7135f93dae2accc7fca9f652dd14fee907a9521784a4e0e57eed4ce16",
+    "e0.stdout.jsonl": "3a7c1e0faf117a9fef5324fc5e65b9079680e602511d4798fee39115e98ab6de",
+    "e2-pre-environment.json": "3dbd6e0c5d8d0b817b36e1ef1681705bb6d70a067958f570e2229cb5403216c3",
+    "e2-post-environment.json": "5f1bef23147014bc7b3de626e0743435d9be2893bb059da1df892ecfb64abb8e",
+    "driver.py": "342bd6c202e5e1816cb34ac87781c0fe45b5352bcfb5ca544aec37097c5314ee",
+    "e1.stdout.jsonl": "eff181b3a263e99163150818ddfb0c064af76b81d183ffa5c38a1866590cde8a",
+    "e0-post-environment.json": "1185d0b62fde836b0fecf1a85fcf9eaa0c55e0a2fd3cdda91adebc639cdc8566"
+  },
+  "raw_inventory_sha256": "cbd39e1af23af63767dc3b35355ec76d11e2febf35a314702a751560566ca741",
+  "transaction_sha256": "b5237e8ed158a41353b6872cfe2aaf19aa4097d72ca96662d68020a230b2028e",
+  "transaction_summary": {
+    "state": "restored",
+    "baseline": 0,
+    "requested": 1,
+    "applied_actual": 1,
+    "restore_after": 0
+  },
+  "first_stop_preserved": true,
+  "physical_capacity_certified": false
+}
