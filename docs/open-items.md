@@ -604,3 +604,6 @@
 当前4KiB single-thread L1目标已完成相邻转折：i48→49、d96→97，各六cache-control primary曲线复制，粗/细/资格合计2700窗。官方fully-assoc及共享L2 2048/256×8分列确认；L1其他page-size/ASID/I-D跨干扰及replace-policy未做，归当前TLB负责人，触发=本机4KiB容量报告完成后冻结另案。完整selector/HPA/稳态coalescing、L2 effective leaf独立辨识仍OPEN，不为官方数回救旧混合reach。报告 `docs/reviews/2026-10-13-sm8650-tlb-hierarchy-findings.md` 与两fine scan report，source721539c/builda32587f；旧0/3仅旧L2+ROB独立识别项，不是新明确L1目标的总进度。
 
 ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身份过，E2第二窗metadata-changed而whole not-qualified，global perf profile恢复0。失效窗口缺原metadata细节登记为数据缺口，不猜具体调度根因。报告 `docs/reviews/2026-10-13-pmu-own-counter-results.md`。新固定72attempt协议 `docs/design/2026-10-13-pmu-bounded-counter.md` 已注册/构建，最大1invalid/process、每role≥7/8、原正控不改；先qualification，再另冻short ROI/supply/units，physical ROB仍OPEN，不复跑v1追门。
+
+
+2026-10-13 ROB counter有限资格更新：新bounded source2479353/build+actual launch014f981，3/3fresh72/72有效、0invalid、原8192±82/absoluteFD/metadata门全过，profile0→1→0/restored。报告 `docs/reviews/2026-10-13-pmu-bounded-counter-results.md`（2ac8d40）；v1失败不重判。708diagnostic通过618.542s覆盖至该代码，后续 `docs/design/2026-10-13-rob-direct-fenced-marker.md` / `probes/diagnostic/rob_direct_fenced_marker.c` / `tools/diagnostic/rob_direct_fenced_analysis.py` 六事件short ROI新资格source43e1def/build231123f另作，未宣称物理ROB。workflow `docs/methodology/tlb-hierarchy-and-counter-window-workflow.md`。

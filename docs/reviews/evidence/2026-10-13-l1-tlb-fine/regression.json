@@ -1,0 +1,11 @@
+{
+  "scope": "full diagnostic tests through bounded counter source014f981; excludes later direct fenced source43e1def",
+  "source_commit": "014f981",
+  "command": ".venv/bin/python -m unittest discover -s tools/diagnostic/tests",
+  "tests": 708,
+  "elapsed_seconds": 618.542,
+  "exit_code": 0,
+  "log_sha256": "979107804fd2144ee3c264b11ff09ba29b84ab4bb7156aa75db68e965b706a84",
+  "formal_runner_analysis_ctest_rerun": false,
+  "new_direct_fenced_targeted_tests": 2
+}
