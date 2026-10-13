@@ -1,0 +1,22 @@
+{
+  "source_commit": "2475db209c739ebc696b7f9669b3ae102252e2ba",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 probes/diagnostic/rob_cache_marker.c -o build/aarch64-linux-android/release/diagnostic/rob_cache_marker",
+  "source_sha256": {
+    "probes/diagnostic/rob_cache_marker.c": "c456011d769ba416a937467f5b8e31e3452aab084d34450d9616a9ef480ae130",
+    "tools/diagnostic/rob_cache_marker_analysis.py": "9a844410770d252d8d2e6f37bd4e835afe9d26a43835b2d074d950258efba612",
+    "tools/diagnostic/run_sm8650_rob_cache_marker.py": "a56d1cfe13e25910041a1ffd4dad857d9926d1856be5b23f8e560c325872a16a",
+    "tools/diagnostic/analyze_cold_pair.py": "44da32f8cf491c1c7388a4811b362780880ee0828e50119223baf274ecab3a09"
+  },
+  "binaries": {
+    "rob_cache_marker": "4994994c780f1129128f9683dc264d8496d72d4446d41ce53bd0f245d98935b8"
+  },
+  "plan_sha256": "96021aae3f38d2b0af58cfe1f8835d3e61ba6973dd7fa04e1503f379034a4c5b",
+  "two_independent_builds_equal": true,
+  "actual_native_plans": 2,
+  "independent_capstone_programs": 4,
+  "tests": 6,
+  "hardware_started": false
+}
