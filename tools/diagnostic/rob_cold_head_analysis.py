@@ -34,10 +34,12 @@ def audit_process(rr,c,registered):
    if block['warm']:packets.audit_envelope(block['warm'],idx)
  return dict(condition=c['name'],args=c['args'],status='complete',config=rr[0],programs=rr[1:5],runtime=rt,samples=formal,warmup_windows=warm,invalid_packets=parsed['invalid'],final=rr[-1])
 def analyze(rows):
+ """Issue/cache palettes remain labeled by their actual event numbers."""
  _require(len(rows)==16,'cold full16 processes');points=[];by={};long=[];cache=[];markers=[]
  for row,c in zip(rows,conditions()):
   _require(row['condition']==c['name'] and row['status']=='complete','cold condition');x=copy.deepcopy(row);x['config'].update(chain=row['config']['heads'],gap=0,filler='cold-head');v=admission.classify_process(x,c)
-  if row['config']['palette']=='cache':v['supply_qualified']=None;v['classification']='CACHE_PROFILE_NO_ICACHE_GATE';v['cache_fields']='0x3-L1D/0x17-L2D'
+  if row['config']['palette']=='cache':
+   v['supply_qualified']=None;v['classification']='CACHE_PROFILE_NO_ICACHE_GATE';v['cache_fields']='0x3-L1D/0x17-L2D';v['deltas']={role:{'0x3' if event=='0x22' else '0x17' if event=='0x1' else event:values for event,values in counts.items()} for role,counts in v['deltas'].items()}
   elif row['config']['state']=='cold':markers.append(v['marker_observable'] and v['supply_qualified'])
   points.append(v);by[c['name']]=row
  contrasts=[]
