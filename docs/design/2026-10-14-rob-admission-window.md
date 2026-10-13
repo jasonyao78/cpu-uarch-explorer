@@ -1,4 +1,4 @@
-# 自有发射标记的 admission 转折 v1.1
+# 自有发射标记的 admission 转折 v1.2
 
 ## 本次任务的目的（给人类看）
 
@@ -27,3 +27,7 @@ chain16→32延长deadline，若转折明显移动则拒绝稳定capacity解释�
 旧v1配方构建曾在本机验证，但从未上板。资源批暴露最后RX和内核往返污染，所以本版使用 `probes/diagnostic/rob_filler_resource_batch.c` 的4warm+1正式共享绝对FD包络；每个warm完整current metadata/硬件/架构审计，原始type=warm-roi与正式分开，84进程共86016warm+21504正式。内层无FD read/getcpu系统调用、无代码/权限写、无输出；时间标签是整个FD包络。payload/ISA/branch/统计门全部不变。
 
 首先执行全部12个gap0 fresh（两chain×三filler×两epoch），逐进程classify_process必须reached，即原8正控/结构阴性/IR/供给/eligible/条件far≥.9全部通过，才接续72个非0扫描；任何N0失败停止而不执行非0点。任何完整度、架构或binding故障亦停止/finally恢复，未采部分不填0。N0门是实际生产消费者调用，不能只在说明中承诺。
+
+## v1.2 固定序号metadata失效预算
+
+正式新采样采用 `docs/design/2026-10-14-bounded-owned-roi-packets.md`：每process最多1个packet因实际ROI-metadata-changed拒绝，256attempt必须全部account，剩余255/256或256/256；不retry、不补样、部分warm原样保存。每成对比较使用共同有效trial且≥31/32，实际trial标签贯穿near→far conditional；其它门/矩阵/N0优先顺序不变。源码配置version5，无CLI放宽开关。v1/v1.1未执行，旧资源失败亦不重命名。
