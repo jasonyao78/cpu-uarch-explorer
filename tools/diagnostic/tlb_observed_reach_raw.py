@@ -19,7 +19,10 @@ def audit_raw(raw):
  prior=m.get('qualification_input')
  if phase=='qualification':need(prior is None,'observed qualification cannot borrow prior')
  else:
-  need(type(prior)is dict and type(prior.get('raw_directory'))is str,'observed qualified prior required');p=Path(prior['raw_directory']);need(p.resolve()!=raw.resolve() and sha(p/'manifest.json')==prior['manifest_sha256'],'observed prior manifest');q,h=audit_raw(p);need(q['phase']=='qualification' and model.analyze(q)['status']=='OBSERVED_GRAPH_QUALIFIED' and q['binary_sha256']==m['binary_sha256'] and model.exact(h,prior['raw_sha256']),'observed immutable qualified prior')
+  need(type(prior)is dict and type(prior.get('raw_directory'))is str,'observed qualified prior required');p=Path(prior['raw_directory']);need(p.resolve()!=raw.resolve() and sha(p/'manifest.json')==prior['manifest_sha256'],'observed prior manifest');
+  try:q,h=audit_raw(p)
+  except (ValueError,FileNotFoundError) as error:raise ValueError('observed qualification prior failed: '+str(error)) from error
+  need(q['phase']=='qualification' and model.analyze(q)['status']=='OBSERVED_GRAPH_QUALIFIED' and q['binary_sha256']==m['binary_sha256'] and model.exact(h,prior['raw_sha256']),'observed immutable qualified prior')
  profile=json.loads(blob(head,'configs/platforms/redmi-k70pro-01.json'));policy=copy.deepcopy(profile['environment_profiles']['charging-thermal']['measurement_environment']);policy['preconditions']['cpufreq_governor']='walt';need(model.exact(json.loads((raw/'environment-policy.json').read_text()),policy),'observed environment policy');inventory={'manifest.json','host-plan','driver.py','consumer.py','environment-policy.json','initial-environment.json','final-environment.json'}|{e['name']+suffix for e in entries for suffix in ('.stdout.jsonl','.stderr.log','-pre-environment.json','-post-environment.json')};rows=[]
  with tempfile.TemporaryDirectory() as t:
   td=Path(t)
