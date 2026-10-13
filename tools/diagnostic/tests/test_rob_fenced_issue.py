@@ -52,3 +52,11 @@ class FencedIssue(unittest.TestCase):
    elif kind=='PFN':bad[-1]['pagemap_after'][0]+=1
    with self.subTest(kind=kind),self.assertRaises(ValueError):m.audit_process(bad,m.conditions('qualification')[0],self.plans)
   with self.assertRaises(ValueError):m.conditions('scan')
+
+ def test_undefined_far_threshold_is_unknown_not_zero_response(self):
+  m=self.model();x=self.matrix()
+  for z in x['rows'][0]['samples']:
+   if z['marker']=='taps' and z['trial']<4:
+    if z['control']=='architect' and z['fence']=='pre':z['counts'][3]-=3
+    elif z['control']=='speculate' and z['fence']=='pre':z['counts'][3]+=3
+  p=m.analyze(x)['processes'][0];self.assertIsNone(p['thresholds']['far']);self.assertGreater(len(p['eligible_trials']),0);self.assertIsNone(p['far_given_near_rate']);self.assertFalse(p['gates']['far_given_near'])
