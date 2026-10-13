@@ -579,3 +579,6 @@
 2026-10-13下一有限候选（未冻结／未实现）：TLB `docs/design/2026-10-13-tlb-descriptor-dose-draft.md` 以stride≥5消除双选VA quartet，N1536固定、实际PT足迹扫过joint-budget2048；ROB观察 `docs/design/2026-10-13-pmu-user-reader-draft.md` 先证own perf mmap/index/seqlock，当前sysctl0未更改，任何临时全局写需独立恢复事务，不暗改。两条不作已交付结果／capacity。
 
 2026-10-13剂量实现前沿：`docs/design/2026-10-13-tlb-descriptor-dose.md` v1.0，producer `probes/diagnostic/tlb_descriptor_dose.c`、analysis/raw/driver 三文件已实现；28 actual布局与9项producer/BPF interpreted/删失测试通过。正式27process324窗64,896观察（草案中估数以正式计算为准），尚无目标数据，待双NDK／immutable生产链后N32资格先行。PMU用户读取仍仅草案，sysctl0未动。
+
+
+2026-10-13dose资格完成：sourcef997cb7/buildc1256db/launchac1903f，actual3fresh192观察36窗20SHA，DOSE_GRAPH_QUALIFIED，两个shape所有18data窗walk0。报告 `docs/reviews/2026-10-13-tlb-descriptor-dose-qualification.md`。下一锁定同binary+资格raw执行27processformal，技术/环境first-stop，不从旧stride3或旧PhaseA填格。

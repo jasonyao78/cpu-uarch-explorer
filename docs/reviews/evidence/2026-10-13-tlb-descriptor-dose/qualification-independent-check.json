@@ -1,0 +1,33 @@
+{
+  "raw_directory": "20261013T110007Z-tlb-descriptor-dose-qualification",
+  "source_head": "ac1903f0e3debd456de30799ce99c3c971bc91b3",
+  "binary_source_head": "f997cb7aa0efd5e380499793e99db73d78e5eb8c",
+  "binary_sha256": "00955f97ab0541bb557cdfeaa6518fcb43f23c9e1a35ef40775f17d5ed7b2fa4",
+  "raw_sha256": {
+    "consumer.py": "e976cef7dc2aeaf96f00f5f6d26cef32bc69f6d004652bd4b11c27607be0feb3",
+    "driver.py": "6afeef9b20457fd4b407b14d8ff77e647c88639cb7d661cc17f827215cb41eba",
+    "e0-q-n32-r0-actual-plan.json": "3312422eb8547812cd83ea54b87a1923b1c654610a5d125bc25c7ef81aca5b7d",
+    "e0-q-n32-r0-post-environment.json": "764f1f3bcd9dc4594646470999e4c561d56bd736e9fb225b7d176a902aac960a",
+    "e0-q-n32-r0-pre-environment.json": "276ea960c185dc3bb2c39abbce8e0c9d1cb4f69929a0adbef019132b1e697d94",
+    "e0-q-n32-r0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e0-q-n32-r0.stdout.jsonl": "cdbfc9bb85bf31c71934960abd08aed8a267432bd3504b952457c079f7d01b81",
+    "e1-q-n32-r1-actual-plan.json": "a3d700ff07ecab5ff5522c5c2b24b326b5d26c745627ea88510892d5bc339404",
+    "e1-q-n32-r1-post-environment.json": "91a40d63b263f19653e3ab9b29897551f96251f6c904bb45d431144f2a1162a7",
+    "e1-q-n32-r1-pre-environment.json": "a73b3c6fbe076d8af95fd119f1bb3a9d2271ab77109b95aeaafc5e9dec5e041e",
+    "e1-q-n32-r1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-q-n32-r1.stdout.jsonl": "e22f40fe5a3d8d8563437bc5a9d3a9e398e4403b3281cc25466a998e6bd5c6a5",
+    "e2-q-n32-r0-actual-plan.json": "bd0c759809d3794f2c192dc45395aee57ef5e07182f7ce4de2de1e11537375e2",
+    "e2-q-n32-r0-post-environment.json": "503d087acff0922a7d85694c8cb3067aa50034eb6a9ee81cb479bec61967e458",
+    "e2-q-n32-r0-pre-environment.json": "a277f1b620c30398dce5a830d01d0eb8e604d4c25d9bd4f01e24ff5aec3c55d1",
+    "e2-q-n32-r0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-q-n32-r0.stdout.jsonl": "8a2dd065948fea79b262c13f271302a25dbdceed313f1781d6824854acdd9c34",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "final-environment.json": "1c8d430946a0c5e2ef114371a6d944e6421d9698d17d5abfbf117d3bade040e1",
+    "initial-environment.json": "d2cd869770b8df379362d476758dc1186ec7179723c8afcb115ae48ce5b77e89"
+  },
+  "installations": 192,
+  "windows": 36,
+  "independent_original_identity_and_window_checks": true,
+  "status": "DOSE_GRAPH_QUALIFIED",
+  "physical_capacity_certified": false
+}

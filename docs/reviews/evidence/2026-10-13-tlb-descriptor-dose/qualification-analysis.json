@@ -1,0 +1,589 @@
+{
+  "mode": "tlb-descriptor-dose",
+  "phase": "qualification",
+  "windows": 36,
+  "processes": [
+    {
+      "process": "e0-q-n32-r0",
+      "nodes": 32,
+      "reverse": false,
+      "dose_pages": 515,
+      "gates": {
+        "retired_IR": true,
+        "instruction_background": true
+      },
+      "background_mean": [
+        73.16666666666667,
+        59,
+        0,
+        0,
+        0,
+        4
+      ],
+      "curves": [
+        {
+          "shape": 0,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              10.281664689381918,
+              10.277576287587484,
+              10.30927069981893
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              6.29425048828125e-05,
+              6.4849853515625e-05,
+              6.4849853515625e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.6449661254882812,
+              0.6480865478515625,
+              0.6480169296264648
+            ],
+            "0x1": [
+              2.86102294921875e-05,
+              1.811981201171875e-05,
+              1.430511474609375e-05
+            ]
+          }
+        },
+        {
+          "shape": 1,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              11.595107873280844,
+              11.58309825261434,
+              11.588790734608969
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              9.441375732421875e-05,
+              9.5367431640625e-05,
+              6.4849853515625e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.9258937835693359,
+              0.9228019714355469,
+              0.9225473403930664
+            ],
+            "0x1": [
+              2.574920654296875e-05,
+              2.193450927734375e-05,
+              1.621246337890625e-05
+            ]
+          }
+        }
+      ],
+      "spaced_minus_packed": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "descriptor_shapes": [
+        {
+          "shape": 0,
+          "leaf_table_pages": 1,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 20,
+          "linux_pmd_64B_groups": 1,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "shape": 1,
+          "leaf_table_pages": 32,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 32,
+          "linux_pmd_64B_groups": 4,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "process": "e1-q-n32-r1",
+      "nodes": 32,
+      "reverse": true,
+      "dose_pages": 515,
+      "gates": {
+        "retired_IR": true,
+        "instruction_background": true
+      },
+      "background_mean": [
+        95.16666666666667,
+        59,
+        0.8333333333333334,
+        0,
+        1.6666666666666667,
+        6.666666666666667
+      ],
+      "curves": [
+        {
+          "shape": 0,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              10.267398675282797,
+              10.30855162938436,
+              10.290358384450277
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              6.40551249186198e-05,
+              3.353754679361979e-05,
+              3.353754679361979e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.6455262502034506,
+              0.6510938008626302,
+              0.6505149205525717
+            ],
+            "0x1": [
+              2.9881795247395832e-05,
+              1.4623006184895832e-05,
+              1.4623006184895832e-05
+            ]
+          }
+        },
+        {
+          "shape": 1,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              11.608896096547445,
+              11.805952866872152,
+              11.609412034352621
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              3.353754679361979e-05,
+              3.353754679361979e-05,
+              3.353754679361979e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.9276631673177084,
+              0.9637616475423177,
+              0.925373395284017
+            ],
+            "0x1": [
+              1.9391377766927082e-05,
+              4.132588704427083e-06,
+              1.5576680501302082e-05
+            ]
+          }
+        }
+      ],
+      "spaced_minus_packed": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "descriptor_shapes": [
+        {
+          "shape": 0,
+          "leaf_table_pages": 1,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 20,
+          "linux_pmd_64B_groups": 1,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "shape": 1,
+          "leaf_table_pages": 32,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 32,
+          "linux_pmd_64B_groups": 4,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "process": "e2-q-n32-r0",
+      "nodes": 32,
+      "reverse": false,
+      "dose_pages": 515,
+      "gates": {
+        "retired_IR": true,
+        "instruction_background": true
+      },
+      "background_mean": [
+        71.83333333333333,
+        59,
+        0,
+        0,
+        0,
+        4.666666666666667
+      ],
+      "curves": [
+        {
+          "shape": 0,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              10.285182158152262,
+              10.262635389963785,
+              10.275224844614664
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              0.0001544952392578125,
+              6.4849853515625e-05,
+              6.4849853515625e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.6502666473388672,
+              0.6440849304199219,
+              0.6471242904663086
+            ],
+            "0x1": [
+              1.8437703450520832e-05,
+              2.0345052083333332e-05,
+              1.7484029134114582e-05
+            ]
+          }
+        },
+        {
+          "shape": 1,
+          "nodes": 32,
+          "walk_rates": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "counts_by_event": {
+            "0x11": [
+              11.616922537485758,
+              11.603649298350016,
+              11.580308119455973
+            ],
+            "0x8": [
+              4.000011444091797,
+              4.000011444091797,
+              4.000011444091797
+            ],
+            "0x5": [
+              3.4332275390625e-05,
+              6.4849853515625e-05,
+              6.67572021484375e-05
+            ],
+            "0x34": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "0x3": [
+              0.9222993850708008,
+              0.9221572875976562,
+              0.9238691329956055
+            ],
+            "0x1": [
+              1.7484029134114582e-05,
+              1.7484029134114582e-05,
+              1.8437703450520832e-05
+            ]
+          }
+        }
+      ],
+      "spaced_minus_packed": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "descriptor_shapes": [
+        {
+          "shape": 0,
+          "leaf_table_pages": 1,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 20,
+          "linux_pmd_64B_groups": 1,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "shape": 1,
+          "leaf_table_pages": 32,
+          "pmd_table_pages": 1,
+          "linux_leaf_64B_groups": 32,
+          "linux_pmd_64B_groups": 4,
+          "observed_installation_cont": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        }
+      ],
+      "qualified": true
+    }
+  ],
+  "floor_negative": true,
+  "physical_capacity_certified": false,
+  "physical_ways_certified": false,
+  "hpa_state": "UNKNOWN",
+  "steady_cont_state": "UNKNOWN",
+  "status": "DOSE_GRAPH_QUALIFIED"
+}
