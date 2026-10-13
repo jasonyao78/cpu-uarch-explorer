@@ -1,0 +1,32 @@
+{
+  "source_commit": "e5349ba14ef9696ddab1478803910aa138daead4",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_sha256": {
+    "probes/diagnostic/rob_filler_resource_hot.c": "c621d2614d405abb3568a9bf10309404f90b4dfe888ec25127559486bc074fdd",
+    "tools/diagnostic/rob_register_fenced_analysis.py": "195ef2db214ce7c45219c93f096365f9360ac656d9d3829bf5ca6b152e2091ad",
+    "tools/diagnostic/rob_filler_resource_analysis.py": "8b0a34f738e13d6efe5379faea51e7821e020f1b3b87029ebd9d1461b9dac939",
+    "docs/design/2026-10-14-rob-filler-resource.md": "b9194ec2a75c2cdffc51bd8e6687ce62edcd3249b64dcdecb09c762286c7fdb2",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/perf_user_counter.h": "fe05d9ad77f47907b8d6721673ae8f34cacaad0fd266fd10175a6315f3c20c95",
+    "tools/diagnostic/rob_filler_resource_hot_analysis.py": "7fd7aa8e4134a1dee15d8e4ef1f238eb348258e92c7ebdf2c8c2548aaccfe7a4",
+    "tools/diagnostic/rob_fenced_issue_analysis.py": "e92c4bd2dad77c89df474d0a8f7065eb309b9fce2164d8ee2aaed1226f238f22",
+    "tools/diagnostic/rob_direct_fenced_analysis.py": "ade4aff48c06db80cfd9f3fdd6690a9344ca864768a21ca7bf8b50f10b185b8a",
+    "tools/diagnostic/pmu_own_counter_analysis.py": "da2df93c45bf93fd707e824d55eb6d9a838ef3292115cc989fc3567d9e240f9a",
+    "tools/diagnostic/run_sm8650_rob_filler_resource_hot.py": "f28bf8dc0460652ce3a7c0daf1109828f474bb94ee8abd8a4e8606906730e21d",
+    "tools/diagnostic/perf_user_access_transaction.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
+    "docs/design/2026-10-14-rob-filler-resource-hot.md": "a8d0fe856aff1cbd0948a2194307b9807b68ec2b56e5fd43bc982cee09a4dca5",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658"
+  },
+  "binary_sha256": "e3b7d91876c0145f5ced30ac3d543e5e01bffb9ec49ba2943798b4287d4c83d5",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 -Iprobes/common probes/diagnostic/rob_filler_resource_hot.c -o build/aarch64-linux-android/release/diagnostic/rob_filler_resource_hot",
+  "two_independent_builds_equal": true,
+  "actual_native_dynamic_plans": 16,
+  "actual_dynamic_programs": 64,
+  "plan_sha256": "7225925ceecd83ad297a19f8f89d00f1fdbe2c3a2aed87788578558e55558801",
+  "dynamic_plan_sha256": "4e548e5c5cc5168cfc855c9a01c8f25f6b8cee100f0af7ac2f0caa9135b55174",
+  "decode_sha256": "647e9e4b79e10485ccff230d2a3151f54a4857b58ff3adbd2895d53bebce128d",
+  "allocation_qualified": false
+}
