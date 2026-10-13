@@ -1,0 +1,26 @@
+{
+  "source_commit": "73dbc1923fc079c13daa273b659212a2f71f5811",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 probes/diagnostic/tlb_descriptor_graph.c -o build/aarch64-linux-android/release/diagnostic/tlb_descriptor_graph",
+  "source_sha256": {
+    "probes/diagnostic/tlb_descriptor_graph.c": "7c5498c5ca76ba7cee159c1860b96cba9cfbd5409383c3ca0a019ff884dd73bc",
+    "probes/diagnostic/translation_install_bpf.h": "d65bf6e0fed41667859adbccaa6b806d987d791f92edba33ac6f11c9abe082b0",
+    "tools/diagnostic/descriptor_graph_analysis.py": "f3da317dee78900546c1577281841638a16e74feffcccc0eeb506b377b54fa6f",
+    "tools/diagnostic/run_sm8650_descriptor_graph.py": "1ade452d55a2966d985faf04928c6b520897c11f57c39163a2ce4b23d285523b",
+    "tools/diagnostic/descriptor_graph_raw.py": "007b282f07d2dbe45af7c2ad5aca128da3f91103ab2527a0728fb6f977bd19b0",
+    "tools/diagnostic/translation_install_analysis.py": "2a38987cd6f9ef5bbd9c87af1bdd556215e2a82ca31eec0540f9ca3cc3fa2ce1",
+    "tools/diagnostic/translation_self_analysis.py": "c011d37065068f2487015bc6532dfc18b08b1dcf11bd4aecb22c6fdfc126f0e5"
+  },
+  "binary_sha256": "8981924d443d36025a8976b805d9dfce3053043fb415466587a903356f9f2fd6",
+  "two_independent_builds_equal": true,
+  "actual_plan_sha256": "36ed8831df8fc1b04d6a1197bcecdb7bb9b9c922b9b91ec8629de85544f7f59e",
+  "actual_bpf_instructions": {
+    "entry": 99,
+    "returning": 32
+  },
+  "actual_kernel_bytes_decoded": true,
+  "btf_sha256": "edf0efa6c0a4d661367567ae7386985c58e42d6e4cc700a0903f8eb831c6c6e1",
+  "associated_tests": 18
+}

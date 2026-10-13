@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "binary_occurrences": 1,
+  "words": [
+    4181721088,
+    2601068544,
+    4043310344,
+    1426063265
+  ],
+  "decoded": [
+    {
+      "mnemonic": "ldr",
+      "operands": "x0, [x0]"
+    },
+    {
+      "mnemonic": "madd",
+      "operands": "x0, x0, x9, x10"
+    },
+    {
+      "mnemonic": "subs",
+      "operands": "x8, x8, #1"
+    },
+    {
+      "mnemonic": "b.ne",
+      "operands": "#0"
+    }
+  ],
+  "same_function_for_both_shapes": true
+}
