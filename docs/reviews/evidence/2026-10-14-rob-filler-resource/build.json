@@ -1,0 +1,30 @@
+{
+  "source_commit": "25dabafd72fa5e7fd5939e9f114247fcb3550893",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_sha256": {
+    "probes/diagnostic/rob_filler_resource.c": "14a5d605064d4db369b3107f99a7b2fa832e75955f70b32ea20dcf958617c85a",
+    "tools/diagnostic/rob_register_fenced_analysis.py": "195ef2db214ce7c45219c93f096365f9360ac656d9d3829bf5ca6b152e2091ad",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/perf_user_counter.h": "fe05d9ad77f47907b8d6721673ae8f34cacaad0fd266fd10175a6315f3c20c95",
+    "tools/diagnostic/rob_filler_resource_analysis.py": "8b0a34f738e13d6efe5379faea51e7821e020f1b3b87029ebd9d1461b9dac939",
+    "tools/diagnostic/rob_fenced_issue_analysis.py": "e92c4bd2dad77c89df474d0a8f7065eb309b9fce2164d8ee2aaed1226f238f22",
+    "tools/diagnostic/rob_direct_fenced_analysis.py": "ade4aff48c06db80cfd9f3fdd6690a9344ca864768a21ca7bf8b50f10b185b8a",
+    "tools/diagnostic/pmu_own_counter_analysis.py": "da2df93c45bf93fd707e824d55eb6d9a838ef3292115cc989fc3567d9e240f9a",
+    "tools/diagnostic/run_sm8650_rob_filler_resource.py": "9a7afd7f15e4283b13db31b621acf544255e2a04bcccd07065b9da597c945783",
+    "tools/diagnostic/perf_user_access_transaction.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
+    "docs/design/2026-10-14-rob-filler-resource.md": "b9194ec2a75c2cdffc51bd8e6687ce62edcd3249b64dcdecb09c762286c7fdb2",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658"
+  },
+  "binary_sha256": "24037cc86164bb3aefd1a7b59aca7f34807a5a77dfe165ac9e34cba4c1bf4f3f",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 -Iprobes/common probes/diagnostic/rob_filler_resource.c -o build/aarch64-linux-android/release/diagnostic/rob_filler_resource",
+  "two_independent_builds_equal": true,
+  "actual_native_dynamic_plans": 16,
+  "actual_dynamic_programs": 64,
+  "plan_sha256": "a9d4d21ea2fd59fde12b65a65593677591063f9ba9270aaa6597aedaa1343438",
+  "dynamic_plan_sha256": "8bab41cfcf8e7da65b9d1c2bd992f418ddea4ac7b7d0905571ed7828167d7ecc",
+  "decode_sha256": "647e9e4b79e10485ccff230d2a3151f54a4857b58ff3adbd2895d53bebce128d",
+  "allocation_qualified": false
+}
