@@ -1,4 +1,4 @@
-# ROB退休阻塞的speculative marker v1.0（仅N0资格冻结）
+# ROB退休阻塞的speculative marker v1.0.2（仅N0资格冻结）
 
 ## 本次任务的目的（给人类看）
 
@@ -10,7 +10,7 @@
 
 一个RX code VA/PFN；所有condition原字节相同，只有marker位置LDR X9,[X1] vs NOP一个word变化，重写/RW->RX/clear-cache在计数外、两mode都做。FMOV D0,X0；k次FSQRT D0,D0；FMOV X12,D0；CBZ X12,marker；B finish；marker LDR或NOP；finish SB；FMOV X0,D0；MRS X12,FPSR；STR X12,[X2]；RET。SB保证marker之后的caller不能在未决分支下贡献错误路径load；先HWCAP_SB检查，缺失命名拒绝，未实证就不假设SB可用。实测input只有0.0/1.0，original返回bits对应input，FPSR0，FPCR0（只清自身FPSR）。N0无filler。
 
-A architect:64次train input0，然后measure0，marker应架构执行；B bypass:train1/measure1，marker应不执行；M speculate:train0/measure1，source分支方向改变，marker可推测执行但不得退休。Load/NOP每control配对，测前同一owned hot marker line读preparation。A/B/M不跨history补格，每trial6格固定轮转，奇trial反序。18trial×6格=108window/process；3epochs×chain16/32=6fresh process/648window，15秒进程间隔。一次JIT调用，移除窗口内libc计时；不把userPMU cycles当direct内存latency。marker/data/code仅own mappings，无BPF在测量时活动。
+A architect:64次train input0，然后measure0，marker应架构执行；B bypass:train1/measure1，marker应不执行；M speculate:train0/measure1，source分支方向改变，marker可推测执行但不得退休。Load/NOP每control配对，测前同一owned hot marker line读preparation。A/B/M不跨history补格，每trial6格固定轮转，每6trial一block、奇block反序（18trial每member每position恰3次）。18trial×6格=108window/process；3epochs×chain16/32=6fresh process/648window，15秒进程间隔。一次JIT调用，移除窗口内libc计时；不把userPMU cycles当direct内存latency。marker/data/code仅own mappings，无BPF在测量时活动。
 
 7events[17,8,112,6,34,59,1] = cycles/IR/LD_SPEC/LD_RETIRED/BR_MIS_PRED_RETIRED/OP_SPEC/L1I_CACHE_REFILL，USER-only GROUP+ID/pinned/noMUX；7不能完整open/read则CAPABILITY_UNAVAILABLE，first failure stop，不降为6假装同合同。group decoder复用 `probes/common/perf_group_read.h`，原结果/codeVA/PFN/stored bytes/typedcounts/time/sysfsbaseline硬门。
 
@@ -23,3 +23,7 @@ A architect:64次train input0，然后measure0，marker应架构执行；B bypas
 ## 实现与证据
 
 `probes/diagnostic/rob_speculative_marker.c`、`tools/diagnostic/rob_spec_marker_analysis.py`、`run_sm8650_rob_spec_marker.py`；tests producer/analysis/raw，实际NDK code/hostplan/独立decode/typed producer→driver→writer→immutable raw攻击通过后才6process。branch codex/sm8650-tlb-hierarchy-r2，primary独占；未完成 `docs/open-items.md`。TLB Gunyah/Stage2及large-N干预独立跟踪，本probe不改变它们。
+
+预采样自审：奇trial反序与六格轮转会只占部分position；已在任何硬件数据之前改成六trial的block反序，实际plan/test钉住均衡。不是事后改门。
+
+预采样窗口自审增补：每condition在64次branch训练后，用training input跑4次同一measure_frame（完整enable/call/disable/read）作不报告的固定wrapper warmup，验证结果/flags。随后一次reported measured input；计数以累计before/after差，不RESET。目的为预热首次ioctl/caller/cache路径而非选择quiet结果；source config显式full_window_warmup_calls=4，所有原门不改。
