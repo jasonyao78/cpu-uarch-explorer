@@ -1,0 +1,7639 @@
+{
+  "decoder": "Capstone 5.0.7",
+  "actual_native_dynamic_programs": 16,
+  "device_indices_must_come_from_current_own_metadata": true,
+  "checks": [
+    {
+      "proposed_context": "16:32,3,4,5,6,7",
+      "marker": "nop",
+      "fence": "none",
+      "word_sha256": "00e5fb06fb6df31762a105378dca60bf9d989049234ce32195854c437324f196",
+      "warm_word_sha256": "339812b32b6057c64fb2dae5e9b477185c7a42829cc942b7aed8d77bc853f052",
+      "instructions": 84,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 24,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmccntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 40,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmxevcntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 128,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 132,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 136,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 140,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 144,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 148,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 152,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 156,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 160,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 164,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 168,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 172,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 176,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 180,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 184,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 188,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 196,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 200,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 204,
+          "mnemonic": "mrs",
+          "operands": "x13, pmccntr_el0"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 212,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 216,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 220,
+          "mnemonic": "mrs",
+          "operands": "x14, pmxevcntr_el0"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 236,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 252,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 292,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 300,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 316,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 332,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "16:32,3,4,5,6,7",
+      "marker": "sink",
+      "fence": "none",
+      "word_sha256": "c782b2eb83fdfe73a83f7c25796a51f951985852db1bb6a0570ec5117b3692d5",
+      "warm_word_sha256": "571d8c952e876b176ffa37fcd6c8cdb74f4360b622edd491de00ae289f10b16b",
+      "instructions": 84,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 24,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmccntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 40,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmxevcntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 196,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 200,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 204,
+          "mnemonic": "mrs",
+          "operands": "x13, pmccntr_el0"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 212,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 216,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 220,
+          "mnemonic": "mrs",
+          "operands": "x14, pmxevcntr_el0"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 236,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 252,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 292,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 300,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 316,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 332,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "16:32,3,4,5,6,7",
+      "marker": "live",
+      "fence": "none",
+      "word_sha256": "09fcec6d1a31ac424e17d53695e0a95dc953b3ae01ef139ddbb8414b16d758b0",
+      "warm_word_sha256": "829db322526904441db1e440cf1f7ded9aea20fb3fa592369b5862e35621f768",
+      "instructions": 84,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 24,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmccntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 40,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmxevcntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 196,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 200,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 204,
+          "mnemonic": "mrs",
+          "operands": "x13, pmccntr_el0"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 212,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 216,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 220,
+          "mnemonic": "mrs",
+          "operands": "x14, pmxevcntr_el0"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 236,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 252,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 292,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 300,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 316,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 332,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "16:32,3,4,5,6,7",
+      "marker": "zero",
+      "fence": "none",
+      "word_sha256": "04bf2251d3efdde64371fe8e921f922b806cc9655396acc7b596ad84100b1cb6",
+      "warm_word_sha256": "d2585a3b25ce97be9a0a17ff6e064c6b79c71cbf687aa3ce95a978c1e86e092c",
+      "instructions": 84,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 24,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmccntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 40,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmxevcntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 196,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 200,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 204,
+          "mnemonic": "mrs",
+          "operands": "x13, pmccntr_el0"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 212,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 216,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 220,
+          "mnemonic": "mrs",
+          "operands": "x14, pmxevcntr_el0"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 236,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 252,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 292,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 300,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 316,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 332,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "32:32,3,4,5,6,7",
+      "marker": "nop",
+      "fence": "none",
+      "word_sha256": "12890f011a5ee5d83f1285c51e472f74f2824675080a8e7324481674f682769d",
+      "warm_word_sha256": "4d098d3b19e5ff2d3fe2a1559b41e981dafdd07b5b9a5f3c34bd3fdfb48ded95",
+      "instructions": 100,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 24,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmccntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 40,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmxevcntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 128,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 132,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 136,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 140,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 144,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 148,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 152,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 156,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 160,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 164,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 168,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 172,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 176,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 180,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 184,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 188,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 192,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 196,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 200,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 204,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 208,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 212,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 216,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 220,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 224,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 228,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 232,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 236,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 240,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 244,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 248,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 252,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 260,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x13, pmccntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x14, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 292,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 300,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 316,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 332,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 336,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 340,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 344,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 348,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 352,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 356,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 360,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 364,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 368,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 372,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 376,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 380,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 384,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 388,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 392,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 396,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "32:32,3,4,5,6,7",
+      "marker": "sink",
+      "fence": "none",
+      "word_sha256": "998ca0d0edaefed378dd8a4c92810721f12c0d8189ed0c001aa2a7735db6fe6d",
+      "warm_word_sha256": "de420ff31d0632d4d16207a5604b6aabbe382cc687cfaaf1d769fcba95fef02d",
+      "instructions": 100,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 24,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmccntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 40,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmxevcntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 196,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 200,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 204,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 212,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 216,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 220,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 236,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 252,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 260,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x13, pmccntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x14, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 292,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 300,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 316,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 332,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 336,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 340,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 344,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 348,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 352,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 356,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 360,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 364,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 368,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 372,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 376,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 380,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 384,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 388,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 392,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 396,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "32:32,3,4,5,6,7",
+      "marker": "live",
+      "fence": "none",
+      "word_sha256": "27e0edf6d40aac69f272a59121b37b702cb5a16d7688e1b6baad2fdf68216dea",
+      "warm_word_sha256": "66e9ec0a5e59a33fd9f3abbafd2ae22a1df3fd40de4a6ca22d002663e93832f5",
+      "instructions": 100,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 24,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmccntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 40,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmxevcntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 196,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 200,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 204,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 212,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 216,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 220,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 236,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 252,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 260,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x13, pmccntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x14, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 292,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 300,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 316,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 332,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 336,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 340,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 344,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 348,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 352,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 356,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 360,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 364,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 368,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 372,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 376,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 380,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 384,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 388,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 392,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 396,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "32:32,3,4,5,6,7",
+      "marker": "zero",
+      "fence": "none",
+      "word_sha256": "f5c636f5ef819d0219efcef209336a5fc20ca22e1a4c7cc9ac84d1ec17256be0",
+      "warm_word_sha256": "7d5d1367cf9dab63819ab7c1869556af4842efb1cd64c77ee9098677133b3e37",
+      "instructions": 100,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 24,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmccntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 40,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmxevcntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 196,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 200,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 204,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 212,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 216,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 220,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 236,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 252,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 260,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x13, pmccntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #2"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x14, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "mov",
+          "operands": "x11, #3"
+        },
+        {
+          "offset": 292,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 300,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 316,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 332,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 336,
+          "mnemonic": "mov",
+          "operands": "x11, #6"
+        },
+        {
+          "offset": 340,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 344,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 348,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 352,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 356,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 360,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 364,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 368,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 372,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 376,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 380,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 384,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 388,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 392,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 396,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "16:1,32,5,6,8,9",
+      "marker": "nop",
+      "fence": "none",
+      "word_sha256": "c01dabe7f54ce8c4a913e1e7c60d83cb99d865bf680827d3cd9277b4297be63a",
+      "warm_word_sha256": "339812b32b6057c64fb2dae5e9b477185c7a42829cc942b7aed8d77bc853f052",
+      "instructions": 84,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 24,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmxevcntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 40,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmccntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 128,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 132,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 136,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 140,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 144,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 148,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 152,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 156,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 160,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 164,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 168,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 172,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 176,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 180,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 184,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 188,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 196,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 200,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 204,
+          "mnemonic": "mrs",
+          "operands": "x13, pmxevcntr_el0"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 212,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 216,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 220,
+          "mnemonic": "mrs",
+          "operands": "x14, pmccntr_el0"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 236,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 252,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 292,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 300,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 316,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 332,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "16:1,32,5,6,8,9",
+      "marker": "sink",
+      "fence": "none",
+      "word_sha256": "20794c332fbd84058b0d2a5683146a295303086f062b0f6c45eaefe89905963d",
+      "warm_word_sha256": "571d8c952e876b176ffa37fcd6c8cdb74f4360b622edd491de00ae289f10b16b",
+      "instructions": 84,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 24,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmxevcntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 40,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmccntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 196,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 200,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 204,
+          "mnemonic": "mrs",
+          "operands": "x13, pmxevcntr_el0"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 212,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 216,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 220,
+          "mnemonic": "mrs",
+          "operands": "x14, pmccntr_el0"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 236,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 252,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 292,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 300,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 316,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 332,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "16:1,32,5,6,8,9",
+      "marker": "live",
+      "fence": "none",
+      "word_sha256": "0392b4d125954f16032da9c6635c168c22d0db9c2ba7556b21009c6e5cca3c59",
+      "warm_word_sha256": "829db322526904441db1e440cf1f7ded9aea20fb3fa592369b5862e35621f768",
+      "instructions": 84,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 24,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmxevcntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 40,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmccntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 196,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 200,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 204,
+          "mnemonic": "mrs",
+          "operands": "x13, pmxevcntr_el0"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 212,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 216,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 220,
+          "mnemonic": "mrs",
+          "operands": "x14, pmccntr_el0"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 236,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 252,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 292,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 300,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 316,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 332,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "16:1,32,5,6,8,9",
+      "marker": "zero",
+      "fence": "none",
+      "word_sha256": "ca8459570a785d15e0e27f0d87f5f105fd9705db6c10a9f5e01b68876f6ee5e9",
+      "warm_word_sha256": "d2585a3b25ce97be9a0a17ff6e064c6b79c71cbf687aa3ce95a978c1e86e092c",
+      "instructions": 84,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 24,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmxevcntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 40,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmccntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 196,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 200,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 204,
+          "mnemonic": "mrs",
+          "operands": "x13, pmxevcntr_el0"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 212,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 216,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 220,
+          "mnemonic": "mrs",
+          "operands": "x14, pmccntr_el0"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 236,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 252,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 276,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 292,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 300,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 316,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 332,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "32:1,32,5,6,8,9",
+      "marker": "nop",
+      "fence": "none",
+      "word_sha256": "3439b79309e0ec127fb701e5f43a129da1ac81076acde35d432db74ada180499",
+      "warm_word_sha256": "4d098d3b19e5ff2d3fe2a1559b41e981dafdd07b5b9a5f3c34bd3fdfb48ded95",
+      "instructions": 100,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 24,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmxevcntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 40,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmccntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 128,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 132,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 136,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 140,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 144,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 148,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 152,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 156,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 160,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 164,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 168,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 172,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 176,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 180,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 184,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 188,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 192,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 196,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 200,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 204,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 208,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 212,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 216,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 220,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 224,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 228,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 232,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 236,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 240,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 244,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 248,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 252,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x13, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 276,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x14, pmccntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 292,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 300,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 316,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 332,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 336,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 340,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 344,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 348,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 352,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 356,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 360,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 364,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 368,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 372,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 376,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 380,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 384,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 388,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 392,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 396,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "32:1,32,5,6,8,9",
+      "marker": "sink",
+      "fence": "none",
+      "word_sha256": "856867314f1ebc2bf2c829448086c4d233f98e6a2251f9d080d3edc81eed832f",
+      "warm_word_sha256": "de420ff31d0632d4d16207a5604b6aabbe382cc687cfaaf1d769fcba95fef02d",
+      "instructions": 100,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 24,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmxevcntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 40,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmccntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 196,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 200,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 204,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 212,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 216,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 220,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 236,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "add",
+          "operands": "xzr, x1, x2"
+        },
+        {
+          "offset": 252,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x13, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 276,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x14, pmccntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 292,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 300,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 316,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 332,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 336,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 340,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 344,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 348,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 352,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 356,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 360,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 364,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 368,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 372,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 376,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 380,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 384,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 388,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 392,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 396,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "32:1,32,5,6,8,9",
+      "marker": "live",
+      "fence": "none",
+      "word_sha256": "739b6fecde47e65106de4bb90458d2b737ecc26f6e131b7d88f19069e93327e4",
+      "warm_word_sha256": "66e9ec0a5e59a33fd9f3abbafd2ae22a1df3fd40de4a6ca22d002663e93832f5",
+      "instructions": 100,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 24,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmxevcntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 40,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmccntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 196,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 200,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 204,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 212,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 216,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 220,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 236,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "add",
+          "operands": "x9, x1, x2"
+        },
+        {
+          "offset": 252,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x13, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 276,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x14, pmccntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 292,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 300,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 316,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 332,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 336,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 340,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 344,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 348,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 352,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 356,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 360,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 364,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 368,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 372,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 376,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 380,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 384,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 388,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 392,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 396,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "proposed_context": "32:1,32,5,6,8,9",
+      "marker": "zero",
+      "fence": "none",
+      "word_sha256": "d979676bdce4e58eeb9fb5df3f192d2884add93fe3bb4e881d8797a05dd87b1b",
+      "warm_word_sha256": "7d5d1367cf9dab63819ab7c1869556af4842efb1cd64c77ee9098677133b3e37",
+      "instructions": 100,
+      "saved_stack_bytes": 64,
+      "observer_memory_inside_roi": 0,
+      "observer_SB_boundaries": 2,
+      "payload_SB": 0,
+      "branch_target_relative": -120,
+      "ABI_restored": true,
+      "warm_counter_reads": 0,
+      "decoded_instructions": [
+        {
+          "offset": 0,
+          "mnemonic": "stp",
+          "operands": "x19, x20, [sp, #-0x40]!"
+        },
+        {
+          "offset": 4,
+          "mnemonic": "stp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 8,
+          "mnemonic": "stp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 12,
+          "mnemonic": "stp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 16,
+          "mnemonic": "dsb",
+          "operands": "ish"
+        },
+        {
+          "offset": 20,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 24,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 28,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 32,
+          "mnemonic": "mrs",
+          "operands": "x20, pmxevcntr_el0"
+        },
+        {
+          "offset": 36,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 40,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 44,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 48,
+          "mnemonic": "mrs",
+          "operands": "x21, pmccntr_el0"
+        },
+        {
+          "offset": 52,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 56,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 60,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 64,
+          "mnemonic": "mrs",
+          "operands": "x22, pmxevcntr_el0"
+        },
+        {
+          "offset": 68,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 72,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 76,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 80,
+          "mnemonic": "mrs",
+          "operands": "x23, pmxevcntr_el0"
+        },
+        {
+          "offset": 84,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 88,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 92,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 96,
+          "mnemonic": "mrs",
+          "operands": "x24, pmxevcntr_el0"
+        },
+        {
+          "offset": 100,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 104,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 108,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 112,
+          "mnemonic": "mrs",
+          "operands": "x25, pmxevcntr_el0"
+        },
+        {
+          "offset": 116,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 120,
+          "mnemonic": "mov",
+          "operands": "x9, xzr"
+        },
+        {
+          "offset": 124,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 128,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 132,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 136,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 140,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 144,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 148,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 152,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 156,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 160,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 164,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 168,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 172,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 176,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 180,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 184,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 188,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 192,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 196,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 200,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 204,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 208,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 212,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 216,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 220,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 224,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 228,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 232,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 236,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 240,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 244,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 248,
+          "mnemonic": "mov",
+          "operands": "x9, #0"
+        },
+        {
+          "offset": 252,
+          "mnemonic": "str",
+          "operands": "x9, [x3]"
+        },
+        {
+          "offset": 256,
+          "mnemonic": "mov",
+          "operands": "x11, #0"
+        },
+        {
+          "offset": 260,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 264,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 268,
+          "mnemonic": "mrs",
+          "operands": "x13, pmxevcntr_el0"
+        },
+        {
+          "offset": 272,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 276,
+          "mnemonic": "nop",
+          "operands": ""
+        },
+        {
+          "offset": 280,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 284,
+          "mnemonic": "mrs",
+          "operands": "x14, pmccntr_el0"
+        },
+        {
+          "offset": 288,
+          "mnemonic": "mov",
+          "operands": "x11, #4"
+        },
+        {
+          "offset": 292,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 296,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 300,
+          "mnemonic": "mrs",
+          "operands": "x15, pmxevcntr_el0"
+        },
+        {
+          "offset": 304,
+          "mnemonic": "mov",
+          "operands": "x11, #5"
+        },
+        {
+          "offset": 308,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 312,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 316,
+          "mnemonic": "mrs",
+          "operands": "x16, pmxevcntr_el0"
+        },
+        {
+          "offset": 320,
+          "mnemonic": "mov",
+          "operands": "x11, #7"
+        },
+        {
+          "offset": 324,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 328,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 332,
+          "mnemonic": "mrs",
+          "operands": "x17, pmxevcntr_el0"
+        },
+        {
+          "offset": 336,
+          "mnemonic": "mov",
+          "operands": "x11, #8"
+        },
+        {
+          "offset": 340,
+          "mnemonic": "msr",
+          "operands": "pmselr_el0, x11"
+        },
+        {
+          "offset": 344,
+          "mnemonic": "isb",
+          "operands": ""
+        },
+        {
+          "offset": 348,
+          "mnemonic": "mrs",
+          "operands": "x19, pmxevcntr_el0"
+        },
+        {
+          "offset": 352,
+          "mnemonic": "sb",
+          "operands": ""
+        },
+        {
+          "offset": 356,
+          "mnemonic": "stp",
+          "operands": "x20, x21, [x5]"
+        },
+        {
+          "offset": 360,
+          "mnemonic": "stp",
+          "operands": "x22, x23, [x5, #0x10]"
+        },
+        {
+          "offset": 364,
+          "mnemonic": "stp",
+          "operands": "x24, x25, [x5, #0x20]"
+        },
+        {
+          "offset": 368,
+          "mnemonic": "stp",
+          "operands": "x13, x14, [x5, #0x30]"
+        },
+        {
+          "offset": 372,
+          "mnemonic": "stp",
+          "operands": "x15, x16, [x5, #0x40]"
+        },
+        {
+          "offset": 376,
+          "mnemonic": "stp",
+          "operands": "x17, x19, [x5, #0x50]"
+        },
+        {
+          "offset": 380,
+          "mnemonic": "ldp",
+          "operands": "x25, x26, [sp, #0x30]"
+        },
+        {
+          "offset": 384,
+          "mnemonic": "ldp",
+          "operands": "x23, x24, [sp, #0x20]"
+        },
+        {
+          "offset": 388,
+          "mnemonic": "ldp",
+          "operands": "x21, x22, [sp, #0x10]"
+        },
+        {
+          "offset": 392,
+          "mnemonic": "ldp",
+          "operands": "x19, x20, [sp], #0x40"
+        },
+        {
+          "offset": 396,
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    }
+  ]
+}

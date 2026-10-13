@@ -1,0 +1,31 @@
+{
+  "source_commit": "43b1a539d6ffa90277b6b3542f69d2881007d095",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_sha256": {
+    "probes/diagnostic/rob_sink_unit.c": "56b09529d6fbd609528a4611bed0472ee6d0e7f64fd8878d541016dc94a3735a",
+    "tools/diagnostic/rob_register_fenced_analysis.py": "195ef2db214ce7c45219c93f096365f9360ac656d9d3829bf5ca6b152e2091ad",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "probes/common/perf_user_counter.h": "fe05d9ad77f47907b8d6721673ae8f34cacaad0fd266fd10175a6315f3c20c95",
+    "tools/diagnostic/rob_sink_unit_analysis.py": "8131199d50a741fea60ae355b22b5fc0f664ec924ff20beea5300f96c5e5c347",
+    "tools/diagnostic/rob_fenced_issue_analysis.py": "e92c4bd2dad77c89df474d0a8f7065eb309b9fce2164d8ee2aaed1226f238f22",
+    "tools/diagnostic/rob_direct_fenced_analysis.py": "ade4aff48c06db80cfd9f3fdd6690a9344ca864768a21ca7bf8b50f10b185b8a",
+    "tools/diagnostic/pmu_own_counter_analysis.py": "da2df93c45bf93fd707e824d55eb6d9a838ef3292115cc989fc3567d9e240f9a",
+    "tools/diagnostic/run_sm8650_rob_sink_unit.py": "bfd34af900e623243e7caf2e946fb5e462063e2bfbf8f4100634b2585ddd35f9",
+    "tools/diagnostic/perf_user_access_transaction.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
+    "docs/design/2026-10-14-rob-sink-unit.md": "2992c0015e40ac8b92cbc29267a6e6ce5fb154162933ae79962a52b779f8adc6",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658"
+  },
+  "binary_sha256": "9d4dd3bb40cb11cba97ba3dba974c7cbb0566f0d77427092580c565868f66a0d",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 -Iprobes/common probes/diagnostic/rob_sink_unit.c -o build/aarch64-linux-android/release/diagnostic/rob_sink_unit",
+  "two_independent_builds_equal": true,
+  "actual_native_dynamic_plans": 4,
+  "actual_dynamic_programs": 16,
+  "plan_sha256": "f289332311485e2c79cf735cb66be2a21022c5b63d8e4896e6807f6eca5f5b1f",
+  "dynamic_plan_sha256": "138f81e1c8b6d40b6d851ebaf33f4ca2a9e14f39c20c4ec8e260639c7829d462",
+  "decode_sha256": "590dc87043ccc7b74386d88faccc33024ced68b172e8e8951806d517bc9b26a7",
+  "assembler_ABI_reference_sha256": "544406cc63b3ac7ee4e5666127038132399ea3fbb9e30114399bf6ff6b39c191",
+  "marker_qualified": false
+}
