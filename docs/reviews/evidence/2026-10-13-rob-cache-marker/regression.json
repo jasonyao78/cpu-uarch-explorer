@@ -1,0 +1,9 @@
+{
+  "source_launch": "7a64a80",
+  "tests": 601,
+  "passed": true,
+  "seconds": 527.857,
+  "log_sha256": "4609b10416205bab0b7879b122e3e326e134930535d76a9cee9ead3c34f6bebe",
+  "excludes_new_persistent_observer": true,
+  "formal_paths_unchanged_not_rerun": true
+}
