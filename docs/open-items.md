@@ -533,3 +533,5 @@
 - **ROB anchor顺序有限协议已冻结 / 当前ROB负责人 / 触发=actual producer与raw生产链验证后12进程**：`docs/design/2026-10-13-rob-anchor-order.md` / `docs/superpowers/plans/2026-10-13-rob-anchor-order.md`；同进程同code PFN/slot交换，blocked/interleaved仅改FSQRT register order，NONE/SERIAL同码阴性，262144 iteration/768window有限。先解释实际k32≈462参考残差，不加offset拟合384，不自动容量扫描，旧终态保留。
 
 - **ROB anchor顺序有限批结束 / 当前ROB负责人 / 触发=采用interleaved reference的allocation/lifecycle正交新协议**：`docs/reviews/2026-10-13-rob-anchor-order-results.md`，source d1c99ea/build ead5e51/launch9be15af，12进程768窗/54raw SHA、全部controls通过；k32 blocked≈462/interleaved≈433、六process DID≈29，k16≈225基本无差，BLOCKED_ANCHOR_ORDER_DELAY。不同register order贡献成立，不唯一解释scheduler/PRF/ROB，不命名32-entry queue；旧scan/proxy不改。后续计量使用实际qualified/reference，不模型外推，actual units/active constraint仍OPEN。558完整诊断通过。
+
+- **实际TLB descriptor graph连接资格 / 当前TLB负责人 / 触发=实际producer/链/严格raw验证后3进程**：`docs/design/2026-10-13-tlb-descriptor-graph.md`；相同32-data-PFN packed/spaced、192实际capture有限连接，reuse99/32不扩大任意kernel读。直接parent/leaf身份与Linux descriptor line激励才过，后续large-N容量/physical layout干预另注册；本小N不当容量，三个最终参数仍0/3定案。
