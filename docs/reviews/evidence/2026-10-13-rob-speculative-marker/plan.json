@@ -1,0 +1,2158 @@
+{
+  "16": [
+    {
+      "type": "config",
+      "version": 1,
+      "probe": "rob-speculative-marker",
+      "chain": 16,
+      "groups": 0,
+      "trials": 18,
+      "windows": 108,
+      "training_calls": 64,
+      "full_window_warmup_calls": 4,
+      "events": [
+        17,
+        8,
+        112,
+        6,
+        34,
+        59,
+        1
+      ],
+      "pmu_type": 8,
+      "schedule_reverse_block_trials": 6
+    },
+    {
+      "type": "program",
+      "marker": "nop",
+      "code_bytes": 104,
+      "words": [
+        2657550336,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        2657484812,
+        3019898956,
+        335544322,
+        3573751839,
+        3573756159,
+        2657484800,
+        3577431084,
+        4177526860,
+        3596551104
+      ]
+    },
+    {
+      "type": "program",
+      "marker": "load",
+      "code_bytes": 104,
+      "words": [
+        2657550336,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        2657484812,
+        3019898956,
+        335544322,
+        4181721129,
+        3573756159,
+        2657484800,
+        3577431084,
+        4177526860,
+        3596551104
+      ]
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 0,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 1,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 2,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 3,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 4,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 5,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 0,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 1,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 2,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 3,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 4,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 5,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 0,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 1,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 2,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 3,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 4,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 5,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 0,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 1,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 2,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 3,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 4,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 5,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 0,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 1,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 2,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 3,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 4,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 5,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 0,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 1,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 2,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 3,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 4,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 5,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 0,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 1,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 2,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 3,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 4,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 5,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 0,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 1,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 2,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 3,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 4,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 5,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 0,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 1,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 2,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 3,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 4,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 5,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 0,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 1,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 2,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 3,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 4,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 5,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 0,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 1,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 2,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 3,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 4,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 5,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 0,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 1,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 2,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 3,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 4,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 5,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 0,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 1,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 2,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 3,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 4,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 5,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 0,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 1,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 2,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 3,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 4,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 5,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 0,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 1,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 2,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 3,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 4,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 5,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 0,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 1,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 2,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 3,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 4,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 5,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 0,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 1,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 2,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 3,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 4,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 5,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 0,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 1,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 2,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 3,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 4,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 5,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    }
+  ],
+  "32": [
+    {
+      "type": "config",
+      "version": 1,
+      "probe": "rob-speculative-marker",
+      "chain": 32,
+      "groups": 0,
+      "trials": 18,
+      "windows": 108,
+      "training_calls": 64,
+      "full_window_warmup_calls": 4,
+      "events": [
+        17,
+        8,
+        112,
+        6,
+        34,
+        59,
+        1
+      ],
+      "pmu_type": 8,
+      "schedule_reverse_block_trials": 6
+    },
+    {
+      "type": "program",
+      "marker": "nop",
+      "code_bytes": 168,
+      "words": [
+        2657550336,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        2657484812,
+        3019898956,
+        335544322,
+        3573751839,
+        3573756159,
+        2657484800,
+        3577431084,
+        4177526860,
+        3596551104
+      ]
+    },
+    {
+      "type": "program",
+      "marker": "load",
+      "code_bytes": 168,
+      "words": [
+        2657550336,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        509722624,
+        2657484812,
+        3019898956,
+        335544322,
+        4181721129,
+        3573756159,
+        2657484800,
+        3577431084,
+        4177526860,
+        3596551104
+      ]
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 0,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 1,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 2,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 3,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 4,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 0,
+      "position": 5,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 0,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 1,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 2,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 3,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 4,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 1,
+      "position": 5,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 0,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 1,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 2,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 3,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 4,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 2,
+      "position": 5,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 0,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 1,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 2,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 3,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 4,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 3,
+      "position": 5,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 0,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 1,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 2,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 3,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 4,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 4,
+      "position": 5,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 0,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 1,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 2,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 3,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 4,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 5,
+      "position": 5,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 0,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 1,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 2,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 3,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 4,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 6,
+      "position": 5,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 0,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 1,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 2,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 3,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 4,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 7,
+      "position": 5,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 0,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 1,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 2,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 3,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 4,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 8,
+      "position": 5,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 0,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 1,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 2,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 3,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 4,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 9,
+      "position": 5,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 0,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 1,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 2,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 3,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 4,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 10,
+      "position": 5,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 0,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 1,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 2,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 3,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 4,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 11,
+      "position": 5,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 0,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 1,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 2,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 3,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 4,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 12,
+      "position": 5,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 0,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 1,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 2,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 3,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 4,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 13,
+      "position": 5,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 0,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 1,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 2,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 3,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 4,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 14,
+      "position": 5,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 0,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 1,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 2,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 3,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 4,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 15,
+      "position": 5,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 0,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 1,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 2,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 3,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 4,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 16,
+      "position": 5,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 0,
+      "control": "speculate",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 1,
+      "control": "architect",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 2,
+      "control": "architect",
+      "marker": "load",
+      "train_bits": 0,
+      "test_bits": 0
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 3,
+      "control": "bypass",
+      "marker": "nop",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 4,
+      "control": "bypass",
+      "marker": "load",
+      "train_bits": 4607182418800017408,
+      "test_bits": 4607182418800017408
+    },
+    {
+      "type": "schedule",
+      "trial": 17,
+      "position": 5,
+      "control": "speculate",
+      "marker": "nop",
+      "train_bits": 0,
+      "test_bits": 4607182418800017408
+    }
+  ]
+}
