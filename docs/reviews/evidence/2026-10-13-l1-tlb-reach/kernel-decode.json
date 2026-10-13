@@ -1,0 +1,43 @@
+{
+  "actual_ELF_symbol": "data_walk",
+  "decoder": "Capstone 5.0.7",
+  "body": [
+    {
+      "word": 4181721088,
+      "mnemonic": "ldr",
+      "operands": "x0, [x0]"
+    },
+    {
+      "word": 2316042251,
+      "mnemonic": "and",
+      "operands": "x11, x0, x12"
+    },
+    {
+      "word": 2601068544,
+      "mnemonic": "madd",
+      "operands": "x0, x0, x9, x10"
+    },
+    {
+      "word": 2332760064,
+      "mnemonic": "add",
+      "operands": "x0, x0, x11, lsl #6"
+    },
+    {
+      "word": 4043310344,
+      "mnemonic": "subs",
+      "operands": "x8, x8, #1"
+    },
+    {
+      "word": 1426063201,
+      "mnemonic": "b.ne",
+      "operands": "loop offset0"
+    }
+  ],
+  "jit_return_words": [
+    4043310080,
+    1409286208,
+    "B(current head)",
+    3596551104
+  ],
+  "jit_target_range_check": true
+}

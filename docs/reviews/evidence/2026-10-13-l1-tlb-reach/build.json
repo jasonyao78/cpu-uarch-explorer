@@ -1,0 +1,24 @@
+{
+  "source_commit": "cd39b1e74d9b0aa3b25020f82bff7f58c79b2add",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "binary_sha256": "6f657fa1bc848061a44a46490561f8fac4359b4a2ba06bdea33c43d0f7edd328",
+  "source_sha256": {
+    "probes/diagnostic/l1_tlb_reach.c": "d736be4b2f7e2d48f4df69b7039f2c63bf41e7aa0f22002fbdc906f7f95ddb32",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "tools/diagnostic/l1_tlb_reach_analysis.py": "badbd4736f64007d7327d3e52e476350a64fc4757d3d64f8c385b320d45920dd",
+    "tools/diagnostic/run_sm8650_l1_tlb_reach.py": "e2f0ed0985371ffd4e193de3e92272a2398058546d3ed22a5b074d4d0edf050d",
+    "tools/diagnostic/run_sm8650_pmu_enabled_metadata.py": "85d23de6dbd4e6d7c8637f14171d77c0859cd12ddd15694be707c597bbd50578",
+    "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
+    "tools/diagnostic/perf_user_access_transaction.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658",
+    "docs/design/2026-10-13-l1-tlb-reach.md": "325d27bffcf385e957fa52ffa5ba74659ef58596ae0158067950f114725c8f7c"
+  },
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 probes/diagnostic/l1_tlb_reach.c -o build/aarch64-linux-android/release/diagnostic/l1_tlb_reach",
+  "two_independent_builds_equal": true,
+  "actual_plans": 12,
+  "actual_ELF_body_decoded": true,
+  "plan_sha256": "0bcdb4503b50630f2e1489c69a550d78cb34d635d019d8e8a73fe7fc545e93cf",
+  "decode_sha256": "468e8eff6f4cc3e2defee2ef45e447d1b08d78070bd066367dd0c4484260eb1b"
+}
