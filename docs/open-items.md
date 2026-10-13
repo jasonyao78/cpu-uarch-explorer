@@ -559,3 +559,5 @@
 - **descriptor-bound reach N0通过 / 当前TLB负责人 / 触发=同binary及锁定资格raw后18process216window**：`docs/reviews/2026-10-13-tlb-observed-reach-qualification.md`，source7f1c824/build3a4ad87/launchc9e5231；3fresh192capt/36PMU/20SHA，walk全部0/IR/I门过；实际leafpages1/32、leaf64Bgroups12/32。N32辅助cachetap差不作主结论，same demandPA不等于全部cache活动；steady表/HPA未知，scan不命名physical2048/8ways。
 
 - **ROB near/far条件issue marker候选草案 / 当前ROB负责人 / 触发=官方ST_SPEC与A/B正控合同冻结、实际N0实现后**：`docs/design/2026-10-13-rob-near-far-marker-draft.md`。8hotLD近tap/8hotST远tap+架构输出，区分未激励/issued/fill/retired；不要求把没预测的M判小ROB，全部raw保留、条件选择偏差/eligible率须报告。未实现/未采样/未冻结，不是容量结论；unit及active constraint继续OPEN，第三方384不作拟合目标。
+
+- **descriptor-bound reach有限scan完成 / 当前TLB负责人 / 后续触发=coalescing/实际table关联/VA-ASID控制新协议**：`docs/reviews/2026-10-13-tlb-observed-reach-scan-results.md`；source7f1c824/build3a4ad87/launchba0ccfd，18fresh52416capt/216PMU/95SHA独立核验，全IR/I门过；N1536/1792几何差复制，实际N1536leafpages9/1536、leaf64Bgroups576/1536，安装关联漂移0。spaced(1024,1536]，packed两个(1792,2048]一个(1536,1792]，整体物理命名不通过，不继续同grid加密。硬件coalescing与PTE.CONT须分开，官方r0p1规格核对不等于target实測独立识别。

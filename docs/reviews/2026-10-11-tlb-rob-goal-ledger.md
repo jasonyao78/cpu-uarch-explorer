@@ -55,3 +55,7 @@
 ## 2026-10-13 可扩展真实descriptor入口
 
 `docs/reviews/2026-10-13-translation-persistent-read-results.md`，sourcec9a71e2/builda49c2b0/launch6eb6621：3/3 fresh、24/24 captures及20SHA独立核验，entry102/return32及private registeredVA，同PID+exactVA双过滤、dynamic root index、sticky first error/reset actualC gate均过。8节点仅2program/1map/1fork，不把结构加载次数降低写walltime速度。无PMU，physical0/3；后续large-N/VA-ASID倍增与实际table关联另冻，不用LinuxIPA冒充HPA。
+
+## 2026-10-13 descriptor绑定的完整reach矩阵
+
+`docs/reviews/2026-10-13-tlb-observed-reach-scan-results.md`：source7f1c824/build3a4ad87/launchba0ccfd，18fresh/52416capt/216窗/95SHA，全IR/I门与floor通过，独立算术精确。主DESCRIPTOR_BOUND_GEOMETRY_DIFFERENCE，N1536两shapewalk差≈1且leaf-table pages9/1536直接观测。spaced三曲线(1024,1536]；packed两(1792,2048]、一(1536,1792]，不能合成统一physical capacity。r0p1官方规格/目标实測独立识别分列；Cortex-X4硬件coalescing位不等于PTE.CONT，当前实測三参数仍0/3。632完整诊断通过549.508秒，后续实际table关联/身份倍增及ROB条件issue资格，不复跑旧grid追数。
