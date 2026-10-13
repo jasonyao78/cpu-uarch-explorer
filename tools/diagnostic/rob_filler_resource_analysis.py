@@ -33,15 +33,16 @@ def audit_process(rr,c,plans):
 def analyze(rows):
  _require(len(rows)==16,'resource all 16 fresh processes');process=[];positive=[];supply=[];ir=[]
  for row,c in zip(rows,conditions()):
-  _require(row['condition']==c['name'] and row['status']=='complete','resource process identity');n=row['config']['chain'];f=row['config']['filler'];cells={(z['trial'],z['control'],z['unit']):z for z in row['samples']};med={};paired={};gates={}
+  _require(row['condition']==c['name'] and row['status']=='complete','resource process identity');n=row['config']['chain'];f=row['config']['filler'];cells={(z['trial'],z['control'],z['unit']):z for z in row['samples']};med={};mad={};paired={};gates={}
   for seed in ('seed-0','seed-1'):
    med[seed]={name:[statistics.median(cells[t,seed,name]['counts'][j] for t in range(32)) for j in range(6)] for name in NAMES}
+   mad[seed]={name:[statistics.median(abs(cells[t,seed,name]['counts'][j]-med[seed][name][j]) for t in range(32)) for j in range(6)] for name in NAMES}
    for name in NAMES:
     v=sorted(cells[t,seed,name]['counts'][5] for t in range(32));supply.append(statistics.median(v)<=1 and v[30]<=4)
     ir.append(all(abs(cells[t,seed,name]['counts'][1]-cells[t,seed,'nop']['counts'][1])<=2 for t in range(32)))
    paired[seed]={a+'-'+b:[cells[t,seed,a]['counts'][0]-cells[t,seed,b]['counts'][0] for t in range(32)] for a,b in (('sink','zero'),('live','zero'),('sink','nop'))}
    v=paired[seed]['sink-zero'];gates[seed]=statistics.median(v)>=8 and sum(x>0 for x in v)/32>=.8
   if f in (8,12):positive.append(all(gates.values()))
-  process.append(dict(name=c['name'],chain=n,filler=f,medians=med,paired_cycles=paired,resource_gates=gates))
+  process.append(dict(name=c['name'],chain=n,filler=f,medians=med,MAD=mad,paired_cycles=paired,resource_gates=gates))
  technical=all(ir);code_supply=all(supply);qualified=technical and code_supply and all(positive)
  return dict(mode=MODE,status='TECHNICAL_FAILURE' if not technical else 'SUPPLY_NOT_QUALIFIED' if not code_supply else 'REPEATABLE_FILLER_RESOURCE_EFFECT' if qualified else 'RESOURCE_EFFECT_NOT_ESTABLISHED',windows=4096,processes=process,IR_equal=technical,supply_qualified=code_supply,physical_capacity_certified=False,ROB_allocation_units_certified=False)
