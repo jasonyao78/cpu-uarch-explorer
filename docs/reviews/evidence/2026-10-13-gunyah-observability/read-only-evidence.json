@@ -1,0 +1,38 @@
+{
+  "target": "redmi-k70pro-01",
+  "date_local": "2026-10-13",
+  "reported_hypervisor": "gunyah",
+  "reported_api": 1,
+  "reported_variant": 81,
+  "device_tree_gunyah_compatible": true,
+  "config_gunyah": true,
+  "spe_perf_source_present": false,
+  "pmu_sources": [
+    "armv8_pmuv3",
+    "breakpoint",
+    "cs_etm",
+    "kprobe",
+    "llcc-pmu",
+    "software",
+    "tracepoint",
+    "uprobe"
+  ],
+  "stage2_enabled_register_observed": false,
+  "stage2_granule": "UNKNOWN",
+  "linux_pfn_to_machine_pa": "UNKNOWN",
+  "boot_log_no_matching_lines_is_not_absence": true,
+  "hypervisor_config_modified": false,
+  "raw_sha256": {
+    "boot-kvm.json": "1a499f9497af5d97e1999e253c44c4949cd33f37b2c5977df884e12f1aa5ec7c",
+    "core-platform.json": "6b1bca1870205d469db604c6afd3eca6f80bca786dda0486380b98b7d3b26260",
+    "driver-modules.json": "118ba28e26b65f8b883c0be77606c77183eadbd9078db954657bd5596e89b074",
+    "guest-device.json": "8f5bb221ccdbdb0c22aafc284c4e48faaf6d765ac819ac40de19b24c407860c4",
+    "gunyah-boot.json": "6ff7c6d26ae0e2542662365d86ab1195a58cc918b91e5c636cc4041fda24ab5f",
+    "hypervisor-files.json": "54b0dc73575d9ab210e86434978524ee1a16e4e720ac4100bd79da1c907b9b98",
+    "hypervisor-type.json": "108e83227cd3759a467ab6917fb9d30558d1f241a606aaeda63ca76c42384edc",
+    "hypervisor-version.json": "de4d3f25cfff3db138778b04a33b5e16fe37c2fabf70639c8fa859066984ad46",
+    "kvm-parameters.json": "cd46098276e521ca2274121527b36c269b7c9b5fda65dba8992228f5ba650829",
+    "pmu-sources.json": "78f53f7b28a02d7dd3ecf7ee47e24f3e762f360f966df5b1680be8c05d15140d",
+    "profiling-config.json": "36d527bee5ee730d05249f17da2fa795d7437b2711b26bafa07bc96bc0e095e4"
+  }
+}

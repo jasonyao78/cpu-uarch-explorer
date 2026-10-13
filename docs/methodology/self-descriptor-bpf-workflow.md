@@ -56,3 +56,7 @@
 `probes/diagnostic/tlb_descriptor_graph.c` 复用exact99/32逐declared node有限观察，独立map/program/event在节点读取后关闭；C实际纯门 `graph_capture_gate` 当场拒绝首次partial/negative污染/word/PFN/层级错误，host动态库攻击该实际函数而非另一份伪门。`tools/diagnostic/descriptor_graph_analysis.py` / `descriptor_graph_raw.py` / `run_sm8650_descriptor_graph.py` 强制64captures与同32数据PFN/ordinal/order，实际机器码LDR/MADD/SUBS/B.NE服务两布局，observer卸载后512loads闭环。初始立即数元数据错误由actual字与binary decode测试发现，不能只查metadata自洽。
 
 `docs/reviews/2026-10-13-tlb-descriptor-graph-results.md` 3/3/192capture证明packed/spaced实际leaf table pages1/32、leaf entry lines8/32、PMD entry lines1/4，而不只VA count；20 raw SHA和独立实际节点算术通过。PGD只比较kernel virtual line，不从两级关系臆推root物理PA；Linux descriptor PA不自动是machine DRAM/HPA。下一扩大N或改变实际PTE物理关联时，仍需新的layout激励/control/PMU门；小N能力闭环不是capacity结论。
+
+## 先确认地址域（Gunyah目标的实际教训）
+
+`docs/reviews/2026-10-13-gunyah-translation-observability.md` 实际sysfs gunyah/API1/variant81。pagemap PFN与S1 PTE吻合，只认证Linux guest物理/IPA域，不是Stage2 machine HPA；字段名PA和root权限均不能替代域证据。保持原raw/初始安装CONT边界，新证据注明发现时间。没有SPE perf source不等于hardware不支持，日志零匹配不当absence。先合法read-only observability，不随机capability调用或变更hypervisor去救曲线。
