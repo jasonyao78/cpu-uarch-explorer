@@ -1,0 +1,23 @@
+{
+  "source_commit": "401086cb880216869f81c1e0c5785060dd038fbd",
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "ndk_version": "27.2.12479018",
+  "android_api": 34,
+  "recipe": "aarch64-linux-android34-clang -O2 -Wall -Wextra -Werror -static -std=c11 -Iprobes/common probes/diagnostic/rob_issue_marker.c -o build/aarch64-linux-android/release/diagnostic/rob_issue_marker",
+  "source_sha256": {
+    "probes/diagnostic/rob_issue_marker.c": "24e758c7acf8eafa8a246071b0233fc167d04159bf18387237fd6400ceccb53a",
+    "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
+    "tools/diagnostic/rob_issue_marker_analysis.py": "7e01f521c773e12dd2a1b95079bd597864dd2fc5897ee5998ce892b3d2e847e9",
+    "tools/diagnostic/run_sm8650_rob_issue_marker.py": "35330c8ab2def38c36e0b3e8b37d811c1d908a73077fbdade8f8d97e64065787",
+    "tools/diagnostic/analyze_cold_pair.py": "44da32f8cf491c1c7388a4811b362780880ee0828e50119223baf274ecab3a09"
+  },
+  "binaries": {
+    "rob_issue_marker": "17afa2a459877a05e90271c13a382d05c32811d257318b5a2939fe87f813c36f"
+  },
+  "plan_sha256": "cdd641b18acf93668917bd56a34b6f4c0eb17570660df6d19dfef27ccee019a0",
+  "two_independent_builds_equal": true,
+  "actual_native_plans": 2,
+  "independent_capstone_programs": 4,
+  "tests": 8,
+  "hardware_qualification_started": false
+}
