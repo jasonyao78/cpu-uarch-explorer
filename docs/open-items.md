@@ -621,3 +621,9 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 - v3无系统调用热batch（source4c787a6/build+launch58d0ea1），`docs/design/2026-10-14-rob-filler-resource-batch.md`、`probes/diagnostic/rob_filler_resource_batch.c`，十个完整fresh + 第11进程21正式窗后metadata失效停止，2581正式/10324warm，`docs/reviews/2026-10-14-rob-filler-resource-batch-results.md`。每5call共同FD绝对包络、每call当前binding，完整配置refill中位0；触发：有限metadata-invalid协议及完整独立新采样；旧失败不复评分。
 - admission v1软件已交付fcedc6b：`docs/design/2026-10-14-rob-admission-window.md` / `probes/diagnostic/rob_admission_window.c`；84/21504原网格冻结，但**未执行**，v1未执行；3ee9fc8已接入最终热batch及12个N0真实上游门，最新双构建b84df163…完成，仍未上板；触发：先补有限metadata失效完整度契约，再以N0资格启动后续72点，当前不执行旧大扫描。物理ROB仍OPEN。
 - 后置：独立冷load退休阻塞 + 两截止时间/PRF/供给反证；触发：热窗口及实际filler响应合格后冻结，路径先登记本项，不强拟合384。诊断ROI近似重复模板后续收敛为共同组件；触发：科学结果稳定后，实际生产配方/ABI/所有旧source-build谱系回归固定再重构。
+
+### 2026-10-14 有限metadata复核通过与窗口执行（primary）
+
+- source dc58c16 / build+actual launch27d4793，`probes/diagnostic/rob_filler_resource_bounded.c` / `tools/diagnostic/owned_roi_packets.py`，16fresh4096正式+16384当前warm全完成、invalid0、原IR/供给/资源门全过，报告 `docs/reviews/2026-10-14-rob-filler-resource-bounded-results.md`；旧失效批不重评分。不认证ALU唯一瓶颈/µop单位/ROBentries。
+- `probes/diagnostic/rob_admission_window.c` 已按有限packet和12个N0上游门接线：源码 dc58c16（实际build source27d4793）、launch a1b4916、binary21c6c418…；private raw20261013T184409Z-rob-admission-window，根Agent独占执行中。触发：12N0全资格才72扫描，完整报告所有计数/invalid/供给失败/删失，不借成功资源差跳过容量归因控制。
+- 独立最老cold load：`docs/design/2026-10-14-rob-cold-head-qualification.md` 已冻结（0d41cd6），`probes/diagnostic/rob_cold_head.c` / `tools/diagnostic/rob_cold_head_analysis.py` / `tools/diagnostic/run_sm8650_rob_cold_head.py` 尚未实现。触发：窗口矩阵期间完成软件，独占串行N0资格后另冻gap，head1/2对照取代允许FP链退休的解释。

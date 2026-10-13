@@ -9,7 +9,7 @@
 | 共享L2 TLB | 匹配r0p1官方 **2048 entries、256 sets × 8 ways**；有效leaf容量与精确set selector独立黑盒尚OPEN |
 | ROB | 物理entries尚OPEN；旧g+chain窗口代理/第三方384未晋升。register-only短ROI **1536/1536资格通过**，A8/Mpre0、far|near1；单位对照OP/DP不能区分NOP/zero/sink分配，物理ROB仍OPEN，所有profile恢复0 |
 
-[层次/容量结论与2700窗证据](docs/reviews/2026-10-13-sm8650-tlb-hierarchy-findings.md)、[目标账本](docs/reviews/2026-10-11-tlb-rob-goal-ledger.md)、[资料核验](docs/reviews/2026-10-13-x4-r0p1-source-audit.md)、[L2 descriptor dose反例](docs/reviews/2026-10-13-tlb-descriptor-dose-results.md)、[寄存器发射资格](docs/reviews/2026-10-14-rob-register-fenced-results.md)、[单位反例](docs/reviews/2026-10-14-rob-sink-unit-results.md)。有限实验完成不等于全部物理机制已识别；main/remote未动作，后置项在 `docs/open-items.md`。完整diagnostic715/715（616.904s）覆盖至58b7128的direct/register/unit树；后加resource/admission/hot/batch局部测试另列。resource v1/v2均完整但供给门未过；v3热批十个完整配置refill中位0，第11进程metadata失效首停，整批未通过；admission热接线/N0上游门已实现未上板，下一补齐有限metadata-invalid契约。formal paths未改未重跑。
+[层次/容量结论与2700窗证据](docs/reviews/2026-10-13-sm8650-tlb-hierarchy-findings.md)、[目标账本](docs/reviews/2026-10-11-tlb-rob-goal-ledger.md)、[资料核验](docs/reviews/2026-10-13-x4-r0p1-source-audit.md)、[L2 descriptor dose反例](docs/reviews/2026-10-13-tlb-descriptor-dose-results.md)、[寄存器发射资格](docs/reviews/2026-10-14-rob-register-fenced-results.md)、[单位反例](docs/reviews/2026-10-14-rob-sink-unit-results.md)。有限实验完成不等于全部物理机制已识别；main/remote未动作，后置项在 `docs/open-items.md`。完整diagnostic715/715（616.904s）覆盖至58b7128的direct/register/unit树；后加resource/admission/hot/batch局部测试另列。resource v1/v2均完整但供给门未过；有限metadata契约已实现；新资源复核16/4096正式+16384warm全过，invalid0，供给门/周期资源差复制。admission已上板，先12个N0真实资格，全部通过后72点扫描；旧v3仍保持首停失败。formal paths未改未重跑。
 
 跨 ISA、跨 OS 的 CPU 微架构探索平台：真实设备微架构探测 → 统一实验协议与数据模型 → gem5 O3 建模与实机校准 → 综合 Benchmark 验证 → ARM / x86 / RISC-V 对比。
 

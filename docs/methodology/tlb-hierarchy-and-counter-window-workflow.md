@@ -26,3 +26,5 @@
 正确包络：一个GROUP+ID的真实绝对FD before/after包含5个独立direct ROI；每call都有当前own metadata、index/width/seqlock/offset/SIGILL检查，不能用外层binding替代内层。五者共享FD绝对值与enabled/running包络时间，direct delta每call独立算，所有before≤after均被绝对FD包围；原始trace和ordinal必须齐备。打印、代码权限/字修改及所有系统调用都在热链外。时间标签不得称每call独立FD时长。
 
 首技术失败协议使v3在第11进程ROI-metadata-changed停止，10/16完整不能报16/16。下一版本可预注册小额技术invalid预算（仅明确metadata失效、不按指标筛选、固定ordinal/无retry/无补样、部分配对须显式覆盖）；这不能回救原批或把拒绝值填0。实现需在真实producer→raw→criterion对丢失/冲突/乱序进行反例，未完成前不启动admission长矩阵。
+
+有限metadata新采样（`docs/reviews/2026-10-14-rob-filler-resource-bounded-results.md`）16fresh4096正式/16384warm、invalid0、原资源/供给门通过。旧首停失败不重新命名。固定ordinal只允许真实ROI-metadata-changed≤1/256，partial warm与rejected原字均保留；其它错误仍停；统计用共同有效trial≥31/32及真实trial标签，禁止数组重编号把near/far条件错接。新 `tools/diagnostic/owned_roi_packets.py` 在真实native计划身份上拒绝缺失/重复/冲突、接受记录置换不改变结果。
