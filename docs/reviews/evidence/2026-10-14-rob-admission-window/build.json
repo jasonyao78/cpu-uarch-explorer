@@ -1,5 +1,5 @@
 {
-  "source_commit": "27d4793354f1631bf31f034ff2316710dc1fc5e4",
+  "source_commit": "c046ed7314a64b37fc84f93fc9eb0d162e94f8ab",
   "source_branch": "codex/sm8650-tlb-hierarchy-r2",
   "source_sha256": {
     "probes/diagnostic/rob_admission_window.c": "671e7301f8194b0ded9de3c08dfbc999d58c6aefb4740930a388580f9c6450ec",
@@ -8,14 +8,14 @@
     "docs/design/2026-10-14-bounded-owned-roi-packets.md": "8c28936b9e83547ce246167e82d6c76e289f0e816044581ff638ca792d6ca0ef",
     "probes/common/perf_group_read.h": "a57f76c6b8d4edd75aa7a5dc22b6cb18b7a7e61b3c2bd9bfff1d500333e63ea6",
     "probes/common/perf_user_counter.h": "fe05d9ad77f47907b8d6721673ae8f34cacaad0fd266fd10175a6315f3c20c95",
-    "tools/diagnostic/rob_admission_window_analysis.py": "8190ce83e1e372dc859717c9f918760c9692ebb68ac09909b79857425a10eb7e",
+    "tools/diagnostic/rob_admission_window_analysis.py": "3948c4c7f7fe1642b6b41aea72eb2d84ca4c83bff523db3c1d08adcca773a13b",
     "tools/diagnostic/rob_fenced_issue_analysis.py": "e92c4bd2dad77c89df474d0a8f7065eb309b9fce2164d8ee2aaed1226f238f22",
     "tools/diagnostic/rob_direct_fenced_analysis.py": "ade4aff48c06db80cfd9f3fdd6690a9344ca864768a21ca7bf8b50f10b185b8a",
     "tools/diagnostic/pmu_own_counter_analysis.py": "da2df93c45bf93fd707e824d55eb6d9a838ef3292115cc989fc3567d9e240f9a",
-    "tools/diagnostic/run_sm8650_rob_admission_window.py": "3186dfbdd4b51b1f741ab66f6e3f2a58c0b7440339c28be66482afe4a0ded67b",
+    "tools/diagnostic/run_sm8650_rob_admission_window.py": "2c612401930025422ff66cbba8884cf7d6d3c5363373ad06773eada8d6b4a829",
     "tools/diagnostic/perf_user_access_transaction.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
     "tools/diagnostic/run_sm8650_minimal.py": "2878a6d94b9a1f41a6d1b7fcf48bac77709e3a773beb9552f0c11a2363a3f3d5",
-    "docs/design/2026-10-14-rob-admission-window.md": "04b46922fdd006c1cbe2017add46c0cc569d1a22cf87aa65a44b0db81991eac2",
+    "docs/design/2026-10-14-rob-admission-window.md": "a0003eda38a059fed3690d580ff2967ccbf4347d5e0323040c6581308e2876e4",
     "configs/platforms/redmi-k70pro-01.json": "fdcc3a288287967d66ee30fb5eb0b3c9095a373019a68599212bac16edd32658"
   },
   "binary_sha256": "21c6c4184eab0d36f31cae960d17d829a707765631c67b2c384a4851f9808077",
