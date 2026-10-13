@@ -539,3 +539,5 @@
 - **实际descriptor graph连接有限资格完成 / 当前TLB负责人 / 触发=large-N转折与固定VA/data-PFN实际PTE-table-PA关联干预冻结**：`docs/reviews/2026-10-13-tlb-descriptor-graph-results.md`，source73dbc19/buildf7e0d93/launch84b8568，3/3/192capture/20raw SHA；实际leaf table pages1/32、leaf lines8/32、PMD lines1/4，数据PFN同32、同ordinal/order、卸observer后闭环。三最终参数0/3；不得用小N身份叫capacity、用Linux PA叫HPA，下一实际layout激励与control必经，不回填旧数据。
 
 - **Gunyah实际接口确认 / 当前TLB负责人 / 触发=合法当前VM stage2只读信息或可分离的组合翻译干预**：`docs/reviews/2026-10-13-gunyah-translation-observability.md`，sysfs gunyah/API1/variant81与DT/config实证，HCRVM/Stage2 granule/HPA identity未读，SPE perf source不存在。Linux descriptor/PFN域保持guest physical/IPA，不据此命名machine continuity/physical TLB leaf entries，不猜capID/改hypervisor，不把dmesg零匹配当absence。ROB纯执行/退休方法独立继续，三个参数仍0/3。
+
+- **ROB retirement-blocked speculative marker N0 OPEN / 当前ROB负责人 / 触发=source/plan/七PMU/typed raw链通过后6进程**：`docs/design/2026-10-13-rob-speculative-marker.md`；延迟CBZ/三history/marker LDR vsNOP/SB隔离后续，6fresh648window有限。先A/B/M执行与退休计数资格，不认证单位或物理ROB，资格前不N扫；与TLB Gunyah域/large-N正交推进。
