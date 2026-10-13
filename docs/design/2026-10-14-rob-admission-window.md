@@ -1,4 +1,4 @@
-# 自有发射标记的 admission 转折 v1.2
+# 自有发射标记的 admission 转折 v1.3
 
 ## 本次任务的目的（给人类看）
 
@@ -31,3 +31,11 @@ chain16→32延长deadline，若转折明显移动则拒绝稳定capacity解释�
 ## v1.2 固定序号metadata失效预算
 
 正式新采样采用 `docs/design/2026-10-14-bounded-owned-roi-packets.md`：每process最多1个packet因实际ROI-metadata-changed拒绝，256attempt必须全部account，剩余255/256或256/256；不retry、不补样、部分warm原样保存。每成对比较使用共同有效trial且≥31/32，实际trial标签贯穿near→far conditional；其它门/矩阵/N0优先顺序不变。源码配置version5，无CLI放宽开关。v1/v1.1未执行，旧资源失败亦不重命名。
+
+## v1.3 采集资格与容量解释分层（新采样，不回救）
+
+v1.2采集在第7个N0 e1-k32-nop停止：near/far两端A=8/Mpre=0、IR、eligible22/32、far|near=1全通过，失败为Mpost-nop的3/32窗Irefill9..11而tap同role中位0/q95=0。旧批仍ADMISSION_N0_NOT_QUALIFIED、72点未执行。aggregate Irefill不能单独归属payload PC、不能据无标记推测路径的尾部唯一证明primary工作体取指不足；也不能据中位0免去全部供给反证。
+
+新冻结采集资格：每个N0必须架构/own绑定/FD/有限metadata完整，近远正控/阴性/分离与IR门全通过、near eligible≥8且far|near≥.9；绝对Irefill仍原样报告并保留原SUPPLY_NOT_QUALIFIED判据，但不会单独阻止**探索数据采集**。只有全部12个N0达到MARKER_OBSERVABLE才采72点。其它硬错误仍首停，无重试/补样/动态指标挑点。该变更修改的是采集权限，不把旧供给门改为通过，更不改物理容量命名。
+
+每点同时输出response=reached/blocked/transition/DEADLINE_NOT_OBSERVED、marker_observable、supply_qualified以及旧完整classification。curve旧资格缺供给仍INCOMPUTABLE；另给observed_response_bracket仅为有限响应观察，带全部失败/删失/非单调标记，不认证ROB。这些数据用于比较2deadline/3filler及后续最老coldload/PRF/取指反证，不能选成功subset拟合384。旧source/raw/停止事实不改名。

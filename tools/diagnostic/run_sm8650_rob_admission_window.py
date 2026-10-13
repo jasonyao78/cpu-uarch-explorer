@@ -53,7 +53,7 @@ def main(argv=None):
    value=model.audit_process([json.loads(l) for l in q.stdout.splitlines()],c,plan);result['classification']={k:v for k,v in value.items() if k not in ('rows','samples','warmup_windows','programs','runtime','final','invalid_packets')};write(out/(name+'-analysis.json'),value);inspect(name+'-post');write(out/'manifest.json',manifest)
    if q.returncode or q.stderr or value['status']!='complete':manifest['status']='ADMISSION_TECHNICAL_FAILURE';write(out/'manifest.json',manifest);return
    point=model.classify_process(value,c);result['point']=point;write(out/'manifest.json',manifest)
-   if c['phase']=='qualification' and point['classification']!='reached':manifest['status']='ADMISSION_N0_NOT_QUALIFIED';write(out/'manifest.json',manifest);return
+   if c['phase']=='qualification' and not point['marker_observable']:manifest['status']='ADMISSION_N0_NOT_QUALIFIED';write(out/'manifest.json',manifest);return
    print('OK',name,point['classification'],point['far_given_near_rate'],flush=True)
   summary=model.analyze([json.loads((out/(r['name']+'-analysis.json')).read_text()) for r in manifest['results']]);write(out/'matrix-analysis.json',summary);manifest['status']=summary['status'];manifest['counter_read_qualified']=True;manifest['marker_qualified']=all(all(v['gates'].values()) for v in summary['processes']);write(out/'manifest.json',manifest)
  try:tx.run(work,dict(source_head=head,protocol=PROTOCOL,protocol_sha256=sha(ROOT/PROTOCOL),raw_directory=str(out),binary_sha256=manifest['binary_sha256']))
