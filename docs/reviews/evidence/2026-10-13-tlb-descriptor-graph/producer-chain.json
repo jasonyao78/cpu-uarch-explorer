@@ -1,0 +1,17 @@
+{
+  "new_tests": 15,
+  "associated_tests": 46,
+  "source": "73dbc19",
+  "build": "f7e0d93",
+  "production_chain": "actual C cycle/layout/BPF/first-bad gate -> emitted-bytecode VM -> registered driver -> writer -> immutable-source raw reader",
+  "external_kernel": "synthetic; no target assertion",
+  "kernel_actual_binary_decode": true,
+  "tests_passed": true,
+  "attacks": [
+    "wrong ordinal/code metadata",
+    "first bad capture gate exercised from actual C shared function",
+    "64-capture missing/duplicate/order/type/PFN/parent activation",
+    "named no-excitation and denial stop first process",
+    "rehashed canonical/parent/entry-index/leaf corruption rejected"
+  ]
+}
