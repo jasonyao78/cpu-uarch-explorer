@@ -614,3 +614,10 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 - register-only sixevent短ROI有限资格完成：source933776f/build+actual launchf8cabd9、1536原窗全门通过，Apre/Apost=8、Mpre=0、far|near1，eligible37.5%–78.125%。报告 `docs/reviews/2026-10-14-rob-register-fenced-results.md`（3b888d4）。observer保存值在GPR、两端SB、元数据在ROI外，原body/warm同PC；旧CROI1536失败不回救。**发射≠allocation**，physicalROBOPEN。
 - unit有限批完成反例：source43b1a53/build+launch4331ac6、1536完整、四roleN16→32的IR/OPret/OPspec/DP全部+16，sink−NOP DP=0，预注册SINK_UNIT_NOT_QUALIFIED。报告 `docs/reviews/2026-10-14-rob-sink-unit-results.md`（58b7128）。不按逻辑OP统计换ROB slot，不为失败给N扫描放行。所有profile0/restored。
 - 后续归当前ROB负责人，触发=可观察依赖链资源竞争/packing新协议冻结与端点完成边界合格；冷load/独立deadline/PRF/supply对照继续，未冻结/未采样。不以当前purebodycycle作ALU端口结论。当前线程持续Goalactive，科学反例不替整个容量目标完成；无newthread/automation/subagent/main/remote。
+
+### 2026-10-14 JIT供给接缝与admission实施（primary）
+
+- 资源v1（source25dabaf/build+launch98ab4c5）16/4096、v2最终RX预热（sourcee5349ba/build+launcha5ca864）16/4096正式+16384own warm均技术完整且restore0，但旧≤1 I-refill供给门失败。报告 `docs/reviews/2026-10-14-rob-filler-resource-results.md` / `docs/reviews/2026-10-14-rob-filler-resource-hot-results.md`；不以周期响应晋升ALU/ROB单位。
+- v3无系统调用热batch（source4c787a6/build+launch58d0ea1），`docs/design/2026-10-14-rob-filler-resource-batch.md`、`probes/diagnostic/rob_filler_resource_batch.c`，16 fresh同统计门正在执行。每5call共同FD绝对包络、每call当前binding；触发：完整实测与独立重放后更新命名，失败不复评分。
+- admission v1软件已交付fcedc6b：`docs/design/2026-10-14-rob-admission-window.md` / `probes/diagnostic/rob_admission_window.c`；84/21504原网格冻结，但**未执行**，旧最终RX预热路径不允许进入长扫描；触发：v3供给对照结束后接入最终热batch、重新构建并先N0资格。物理ROB仍OPEN。
+- 后置：独立冷load退休阻塞 + 两截止时间/PRF/供给反证；触发：热窗口及实际filler响应合格后冻结，路径先登记本项，不强拟合384。诊断ROI近似重复模板后续收敛为共同组件；触发：科学结果稳定后，实际生产配方/ABI/所有旧source-build谱系回归固定再重构。

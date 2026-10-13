@@ -1,0 +1,10 @@
+{
+  "tests": 715,
+  "seconds": 616.904,
+  "status": "OK",
+  "log_sha256": "d1c7b7f38201f2b4f5f09e787777801fa3182a2243b0a9e2a72a716272cf6c00",
+  "source_head": "58b7128",
+  "coverage_limit": "through direct/register/sink unit; new resource/admission/hot tests separate",
+  "formal_paths_changed": false,
+  "formal_tests_rerun": false
+}
