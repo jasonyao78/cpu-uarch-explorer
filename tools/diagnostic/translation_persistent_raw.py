@@ -31,6 +31,7 @@ def audit_raw(raw):
   for rel in ('probes/diagnostic/translation_persistent_read.c','probes/diagnostic/translation_persistent_bpf.h'):
    content=blob(source,rel);need(hashlib.sha256(content).hexdigest()==b['source_sha256'][rel],'binary source drift');(td/Path(rel).name).write_bytes(content)
   host=td/'producer';subprocess.run(['clang','-std=c11','-O2','-Wall','-Wextra','-Werror',str(td/'translation_persistent_read.c'),'-o',str(host)],check=True,capture_output=True)
+  registered=blob(launch,model.PLAN);need(hashlib.sha256(registered).hexdigest()==b['actual_plan_sha256'] and model.exact(json.loads(registered),json.loads(subprocess.check_output([str(host),'--plan'],text=True))),'persistent immutable registered plan')
   for i,e in enumerate(entries):
    name=e['name'];f=raw/(name+'.stdout.jsonl');need(sha(f)==e.get('stdout_sha256'),'stdout SHA');need(e.get('timed_out') is False,'probe timeout');rr=[json.loads(s) for s in f.read_text().splitlines()];plan=None
    if rr and rr[0].get('probe')==model.MODE:
