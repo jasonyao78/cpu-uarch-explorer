@@ -22,3 +22,5 @@ branch codex/sm8650-tlb-hierarchy-r2，source73dbc19/buildf7e0d93/actual launch8
 private raw `data/private/20261013T015456Z-tlb-descriptor-graph/`，所有绝对kernel VA/PFN与逐节点计划保留，公开 `docs/reviews/evidence/2026-10-13-tlb-descriptor-graph/validation.json` / `independent-check.json` 仅匿名谓词/计数/SHA；20raw文件SHA、192个capture、所有链闭环及页表PA分组由第二算术直接读取原值核对，三owner PID不同，和consumer一致。
 
 距离目标：descriptor可读→同实际链身份绑定这项必要连接已完成，但TLB物理capacity/set-way和ROB capacity最终参数仍0/3定案。下一另冻结large-N转折及固定VA/data-PFN、改变实际PTE-table PA关联的干预；只有真实layout激励/工作集与control通过才比较。原高位/全位pointer阴性、PFN关联NOT_EXCITED、old reach/proxy/ROB终态不覆盖。本小N资格不产生capacity/ways/hash数字，owner/触发 `docs/open-items.md`。
+
+新连接资格后的完整diagnostic573/573通过（489.499s、exit0、tested source84b8568），证据 `docs/reviews/evidence/2026-10-13-tlb-descriptor-graph/regression.json`；不将它和其它日期回归合成一个虚构总数。

@@ -1,0 +1,10 @@
+{
+  "command": ".venv/bin/python -m unittest discover -s tools/diagnostic/tests",
+  "tests": 573,
+  "passed": 573,
+  "exit_code": 0,
+  "elapsed_s": 489.499,
+  "tested_source_head": "84b8568",
+  "full_output_sha256": "bb96a9a6b758057269328caa31ba87dfd8a895adba8ee6f822138ab8e76d1a76",
+  "scope": "all diagnostic tests after actual descriptor graph binding; unchanged formal runner/analysis/CMake not rerun"
+}
