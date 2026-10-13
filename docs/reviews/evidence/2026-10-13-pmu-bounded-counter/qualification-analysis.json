@@ -1,0 +1,127 @@
+{
+  "status": "OWN_DIRECT_COUNTER_QUALIFIED",
+  "attempts": 72,
+  "accepted": 72,
+  "invalid": 0,
+  "source_branch": "codex/sm8650-tlb-hierarchy-r2",
+  "source_head": "014f981c1a25ddb7c32993a7937bb4ccbb6b8c5f",
+  "binary_source_head": "2479353236e52ca77b89579cf816b01e3e66d1bc",
+  "binary_sha256": "86f74bc61f206246203d566990ce0cd25d044dcc918de54024b00c380954f920",
+  "processes": [
+    {
+      "epoch": 0,
+      "invalid_ordinals": [],
+      "status": "OWN_DIRECT_COUNTER_QUALIFIED",
+      "checks": {
+        "load_signal": true,
+        "store_signal": true,
+        "load_cross": true,
+        "store_cross": true,
+        "load_IR": true,
+        "store_IR": true
+      },
+      "load_minus_nop": [
+        -49.5,
+        4.0,
+        8185.0,
+        -6.0
+      ],
+      "store_minus_nop": [
+        -56.5,
+        4.0,
+        -9.0,
+        8188.5
+      ],
+      "physical_capacity_certified": false,
+      "short_window_precision_certified": false
+    },
+    {
+      "epoch": 1,
+      "invalid_ordinals": [],
+      "status": "OWN_DIRECT_COUNTER_QUALIFIED",
+      "checks": {
+        "load_signal": true,
+        "store_signal": true,
+        "load_cross": true,
+        "store_cross": true,
+        "load_IR": true,
+        "store_IR": true
+      },
+      "load_minus_nop": [
+        23.0,
+        4.0,
+        8195.0,
+        3.5
+      ],
+      "store_minus_nop": [
+        21.5,
+        4.0,
+        -2.5,
+        8200.0
+      ],
+      "physical_capacity_certified": false,
+      "short_window_precision_certified": false
+    },
+    {
+      "epoch": 2,
+      "invalid_ordinals": [],
+      "status": "OWN_DIRECT_COUNTER_QUALIFIED",
+      "checks": {
+        "load_signal": true,
+        "store_signal": true,
+        "load_cross": true,
+        "store_cross": true,
+        "load_IR": true,
+        "store_IR": true
+      },
+      "load_minus_nop": [
+        -60.5,
+        4.0,
+        8199.0,
+        0.0
+      ],
+      "store_minus_nop": [
+        -35.0,
+        4.0,
+        5.5,
+        8205.0
+      ],
+      "physical_capacity_certified": false,
+      "short_window_precision_certified": false
+    }
+  ],
+  "raw_sha256": {
+    "final-environment.json": "e4216c328de8af0695c799858b99dc4931fc4640ddce059da7c4830cf073b62c",
+    "e1-pre-environment.json": "563f1a297afd335222a4d0e9c32ae3f9434cf9d250dc1afdbeedd7fc9ac7e9b4",
+    "e2.stdout.jsonl": "057455dd25472906bc65a0af56b85db3593b0eef6d31a5df4399f528b710af92",
+    "e0.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e2-analysis.json": "22cc0849cf643159b16d28fa8cbecb6e3b44d69be4b79c59a8d516c1a1151d9b",
+    "e1-post-environment.json": "857657cfed52c1ffede5c6909999b870700c67ab8fe8e71fa594fe76fa0d655c",
+    "transaction-helper.py": "cf9b100dcb0c07bca72b7458f6d2bac5bb5f553cc4192d090e49ed2075db0bec",
+    "environment-policy.json": "232a9c60ea302c12f1f7b886ed8b4a47c83076bbb5511f42837704ccdd79fc23",
+    "e2.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "e1-analysis.json": "09674568fba7489dc376f182ef85436aaffa92ff85071e63b767ce7d8b41d0c3",
+    "e0-pre-environment.json": "94de8833a6da8973acab941abdd0ba88a9046da0fe2b41691c7039cac2bae0b7",
+    "initial-environment.json": "bc03763a075268dac347bebb15f02b2e8326ff99ea873c6cfc48d90a3c02b468",
+    "e0-analysis.json": "93ea89bd2a6569d58586e36ad206b4dc61cbfd572f2284e662c81f28314f6687",
+    "consumer.py": "0e39c7ae32f6765afaa9b0aebbc2948ce2042867be650678592566963d24f2c8",
+    "e1.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "manifest.json": "281a87558ea6a318a5abb77855c55a0fa24896efc300333de5a166da2911abc4",
+    "e0.stdout.jsonl": "cebdc6b5344636f498fbe45ac91d5d784d407f5b12141ae60b93ea2a93ac787c",
+    "e2-pre-environment.json": "b92a9d27462bbd2195f820394872eba53533bca7a00dce19e8cf99cbdf345f2a",
+    "e2-post-environment.json": "c28764ce0a6b6ee0a5adc3c97fdbab7871c12db1957ab8b027288be3c87d7ab5",
+    "driver.py": "2177502eb921b9d1c45cacd85b99df41fa8b71bacf6ddf81fc966c6679c57c93",
+    "e1.stdout.jsonl": "858e34ba84e38f40275e0e9845e0f5dd65e7b5eb2dd3ff8b5b251795fce15f41",
+    "e0-post-environment.json": "7699c0c9351944ff631db9426f849e4ad82f746cbf9ca9f79022825814739381"
+  },
+  "raw_inventory_sha256": "91e9e8d191488cc7ebe4afb6ee4a216a21ca91867df39430b03704a5f63a778f",
+  "transaction_sha256": "3ea69801ad1e697fef1a487ddbffe0bc2306c5eb27934e47b270fe8fd49b11a6",
+  "transaction_summary": {
+    "state": "restored",
+    "baseline": 0,
+    "applied_actual": 1,
+    "restore_after": 0
+  },
+  "physical_capacity_certified": false,
+  "short_window_precision_certified": false
+}
