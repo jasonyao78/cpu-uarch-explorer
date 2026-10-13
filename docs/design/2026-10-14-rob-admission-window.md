@@ -1,4 +1,4 @@
-# 自有发射标记的 admission 转折 v1.0
+# 自有发射标记的 admission 转折 v1.1
 
 ## 本次任务的目的（给人类看）
 
@@ -21,3 +21,9 @@ chain{16,32} × gap{0,128,256,384,512,640,768} × filler{sink,zero,nop} × fresh
 Mpost near过阈值≥8/32，否则 DEADLINE_NOT_OBSERVED；只对这些eligible观察far，响应率≥.9为 reached，≤.1为 blocked，中间为 transition。相同epoch/chain/filler的转折报告最后reached与首个后续blocked的gap区间；前后未观察则左右删失，非单调记非单调，不补插值。两epoch交集为空不得称重复。
 
 chain16→32延长deadline，若转折明显移动则拒绝稳定capacity解释；NOP/MOV/ADD的差别只能作为fusion/rename/execute/admission模型的约束。即便长deadline下某转折稳定，FP链可以逐条退休，后续供给、整数PRF、FP资源、分支/调度均须专门控制；本批不会认证物理ROB或µop单位。前一g+chain代理区间与第三方384保持原证据等级，不择近者报告。后续冷loadhead+两deadline/PRF对照另冻新矩阵。
+
+## v1.1 热接线与N0上游门（正式采样前）
+
+旧v1配方构建曾在本机验证，但从未上板。资源批暴露最后RX和内核往返污染，所以本版使用 `probes/diagnostic/rob_filler_resource_batch.c` 的4warm+1正式共享绝对FD包络；每个warm完整current metadata/硬件/架构审计，原始type=warm-roi与正式分开，84进程共86016warm+21504正式。内层无FD read/getcpu系统调用、无代码/权限写、无输出；时间标签是整个FD包络。payload/ISA/branch/统计门全部不变。
+
+首先执行全部12个gap0 fresh（两chain×三filler×两epoch），逐进程classify_process必须reached，即原8正控/结构阴性/IR/供给/eligible/条件far≥.9全部通过，才接续72个非0扫描；任何N0失败停止而不执行非0点。任何完整度、架构或binding故障亦停止/finally恢复，未采部分不填0。N0门是实际生产消费者调用，不能只在说明中承诺。

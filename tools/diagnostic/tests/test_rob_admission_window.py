@@ -15,5 +15,5 @@ class AdmissionWindow(unittest.TestCase):
  def test_matrix_coverage_and_recipe(self):
   try:m=importlib.import_module('tools.diagnostic.rob_admission_window_analysis')
   except ModuleNotFoundError:self.fail('admission consumer missing')
-  self.assertEqual(len(m.conditions()),84)
+  self.assertEqual(len(m.conditions()),84);self.assertTrue(all(c['phase']=='qualification' and c['args'][4]=='0' for c in m.conditions()[:12]));self.assertTrue(all(c['phase']=='scan' and c['args'][4]!='0' for c in m.conditions()[12:]));self.assertEqual(m.expected(32,768,'sink')[0]['fd_envelope'],'four-warm-plus-one-formal')
   with self.assertRaises(ValueError):m.analyze([])

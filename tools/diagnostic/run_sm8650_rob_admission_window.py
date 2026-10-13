@@ -15,7 +15,7 @@ PROTOCOL='docs/design/2026-10-14-rob-admission-window.md';DRIVER='tools/diagnost
 def ownership(ex):
  devices=subprocess.check_output(['adb','devices'],text=True).splitlines()[1:]
  if sum(l.endswith('\tdevice') for l in devices)!=1:raise RuntimeError('STOP one online target required')
- for name in ('rob_filler_resource','rob_sink_unit','rob_register_fenced_marker','rob_direct_fenced_marker','rob_admission_window','l1_tlb_reach','pmu_own_counter','pmu_user_reader','tlb_descriptor_dose','tlb_observed_reach','ptr_chase','rob_window_probe','rob_issue_marker','rob_fenced_issue_marker','rob_cache_marker','rob_speculative_marker','translation_persistent_read','rob_fp_drain','rob_dual_anchor','rob_anchor_order','rob_zero_latency_units'):
+ for name in ('rob_filler_resource_batch','rob_filler_resource_hot','rob_filler_resource','rob_sink_unit','rob_register_fenced_marker','rob_direct_fenced_marker','rob_admission_window','l1_tlb_reach','pmu_own_counter','pmu_user_reader','tlb_descriptor_dose','tlb_observed_reach','ptr_chase','rob_window_probe','rob_issue_marker','rob_fenced_issue_marker','rob_cache_marker','rob_speculative_marker','translation_persistent_read','rob_fp_drain','rob_dual_anchor','rob_anchor_order','rob_zero_latency_units'):
   r=ex.execute(['pidof',name])
   if r.returncode!=1 or r.stdout.strip():raise RuntimeError('STOP active probe/ownership')
  r=ex.execute(['su','-c','cat /sys/devices/system/cpu/cpu7/regs/identification/midr_el1; getconf PAGESIZE'])
@@ -50,10 +50,12 @@ def main(argv=None):
   for c in manifest['registered_conditions']:
    time.sleep(15);name=c['name'];inspect(name+'-pre');q=ex.execute(['su','-c',shlex.join([remote,*c['args']])]);stdout=out/(name+'.stdout.jsonl');stdout.write_text(q.stdout);(out/(name+'.stderr.log')).write_text(q.stderr);result=dict(name=name,args=c['args'],exit_code=q.returncode,timed_out=q.timed_out,stdout_sha256=sha(stdout));manifest['results'].append(result);write(out/'manifest.json',manifest)
    if q.timed_out:raise RuntimeError('STOP direct counter timeout')
-   value=model.audit_process([json.loads(l) for l in q.stdout.splitlines()],c,plan);result['classification']={k:v for k,v in value.items() if k!='rows'};write(out/(name+'-analysis.json'),value);inspect(name+'-post');write(out/'manifest.json',manifest)
+   value=model.audit_process([json.loads(l) for l in q.stdout.splitlines()],c,plan);result['classification']={k:v for k,v in value.items() if k not in ('rows','samples','warmup_windows','programs','runtime','final')};write(out/(name+'-analysis.json'),value);inspect(name+'-post');write(out/'manifest.json',manifest)
    if q.returncode or q.stderr or value['status']!='complete':manifest['status']='ADMISSION_TECHNICAL_FAILURE';write(out/'manifest.json',manifest);return
-   print('OK',name,'complete owned ROI with six current counters',flush=True)
-  summary=model.analyze([r['classification'] for r in manifest['results']]);write(out/'matrix-analysis.json',summary);manifest['status']=summary['status'];manifest['counter_read_qualified']=True;manifest['marker_qualified']=all(all(v['gates'].values()) for v in summary['processes']);write(out/'manifest.json',manifest)
+   point=model.classify_process(value,c);result['point']=point;write(out/'manifest.json',manifest)
+   if c['phase']=='qualification' and point['classification']!='reached':manifest['status']='ADMISSION_N0_NOT_QUALIFIED';write(out/'manifest.json',manifest);return
+   print('OK',name,point['classification'],point['far_given_near_rate'],flush=True)
+  summary=model.analyze([json.loads((out/(r['name']+'-analysis.json')).read_text()) for r in manifest['results']]);write(out/'matrix-analysis.json',summary);manifest['status']=summary['status'];manifest['counter_read_qualified']=True;manifest['marker_qualified']=all(all(v['gates'].values()) for v in summary['processes']);write(out/'manifest.json',manifest)
  try:tx.run(work,dict(source_head=head,protocol=PROTOCOL,protocol_sha256=sha(ROOT/PROTOCOL),raw_directory=str(out),binary_sha256=manifest['binary_sha256']))
  except BaseException as e:manifest['status']='stopped';manifest['error']=repr(e);raise
  finally:
