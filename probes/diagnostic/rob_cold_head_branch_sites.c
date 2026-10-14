@@ -36,6 +36,16 @@ static unsigned member(unsigned trial,unsigned pos){unsigned i=(trial+pos)%16;re
 static const char*controls[]={"architect","speculate"};
 static uint64_t test_bits(unsigned c){return c?UINT64_C(1):0;}
 static uint64_t train_bits(unsigned c){(void)c;return 0;}
+/* packet-cache v1.0显式build变体；默认issue的计划/参数合同不变。 */
+#ifdef COLD_HEAD_PACKET_CACHE
+#define PROBE_NAME "rob-cold-head-packet-cache"
+#define PALETTE_WORD "cache"
+static bool layout_allowed(const char*text){return !strcmp(text,"packet");}
+#else
+#define PROBE_NAME "rob-cold-head-branch-sites"
+#define PALETTE_WORD "issue"
+static bool layout_allowed(const char*text){return !strcmp(text,"fixed")||!strcmp(text,"trial-role")||!strcmp(text,"packet");}
+#endif
 static unsigned heads_count,palette_kind,head_offset,layout_kind;static bool cold_state;
 /* v2.0：requested偏移必须经过同一出口用于实际load参数和内容链。 */
 uintptr_t head_address(uintptr_t map_base,unsigned offset){return map_base+offset;}
@@ -101,8 +111,8 @@ static void head_prepare(uint64_t bits,bool cold){
 static void prepare(uint64_t*near,uint64_t*far,uint64_t*out){volatile uint64_t hot=0;for(unsigned j=0;j<8;++j){hot^=((volatile uint64_t*)near)[j*8];far[j*8]=0;}out[0]=out[1]=0;(void)hot;__asm__ volatile("dsb ish":::"memory");}
 #endif
 int main(int argc,char**argv){
- bool planned=argc==12&&!strcmp(argv[1],"--plan");bool running=argc==10&&!strcmp(argv[1],"--run");if((!planned&&!running)||strcmp(argv[2],"--heads")||(strcmp(argv[3],"1")&&strcmp(argv[3],"2"))||strcmp(argv[4],"--palette")||strcmp(argv[5],"issue")||strcmp(argv[6],"--head-offset")||strcmp(argv[7],"1024")||strcmp(argv[8],"--branch-layout")||(strcmp(argv[9],"fixed")&&strcmp(argv[9],"trial-role")&&strcmp(argv[9],"packet"))||(planned&&(strcmp(argv[10],"--indices")||!parse_indices(argv[11]))))return fail("usage-cold-head-N0-only");unsigned chain=(unsigned)atoi(argv[3]);heads_count=chain;palette_kind=!strcmp(argv[5],"cache");head_offset=(unsigned)atoi(argv[7]);layout_kind=!strcmp(argv[9],"packet")?2:!strcmp(argv[9],"trial-role")?1:0;
- printf("{\"type\":\"config\",\"version\":7,\"probe\":\"rob-cold-head-branch-sites\",\"heads\":%u,\"palette\":\"%s\",\"head_offset\":%u,\"branch_layout\":\"%s\",\"gap\":0,\"trials\":32,\"max_metadata_invalid_packets\":1,\"windows\":512,\"training_calls\":64,\"routine_warmup_calls\":4,\"final_RX_owned_warm_calls\":4,\"warm_protocol\":\"post-RX-no-syscall-owned-ROI\",\"fd_envelope\":\"four-warm-plus-one-formal\",\"count_source\":\"owned-register-only-roi\",\"perf_config1\":3,\"events\":%s,\"pmu_type\":8,\"schedule_reverse_block_trials\":8}\n",heads_count,argv[5],head_offset,layout_name(),palette_kind?"[17,8,112,113,3,23]":"[17,8,112,113,34,1]");
+ bool planned=argc==12&&!strcmp(argv[1],"--plan");bool running=argc==10&&!strcmp(argv[1],"--run");if((!planned&&!running)||strcmp(argv[2],"--heads")||(strcmp(argv[3],"1")&&strcmp(argv[3],"2"))||strcmp(argv[4],"--palette")||strcmp(argv[5],PALETTE_WORD)||strcmp(argv[6],"--head-offset")||strcmp(argv[7],"1024")||strcmp(argv[8],"--branch-layout")||!layout_allowed(argv[9])||(planned&&(strcmp(argv[10],"--indices")||!parse_indices(argv[11]))))return fail("usage-cold-head-N0-only");unsigned chain=(unsigned)atoi(argv[3]);heads_count=chain;palette_kind=!strcmp(argv[5],"cache");head_offset=(unsigned)atoi(argv[7]);layout_kind=!strcmp(argv[9],"packet")?2:!strcmp(argv[9],"trial-role")?1:0;
+ printf("{\"type\":\"config\",\"version\":7,\"probe\":\""PROBE_NAME"\",\"heads\":%u,\"palette\":\"%s\",\"head_offset\":%u,\"branch_layout\":\"%s\",\"gap\":0,\"trials\":32,\"max_metadata_invalid_packets\":1,\"windows\":512,\"training_calls\":64,\"routine_warmup_calls\":4,\"final_RX_owned_warm_calls\":4,\"warm_protocol\":\"post-RX-no-syscall-owned-ROI\",\"fd_envelope\":\"four-warm-plus-one-formal\",\"count_source\":\"owned-register-only-roi\",\"perf_config1\":3,\"events\":%s,\"pmu_type\":8,\"schedule_reverse_block_trials\":8}\n",heads_count,argv[5],head_offset,layout_name(),palette_kind?"[17,8,112,113,3,23]":"[17,8,112,113,34,1]");
 #if defined(__linux__) && defined(__aarch64__)
  struct perf p;struct roi_value initial_binding[6]={0};
  if(running){

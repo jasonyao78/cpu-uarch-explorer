@@ -28,14 +28,15 @@ def conditions():
  grid=[(h,l) for h in (1,2) for l in LAYOUTS]
  return [dict(name=f'e{e}-h{h}-{l}',args=['--run','--heads',str(h),'--palette','issue','--head-offset','1024','--branch-layout',l]) for e in range(2) for h,l in (grid if e==0 else reversed(grid))]
 
-def audit_process(rr,c,registered):
- """核验真实头地址/内容链/PFN、ISA、state、每窗PMU算术与同FD包络；失败保留空metrics。"""
- _require(_same(registered,plans()),'interleaved native registered plans');h=int(c['args'][2]);p=c['args'][4];off=int(c['args'][6]);layout=c['args'][8]
- _require(type(rr)is list and len(rr)>=2 and _same(rr[0],expected(h,p,off,layout)[0]),'interleaved config')
+def audit_process(rr,c,registered,*,expected_recipe=None,recipe_registry=None):
+ """核验真实地址/ISA/current FD；可信consumer可传冻结recipe，默认issue原合同不变。"""
+ recipe=expected if expected_recipe is None else expected_recipe;registry=plans if recipe_registry is None else recipe_registry
+ _require(_same(registered,registry()),'sites native registered plans');h=int(c['args'][2]);p=c['args'][4];off=int(c['args'][6]);layout=c['args'][8]
+ _require(type(rr)is list and len(rr)>=2 and _same(rr[0],recipe(h,p,off,layout)[0]),'interleaved config')
  if rr[-1].get('type')=='failure':
   _require(rr[-1].get('metrics')=={} and type(rr[-1].get('failure'))is dict,'interleaved failure')
   return dict(condition=c['name'],args=c['args'],status='TECHNICAL_FAILURE',failure=rr[-1]['failure'])
- idx=admission.register.indices(rr[5].get('counter_indices'));want=expected(h,p,off,layout,idx);_require(_same(rr[:5],want[:5]),'interleaved actual words');rt=packets.runtime(rr,idx)
+ idx=admission.register.indices(rr[5].get('counter_indices'));want=recipe(h,p,off,layout,idx);_require(_same(rr[:5],want[:5]),'interleaved actual words');rt=packets.runtime(rr,idx)
  before=rt.get('head_pagemap_before');after=rr[-1].get('head_pagemap_after');_require(type(before)is list and type(after)is list and len(before)==len(after)==2,'interleaved head backing')
  def pfn(v):
   _require(type(v)is int and 0<=v<1<<64 and v>>63 and not(v&(1<<62)) and v&((1<<55)-1),'interleaved visible PFN');return v&((1<<55)-1)

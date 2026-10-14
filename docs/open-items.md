@@ -668,3 +668,8 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 
 - `docs/reviews/2026-10-14-rob-cold-head-branch-sites-results.md`：source7ae0dd5/build+actual launch1034c41，12/6144formal+24576warm、invalid0；packet两epoch/head1-2全部near/错方向32/32、negative/joint32，far|near1，原long/供给/校准通过。fixed机会9/13/8/23，trial-role/packet全部32；184320 event差/68SHA，15事务restored0。实际rawPC数量1/256/512核验，不靠requested字段。
 - 后续归ROB负责人，触发=同packet实际LDR-PC cache剂量四配置复核。整个routine PC改变同时改变LDR PC与对齐，head2 fixed vs新sites长延迟差保留，不唯一归因branch history，不外推旧cache门。四配置通过后独立冻cold-head gap/packing/PRF/supply/two-head deadline，不拟合384。物理ROB与共享L2 leaf/set未知、goalactive。
+
+### 2026-10-14 当前packet-PC cache wrapper就绪（primary）
+
+- `docs/design/2026-10-14-rob-cold-head-packet-cache.md` / `probes/diagnostic/rob_cold_head_packet_cache.c` / `tools/diagnostic/rob_cold_head_packet_cache_analysis.py` / `tools/diagnostic/run_sm8650_rob_cold_head_packet_cache.py` 冻结四配置2048formal/8192warm；实际cache-only macro wrapper复用唯一ROI源，不靠换统计标签。
+- shared `probes/diagnostic/rob_cold_head_branch_sites.c` 默认issue/native合同保留；`tools/diagnostic/rob_cold_head_branch_sites_analysis.py` 默认审计不变，新cache可信recipe显式传入。局部16tests过；旧原始6144/24576重新读取仍BRANCH_SITES_PRIMARY_QUALIFIED，summary逐字一致；NDK cache wrapper源码编译过。触发=source/build/真实native/ABI审计后独占上板；尚未采样，不拿733覆盖新增代码。
