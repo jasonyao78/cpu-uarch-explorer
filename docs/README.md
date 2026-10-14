@@ -52,3 +52,5 @@
 - 同映射cold-head终态：`docs/reviews/2026-10-14-rob-cold-head-interleaved-results.md`；完整匿名counts/SHA及全部原门 `docs/reviews/evidence/2026-10-14-rob-cold-head-interleaved/`。
 
 - Cold-head实际branch PC反证：设计 `docs/design/2026-10-14-rob-cold-head-branch-sites.md`；实施 `docs/superpowers/plans/2026-10-14-rob-cold-head-branch-sites.md`；producer `probes/diagnostic/rob_cold_head_branch_sites.c`、consumer `tools/diagnostic/rob_cold_head_branch_sites_analysis.py`、controller `tools/diagnostic/run_sm8650_rob_cold_head_branch_sites.py`。
+
+- 分支PC机会资格终态：`docs/reviews/2026-10-14-rob-cold-head-branch-sites-results.md`；完整原门、匿名全窗与SHA `docs/reviews/evidence/2026-10-14-rob-cold-head-branch-sites/`。

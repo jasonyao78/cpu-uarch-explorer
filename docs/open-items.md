@@ -663,3 +663,8 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 
 - `docs/design/2026-10-14-rob-cold-head-branch-sites.md` 冻结12process6144formal/24576warm、fixed/trial-role/packet真实PC干预；packet主配置要求原marker/供给/long门及near/错方向≥24、negative/joint≥29。旧7/4<8的资格失败保留，不能用这次成功回填旧批。
 - 组件路径 `probes/diagnostic/rob_cold_head_branch_sites.c` / `tools/diagnostic/rob_cold_head_branch_sites_analysis.py` / `tools/diagnostic/run_sm8650_rob_cold_head_branch_sites.py`，新native实际512site计划/bounds/冷热共享差异与controller锚点已RED→GREEN，Android源码编译通过。尚未执行；触发=source/build与actual全slot/ABI审核、独占双journal恢复后上板。
+
+### 2026-10-14 分支PC机会资格完成，继续资源辨识（primary）
+
+- `docs/reviews/2026-10-14-rob-cold-head-branch-sites-results.md`：source7ae0dd5/build+actual launch1034c41，12/6144formal+24576warm、invalid0；packet两epoch/head1-2全部near/错方向32/32、negative/joint32，far|near1，原long/供给/校准通过。fixed机会9/13/8/23，trial-role/packet全部32；184320 event差/68SHA，15事务restored0。实际rawPC数量1/256/512核验，不靠requested字段。
+- 后续归ROB负责人，触发=同packet实际LDR-PC cache剂量四配置复核。整个routine PC改变同时改变LDR PC与对齐，head2 fixed vs新sites长延迟差保留，不唯一归因branch history，不外推旧cache门。四配置通过后独立冻cold-head gap/packing/PRF/supply/two-head deadline，不拟合384。物理ROB与共享L2 leaf/set未知、goalactive。
