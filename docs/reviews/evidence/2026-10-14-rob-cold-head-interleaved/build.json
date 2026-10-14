@@ -1,5 +1,5 @@
 {
-  "source_commit": "157929b572a26da74795af33ec73b4482b877fa1",
+  "source_commit": "c7f7e440539ba94df2627eca212c275e6fc1371b",
   "source_branch": "codex/sm8650-tlb-hierarchy-r2",
   "source_sha256": {
     "probes/diagnostic/rob_cold_head.c": "54f05b9215444f86932ee2965aa72c1b06e8b6fafc00fc5e0af4963c2368d5e4",
@@ -21,7 +21,7 @@
     "probes/diagnostic/rob_cold_head_interleaved.c": "c2f24017f1998afe1e23d6136b5d8d6cb9f07ec2fbb54aadbf51629d6df6ba00",
     "docs/design/2026-10-14-rob-cold-head-interleaved.md": "b9a275f40d4373264744669a57bbf0b90969816cf8db4fa1911f1f2260e82d86",
     "tools/diagnostic/rob_cold_head_interleaved_analysis.py": "3a2f634c2a6e9eeea7048eb57f7ac468214d2ebd6503cbc7c9f2216c4742dda3",
-    "tools/diagnostic/run_sm8650_rob_cold_head_interleaved.py": "cd07cd71bf4338063cd0c8734ecab8a2ed96920c926e33124d6610d284a9e9aa"
+    "tools/diagnostic/run_sm8650_rob_cold_head_interleaved.py": "33323a1188842ec6e73c5865cfd01279015d797cd1242f1504f003d5f6fa62fe"
   },
   "binary_sha256": "cbea6796bce9e9072a533260bb3250ccc39aade5bea76238a9734b47866f8328",
   "ndk_version": "27.2.12479018",
