@@ -644,3 +644,8 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 
 - `docs/reviews/2026-10-14-rob-cold-head-results.md`：source3aefd28/build+launch6c0888c，4096正式/16384warm、invalid0，长延迟、四cold issue的marker/strict I-cache全通过；若干cache/taps的L1D/L2D剂量门失败，原COLD_HEAD_NOT_QUALIFIED保持。所有13个PMU事务已恢复0，设备idle。
 - 下一冻结 `docs/design/2026-10-14-rob-cold-head-interleaved.md`：16process×512state交错、sameVA/PFN/context hot-cold、head offset0/1024，1024预先指定primary，0作为缓存交互对照。新producer/consumer/controller路径已登记本协议，尚未实现；触发：实际native512身份/地址链/packet parser256兼容与source/build审核后上板，禁止旧模型失败回救或先无控制拟合物理384。
+
+### 2026-10-14 同映射cold-head软件接续（primary）
+
+- `probes/diagnostic/rob_cold_head_interleaved.c` / `tools/diagnostic/rob_cold_head_interleaved_analysis.py` / `tools/diagnostic/run_sm8650_rob_cold_head_interleaved.py` 已实现冻结state512/head offset0/1024；原生实际布局出口与state冲突/完整度RED→GREEN，局部11tests通过；旧v1实际4096/16384重读仍COLD_HEAD_NOT_QUALIFIED，不回救。
+- 后续归ROB负责人，触发=source commit与NDK双构建/native逐词/ABI审核完成后16process8192资格；尚未上板，物理entries UNKNOWN。current index每FD新核验，13旧journal restored/runner unfinished空/perf baseline0；baseline检查需每次launch再做。

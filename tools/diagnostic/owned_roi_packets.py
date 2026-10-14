@@ -6,9 +6,13 @@ metrics; hardware metadata validation is performed by each caller afterward.
 from tools.diagnostic.analyze_cold_pair import _require
 
 def decode(records,schedule):
- wanted={(s['trial'],s['position']):s for s in schedule};_require(len(wanted)==256,'packet native schedule uniqueness');bins={k:{} for k in wanted}
+ """按注册256/512身份解包；state冲突、漏样、重复或多invalid均拒绝。"""
+ # v2.0只扩展已注册512；旧256身份与有限invalid预算不放宽。
+ wanted={(s['trial'],s['position']):s for s in schedule};_require(len(schedule) in (256,512) and len(wanted)==len(schedule),'packet native schedule uniqueness');bins={k:{} for k in wanted}
  for z in records:
-  _require(type(z)is dict and type(z.get('trial'))is int and type(z.get('position'))is int,'packet identity types');key=z['trial'],z['position'];_require(key in wanted,'packet unknown identity');kind=z.get('type');_require(kind in ('round','warm-roi','invalid-packet','rejected-window'),'packet unknown record type')
+  _require(type(z)is dict and type(z.get('trial'))is int and type(z.get('position'))is int,'packet identity types');key=z['trial'],z['position'];_require(key in wanted,'packet unknown identity');kind=z.get('type');
+  if len(schedule)==512:_require(wanted[key].get('state') in ('hot','cold') and z.get('state')==wanted[key]['state'],'packet state identity')
+  _require(kind in ('round','warm-roi','invalid-packet','rejected-window'),'packet unknown record type')
   item=(kind,z.get('ordinal')) if kind=='warm-roi' else (kind,None)
   if kind=='warm-roi':_require(type(z.get('ordinal'))is int and 0<=z['ordinal']<4,'packet warm ordinal')
   _require(item not in bins[key],'packet duplicate');bins[key][item]=z
@@ -19,7 +23,7 @@ def decode(records,schedule):
    _require(rej is None and sample is not None and all(z is not None for z in warm) and len(group)==5,'packet valid complete coverage');valid.append(dict(identity=key,schedule=s,warm=warm,sample=sample))
   else:
    count=inv.get('completed_warm');stage=inv.get('stage');_require(inv.get('metrics')=={} and inv.get('failure')=={'reason':'ROI-metadata-changed'} and type(count)is int and 0<=count<=4 and type(stage)is int and stage==count,'packet invalid named reason/stage');_require(rej is not None and rej.get('reason')=='ROI-metadata-changed' and rej.get('stage')==stage and type(rej.get('stage'))is int and rej.get('metrics')=={} and rej.get('hardware_values_usable')is False,'packet rejection trace');_require(sample is None and all((z is not None)==(j<count) for j,z in enumerate(warm)) and len(group)==count+2,'packet invalid partial coverage');invalid.append(dict(identity=key,schedule=s,warm=warm[:count],invalid=inv,rejected=rej))
- _require(len(invalid)<=1 and len(valid)+len(invalid)==256,'packet finite metadata budget');return dict(valid=valid,invalid=invalid)
+ _require(len(invalid)<=1 and len(valid)+len(invalid)==len(schedule),'packet finite metadata budget');return dict(valid=valid,invalid=invalid)
 
 def validate_rejection(z,indices):
  """Only an observed before/after binding change permits a packet rejection."""
@@ -43,7 +47,8 @@ def audit_envelope(group,idx):
  for field in ('kernel_before','kernel_after','fd_counts','enabled','running'):_require(all(z[field]==group[0][field] for z in group),'packet shared real FD envelope')
 
 def final_counts(final,packets):
- for k,v in dict(attempted_packets=256,valid_packets=len(packets['valid']),invalid_packets=len(packets['invalid'])).items():_require(type(final.get(k))is int and final[k]==v,'packet final accounting '+k)
+ """终态必须逐项等于注册解析所得attempt/valid/invalid，不能补零。"""
+ for k,v in dict(attempted_packets=len(packets['valid'])+len(packets['invalid']),valid_packets=len(packets['valid']),invalid_packets=len(packets['invalid'])).items():_require(type(final.get(k))is int and final[k]==v,'packet final accounting '+k)
 
 def paired_trials(cells,*roles):
  """Finite invalids shrink a named intersection; missing samples never become zero."""

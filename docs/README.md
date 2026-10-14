@@ -46,3 +46,5 @@
 这样设计）的快照式分析进 `design/`——TLB 战役的管线增量分析：
 `design/2026-09-30-sm8650-tlb-pipeline.md`（基础管线见
 `design/ptr-chase-pipeline-analysis.md`，2026-09-25 快照）。
+
+- 同映射cold-head独立反证：设计 `docs/design/2026-10-14-rob-cold-head-interleaved.md`；实施 `docs/superpowers/plans/2026-10-14-rob-cold-head-interleaved.md`；producer `probes/diagnostic/rob_cold_head_interleaved.c`；consumer `tools/diagnostic/rob_cold_head_interleaved_analysis.py`；controller `tools/diagnostic/run_sm8650_rob_cold_head_interleaved.py`；共享parser `tools/diagnostic/owned_roi_packets.py`。
