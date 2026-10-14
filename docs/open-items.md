@@ -673,3 +673,8 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 
 - `docs/design/2026-10-14-rob-cold-head-packet-cache.md` / `probes/diagnostic/rob_cold_head_packet_cache.c` / `tools/diagnostic/rob_cold_head_packet_cache_analysis.py` / `tools/diagnostic/run_sm8650_rob_cold_head_packet_cache.py` 冻结四配置2048formal/8192warm；实际cache-only macro wrapper复用唯一ROI源，不靠换统计标签。
 - shared `probes/diagnostic/rob_cold_head_branch_sites.c` 默认issue/native合同保留；`tools/diagnostic/rob_cold_head_branch_sites_analysis.py` 默认审计不变，新cache可信recipe显式传入。局部16tests过；旧原始6144/24576重新读取仍BRANCH_SITES_PRIMARY_QUALIFIED，summary逐字一致；NDK cache wrapper源码编译过。触发=source/build/真实native/ABI审计后独占上板；尚未采样，不拿733覆盖新增代码。
+
+### 2026-10-14 当前packet cache失败与head-local辨识（primary）
+
+- source5013561/build+actual launch769c8f8，`docs/reviews/2026-10-14-rob-cold-head-packet-cache-results.md`：4/2048formal+8192warm完整、invalid0，marker32/32/far1/原阴阳IR/long全过；head1三个taps L1D剂量1.28125/1.34375>1.25，PACKET_CACHE_NOT_QUALIFIED保持。NOP/head2全部剂量通过，L2D全部近head数不救L1D。61440差/28SHA复核，16事务restored0/runner空/idle。
+- 新独立head-local归ROB负责人：触发=无CBNZ/near/far/resultstore的GPR-only捕获内head-only ROI；保留actual LDR PC/数据实址与cache source，结果写回在after+SB外；用自己的冷热/LD/ST/IR/剂量正控，不能裁旧taps或放宽旧门。之后才cold-head gap/packing/PRF/supply/independent deadline；总refill来源未知，不偷换成head未激励或容量0。
