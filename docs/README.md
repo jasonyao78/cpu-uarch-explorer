@@ -48,3 +48,5 @@
 `design/ptr-chase-pipeline-analysis.md`，2026-09-25 快照）。
 
 - 同映射cold-head独立反证：设计 `docs/design/2026-10-14-rob-cold-head-interleaved.md`；实施 `docs/superpowers/plans/2026-10-14-rob-cold-head-interleaved.md`；producer `probes/diagnostic/rob_cold_head_interleaved.c`；consumer `tools/diagnostic/rob_cold_head_interleaved_analysis.py`；controller `tools/diagnostic/run_sm8650_rob_cold_head_interleaved.py`；共享parser `tools/diagnostic/owned_roi_packets.py`。
+
+- 同映射cold-head终态：`docs/reviews/2026-10-14-rob-cold-head-interleaved-results.md`；完整匿名counts/SHA及全部原门 `docs/reviews/evidence/2026-10-14-rob-cold-head-interleaved/`。

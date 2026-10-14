@@ -651,3 +651,8 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 - 后续归ROB负责人，触发=source commit与NDK双构建/native逐词/ABI审核完成后16process8192资格；尚未上板，物理entries UNKNOWN。current index每FD新核验，13旧journal restored/runner unfinished空/perf baseline0；baseline检查需每次launch再做。
 
 - 同映射cold-head构建已审核：source `157929b`，NDK27.2.12479018/API34两静态binary SHA相同 `cbea6796bce9e9072a533260bb3250ccc39aade5bea76238a9734b47866f8328`；实际native两index×八组合16plans/64programs与consumer逐词一致，Capstone head1/2真实依赖、branch、SB、GPR/无x18、64byte ABI保存恢复通过。局部复用路径18tests通过。完整build/plan/decode路径 `docs/reviews/evidence/2026-10-14-rob-cold-head-interleaved/`；即将执行固定16process，无旧批回救。
+
+### 2026-10-14 同映射cold-head反例终态与下一辨识（primary）
+
+- source c7f7e44/build+actual launch a44b3ce，`docs/reviews/2026-10-14-rob-cold-head-interleaved-results.md`：16/8192正式+32768warm、invalid0；1024全部cache/long/strict供给通过，但e0-head2 issue near7、e1-head1 cache near4<8，原资格INTERLEAVED_COLD_HEAD_NOT_QUALIFIED。不改门/不重跑求通过、不发起物理容量扫描。245760 event差/88SHA复核，14事务restored0/runner unfinished空。
+- 新问题归ROB负责人：near机会不足的branch预测 vs 发射时机；触发=准确r0p1 BR_MIS_PRED语义/实际PMCEID与own short ROI阴阳控制，另冻同映射wrong-direction/near联合反证。旧BR_PRED不足以回答，参数UNKNOWN；稳定机会资格之后gap/packing/PRF/supply/deadline，不用384拟合。

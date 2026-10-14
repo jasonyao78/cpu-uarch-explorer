@@ -30,3 +30,5 @@
 有限metadata新采样（`docs/reviews/2026-10-14-rob-filler-resource-bounded-results.md`）16fresh4096正式/16384warm、invalid0、原资源/供给门通过。旧首停失败不重新命名。固定ordinal只允许真实ROI-metadata-changed≤1/256，partial warm与rejected原字均保留；其它错误仍停；统计用共同有效trial≥31/32及真实trial标签，禁止数组重编号把near/far条件错接。新 `tools/diagnostic/owned_roi_packets.py` 在真实native计划身份上拒绝缺失/重复/冲突、接受记录置换不改变结果。
 
 最老cold-head反例（`docs/reviews/2026-10-14-rob-cold-head-results.md`）：marker/供给/long excitation已正，但整个带标记窗口的L1D差不一定等于head数；near/out/metadata cache交互及fresh-process物理布局可以进入差分。采用同进程/sameVA-PFN-counter的hot/cold交错，state必须进入身份键；页内offset隔离是独立预注册控制，不能把总refill唯一归属某个PC。完整硬件positive与模型资格failure要分别命名，不能一个失败让另一事实变0。
+
+同映射冷热state512实测（`docs/reviews/2026-10-14-rob-cold-head-interleaved-results.md`）：state进入schedule/warm/formal/invalid/rejected及统计身份键，真实load地址从map_base+offset共同出口生成，内容链和munmap必须用对应地址域。parser只允许注册256/512，duplicate/conflict/missing/state碰撞首停，旧v1原4096/16384失败保持。1024 cache/long/供给全通过仍不等于整批资格：near机会只有7/4<8时要保留失败，conditional far1不能消除不足。下一按真实wrong-direction事件联合检验机会，不把branch预测变动或稀少issue变成容量。
