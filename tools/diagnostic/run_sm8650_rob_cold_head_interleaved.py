@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """同映射冷热/offset独立反证；只采自己的短ROI，durable 0->1->0恢复。
 
-Purpose: docs/design/2026-10-14-rob-cold-head-interleaved-qualification.md. Source, readiness,
+Purpose: docs/design/2026-10-14-rob-cold-head-interleaved.md. Source, readiness,
 write-ahead and restore state are explicit; no frequency or other setting writes.
 """
 import argparse,copy,hashlib,json,shlex,shutil,subprocess,sys,time,uuid
@@ -11,7 +11,8 @@ ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT))
 from tools.diagnostic.run_sm8650_minimal import AdbExecutor,sha,write,collect_android_state,evaluate_preconditions_full,default_store
 from tools.diagnostic.perf_user_access_transaction import PerfUserAccessTransaction,durable_write
 from tools.diagnostic import rob_cold_head_interleaved_analysis as model
-PROTOCOL='docs/design/2026-10-14-rob-cold-head-interleaved-qualification.md';DRIVER='tools/diagnostic/run_sm8650_rob_cold_head_interleaved.py';TX='tools/diagnostic/perf_user_access_transaction.py'
+# 协议锚点共享consumer常量，避免launch前拼接路径漂移。
+PROTOCOL=model.PROTOCOL;DRIVER=model.DRIVER;TX='tools/diagnostic/perf_user_access_transaction.py'
 def ownership(ex):
  """一个目标、无任何已知探针在运行、精确MIDR和4KiB才允许操作。"""
  devices=subprocess.check_output(['adb','devices'],text=True).splitlines()[1:]

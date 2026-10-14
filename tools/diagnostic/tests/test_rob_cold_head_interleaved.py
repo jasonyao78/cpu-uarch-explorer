@@ -49,3 +49,10 @@ class Interleaved(unittest.TestCase):
    with self.assertRaises(ValueError):packets.decode(bad,schedule)
   packets.final_counts(dict(attempted_packets=512,valid_packets=512,invalid_packets=0),result)
   with self.assertRaises(ValueError):packets.final_counts(dict(attempted_packets=256,valid_packets=512,invalid_packets=0),result)
+
+ def test_controller_resolves_exact_frozen_protocol(self):
+  from tools.diagnostic import run_sm8650_rob_cold_head_interleaved as driver
+  from tools.diagnostic import rob_cold_head_interleaved_analysis as model
+  self.assertEqual(driver.PROTOCOL,model.PROTOCOL)
+  self.assertTrue((ROOT/driver.PROTOCOL).is_file())
+  self.assertEqual(driver.DRIVER,model.DRIVER)
