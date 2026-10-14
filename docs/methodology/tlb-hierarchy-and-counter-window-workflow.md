@@ -32,3 +32,5 @@
 最老cold-head反例（`docs/reviews/2026-10-14-rob-cold-head-results.md`）：marker/供给/long excitation已正，但整个带标记窗口的L1D差不一定等于head数；near/out/metadata cache交互及fresh-process物理布局可以进入差分。采用同进程/sameVA-PFN-counter的hot/cold交错，state必须进入身份键；页内offset隔离是独立预注册控制，不能把总refill唯一归属某个PC。完整硬件positive与模型资格failure要分别命名，不能一个失败让另一事实变0。
 
 同映射冷热state512实测（`docs/reviews/2026-10-14-rob-cold-head-interleaved-results.md`）：state进入schedule/warm/formal/invalid/rejected及统计身份键，真实load地址从map_base+offset共同出口生成，内容链和munmap必须用对应地址域。parser只允许注册256/512，duplicate/conflict/missing/state碰撞首停，旧v1原4096/16384失败保持。1024 cache/long/供给全通过仍不等于整批资格：near机会只有7/4<8时要保留失败，conditional far1不能消除不足。下一按真实wrong-direction事件联合检验机会，不把branch预测变动或稀少issue变成容量。
+
+事件名必须从匹配TRM和原协议核对，不凭回忆：本轮报告曾把0x22误标BR_PRED（实际BR_PRED=0x12）；0x22实际BR_MIS_PRED_RETIRED。修订只改解释，不改raw编号。已有512issue窗的whole-ROI 0x22与extraLD/ST联合模式零反例；资格失败可以来自可观察错误方向机会不足，不能自动叫deadline/ROB限制。无0x22的cache palette不能被补成同样结论。固定PC复用历史的独立反证应记录actual per-packet code/branch PC；不同PC必须作为真实干预列出，不假装完全同代码VA。

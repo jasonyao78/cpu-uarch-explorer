@@ -1,0 +1,315 @@
+{
+  "event4": 34,
+  "event_name": "BR_MIS_PRED_RETIRED",
+  "source": "Arm Cortex-X4 TRM 102484_0001_04_en section18",
+  "source_pdf_sha256": "d978da9c87a4ca267b81000b2f2ca4f82d182f0d4b13189e06e6511ba9492802",
+  "windows": 512,
+  "mismatched_joint_windows": 0,
+  "scope": "own entire ROI association; no per-PC event attribution; cache palette excluded",
+  "rows": [
+    {
+      "process": "e0-h1-issue-o0",
+      "state": "hot",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 19
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 13
+        }
+      ]
+    },
+    {
+      "process": "e0-h1-issue-o0",
+      "state": "cold",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 19
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 13
+        }
+      ]
+    },
+    {
+      "process": "e0-h1-issue-o1024",
+      "state": "hot",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 13
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 19
+        }
+      ]
+    },
+    {
+      "process": "e0-h1-issue-o1024",
+      "state": "cold",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 23
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 9
+        }
+      ]
+    },
+    {
+      "process": "e0-h2-issue-o0",
+      "state": "hot",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 13
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 19
+        }
+      ]
+    },
+    {
+      "process": "e0-h2-issue-o0",
+      "state": "cold",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 13
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 19
+        }
+      ]
+    },
+    {
+      "process": "e0-h2-issue-o1024",
+      "state": "hot",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 10
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 22
+        }
+      ]
+    },
+    {
+      "process": "e0-h2-issue-o1024",
+      "state": "cold",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 25
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 7
+        }
+      ]
+    },
+    {
+      "process": "e1-h1-issue-o0",
+      "state": "hot",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 10
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 22
+        }
+      ]
+    },
+    {
+      "process": "e1-h1-issue-o0",
+      "state": "cold",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 7
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 25
+        }
+      ]
+    },
+    {
+      "process": "e1-h1-issue-o1024",
+      "state": "hot",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 14
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 18
+        }
+      ]
+    },
+    {
+      "process": "e1-h1-issue-o1024",
+      "state": "cold",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 9
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 23
+        }
+      ]
+    },
+    {
+      "process": "e1-h2-issue-o0",
+      "state": "hot",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 16
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 16
+        }
+      ]
+    },
+    {
+      "process": "e1-h2-issue-o0",
+      "state": "cold",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 9
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 23
+        }
+      ]
+    },
+    {
+      "process": "e1-h2-issue-o1024",
+      "state": "hot",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 11
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 21
+        }
+      ]
+    },
+    {
+      "process": "e1-h2-issue-o1024",
+      "state": "cold",
+      "trials": 32,
+      "joint": [
+        {
+          "BR_MIS_PRED_RETIRED": 0,
+          "extra_LD_SPEC": 0,
+          "extra_ST_SPEC": 0,
+          "count": 9
+        },
+        {
+          "BR_MIS_PRED_RETIRED": 1,
+          "extra_LD_SPEC": 8,
+          "extra_ST_SPEC": 8,
+          "count": 23
+        }
+      ]
+    }
+  ]
+}

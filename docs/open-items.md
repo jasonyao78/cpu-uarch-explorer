@@ -655,4 +655,6 @@ ROB direct counter v1有限批结束：49完整窗、E0/E1正控及绝对FD身�
 ### 2026-10-14 同映射cold-head反例终态与下一辨识（primary）
 
 - source c7f7e44/build+actual launch a44b3ce，`docs/reviews/2026-10-14-rob-cold-head-interleaved-results.md`：16/8192正式+32768warm、invalid0；1024全部cache/long/strict供给通过，但e0-head2 issue near7、e1-head1 cache near4<8，原资格INTERLEAVED_COLD_HEAD_NOT_QUALIFIED。不改门/不重跑求通过、不发起物理容量扫描。245760 event差/88SHA复核，14事务restored0/runner unfinished空。
-- 新问题归ROB负责人：near机会不足的branch预测 vs 发射时机；触发=准确r0p1 BR_MIS_PRED语义/实际PMCEID与own short ROI阴阳控制，另冻同映射wrong-direction/near联合反证。旧BR_PRED不足以回答，参数UNKNOWN；稳定机会资格之后gap/packing/PRF/supply/deadline，不用384拟合。
+- 新问题归ROB负责人：near机会不足的branch预测 vs 发射时机；触发=准确r0p1 BR_MIS_PRED语义/实际PMCEID与own short ROI阴阳控制，另冻同映射wrong-direction/near联合反证。现有0x22事件即BR_MIS_PRED_RETIRED，首次BR_PRED命名错误已在报告修订表纠正；cache profile缺该事件，参数UNKNOWN；稳定机会资格之后gap/packing/PRF/supply/deadline，不用384拟合。
+
+- 追加512issue热/冷窗口联合复核：0x22=1全伴extraLD/ST=8/8，0则0/0，0反例；准确事件名称BR_MIS_PRED_RETIRED，原source/raw号不改。下一归ROB负责人，触发=固定PC与trial-role PC控制软件/actual PC解码/同PFN资格，通过稳定wrong-direction机会后gap。缓存profile机会不足仍UNKNOWN。完整diagnostic733/733、644.752s通过。
